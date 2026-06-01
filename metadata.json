@@ -1,0 +1,6 @@
+{
+  "name": "ALLIN OS",
+  "description": "Enterprise AI-First Operating System for MLM, E-Commerce, and Intelligent Operations",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
