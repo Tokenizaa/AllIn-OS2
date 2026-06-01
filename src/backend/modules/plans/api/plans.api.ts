@@ -7,7 +7,7 @@ import { createPlanSchema, updatePlanSchema, createPlanBonusSchema, activateCust
 const planService = new PlanService();
 
 export const getPlans = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return paginationSchema.merge(filterSchema).merge(
       z.object({
         is_active: z.coerce.boolean().optional(),
@@ -31,7 +31,7 @@ export const getPlans = createServerFn({ method: "GET" })
   });
 
 export const getPlanById = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -56,7 +56,7 @@ export const getPlanById = createServerFn({ method: "GET" })
   });
 
 export const getPlanBySlug = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ slug: z.string() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -81,7 +81,7 @@ export const getPlanBySlug = createServerFn({ method: "GET" })
   });
 
 export const createPlan = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return createPlanSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -101,7 +101,7 @@ export const createPlan = createServerFn({ method: "POST" })
   });
 
 export const updatePlan = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       id: z.string().uuid(),
       data: updatePlanSchema,
@@ -124,7 +124,7 @@ export const updatePlan = createServerFn({ method: "POST" })
   });
 
 export const deletePlan = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -143,7 +143,7 @@ export const deletePlan = createServerFn({ method: "POST" })
   });
 
 export const getPlanBonuses = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ planId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -162,7 +162,7 @@ export const getPlanBonuses = createServerFn({ method: "GET" })
   });
 
 export const createPlanBonus = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return createPlanBonusSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -182,7 +182,7 @@ export const createPlanBonus = createServerFn({ method: "POST" })
   });
 
 export const deletePlanBonus = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -201,7 +201,7 @@ export const deletePlanBonus = createServerFn({ method: "POST" })
   });
 
 export const activateCustomerPlan = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return activateCustomerPlanSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -221,7 +221,7 @@ export const activateCustomerPlan = createServerFn({ method: "POST" })
   });
 
 export const deactivateCustomerPlan = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ customerId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -240,7 +240,7 @@ export const deactivateCustomerPlan = createServerFn({ method: "POST" })
   });
 
 export const getCustomerPlans = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ customerId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -259,7 +259,7 @@ export const getCustomerPlans = createServerFn({ method: "GET" })
   });
 
 export const getActiveCustomerPlan = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ customerId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -278,7 +278,7 @@ export const getActiveCustomerPlan = createServerFn({ method: "GET" })
   });
 
 export const getPlanStats = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ planId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {

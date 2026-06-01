@@ -76,7 +76,7 @@ export class SupabaseService {
     try {
       const { data, error } = await supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, qualification, status, metadata")
+        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, qualification, status, plan_id, metadata")
         .eq("user_id", userId)
         .maybeSingle();
 

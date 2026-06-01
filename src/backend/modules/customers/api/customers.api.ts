@@ -7,7 +7,7 @@ import { createCustomerSchema, updateCustomerSchema } from "../dto/customer.dto"
 const customerService = new CustomerService();
 
 export const getCustomers = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return paginationSchema.merge(filterSchema).parse(data);
   })
   .handler(async ({ data }) => {
@@ -26,7 +26,7 @@ export const getCustomers = createServerFn({ method: "GET" })
   });
 
 export const getCustomerById = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -51,7 +51,7 @@ export const getCustomerById = createServerFn({ method: "GET" })
   });
 
 export const getCustomer360 = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -76,7 +76,7 @@ export const getCustomer360 = createServerFn({ method: "GET" })
   });
 
 export const createCustomer = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return createCustomerSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -96,7 +96,7 @@ export const createCustomer = createServerFn({ method: "POST" })
   });
 
 export const updateCustomer = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       id: z.string().uuid(),
       data: updateCustomerSchema,
@@ -119,7 +119,7 @@ export const updateCustomer = createServerFn({ method: "POST" })
   });
 
 export const deleteCustomer = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -154,7 +154,7 @@ export const getCustomerStats = createServerFn({ method: "GET" })
   });
 
 export const getCustomerDownlines = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       sponsorId: z.string().uuid(),
       ...paginationSchema.shape,

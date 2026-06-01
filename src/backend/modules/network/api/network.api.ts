@@ -6,7 +6,7 @@ import { paginationSchema } from "../../../shared/dto/pagination.dto";
 const networkService = new NetworkService();
 
 export const getNetworkTree = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       customerId: z.string().uuid(),
       maxDepth: z.coerce.number().min(1).max(10).default(5),
@@ -34,7 +34,7 @@ export const getNetworkTree = createServerFn({ method: "GET" })
   });
 
 export const getDownlines = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return paginationSchema.merge(
       z.object({
         customerId: z.string().uuid(),
@@ -58,7 +58,7 @@ export const getDownlines = createServerFn({ method: "GET" })
   });
 
 export const getUpline = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       customerId: z.string().uuid(),
       maxLevels: z.coerce.number().min(1).max(20).default(10),
@@ -80,7 +80,7 @@ export const getUpline = createServerFn({ method: "GET" })
   });
 
 export const getNetworkStats = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       customerId: z.string().uuid().optional(),
     }).parse(data);

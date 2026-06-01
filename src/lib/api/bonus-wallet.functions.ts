@@ -22,7 +22,7 @@ const useBonusSchema = z.object({
 
 // Get bonus wallet by customer
 export const getBonusWallet = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await bonusWalletService.getBonusWalletByCustomerId(data.customerId);
@@ -34,7 +34,7 @@ export const getBonusWallet = createServerFn({ method: 'GET' })
 
 // Ensure bonus wallet exists
 export const ensureBonusWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await bonusWalletService.ensureBonusWallet(data.customerId);
@@ -46,7 +46,7 @@ export const ensureBonusWallet = createServerFn({ method: 'POST' })
 
 // Earn bonus
 export const earnBonus = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => earnBonusSchema.parse(data))
+  .inputValidator((data: unknown) => earnBonusSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await bonusWalletService.earnBonus(
@@ -65,7 +65,7 @@ export const earnBonus = createServerFn({ method: 'POST' })
 
 // Use bonus
 export const useBonus = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => useBonusSchema.parse(data))
+  .inputValidator((data: unknown) => useBonusSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await bonusWalletService.useBonus(
@@ -83,7 +83,7 @@ export const useBonus = createServerFn({ method: 'POST' })
 
 // Get available bonus for payment
 export const getAvailableBonusForPayment = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     productId: z.string().optional(),
   }).parse(data))
@@ -101,7 +101,7 @@ export const getAvailableBonusForPayment = createServerFn({ method: 'GET' })
 
 // Get bonus wallet transactions
 export const getBonusTransactions = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     page: z.number().default(1),
     limit: z.number().default(20),
@@ -123,7 +123,7 @@ export const getBonusTransactions = createServerFn({ method: 'GET' })
 
 // Get bonus wallet balance
 export const getBonusWalletBalance = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const wallet = await bonusWalletService.getBonusWalletByCustomerId(data.customerId);
@@ -145,7 +145,7 @@ export const getBonusWalletBalance = createServerFn({ method: 'GET' })
 
 // Expire old bonuses (admin function)
 export const expireOldBonuses = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ daysThreshold: z.number().default(90) }).parse(data))
+  .inputValidator((data: unknown) => z.object({ daysThreshold: z.number().default(90) }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await bonusWalletService.expireOldBonuses(data.daysThreshold);

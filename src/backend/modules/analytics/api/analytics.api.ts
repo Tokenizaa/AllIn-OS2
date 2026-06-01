@@ -21,7 +21,7 @@ export const getExecutiveAnalytics = createServerFn({ method: "GET" })
   });
 
 export const getSalesAnalytics = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       period: z.enum(["7d", "30d", "90d"]).default("30d"),
     }).parse(data);
@@ -74,7 +74,7 @@ export const getPlanAnalytics = createServerFn({ method: "GET" })
   });
 
 export const getPlanAnalyticsById = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ planId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {

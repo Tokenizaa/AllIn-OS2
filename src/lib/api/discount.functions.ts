@@ -41,7 +41,7 @@ const validateCouponSchema = z.object({
 
 // Calculate discount
 export const calculateDiscount = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => calculateDiscountSchema.parse(data))
+  .inputValidator((data: unknown) => calculateDiscountSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await discountEngineService.calculateDiscount(
@@ -59,7 +59,7 @@ export const calculateDiscount = createServerFn({ method: 'POST' })
 
 // Create coupon
 export const createCoupon = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => createCouponSchema.parse(data))
+  .inputValidator((data: unknown) => createCouponSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await discountEngineService.createCoupon(
@@ -77,7 +77,7 @@ export const createCoupon = createServerFn({ method: 'POST' })
 
 // Create discount rule
 export const createDiscountRule = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => createDiscountRuleSchema.parse(data))
+  .inputValidator((data: unknown) => createDiscountRuleSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await discountEngineService.createDiscountRule({
@@ -102,7 +102,7 @@ export const createDiscountRule = createServerFn({ method: 'POST' })
 
 // Validate coupon
 export const validateCoupon = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => validateCouponSchema.parse(data))
+  .inputValidator((data: unknown) => validateCouponSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await discountEngineService.validateCoupon(data.couponCode, data.customerId);

@@ -6,7 +6,7 @@ import { loginSchema, registerSchema, refreshTokenSchema, changePasswordSchema }
 const authService = new AuthService();
 
 export const login = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return loginSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -26,7 +26,7 @@ export const login = createServerFn({ method: "POST" })
   });
 
 export const register = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return registerSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -46,7 +46,7 @@ export const register = createServerFn({ method: "POST" })
   });
 
 export const refreshToken = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return refreshTokenSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -66,7 +66,7 @@ export const refreshToken = createServerFn({ method: "POST" })
   });
 
 export const changePassword = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       userId: z.string().uuid(),
       data: changePasswordSchema,
@@ -88,7 +88,7 @@ export const changePassword = createServerFn({ method: "POST" })
   });
 
 export const logout = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ userId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {

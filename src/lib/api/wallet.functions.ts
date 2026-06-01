@@ -37,7 +37,7 @@ const unfreezeWalletSchema = z.object({
 
 // Get wallet by customer
 export const getWallet = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await walletService.getWalletByCustomerId(data.customerId);
@@ -49,7 +49,7 @@ export const getWallet = createServerFn({ method: 'GET' })
 
 // Ensure wallet exists
 export const ensureWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await walletService.ensureWallet(data.customerId);
@@ -61,7 +61,7 @@ export const ensureWallet = createServerFn({ method: 'POST' })
 
 // Credit wallet
 export const creditWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => creditWalletSchema.parse(data))
+  .inputValidator((data: unknown) => creditWalletSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await walletService.creditWallet(
@@ -79,7 +79,7 @@ export const creditWallet = createServerFn({ method: 'POST' })
 
 // Debit wallet
 export const debitWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => debitWalletSchema.parse(data))
+  .inputValidator((data: unknown) => debitWalletSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await walletService.debitWallet(
@@ -97,7 +97,7 @@ export const debitWallet = createServerFn({ method: 'POST' })
 
 // Freeze wallet funds
 export const freezeWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => freezeWalletSchema.parse(data))
+  .inputValidator((data: unknown) => freezeWalletSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await walletService.freezeWallet(
@@ -115,7 +115,7 @@ export const freezeWallet = createServerFn({ method: 'POST' })
 
 // Unfreeze wallet funds
 export const unfreezeWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => unfreezeWalletSchema.parse(data))
+  .inputValidator((data: unknown) => unfreezeWalletSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await walletService.unfreezeWallet(
@@ -133,7 +133,7 @@ export const unfreezeWallet = createServerFn({ method: 'POST' })
 
 // Get wallet transactions
 export const getWalletTransactions = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     page: z.number().default(1),
     limit: z.number().default(20),
@@ -155,7 +155,7 @@ export const getWalletTransactions = createServerFn({ method: 'GET' })
 
 // Get wallet balance
 export const getWalletBalance = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const wallet = await walletService.getWalletByCustomerId(data.customerId);

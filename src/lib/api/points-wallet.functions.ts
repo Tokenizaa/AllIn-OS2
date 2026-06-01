@@ -30,7 +30,7 @@ const convertPointsToCurrencySchema = z.object({
 
 // Get points wallet by customer
 export const getPointsWallet = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.getPointsWalletByCustomerId(data.customerId);
@@ -42,7 +42,7 @@ export const getPointsWallet = createServerFn({ method: 'GET' })
 
 // Ensure points wallet exists
 export const ensurePointsWallet = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.ensurePointsWallet(data.customerId);
@@ -54,7 +54,7 @@ export const ensurePointsWallet = createServerFn({ method: 'POST' })
 
 // Earn points
 export const earnPoints = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => earnPointsSchema.parse(data))
+  .inputValidator((data: unknown) => earnPointsSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.earnPoints(
@@ -73,7 +73,7 @@ export const earnPoints = createServerFn({ method: 'POST' })
 
 // Redeem points
 export const redeemPoints = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => redeemPointsSchema.parse(data))
+  .inputValidator((data: unknown) => redeemPointsSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.redeemPoints(
@@ -91,7 +91,7 @@ export const redeemPoints = createServerFn({ method: 'POST' })
 
 // Get available points for payment
 export const getAvailablePointsForPayment = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     productId: z.string().optional(),
   }).parse(data))
@@ -109,7 +109,7 @@ export const getAvailablePointsForPayment = createServerFn({ method: 'GET' })
 
 // Get points wallet transactions
 export const getPointsTransactions = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     page: z.number().default(1),
     limit: z.number().default(20),
@@ -131,7 +131,7 @@ export const getPointsTransactions = createServerFn({ method: 'GET' })
 
 // Get points wallet balance
 export const getPointsWalletBalance = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const wallet = await pointsWalletService.getPointsWalletByCustomerId(data.customerId);
@@ -153,7 +153,7 @@ export const getPointsWalletBalance = createServerFn({ method: 'GET' })
 
 // Convert currency to points
 export const convertCurrencyToPoints = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => convertCurrencyToPointsSchema.parse(data))
+  .inputValidator((data: unknown) => convertCurrencyToPointsSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.convertCurrencyToPoints(data.amount);
@@ -165,7 +165,7 @@ export const convertCurrencyToPoints = createServerFn({ method: 'POST' })
 
 // Convert points to currency
 export const convertPointsToCurrency = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => convertPointsToCurrencySchema.parse(data))
+  .inputValidator((data: unknown) => convertPointsToCurrencySchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.convertPointsToCurrency(data.points);
@@ -177,7 +177,7 @@ export const convertPointsToCurrency = createServerFn({ method: 'POST' })
 
 // Expire old points (admin function)
 export const expireOldPoints = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ daysThreshold: z.number().default(365) }).parse(data))
+  .inputValidator((data: unknown) => z.object({ daysThreshold: z.number().default(365) }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await pointsWalletService.expireOldPoints(data.daysThreshold);

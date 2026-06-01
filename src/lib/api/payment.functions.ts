@@ -63,7 +63,7 @@ const paymentSplitSchema = z.object({
 
 // Create payment
 export const createPayment = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => createPaymentSchema.parse(data))
+  .inputValidator((data: unknown) => createPaymentSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await paymentService.createPayment(data, data.gatewayType);
@@ -75,7 +75,7 @@ export const createPayment = createServerFn({ method: 'POST' })
 
 // Create hybrid payment
 export const createHybridPayment = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => hybridPaymentSchema.parse(data))
+  .inputValidator((data: unknown) => hybridPaymentSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await hybridPaymentService.processHybridPayment(data);
@@ -87,7 +87,7 @@ export const createHybridPayment = createServerFn({ method: 'POST' })
 
 // Get hybrid payment preview
 export const getHybridPaymentPreview = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     originalAmount: z.number().positive(),
     useWallet: z.boolean().default(false),
@@ -117,7 +117,7 @@ export const getHybridPaymentPreview = createServerFn({ method: 'POST' })
 
 // Get payment by ID
 export const getPayment = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await paymentService.findById(data.id);
@@ -129,7 +129,7 @@ export const getPayment = createServerFn({ method: 'GET' })
 
 // Get payments by customer
 export const getCustomerPayments = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     customerId: z.string().uuid(),
     page: z.number().default(1),
     limit: z.number().default(20),
@@ -162,7 +162,7 @@ export const getPaymentStats = createServerFn({ method: 'GET' })
 
 // Create payment split
 export const createPaymentSplit = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => paymentSplitSchema.parse(data))
+  .inputValidator((data: unknown) => paymentSplitSchema.parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await paymentSplitService.createPaymentSplit(
@@ -178,7 +178,7 @@ export const createPaymentSplit = createServerFn({ method: 'POST' })
 
 // Process payment split
 export const processPaymentSplit = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ splitId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ splitId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await paymentSplitService.processSplitPayment(data.splitId);
@@ -190,7 +190,7 @@ export const processPaymentSplit = createServerFn({ method: 'POST' })
 
 // Get payment splits
 export const getPaymentSplits = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({ paymentId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ paymentId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await paymentSplitService.getPaymentSplits(data.paymentId);
@@ -202,7 +202,7 @@ export const getPaymentSplits = createServerFn({ method: 'GET' })
 
 // Get financial summary
 export const getFinancialSummary = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     startDate: z.string(),
     endDate: z.string(),
   }).parse(data))
@@ -220,7 +220,7 @@ export const getFinancialSummary = createServerFn({ method: 'GET' })
 
 // Get audit logs
 export const getAuditLogs = createServerFn({ method: 'GET' })
-  .validator((data: unknown) => z.object({
+  .inputValidator((data: unknown) => z.object({
     entityType: z.string().optional(),
     entityId: z.string().optional(),
     userId: z.string().optional(),
@@ -244,7 +244,7 @@ export const getAuditLogs = createServerFn({ method: 'GET' })
 
 // Retry payment
 export const retryPayment = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => z.object({ paymentId: z.string().uuid() }).parse(data))
+  .inputValidator((data: unknown) => z.object({ paymentId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     try {
       const result = await paymentService.retryPayment(data.paymentId);

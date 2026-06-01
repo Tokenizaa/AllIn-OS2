@@ -7,7 +7,7 @@ import { createOrderSchema, updateOrderSchema } from "../dto/order.dto";
 const orderService = new OrderService();
 
 export const getOrders = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return paginationSchema.merge(filterSchema).merge(
       z.object({
         customer_id: z.string().uuid().optional(),
@@ -31,7 +31,7 @@ export const getOrders = createServerFn({ method: "GET" })
   });
 
 export const getOrderById = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -56,7 +56,7 @@ export const getOrderById = createServerFn({ method: "GET" })
   });
 
 export const getOrderSummary = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ customerId: z.string().uuid().optional() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -75,7 +75,7 @@ export const getOrderSummary = createServerFn({ method: "GET" })
   });
 
 export const createOrder = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return createOrderSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -95,7 +95,7 @@ export const createOrder = createServerFn({ method: "POST" })
   });
 
 export const updateOrder = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       id: z.string().uuid(),
       data: updateOrderSchema,
@@ -118,7 +118,7 @@ export const updateOrder = createServerFn({ method: "POST" })
   });
 
 export const deleteOrder = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -137,7 +137,7 @@ export const deleteOrder = createServerFn({ method: "POST" })
   });
 
 export const getOrderItems = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ orderId: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {

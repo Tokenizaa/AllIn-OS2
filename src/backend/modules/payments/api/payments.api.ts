@@ -7,7 +7,7 @@ import { createPaymentSchema, updatePaymentSchema, webhookPayloadSchema } from "
 const paymentService = new PaymentService();
 
 export const getPayments = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return paginationSchema.merge(filterSchema).merge(
       z.object({
         customer_id: z.string().uuid().optional(),
@@ -31,7 +31,7 @@ export const getPayments = createServerFn({ method: "GET" })
   });
 
 export const getPaymentById = createServerFn({ method: "GET" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -56,7 +56,7 @@ export const getPaymentById = createServerFn({ method: "GET" })
   });
 
 export const createPayment = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return createPaymentSchema.parse(data);
   })
   .handler(async ({ data }) => {
@@ -76,7 +76,7 @@ export const createPayment = createServerFn({ method: "POST" })
   });
 
 export const updatePayment = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({
       id: z.string().uuid(),
       data: updatePaymentSchema,
@@ -99,7 +99,7 @@ export const updatePayment = createServerFn({ method: "POST" })
   });
 
 export const deletePayment = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return z.object({ id: z.string().uuid() }).parse(data);
   })
   .handler(async ({ data }) => {
@@ -118,7 +118,7 @@ export const deletePayment = createServerFn({ method: "POST" })
   });
 
 export const processPaymentWebhook = createServerFn({ method: "POST" })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     return webhookPayloadSchema.parse(data);
   })
   .handler(async ({ data }) => {
