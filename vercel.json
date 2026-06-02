@@ -3,11 +3,7 @@
   "outputDirectory": "dist/client",
   "rewrites": [
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api|_next|_vercel|.*\\..*).*)",
       "destination": "/dist/server/server.js"
     }
   ]
