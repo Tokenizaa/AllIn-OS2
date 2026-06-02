@@ -116,16 +116,16 @@ function DistributorPage() {
 
             <div className="flex flex-wrap gap-3.5 pt-2">
               <Link
-                to="/loja/$slug"
-                params={{ slug: sponsorSlug }}
+                to={sponsorSlug ? "/loja/$slug" : "/loja"}
+                params={sponsorSlug ? { slug: sponsorSlug } : undefined}
                 className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:opacity-90 transition-all font-bold text-black text-xs shadow-lg shadow-emerald-500/10 cursor-pointer"
               >
                 <ShoppingBag className="h-4 w-4" />
                 Explorar Vitrine On-Line
               </Link>
               <Link
-                to="/seja-distribuidor/$slug"
-                params={{ slug: sponsorSlug }}
+                to={sponsorSlug ? "/seja-distribuidor/$slug" : "/seja-distribuidor"}
+                params={sponsorSlug ? { slug: sponsorSlug } : undefined}
                 className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl border border-border/80 bg-background/40 hover:bg-background/80 transition-all font-semibold text-white text-xs cursor-pointer"
               >
                 Trabalhar Conosco
@@ -163,12 +163,18 @@ function DistributorPage() {
               
               <div className="relative rounded-2xl border border-border/60 bg-[#090d16] p-4 text-center w-full max-w-[340px] space-y-4">
                 <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-2 border-emerald-500/30">
-                  <img 
-                    src={distAvatar} 
-                    alt={distName} 
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
+                  {distAvatar ? (
+                    <img 
+                      src={distAvatar} 
+                      alt={distName} 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-3xl font-bold">
+                      {distName.charAt(0)}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-md font-bold text-white font-sans">{distName}</h3>
@@ -223,7 +229,7 @@ function DistributorPage() {
               </span>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1.5">Nossos Lançamentos de Alta Performance</h2>
             </div>
-            <Link to="/loja/$slug" params={{ slug: sponsorSlug }} className="text-xs text-emerald-400 hover:underline flex items-center gap-0.5 cursor-pointer">
+            <Link to={sponsorSlug ? "/loja/$slug" : "/loja"} params={sponsorSlug ? { slug: sponsorSlug } : undefined} className="text-xs text-emerald-400 hover:underline flex items-center gap-0.5 cursor-pointer">
               Ver vitrine completa <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -395,7 +401,7 @@ function DistributorPage() {
                       size="sm" 
                       variant="outline" 
                       className="text-xs font-mono"
-                      onClick={() => navigate({ to: "/seja-distribuidor/$slug", params: { slug: sponsorSlug } })}
+                      onClick={() => sponsorSlug ? navigate({ to: "/seja-distribuidor/$slug", params: { slug: sponsorSlug } }) : navigate({ to: "/seja-distribuidor" })}
                     >
                       Acessar Onboarding MLM
                     </Button>
@@ -430,7 +436,13 @@ function DistributorPage() {
           <div>
             <h4 className="font-bold text-white mb-3">Patrocinador Ativo</h4>
             <div className="flex items-center gap-2">
-              <img src={distAvatar} alt={distName} className="h-8 w-8 rounded-full border border-border/40" />
+              {distAvatar ? (
+                <img src={distAvatar} alt={distName} className="h-8 w-8 rounded-full border border-border/40" />
+              ) : (
+                <div className="h-8 w-8 rounded-full border border-border/40 bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
+                  {distName.charAt(0)}
+                </div>
+              )}
               <div>
                 <p className="font-semibold text-white leading-none">{distName}</p>
                 <p className="text-[10px] text-emerald-400 font-mono mt-0.5">@{sponsorSlug}</p>

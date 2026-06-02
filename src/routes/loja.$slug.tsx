@@ -17,7 +17,7 @@ export const Route = createFileRoute("/loja/$slug")({
   component: DistributorStorePage,
 });
 
-export function DistributorStorePage() {
+function DistributorStorePage() {
   const params = useParams({ strict: false }) as { slug?: string };
   const { currentDistributor, setDistributorBySlug } = useDistributor();
   const { triggerBinomialBonusPay, addAuditLog } = useAuth();
@@ -571,7 +571,13 @@ export function DistributorStorePage() {
                       <p className="font-bold text-emerald-400 uppercase tracking-widest text-[9px] font-mono select-none">Bônus & Patrocínio Direto</p>
                       <p>Estas aquisições faturam <strong className="text-white">R$ {(subtotal * 0.25).toFixed(2)}</strong> de cashback imediato e acumulam volume binário de rede para:</p>
                       <div className="flex items-center gap-2 pt-1 border-t border-emerald-500/10 mt-1">
-                        <img src={distAvatar} alt={distName} className="h-6 w-6 rounded-full border border-emerald-500/30 object-cover" />
+                        {distAvatar ? (
+                          <img src={distAvatar} alt={distName} className="h-6 w-6 rounded-full border border-emerald-500/30 object-cover" />
+                        ) : (
+                          <div className="h-6 w-6 rounded-full border border-emerald-500/30 bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
+                            {distName.charAt(0)}
+                          </div>
+                        )}
                         <div>
                           <p className="font-semibold text-white text-[11px]">{distName}</p>
                           <p className="text-[9px] text-emerald-400 font-mono leading-none">@{sponsorSlug}</p>

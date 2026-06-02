@@ -103,7 +103,6 @@ const TestimonialsGridSection = () => {
                 {/* Author */}
                 <div className="flex items-center justify-center gap-3">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src="" />
                     <AvatarFallback className="bg-allin-orange text-allin-dark font-semibold">
                       {testimonial.avatar}
                     </AvatarFallback>
