@@ -1,4 +1,4 @@
-import { createServerFn } from '@tanstack/react-start';
+﻿import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { bonusWalletService } from '../backend/modules/payments/services/bonus-wallet.service';
 
@@ -154,3 +154,4 @@ export const expireOldBonuses = createServerFn({ method: 'POST' })
       return { success: false, error: error instanceof Error ? error.message : 'Failed to expire old bonuses' };
     }
   });
+

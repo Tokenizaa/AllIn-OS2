@@ -22,6 +22,7 @@ const PATH_PERMISSION_MAP: Array<{
   { pattern: /^\/insights(?:\/|$)/, permission: { module: "analytics", action: "read" } },
   { pattern: /^\/alerts(?:\/|$)/, permission: { module: "dashboard", action: "read" } },
   { pattern: /^\/customers(?:\/|$)/, permission: { module: "support", action: "read" } },
+  { pattern: /^\/_app\/customers(?:\/|$)/, permission: { module: "support", action: "read" } },
   { pattern: /^\/orders(?:\/|$)/, permission: { module: "orders", action: "read" } },
   { pattern: /^\/products(?:\/|$)/, permission: { module: "products", action: "read" } },
   { pattern: /^\/network(?:\/|$)/, permission: { module: "network", action: "read" } },

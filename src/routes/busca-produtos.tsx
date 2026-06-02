@@ -104,11 +104,19 @@ function ProductSearchPage() {
             )}
 
             <div className="mt-16 text-center">
-              <Link to={isDefaultTenant ? "/loja" : `/loja/${sponsorSlug}`}>
-                <Button variant="vibrantOutline" size="lg" className="text-lg px-8 py-6">
-                  Voltar para a Loja
-                </Button>
-              </Link>
+              {isDefaultTenant ? (
+                <Link to="/loja">
+                  <Button variant="vibrantOutline" size="lg" className="text-lg px-8 py-6">
+                    Voltar para a Loja
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/loja/$slug" params={{ slug: sponsorSlug }}>
+                  <Button variant="vibrantOutline" size="lg" className="text-lg px-8 py-6">
+                    Voltar para a Loja
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>

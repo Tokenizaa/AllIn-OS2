@@ -7,9 +7,7 @@ import { createCustomerSchema, updateCustomerSchema } from "../dto/customer.dto"
 const customerService = new CustomerService();
 
 export const getCustomers = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => {
-    return paginationSchema.merge(filterSchema).parse(data);
-  })
+  .inputValidator(paginationSchema.merge(filterSchema))
   .handler(async ({ data }) => {
     try {
       const result = await customerService.findAll(data);
@@ -26,9 +24,7 @@ export const getCustomers = createServerFn({ method: "GET" })
   });
 
 export const getCustomerById = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => {
-    return z.object({ id: z.string().uuid() }).parse(data);
-  })
+  .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data }) => {
     try {
       const customer = await customerService.findById(data.id);
@@ -51,9 +47,7 @@ export const getCustomerById = createServerFn({ method: "GET" })
   });
 
 export const getCustomer360 = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => {
-    return z.object({ id: z.string().uuid() }).parse(data);
-  })
+  .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data }) => {
     try {
       const customer = await customerService.getCustomer360(data.id);
@@ -76,9 +70,7 @@ export const getCustomer360 = createServerFn({ method: "GET" })
   });
 
 export const createCustomer = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => {
-    return createCustomerSchema.parse(data);
-  })
+  .inputValidator(createCustomerSchema)
   .handler(async ({ data }) => {
     try {
       const customer = await customerService.create(data);
@@ -96,12 +88,10 @@ export const createCustomer = createServerFn({ method: "POST" })
   });
 
 export const updateCustomer = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => {
-    return z.object({
-      id: z.string().uuid(),
-      data: updateCustomerSchema,
-    }).parse(data);
-  })
+  .inputValidator(z.object({
+    id: z.string().uuid(),
+    data: updateCustomerSchema,
+  }))
   .handler(async ({ data }) => {
     try {
       const customer = await customerService.update(data.id, data.data);
@@ -119,9 +109,7 @@ export const updateCustomer = createServerFn({ method: "POST" })
   });
 
 export const deleteCustomer = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => {
-    return z.object({ id: z.string().uuid() }).parse(data);
-  })
+  .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data }) => {
     try {
       await customerService.delete(data.id);
@@ -154,12 +142,10 @@ export const getCustomerStats = createServerFn({ method: "GET" })
   });
 
 export const getCustomerDownlines = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => {
-    return z.object({
-      sponsorId: z.string().uuid(),
-      ...paginationSchema.shape,
-    }).parse(data);
-  })
+  .inputValidator(z.object({
+    sponsorId: z.string().uuid(),
+    ...paginationSchema.shape,
+  }))
   .handler(async ({ data }) => {
     try {
       const result = await customerService.getDownlines(data.sponsorId, data);

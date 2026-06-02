@@ -11,9 +11,9 @@ function AlertsPage() {
   useEffect(() => {
     (async () => {
       const [{ data: payments }, { data: withdrawals }, { data: orders }] = await Promise.all([
-        supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(5),
-        supabase.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(5),
-        supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(5),
+        supabase.from("payments").select("id, created_at").order("created_at", { ascending: false }).limit(5),
+        supabase.from("withdrawals").select("id, created_at, risco").order("created_at", { ascending: false }).limit(5),
+        supabase.from("orders").select("id, created_at").order("created_at", { ascending: false }).limit(5),
       ]);
       const items = [
         ...(withdrawals || []).map((w: any) => ({ id: `w-${w.id}`, title: "Saque em processamento", domain: "financeiro", at: w.created_at, severity: w.risco ? "critical" : "warning" })),

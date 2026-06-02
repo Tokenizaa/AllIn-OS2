@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+﻿import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { OrderService } from "../services/order.service";
 import { paginationSchema, filterSchema } from "../../../shared/dto/pagination.dto";
@@ -170,3 +170,4 @@ export const getOrderStats = createServerFn({ method: "GET" })
       };
     }
   });
+

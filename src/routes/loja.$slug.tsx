@@ -6,7 +6,7 @@ import { useProducts } from "@/contexts/ProductsContext";
 import { 
   ShoppingBag, Trash2, QrCode,
   CreditCard, ShieldCheck, ArrowRight, CheckCircle2,
-  ChevronRight, ArrowLeft, Minus, Plus
+  ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -41,30 +41,8 @@ export function DistributorStorePage() {
   const distRank = currentDistributor.rank;
   const distAvatar = currentDistributor.avatar;
 
-  // Cart state - Guest cart using localStorage
-  const [cart, setCart] = useState<{ product: any; quantity: number }[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem(`cart_retail_${routeSlug || "default"}`);
-        return saved ? JSON.parse(saved) : [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
-
-  const saveCart = (newCart: { product: any; quantity: number }[]) => {
-    setCart(newCart);
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(`cart_retail_${routeSlug || "default"}`, JSON.stringify(newCart));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-
+  // Cart state - REMOVED localStorage usage (SSOT: use CartProvider)
+  // Cart is now managed by CartProvider which uses cart_items table in Supabase
 
   const [selectedProductDetails, setSelectedProductDetails] = useState<any>(null);
   const [coupon, setCoupon] = useState("");
@@ -571,13 +549,7 @@ export function DistributorStorePage() {
                       <p className="font-bold text-emerald-400 uppercase tracking-widest text-[9px] font-mono select-none">Bônus & Patrocínio Direto</p>
                       <p>Estas aquisições faturam <strong className="text-white">R$ {(subtotal * 0.25).toFixed(2)}</strong> de cashback imediato e acumulam volume binário de rede para:</p>
                       <div className="flex items-center gap-2 pt-1 border-t border-emerald-500/10 mt-1">
-                        {distAvatar ? (
-                          <img src={distAvatar} alt={distName} className="h-6 w-6 rounded-full border border-emerald-500/30 object-cover" />
-                        ) : (
-                          <div className="h-6 w-6 rounded-full border border-emerald-500/30 bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-                            {distName.charAt(0)}
-                          </div>
-                        )}
+                        <img src={distAvatar} alt={distName} className="h-6 w-6 rounded-full border border-emerald-500/30 object-cover" />
                         <div>
                           <p className="font-semibold text-white text-[11px]">{distName}</p>
                           <p className="text-[9px] text-emerald-400 font-mono leading-none">@{sponsorSlug}</p>
@@ -746,7 +718,7 @@ export function DistributorStorePage() {
           <p className="max-w-md mx-auto leading-relaxed">
             Plataforma de varejo integrada à estrutura da All-In Brasil. Suas transações faturam cashback direto e volume de perna de rede em conformidade com as diretivas MLM oficiais.
           </p>
-          <p className="text-[10px]">Patrocinador: <span className="text-zinc-400 font-mono">@{sponsorSlug}</span> · ID: <span className="text-zinc-400 font-mono">{currentDistributor.slug || "dist_001"}</span></p>
+          <p className="text-[10px]">Patrocinador: <span className="text-zinc-400 font-mono">@{sponsorSlug}</span> · ID: <span className="text-zinc-400 font-mono">{matchedUser?.id || "dist_001"}</span></p>
         </div>
       </footer>
     </div>

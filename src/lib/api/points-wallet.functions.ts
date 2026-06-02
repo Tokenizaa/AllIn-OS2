@@ -1,4 +1,4 @@
-import { createServerFn } from '@tanstack/react-start';
+﻿import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { pointsWalletService } from '../backend/modules/payments/services/points-wallet.service';
 
@@ -186,3 +186,4 @@ export const expireOldPoints = createServerFn({ method: 'POST' })
       return { success: false, error: error instanceof Error ? error.message : 'Failed to expire old points' };
     }
   });
+

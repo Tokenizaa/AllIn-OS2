@@ -36,13 +36,20 @@ function FinancePage() {
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const [{ data: withdrawalsData }, { data: profileData }] = await Promise.all([
-        supabase.from("withdrawals").select("id, description, type, amount, created_at").order("created_at", { ascending: false }).limit(50),
-        supabase.from("workspace_settings").select("balance_available, balance_blocked, balance_pending, total_year, total_month").limit(1).maybeSingle(),
+      const [{ data: withdrawalsData }, { data: bonusWalletData }, { data: mainWalletData }] = await Promise.all([
+        supabase.from("withdrawals").select("id, description, type, amount, created_at, wallet_type").order("created_at", { ascending: false }).limit(50),
+        supabase.from("bonus_wallets").select("balance, available_balance, frozen_balance, total_earned").limit(1).maybeSingle(),
+        supabase.from("wallets").select("balance, available_balance, frozen_balance").limit(1).maybeSingle(),
       ]);
       if (!mounted) return;
       setWithdrawals((withdrawalsData as WithdrawalRow[]) || []);
-      setWallet((profileData as WalletRow) || {});
+      setWallet({
+        balance_available: Number((bonusWalletData?.available_balance || 0) + (mainWalletData?.available_balance || 0)),
+        balance_blocked: Number((bonusWalletData?.frozen_balance || 0) + (mainWalletData?.frozen_balance || 0)),
+        balance_pending: Number((bonusWalletData?.balance || 0) + (mainWalletData?.balance || 0) - (bonusWalletData?.available_balance || 0) - (mainWalletData?.available_balance || 0)),
+        total_year: Number(bonusWalletData?.total_earned || 0),
+        total_month: Number(bonusWalletData?.total_earned || 0) * 0.1, // Estimativa mensal
+      });
     })();
     return () => {
       mounted = false;

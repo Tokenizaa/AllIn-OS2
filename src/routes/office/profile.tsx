@@ -11,6 +11,8 @@ import { toast } from "sonner";
 type ProfileRow = {
   id: string;
   name?: string | null;
+  full_name?: string | null;
+  display_name?: string | null;
   email?: string | null;
   phone?: string | null;
   cpf?: string | null;
@@ -29,7 +31,7 @@ function ProfilePage() {
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const { data } = await supabase.from("profiles").select("id, name, email, phone, cpf, sponsor_id, city, state, role").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const { data } = await supabase.from("profiles").select("id, name, full_name, display_name, email, phone, cpf, sponsor_id, city, state, role").order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (mounted) setProfile((data as ProfileRow) || null);
     })();
     return () => {
@@ -62,7 +64,7 @@ function ProfilePage() {
             <div className="relative group cursor-pointer">
               <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-primary via-fuchsia-500 to-cyan-400 p-0.5 shadow-lg">
                 <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center text-xl font-bold text-white uppercase">
-                  {(profile?.name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                  {(profile?.full_name || profile?.display_name || profile?.name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("")}
                 </div>
               </div>
               <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] uppercase font-mono">
@@ -70,7 +72,7 @@ function ProfilePage() {
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold text-white truncate max-w-[150px] mx-auto">{profile?.name || "-"}</p>
+              <p className="text-sm font-semibold text-white truncate max-w-[150px] mx-auto">{profile?.full_name || profile?.display_name || profile?.name || "-"}</p>
               <p className="text-xs text-muted-foreground mt-0.5">ID: {profile?.id || "-"}</p>
             </div>
             <div className="flex flex-col gap-1 w-full pt-1.5 border-t border-border/20">
@@ -107,7 +109,7 @@ function ProfilePage() {
                 <p className="text-xs text-muted-foreground">Os campos agora são preenchidos a partir de profiles.</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Nome Completo" value={profile?.name || "-"} />
+                <Field label="Nome Completo" value={profile?.full_name || profile?.display_name || profile?.name || "-"} />
                 <Field label="Endereço de E-mail" value={profile?.email || "-"} />
                 <Field label="Número de Telefone" value={profile?.phone || "-"} />
                 <Field label="CPF Fiscal" value={profile?.cpf || "-"} />

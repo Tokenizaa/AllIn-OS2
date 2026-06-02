@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Wallet, Users, TrendingUp, Crown, Sparkles, ArrowUpRight, Copy, Share2, UserPlus, Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { StatCard } from "@/components/distributor/stat-card";
 import { supabase } from "@/lib/supabase-client";
 import { toast } from "sonner";
+import { OfficeDashboardCharts, TopProductsChart } from "./-office-dashboard-charts";
 
 type DashboardStats = {
   saldoDisponivel: number;
@@ -44,13 +44,15 @@ function Dashboard() {
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const [ordersRes, paymentsRes, customersRes, productsRes, withdrawalsRes, profileRes] = await Promise.all([
+      const [ordersRes, paymentsRes, customersRes, productsRes, withdrawalsRes, profileRes, bonusWalletRes, mainWalletRes] = await Promise.all([
         supabase.from("orders").select("id, numero_pedido, valor_total_pedido, valor_total, created_at, status, status_pedido").order("created_at", { ascending: false }).limit(300),
         supabase.from("payments").select("id, amount, created_at, status").order("created_at", { ascending: false }).limit(300),
-        supabase.from("customers").select("id, usuario, id_comprador, user_id, status, created_at, name").limit(1000),
+        supabase.from("customers").select("id, usuario, id_comprador, user_id, status, created_at, customer_type, plan_id").limit(300),
         supabase.from("products").select("id, name, price").limit(20),
         supabase.from("withdrawals").select("id, amount, created_at, status").order("created_at", { ascending: false }).limit(20),
         supabase.from("profiles").select("name, role, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("bonus_wallets").select("balance, available_balance, total_earned").limit(1).maybeSingle(),
+        supabase.from("wallets").select("balance, available_balance").limit(1).maybeSingle(),
       ]);
 
       if (!mounted) return;
@@ -60,18 +62,27 @@ function Dashboard() {
       const customers = (customersRes.data || []) as any[];
       const products = (productsRes.data || []) as any[];
       const withdrawals = (withdrawalsRes.data || []) as any[];
+      const bonusWallet = (bonusWalletRes.data || {}) as any;
+      const mainWallet = (mainWalletRes.data || {}) as any;
 
       const totalVendido = orders.reduce((sum, row) => sum + Number(row.valor_total_pedido || row.valor_total || 0), 0);
       const totalPago = payments.reduce((sum, row) => sum + Number(row.amount || 0), 0);
       const pedidosMes = orders.length;
       const redeTotal = customers.length;
+      const distribuidores = customers.filter((c) => c.customer_type === "distribuidor").length;
+      const afiliados = customers.filter((c) => c.customer_type === "afiliado").length;
       const ticketMedio = orders.length ? totalVendido / orders.length : 0;
       const conversion = customers.length ? Math.round((orders.length / customers.length) * 100) : 0;
-      const saldoDisponivel = Math.max(0, totalPago - withdrawals.reduce((sum, row) => sum + Number(row.amount || 0), 0));
+      
+      // Usar dados reais das wallets
+      const saldoBonusDisponivel = Number(bonusWallet.available_balance || 0);
+      const saldoMainDisponivel = Number(mainWallet.available_balance || 0);
+      const saldoDisponivel = saldoBonusDisponivel + saldoMainDisponivel;
+      const comissaoAcumulada = Number(bonusWallet.total_earned || 0);
 
       setStats({
         saldoDisponivel,
-        comissaoAcumulada: totalPago * 0.18,
+        comissaoAcumulada,
         totalVendido,
         pedidosMes,
         redeTotal,
@@ -80,7 +91,7 @@ function Dashboard() {
         crescimentoRedeMes: 0,
         nome: (profileRes.data as any)?.name || "Usuário",
         qualificacao: "Ativo",
-        plano: "Plano Real",
+        plano: distribuidores > 0 ? "Plano Distribuidor" : (afiliados > 0 ? "Plano Afiliado" : "Plano Padrão"),
         progresso: Math.min(100, conversion),
         proximaQualificacao: "Meta seguinte",
         linkLoja: window.location.origin,
@@ -156,34 +167,7 @@ function Dashboard() {
         <StatCard label="Cadastros diretos" value={String(current.redeTotal)} delta={0} icon={Users} accent="warning" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Vendas & Bônus · últimos registros</h3>
-          <div className="h-72 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesSeries}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="day" stroke="var(--color-muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickFormatter={(v) => `${(v / 1000).toFixed(1)}k`} />
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-                <Area type="monotone" dataKey="vendas" stroke="var(--color-primary)" fill="url(#g1)" strokeWidth={2} />
-                <Area type="monotone" dataKey="bonus" stroke="var(--color-success)" fill="url(#g2)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Origem dos bônus</h3>
-          <div className="h-56 mt-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={bonusOrigin} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="none">{bonusOrigin.map((_, i) => <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />)}</Pie>
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+      <OfficeDashboardCharts salesSeries={salesSeries} bonusOrigin={bonusOrigin} topProducts={topProducts} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2 space-y-3">
@@ -244,15 +228,7 @@ function Dashboard() {
         <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
           <h3 className="text-sm font-semibold">Top produtos</h3>
           <div className="h-44 mt-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topProducts} layout="vertical" margin={{ left: 0, right: 12 }}>
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" stroke="var(--color-muted-foreground)" fontSize={10} width={120} />
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="qtd" fill="var(--color-primary)" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <TopProductsChart data={topProducts} />
           </div>
         </div>
       </div>

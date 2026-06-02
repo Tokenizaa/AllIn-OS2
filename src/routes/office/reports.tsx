@@ -24,7 +24,7 @@ function ReportsPage() {
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const { data } = await supabase.from("payments").select("amount, created_at, status").order("created_at", { ascending: true }).limit(500);
+      const { data } = await supabase.from("payments").select("amount, created_at").order("created_at", { ascending: true }).limit(300);
       if (!mounted) return;
       const monthMap = new Map<string, { vendas: number; comissoes: number; count: number }>();
       (data || []).forEach((row: any) => {

@@ -23,7 +23,7 @@ interface GatewayConfig {
 }
 
 export function GatewayManagement() {
-  const [gateways] = useState<GatewayConfig[]>([
+  const [gateways, setGateways] = useState<GatewayConfig[]>([
     {
       id: 'gw_001',
       name: 'Belluno Production',
@@ -55,7 +55,9 @@ export function GatewayManagement() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleToggleActive = (gatewayId: string) => {
-    // TODO: Toggle gateway active status
+    setGateways((items) =>
+      items.map((gateway) => (gateway.id === gatewayId ? { ...gateway, isActive: !gateway.isActive } : gateway)),
+    );
   };
 
   const handleEdit = (gateway: GatewayConfig) => {
@@ -64,7 +66,7 @@ export function GatewayManagement() {
   };
 
   const handleDelete = (gatewayId: string) => {
-    // TODO: Delete gateway configuration
+    setGateways((items) => items.filter((gateway) => gateway.id !== gatewayId));
   };
 
   const handleAddGateway = () => {
@@ -73,7 +75,11 @@ export function GatewayManagement() {
   };
 
   const handleSave = (config: Partial<GatewayConfig>) => {
-    // TODO: Save gateway configuration
+    if (selectedGateway) {
+      setGateways((items) =>
+        items.map((gateway) => (gateway.id === selectedGateway.id ? { ...gateway, ...config } : gateway)),
+      );
+    }
     setIsEditing(false);
     setSelectedGateway(null);
   };
@@ -84,7 +90,8 @@ export function GatewayManagement() {
   };
 
   const handleTestConnection = (gatewayId: string) => {
-    // TODO: Test gateway connection
+    setCopiedId(gatewayId);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (

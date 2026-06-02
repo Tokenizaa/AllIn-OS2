@@ -48,17 +48,55 @@ type PlanMetadata = {
   extraDirects?: Array<{ minDirects: number; percentage: number }>;
 };
 
-async function fetchJson<T>(path: string) {
+async function fetchJson<T>(path: string, method: string = "GET", body?: any) {
   const config = getServerConfig();
+  const headers = new Headers();
+  headers.append("apikey", config.supabaseAnonKey || "");
+  headers.append("Authorization", `Bearer ${config.supabaseAnonKey || ""}`);
+  headers.append("Content-Type", "application/json");
+  
   const res = await fetch(`${config.supabaseUrl}${path}`, {
-    headers: {
-      apikey: config.supabaseAnonKey,
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-      "Content-Type": "application/json",
-    },
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) throw new Error(`Supabase request failed: ${res.status}`);
   return (await res.json()) as T;
+}
+
+// Chamar função SQL para calcular bônus de rede
+async function calculateNetworkBonusSQL(customerId: string, orderAmount: number) {
+  try {
+    const result = await fetchJson<any>(
+      `/rest/v1/rpc/calculate_network_bonus`,
+      "POST",
+      {
+        p_customer_id: customerId,
+        p_order_amount: orderAmount,
+      }
+    );
+    return result;
+  } catch (error) {
+    console.error("Erro ao calcular bônus via SQL:", error);
+    return null;
+  }
+}
+
+// Chamar função SQL para atualizar bônus wallets
+async function updateBonusWalletsSQL(orderId: string) {
+  try {
+    const result = await fetchJson<any>(
+      `/rest/v1/rpc/update_bonus_wallets`,
+      "POST",
+      {
+        p_order_id: orderId,
+      }
+    );
+    return result;
+  } catch (error) {
+    console.error("Erro ao atualizar bônus wallets via SQL:", error);
+    return null;
+  }
 }
 
 async function fetchCustomer(customerId: string) {
@@ -175,52 +213,80 @@ export const calculateCommission = createServerFn({ method: "POST" })
       return { direct_commission: 0, mlm_commissions: [], total_commission: 0, breakdown: [] };
     }
 
+    // Usar função SQL para calcular bônus de rede
+    const networkBonus = await calculateNetworkBonusSQL(data.seller_id, data.order_amount);
+    
     const planConfig = await resolvePlanConfig(data.seller_id);
     const fallbackRule = getPlanRule(resolvePlanKey(seller));
     const directPct = planConfig.directPct || fallbackRule?.directCommissionPct || 0;
-    const generationBonuses = planConfig.generationBonuses.length ? planConfig.generationBonuses : (fallbackRule?.generationBonuses || []);
-    const extraDirectsBonuses = planConfig.extraDirectsBonuses.length ? planConfig.extraDirectsBonuses : (fallbackRule?.extraDirectsBonuses || []);
     const direct_commission = data.order_amount * (directPct / 100);
-    const sponsor = await fetchSponsor(data.seller_id);
-    const mlm_commissions: Array<any> = [];
+    
+    // Usar resultado da função SQL se disponível, senão usar lógica client-side
+    let mlm_commissions: Array<any> = [];
+    if (networkBonus && Array.isArray(networkBonus)) {
+      mlm_commissions = networkBonus.map((bonus: any) => ({
+        recipient_id: bonus.sponsor_id,
+        recipient_name: bonus.sponsor_id, // Nome seria buscado separadamente
+        generation: bonus.generation,
+        percentage: bonus.bonus_percentage,
+        amount: bonus.bonus_amount,
+        bonus_type: bonus.bonus_type,
+      }));
+    } else {
+      // Fallback para lógica client-side
+      const generationBonuses = planConfig.generationBonuses.length ? planConfig.generationBonuses : (fallbackRule?.generationBonuses || []);
+      const extraDirectsBonuses = planConfig.extraDirectsBonuses.length ? planConfig.extraDirectsBonuses : (fallbackRule?.extraDirectsBonuses || []);
+      const sponsor = await fetchSponsor(data.seller_id);
 
-    if (sponsor?.sponsor_customer_id && planConfig.sponsorPct > 0) {
-      const sponsorCustomer = await fetchCustomer(sponsor.sponsor_customer_id);
-      mlm_commissions.push({
-        recipient_id: sponsor.sponsor_customer_id,
-        recipient_name: getCustomerLabel(sponsorCustomer),
-        generation: 0,
-        percentage: planConfig.sponsorPct,
-        amount: data.order_amount * (planConfig.sponsorPct / 100),
-        bonus_type: "sponsor",
-      });
-    } else if (sponsor?.sponsor_customer_id && generationBonuses.length) {
-      const sponsorCustomer = await fetchCustomer(sponsor.sponsor_customer_id);
-      const sponsorPlanKey = resolvePlanKey(sponsorCustomer);
-      if (sponsorPlanKey) {
-        const generationBonus = computeGenerationBonus(planConfig.planKey || fallbackRule?.key || null, data.order_amount, 0);
-        const firstGen = generationBonus.generations.find((g) => g.generation === 1);
-        if (firstGen) {
-          mlm_commissions.push({
-            recipient_id: sponsor.sponsor_customer_id,
-            recipient_name: getCustomerLabel(sponsorCustomer),
-            generation: 1,
-            percentage: firstGen.percentage,
-            amount: firstGen.amount,
-            bonus_type: "generation",
-          });
+      if (sponsor?.sponsor_customer_id && planConfig.sponsorPct > 0) {
+        const sponsorCustomer = await fetchCustomer(sponsor.sponsor_customer_id);
+        mlm_commissions.push({
+          recipient_id: sponsor.sponsor_customer_id,
+          recipient_name: getCustomerLabel(sponsorCustomer),
+          generation: 0,
+          percentage: planConfig.sponsorPct,
+          amount: data.order_amount * (planConfig.sponsorPct / 100),
+          bonus_type: "sponsor",
+        });
+      } else if (sponsor?.sponsor_customer_id && generationBonuses.length) {
+        const sponsorCustomer = await fetchCustomer(sponsor.sponsor_customer_id);
+        const sponsorPlanKey = resolvePlanKey(sponsorCustomer);
+        if (sponsorPlanKey) {
+          const generationBonus = computeGenerationBonus(planConfig.planKey || fallbackRule?.key || null, data.order_amount, 0);
+          const firstGen = generationBonus.generations.find((g) => g.generation === 1);
+          if (firstGen) {
+            mlm_commissions.push({
+              recipient_id: sponsor.sponsor_customer_id,
+              recipient_name: getCustomerLabel(sponsorCustomer),
+              generation: 1,
+              percentage: firstGen.percentage,
+              amount: firstGen.amount,
+              bonus_type: "generation",
+            });
+          }
         }
       }
-    }
 
-    const directCount = await countDirects(data.seller_id);
-    const extraDirects = extraDirectsBonuses.filter((b) => b.minDirects <= directCount);
-    const extraDirectBonus = extraDirects.reduce((sum, b) => sum + data.order_amount * (b.percentage / 100), 0);
+      const directCount = await countDirects(data.seller_id);
+      const extraDirects = extraDirectsBonuses.filter((b) => b.minDirects <= directCount);
+      const extraDirectBonus = extraDirects.reduce((sum, b) => sum + data.order_amount * (b.percentage / 100), 0);
+      
+      if (extraDirectBonus > 0) {
+        mlm_commissions.push({
+          recipient_id: data.seller_id,
+          recipient_name: getCustomerLabel(seller),
+          generation: 0,
+          percentage: extraDirects.reduce((sum, b) => sum + b.percentage, 0),
+          amount: extraDirectBonus,
+          bonus_type: "direct_bonus",
+        });
+      }
+    }
 
     return {
       direct_commission,
       mlm_commissions,
-      total_commission: direct_commission + mlm_commissions.reduce((sum, item) => sum + Number(item.amount || 0), 0) + extraDirectBonus,
+      total_commission: direct_commission + mlm_commissions.reduce((sum, item) => sum + Number(item.amount || 0), 0),
       breakdown: [
         { type: "direct", recipient_id: data.seller_id, percentage: directPct, amount: direct_commission },
         ...mlm_commissions,
@@ -366,4 +432,68 @@ export const simulateCommission = createServerFn({ method: "POST" })
         },
       },
     };
+  });
+
+// Processar saque usando função SQL
+export const processWithdrawal = createServerFn({ method: "POST" })
+  .inputValidator(z.object({
+    withdrawal_id: z.string(),
+  }))
+  .handler(async ({ data }) => {
+    try {
+      const result = await fetchJson<any>(
+        `/rest/v1/rpc/process_withdrawal`,
+        "POST",
+        {
+          p_withdrawal_id: data.withdrawal_id,
+        }
+      );
+      return { success: true, processed: result };
+    } catch (error) {
+      console.error("Erro ao processar saque:", error);
+      return { success: false, error: "Falha ao processar saque" };
+    }
+  });
+
+// Solicitar novo saque
+export const requestWithdrawal = createServerFn({ method: "POST" })
+  .inputValidator(z.object({
+    customer_id: z.string().uuid(),
+    amount: z.number().min(0),
+    wallet_type: z.enum(["bonus", "points", "main"]),
+    method: z.string(),
+    pix_key: z.string().optional(),
+    bank_info: z.record(z.string()).optional(),
+  }))
+  .handler(async ({ data }) => {
+    try {
+      const config = getServerConfig();
+      const res = await fetch(`${config.supabaseUrl}/rest/v1/withdrawals`, {
+        method: "POST",
+        headers: new Headers({
+          apikey: config.supabaseAnonKey || "",
+          Authorization: `Bearer ${config.supabaseAnonKey || ""}`,
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({
+          customer_id: data.customer_id,
+          valor: data.amount,
+          metodo: data.method,
+          wallet_type: data.wallet_type,
+          pix_key: data.pix_key,
+          bank_info: data.bank_info,
+          status: "pending",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      
+      if (!res.ok) throw new Error(`Falha ao criar saque: ${res.status}`);
+      
+      const result = await res.json();
+      return { success: true, withdrawal: result };
+    } catch (error) {
+      console.error("Erro ao solicitar saque:", error);
+      return { success: false, error: "Falha ao solicitar saque" };
+    }
   });

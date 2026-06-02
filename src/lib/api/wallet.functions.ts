@@ -1,4 +1,4 @@
-import { createServerFn } from '@tanstack/react-start';
+﻿import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { walletService } from '../backend/modules/payments/services/wallet.service';
 
@@ -175,3 +175,4 @@ export const getWalletBalance = createServerFn({ method: 'GET' })
       return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet balance' };
     }
   });
+

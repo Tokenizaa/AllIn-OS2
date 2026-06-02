@@ -16,9 +16,9 @@ function CommissionsPage() {
   useEffect(() => {
     (async () => {
       const [{ data: payments }, { data: plansData }, { data: customersData }] = await Promise.all([
-        supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(18),
+        supabase.from("payments").select("id, amount, quantity, plan_id, plan_name, plano_id, created_at").order("created_at", { ascending: false }).limit(18),
         supabase.from("plans").select("id, name, price, commission_percent, generations, benefits, is_active, sort_order").eq("is_active", true).order("sort_order", { ascending: true }),
-        supabase.from("customers").select("id, user_id, usuario, id_comprador, qualification, patrocinador_comprador, status, created_at, name").limit(500),
+        supabase.from("customers").select("id, user_id, usuario, id_comprador, qualification, patrocinador_comprador, status, created_at").limit(300),
       ]);
 
       setRows((payments || []).map((p: any, i: number) => ({

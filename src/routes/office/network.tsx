@@ -17,6 +17,17 @@ type NodeRow = {
   status?: string | null;
   cidade?: string | null;
   estado?: string | null;
+  plan_id?: string | null;
+  plan_name?: string | null;
+  customer_type?: string | null;
+  level?: number | null;
+  direct_count?: number;
+};
+
+type NetworkRow = {
+  customer_id: string;
+  sponsor_customer_id: string | null;
+  level: number;
 };
 
 export const Route = createFileRoute("/office/network")({ component: NetworkPage });
@@ -29,12 +40,38 @@ function NetworkPage() {
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const { data } = await supabase
-        .from("customers")
-        .select("id, usuario, id_comprador, user_id, qualification, status, cidade, estado, name")
-        .limit(500);
+      const [{ data: customersData }, { data: networkData }] = await Promise.all([
+        supabase
+          .from("customers")
+          .select("id, usuario, id_comprador, user_id, qualification, status, cidade, estado, plan_id, customer_type")
+          .limit(300),
+        supabase
+          .from("network_relationships")
+          .select("customer_id, sponsor_customer_id, level")
+          .limit(500),
+      ]);
+      
       if (!mounted) return;
-      setNodes((data || []) as NodeRow[]);
+      
+      // Contar diretos para cada customer
+      const directCounts = new Map<string, number>();
+      (networkData || []).forEach((n: NetworkRow) => {
+        if (n.sponsor_customer_id) {
+          directCounts.set(n.sponsor_customer_id, (directCounts.get(n.sponsor_customer_id) || 0) + 1);
+        }
+      });
+      
+      // Adicionar nível e contagem de diretos aos customers
+      const enrichedNodes = (customersData || []).map((c: any) => {
+        const networkRelation = (networkData || []).find((n: NetworkRow) => n.customer_id === c.id);
+        return {
+          ...c,
+          level: networkRelation?.level || 0,
+          direct_count: directCounts.get(c.id) || 0,
+        };
+      });
+      
+      setNodes(enrichedNodes as NodeRow[]);
     })();
     return () => {
       mounted = false;
@@ -76,9 +113,9 @@ function NetworkPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card label="Rede total" value={String(total)} icon={<Users className="h-4 w-4 text-emerald-400" />} />
-        <Card label="Ativos" value={String(nodes.filter((n) => n.status !== "inactive").length)} icon={<TrendingUp className="h-4 w-4 text-fuchsia-400" />} />
-        <Card label="Qualificados" value={String(nodes.filter((n) => String(n.qualification || "").length > 0).length)} icon={<Sparkles className="h-4 w-4 text-amber-400" />} />
-        <Card label="Inativos" value={String(nodes.filter((n) => n.status === "inactive").length)} icon={<Sparkles className="h-4 w-4 text-rose-400" />} />
+        <Card label="Distribuidores" value={String(nodes.filter((n) => n.customer_type === "distribuidor").length)} icon={<TrendingUp className="h-4 w-4 text-fuchsia-400" />} />
+        <Card label="Afiliados" value={String(nodes.filter((n) => n.customer_type === "afiliado").length)} icon={<Sparkles className="h-4 w-4 text-amber-400" />} />
+        <Card label="Diretos ativos" value={String(nodes.reduce((sum, n) => sum + (n.direct_count || 0), 0))} icon={<Sparkles className="h-4 w-4 text-rose-400" />} />
       </div>
 
       <Tabs defaultValue="linear" className="space-y-6">
@@ -108,8 +145,11 @@ function NetworkPage() {
                 <thead>
                   <tr className="border-b border-border/40 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
                     <th className="px-5 py-4">Distribuidor</th>
+                    <th className="px-5 py-4">Tipo</th>
+                    <th className="px-5 py-4">Plano</th>
+                    <th className="px-5 py-4">Nível</th>
+                    <th className="px-5 py-4">Diretos</th>
                     <th className="px-5 py-4">Qualificação</th>
-                    <th className="px-5 py-4">Cidade</th>
                     <th className="px-5 py-4">Status</th>
                   </tr>
                 </thead>
@@ -118,10 +158,21 @@ function NetworkPage() {
                     <tr key={node.id} className="hover:bg-muted/10 transition-colors">
                       <td className="px-5 py-4 font-semibold text-white">{getCustomerLabel(node)}</td>
                       <td className="px-5 py-4">
+                        <Badge variant={node.customer_type === "distribuidor" ? "default" : "secondary"} className="capitalize">
+                          {node.customer_type || "-"}
+                        </Badge>
+                      </td>
+                      <td className="px-5 py-4 text-xs text-muted-foreground">{node.plan_name || "-"}</td>
+                      <td className="px-5 py-4 text-xs text-muted-foreground">Geração {node.level || 0}</td>
+                      <td className="px-5 py-4 text-xs text-muted-foreground">{node.direct_count || 0}</td>
+                      <td className="px-5 py-4">
                         <Badge variant="outline">{node.qualification || "-"}</Badge>
                       </td>
-                      <td className="px-5 py-4">{[node.cidade, node.estado].filter(Boolean).join("/") || "-"}</td>
-                      <td className="px-5 py-4">{node.status || "-"}</td>
+                      <td className="px-5 py-4">
+                        <Badge variant={node.status === "active" ? "default" : "destructive"} className="capitalize">
+                          {node.status || "-"}
+                        </Badge>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

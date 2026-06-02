@@ -18,6 +18,16 @@ type PlanRow = {
   benefits?: string[] | null;
   is_active?: boolean | null;
   sort_order?: number | null;
+  bonus_usage_percentage?: number | null;
+};
+
+type CustomerPlanRow = {
+  id: string;
+  customer_id: string;
+  plan_id: string;
+  status: string;
+  activated_at: string;
+  plan_name?: string | null;
 };
 
 type ProfileRow = {
@@ -33,17 +43,20 @@ function formatBRL(value: number) {
 
 function PlanPage() {
   const [plans, setPlans] = useState<PlanRow[]>([]);
+  const [customerPlan, setCustomerPlan] = useState<CustomerPlanRow | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
 
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const [{ data: plansData }, { data: profileData }] = await Promise.all([
-        supabase.from("plans").select("id, name, price, commission_percent, generations, benefits, is_active, sort_order").eq("is_active", true).order("sort_order", { ascending: true }),
+      const [{ data: plansData }, { data: customerPlanData }, { data: profileData }] = await Promise.all([
+        supabase.from("plans").select("id, name, price, commission_percent, generations, benefits, is_active, sort_order, bonus_usage_percentage").eq("is_active", true).order("sort_order", { ascending: true }),
+        supabase.from("customer_plans").select("id, customer_id, plan_id, status, activated_at").eq("status", "active").order("activated_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("profiles").select("name, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
       if (!mounted) return;
       setPlans((plansData as PlanRow[]) || []);
+      setCustomerPlan((customerPlanData as CustomerPlanRow) || null);
       setProfile((profileData as ProfileRow) || null);
     })();
     return () => {
@@ -51,9 +64,11 @@ function PlanPage() {
     };
   }, []);
 
-  const current = plans[0];
-  const next = plans[1] || plans[0];
-  const createdAt = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "-";
+  // Encontrar plano ativo do customer
+  const activePlan = customerPlan ? plans.find(p => p.id === customerPlan.plan_id) : plans[0];
+  const current = activePlan || plans[0];
+  const next = plans.find(p => p.id !== current?.id) || plans[0];
+  const createdAt = customerPlan?.activated_at ? new Date(customerPlan.activated_at).toLocaleDateString("pt-BR") : (profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "-");
   const currentRule = getPlanRule(current?.name);
 
   const planCards = useMemo(() => plans.slice(0, 4), [plans]);

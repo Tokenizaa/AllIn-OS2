@@ -85,13 +85,19 @@ function DiseasesPage() {
             </div>
 
             <div className="mt-16 text-center">
-              <Link
-                to={isDefaultTenant ? "/loja" : `/loja/${sponsorSlug}`}
-              >
-                <Button variant="vibrant" size="lg" className="text-lg px-8 py-6">
-                  Ver Produtos que Podem Ajudar
-                </Button>
-              </Link>
+              {isDefaultTenant ? (
+                <Link to="/loja">
+                  <Button variant="vibrant" size="lg" className="text-lg px-8 py-6">
+                    Ver Produtos que Podem Ajudar
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/loja/$slug" params={{ slug: sponsorSlug }}>
+                  <Button variant="vibrant" size="lg" className="text-lg px-8 py-6">
+                    Ver Produtos que Podem Ajudar
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>

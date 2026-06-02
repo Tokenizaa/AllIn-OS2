@@ -118,7 +118,7 @@ export function PaymentHistory() {
     return matchesSearch && matchesStatus && matchesMethod;
   });
 
-  const handleViewDetails = (_paymentId: string) => {
+  const handleViewDetails = () => {
     // TODO: Open payment details modal
   };
 
@@ -237,7 +237,7 @@ export function PaymentHistory() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleViewDetails(payment.id)}
+                      onClick={handleViewDetails}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>

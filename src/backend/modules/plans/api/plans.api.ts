@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+﻿import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { PlanService } from "../services/plan.service";
 import { paginationSchema, filterSchema } from "../../../shared/dto/pagination.dto";
@@ -311,3 +311,4 @@ export const getAllPlanStats = createServerFn({ method: "GET" })
       };
     }
   });
+

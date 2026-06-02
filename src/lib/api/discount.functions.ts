@@ -1,4 +1,4 @@
-import { createServerFn } from '@tanstack/react-start';
+﻿import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { discountEngineService } from '../backend/modules/payments/services/discount-engine.service';
 
@@ -111,3 +111,4 @@ export const validateCoupon = createServerFn({ method: 'POST' })
       return { success: false, error: error instanceof Error ? error.message : 'Failed to validate coupon' };
     }
   });
+
