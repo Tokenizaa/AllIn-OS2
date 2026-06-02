@@ -21,7 +21,7 @@ function OrdersPage() {
     (async () => {
       const [{ data: ordersData }, { data: customersData }] = await Promise.all([
         supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(60),
-        supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata").order("created_at", { ascending: false }),
+        supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata, name").order("created_at", { ascending: false }),
       ]);
       setOrders(ordersData || []);
       setCustomers(customersData || []);
@@ -53,7 +53,7 @@ function OrdersPage() {
           <tbody className="divide-y divide-border/60">
             {orders.map((o) => {
               const customer = customers.find((x) => x.id === o.customer_id);
-              const customerLabel = customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
+              const customerLabel = customer?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
               return (
                 <tr key={o.id} className="hover:bg-accent/30">
                   <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>

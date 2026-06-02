@@ -38,7 +38,7 @@ function CustomersPage() {
       const [{ data: customerData }, { data: allOrders }] = await Promise.all([
         supabase
           .from("customers")
-          .select("id, user_id, usuario, id_comprador, qualification, status, telefone, created_at")
+          .select("id, user_id, usuario, id_comprador, qualification, status, telefone, created_at, name")
           .order("created_at", { ascending: false }),
         supabase
           .from("orders")

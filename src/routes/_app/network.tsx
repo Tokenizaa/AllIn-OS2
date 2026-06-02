@@ -14,7 +14,7 @@ function NetworkPage() {
   useEffect(() => {
     (async () => {
       const [{ data: customerData }, { data: relationshipData }] = await Promise.all([
-        supabase.from("customers").select("id, usuario, id_comprador, qualification, status, cidade, estado, user_id").order("created_at", { ascending: false }).limit(20),
+        supabase.from("customers").select("id, usuario, id_comprador, qualification, status, cidade, estado, user_id, name").order("created_at", { ascending: false }).limit(20),
         supabase.from("network_relationships").select("*").order("created_at", { ascending: false }).limit(12),
       ]);
       setCustomers(customerData || []);
@@ -26,7 +26,7 @@ function NetworkPage() {
     })();
   }, []);
 
-  const data = customers.map((c) => ({ name: (c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
+  const data = customers.map((c) => ({ name: (c.name || c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
 
   return (
     <div className="space-y-6">

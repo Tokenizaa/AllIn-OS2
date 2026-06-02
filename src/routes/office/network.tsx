@@ -31,7 +31,7 @@ function NetworkPage() {
     void (async () => {
       const { data } = await supabase
         .from("customers")
-        .select("id, usuario, id_comprador, user_id, qualification, status, cidade, estado")
+        .select("id, usuario, id_comprador, user_id, qualification, status, cidade, estado, name")
         .limit(500);
       if (!mounted) return;
       setNodes((data || []) as NodeRow[]);

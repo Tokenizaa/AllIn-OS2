@@ -130,7 +130,7 @@ function Customer360() {
       if (c.id_comprador) {
         const { data: downlineData } = await supabase
           .from("customers")
-          .select("id, usuario, id_comprador, qualification, status, telefone, created_at, cidade, estado")
+          .select("id, usuario, id_comprador, qualification, status, telefone, created_at, cidade, estado, name")
           .eq("patrocinador_comprador", c.id_comprador)
           .order("created_at", { ascending: false });
         setDownlines(downlineData || []);
