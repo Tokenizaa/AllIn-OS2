@@ -1,11 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
-  "functions": {
-    "dist/server/server.js": {
-      "runtime": "nodejs20"
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",
