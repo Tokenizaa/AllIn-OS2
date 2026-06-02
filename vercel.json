@@ -3,7 +3,7 @@
   "outputDirectory": "dist/client",
   "functions": {
     "dist/server/server.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs20"
     }
   },
   "rewrites": [
