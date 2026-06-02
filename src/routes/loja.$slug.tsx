@@ -17,7 +17,7 @@ export const Route = createFileRoute("/loja/$slug")({
   component: DistributorStorePage,
 });
 
-function DistributorStorePage() {
+export function DistributorStorePage() {
   const params = useParams({ strict: false }) as { slug?: string };
   const { currentDistributor, setDistributorBySlug } = useDistributor();
   const { triggerBinomialBonusPay, addAuditLog } = useAuth();
