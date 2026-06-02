@@ -1,0 +1,1 @@
+const l=n=>{if(!n)return null;const e=String(n).replace(/[^\d,.]/g,""),a=e.lastIndexOf(","),c=e.lastIndexOf(".");let r;a>c?r=e.replace(/\./g,"").replace(",","."):r=e.replace(/,/g,"");const t=parseFloat(r);return isNaN(t)||t<=0?null:new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(t)};export{l as f};

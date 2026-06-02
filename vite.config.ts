@@ -1,7 +1,9 @@
 import { defineConfig } from '@lovable.dev/vite-tanstack-config';
 
 export default defineConfig({
-  nitro: true,
+  nitro: {
+    preset: 'vercel',
+  },
   vite: {
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
