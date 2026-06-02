@@ -1,10 +1,10 @@
 export function getCustomerLabel(customer: any): string {
   return (
+    customer?.name ||
     customer?.usuario ||
     customer?.id_comprador ||
     customer?.user_id ||
     customer?.email ||
-    customer?.name ||
     customer?.id ||
     "Cliente"
   );

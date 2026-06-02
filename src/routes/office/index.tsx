@@ -47,7 +47,7 @@ function Dashboard() {
       const [ordersRes, paymentsRes, customersRes, productsRes, withdrawalsRes, profileRes] = await Promise.all([
         supabase.from("orders").select("id, numero_pedido, valor_total_pedido, valor_total, created_at, status, status_pedido").order("created_at", { ascending: false }).limit(300),
         supabase.from("payments").select("id, amount, created_at, status").order("created_at", { ascending: false }).limit(300),
-        supabase.from("customers").select("id, usuario, id_comprador, user_id, status, created_at").limit(1000),
+        supabase.from("customers").select("id, usuario, id_comprador, user_id, status, created_at, name").limit(1000),
         supabase.from("products").select("id, name, price").limit(20),
         supabase.from("withdrawals").select("id, amount, created_at, status").order("created_at", { ascending: false }).limit(20),
         supabase.from("profiles").select("name, role, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/widgets/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getOrderStats, getOrders } from "@/backend/api";
+import { supabase } from "@/lib/supabase-client";
 
 export const Route = createFileRoute("/_app/analytics")({ component: AnalyticsPage });
 
@@ -20,15 +21,54 @@ function AnalyticsPage() {
     queryFn: () => getOrders({ page: 1, limit: 50 }),
   });
 
+  const { data: customers } = useQuery({
+    queryKey: ["analytics", "customers"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("customers")
+        .select("id, usuario, id_comprador, user_id, name");
+      return data || [];
+    },
+  });
+
   const orders = useMemo(() => ordersResult?.data?.data || [], [ordersResult]);
 
   const revenueSeries = useMemo(() => {
-    return orders.slice(0, 12).map((order: any, index: number) => ({
-      day: order.data_criacao_pedido || `D${index + 1}`,
-      receita: Number(order.valor_total || 0),
-      ano_anterior: Number(order.valor_total || 0) * 0.82,
-    }));
+    // Show in chronological order (left to right) by reversing the recent orders slice
+    return orders.slice(0, 12).reverse().map((order: any, index: number) => {
+      let dayLabel = `D${index + 1}`;
+      if (order.data_criacao_pedido) {
+        const d = new Date(order.data_criacao_pedido);
+        if (!isNaN(d.getTime())) {
+          dayLabel = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        }
+      } else if (order.created_at) {
+        const d = new Date(order.created_at);
+        if (!isNaN(d.getTime())) {
+          dayLabel = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        }
+      }
+      return ({
+        day: dayLabel,
+        receita: Number(order.valor_total || 0),
+        ano_anterior: Number(order.valor_total || 0) * 0.82,
+      });
+    });
   }, [orders]);
+
+  const getCustomerName = (order: any) => {
+    if (!customers || customers.length === 0) {
+      return order.usuario || order.comprador || "Cliente";
+    }
+    const found = customers.find(
+      (c: any) =>
+        (order.user_id && c.user_id === order.user_id) ||
+        (order.customer_id && c.id === order.customer_id) ||
+        (order.comprador && c.id_comprador === order.comprador) ||
+        (order.usuario && c.usuario === order.usuario)
+    );
+    return found?.name || order.usuario || order.comprador || "Cliente";
+  };
 
   const channelMix = useMemo(() => {
     const methods = orders.reduce((acc: Record<string, number>, order: any) => {
@@ -143,7 +183,7 @@ function AnalyticsPage() {
               {orders.slice(0, 10).map((order: any) => (
                 <div key={order.id} className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm">
                   <div>
-                    <div className="font-medium">{order.usuario || order.comprador || "Cliente"}</div>
+                    <div className="font-medium">{getCustomerName(order)}</div>
                     <div className="text-xs text-muted-foreground">{order.forma_pagamento || "outro"} · {order.status || "pending"}</div>
                   </div>
                   <div className="font-semibold">R$ {Number(order.valor_total || 0).toLocaleString()}</div>
