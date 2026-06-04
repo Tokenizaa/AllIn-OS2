@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { BarChart3, TrendingUp, ArrowUpRight, FileSpreadsheet, FileText, Activity, ShoppingCart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/lib/supabase-client";
+import { PaymentService } from "@/services/payments";
 import { toast } from "sonner";
 
 type ReportPoint = { month: string; vendas: number; comissoes: number; retencao: number; conversao: number };
@@ -19,41 +20,45 @@ function ReportsPage() {
   const [timeframe, setTimeframe] = useState("30");
   const [isExporting, setIsExporting] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<"vendas" | "comissoes" | "retencao">("vendas");
-  const [points, setPoints] = useState<ReportPoint[]>([]);
 
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const { data } = await supabase.from("payments").select("amount, created_at").order("created_at", { ascending: true }).limit(300);
-      if (!mounted) return;
-      const monthMap = new Map<string, { vendas: number; comissoes: number; count: number }>();
-      (data || []).forEach((row: any) => {
-        const month = new Date(row.created_at || Date.now()).toLocaleDateString("pt-BR", { month: "short" });
-        const entry = monthMap.get(month) || { vendas: 0, comissoes: 0, count: 0 };
-        const amount = Number(row.amount || 0);
-        entry.vendas += amount;
-        entry.comissoes += amount * 0.18;
-        entry.count += 1;
-        monthMap.set(month, entry);
-      });
-      setPoints(Array.from(monthMap.entries()).map(([month, value]) => ({
-        month,
-        vendas: value.vendas,
-        comissoes: value.comissoes,
-        retencao: 90 + Math.min(9, value.count % 10),
-        conversao: 4 + Math.min(4, value.count % 5),
-      })));
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [timeframe]);
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ["office-reports-payments", timeframe],
+    queryFn: () => PaymentService.fetchPaymentsForReports(500),
+  });
+
+  const points = useMemo<ReportPoint[]>(() => {
+    const monthMap = new Map<string, { vendas: number; comissoes: number; count: number }>();
+    payments.forEach((row: any) => {
+      const month = new Date(row.created_at || Date.now()).toLocaleDateString("pt-BR", { month: "short" });
+      const entry = monthMap.get(month) || { vendas: 0, comissoes: 0, count: 0 };
+      const amount = Number(row.amount || 0);
+      entry.vendas += amount;
+      entry.comissoes += amount * 0.18;
+      entry.count += 1;
+      monthMap.set(month, entry);
+    });
+    return Array.from(monthMap.entries()).map(([month, value]) => ({
+      month,
+      vendas: value.vendas,
+      comissoes: value.comissoes,
+      retencao: 90 + Math.min(9, value.count % 10),
+      conversao: 4 + Math.min(4, value.count % 5),
+    }));
+  }, [payments]);
 
   const summary = useMemo(() => {
     const totalSales = points.reduce((sum, item) => sum + item.vendas, 0);
     const totalCommissions = points.reduce((sum, item) => sum + item.comissoes, 0);
     return { totalSales, totalCommissions };
   }, [points]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground animate-pulse text-sm">Carregando relatórios analíticos...</div>
+      </div>
+    );
+  }
 
   const handleExport = (format: "pdf" | "excel") => {
     setIsExporting(true);

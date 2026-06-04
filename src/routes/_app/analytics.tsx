@@ -1,55 +1,69 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getOrderStats, getOrders } from "@/backend/api";
-import { supabase } from "@/lib/supabase-client";
+import { AnalyticsService } from "@/services/analytics";
+import { CustomerService } from "@/services/customers";
 
 export const Route = createFileRoute("/_app/analytics")({ component: AnalyticsPage });
 
 function AnalyticsPage() {
-  const [mlmStats, setMlmStats] = useState({ totalBonus: 0, totalWithdrawals: 0, activePlans: 0, networkSize: 0 });
-  
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["analytics", "orders", "stats"],
-    queryFn: getOrderStats,
+    queryFn: () => AnalyticsService.fetchOrderStats(),
   });
 
   const { data: ordersResult, isLoading: ordersLoading } = useQuery({
     queryKey: ["analytics", "orders", "recent"],
-    queryFn: () => getOrders({ page: 1, limit: 50 }),
+    queryFn: () => AnalyticsService.fetchRecentOrders({ page: 1, limit: 50 }),
+  });
+
+  const { data: customers } = useQuery({
+    queryKey: ["analytics", "customers"],
+    queryFn: () => CustomerService.fetchAnalyticsCustomers(),
   });
 
   const orders = useMemo(() => ordersResult?.data?.data || [], [ordersResult]);
 
-  useEffect(() => {
-    (async () => {
-      const [{ data: bonusWallets }, { data: withdrawals }, { data: customerPlans }, { data: network }] = await Promise.all([
-        supabase.from("bonus_wallets").select("total_earned"),
-        supabase.from("withdrawals").select("valor").eq("status", "approved"),
-        supabase.from("customer_plans").select("id").eq("status", "active"),
-        supabase.from("network_relationships").select("customer_id"),
-      ]);
-
-      const totalBonus = (bonusWallets || []).reduce((sum: number, w: any) => sum + Number(w.total_earned || 0), 0);
-      const totalWithdrawals = (withdrawals || []).reduce((sum: number, w: any) => sum + Number(w.valor || 0), 0);
-      const activePlans = (customerPlans || []).length;
-      const networkSize = (network || []).length;
-
-      setMlmStats({ totalBonus, totalWithdrawals, activePlans, networkSize });
-    })();
-  }, []);
-
   const revenueSeries = useMemo(() => {
-    return orders.slice(0, 12).map((order: any, index: number) => ({
-      day: order.data_criacao_pedido || `D${index + 1}`,
-      receita: Number(order.valor_total || 0),
-      ano_anterior: Number(order.valor_total || 0) * 0.82,
-    }));
+    // Show in chronological order (left to right) by reversing the recent orders slice
+    return orders.slice(0, 12).reverse().map((order: any, index: number) => {
+      let dayLabel = `D${index + 1}`;
+      if (order.data_criacao_pedido) {
+        const d = new Date(order.data_criacao_pedido);
+        if (!isNaN(d.getTime())) {
+          dayLabel = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        }
+      } else if (order.created_at) {
+        const d = new Date(order.created_at);
+        if (!isNaN(d.getTime())) {
+          dayLabel = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        }
+      }
+      return ({
+        day: dayLabel,
+        receita: Number(order.valor_total || 0),
+        ano_anterior: Number(order.valor_total || 0) * 0.82,
+      });
+    });
   }, [orders]);
+
+  const getCustomerName = (order: any) => {
+    if (!customers || customers.length === 0) {
+      return order.usuario || order.comprador || "Cliente";
+    }
+    const found = customers.find(
+      (c: any) =>
+        (order.user_id && c.user_id === order.user_id) ||
+        (order.customer_id && c.id === order.customer_id) ||
+        (order.comprador && c.id_comprador === order.comprador) ||
+        (order.usuario && c.usuario === order.usuario)
+    );
+    return found?.name || order.usuario || order.comprador || "Cliente";
+  };
 
   const channelMix = useMemo(() => {
     const methods = orders.reduce((acc: Record<string, number>, order: any) => {
@@ -94,9 +108,9 @@ function AnalyticsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard title="Receita total" value={`R$ ${Number(stats?.data?.totalRevenue || 0).toLocaleString()}`} helper={`${Number(stats?.data?.totalOrders || 0)} pedidos`} />
-        <MetricCard title="Bônus MLM" value={`R$ ${mlmStats.totalBonus.toLocaleString()}`} helper={`${mlmStats.activePlans} planos ativos`} />
-        <MetricCard title="Saques" value={`R$ ${mlmStats.totalWithdrawals.toLocaleString()}`} helper="Aprovados" />
-        <MetricCard title="Rede" value={mlmStats.networkSize.toString()} helper="Membros na rede" />
+        <MetricCard title="Pedidos" value={Number(stats?.data?.totalOrders || 0).toString()} helper={`${Number(stats?.data?.pendingOrders || 0)} pendentes`} />
+        <MetricCard title="Entregues" value={Number(stats?.data?.deliveredOrders || 0).toString()} helper={`${Number(stats?.data?.shippedOrders || 0)} enviados`} />
+        <MetricCard title="Cancelados" value={Number(stats?.data?.cancelledOrders || 0).toString()} helper="Monitoramento de perda" />
       </div>
 
       <Tabs defaultValue="operacional" className="space-y-4">
@@ -164,7 +178,7 @@ function AnalyticsPage() {
               {orders.slice(0, 10).map((order: any) => (
                 <div key={order.id} className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm">
                   <div>
-                    <div className="font-medium">{order.usuario || order.comprador || "Cliente"}</div>
+                    <div className="font-medium">{getCustomerName(order)}</div>
                     <div className="text-xs text-muted-foreground">{order.forma_pagamento || "outro"} · {order.status || "pending"}</div>
                   </div>
                   <div className="font-semibold">R$ {Number(order.valor_total || 0).toLocaleString()}</div>

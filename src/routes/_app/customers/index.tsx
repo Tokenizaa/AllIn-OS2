@@ -1,11 +1,12 @@
-﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Filter, Search, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowUpRight, Filter, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase-client";
+import { CustomerService } from "@/services/customers";
 import { cn } from "@/lib/utils";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
 
@@ -18,80 +19,55 @@ const statusStyles: Record<string, string> = {
   churned: "bg-muted text-muted-foreground border-border",
 };
 
+function formatBRL(value: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+}
+
 function CustomersPage() {
   const [q, setQ] = useState("");
   const [qual, setQual] = useState<string>("all");
-  const [customers, setCustomers] = useState<any[]>([]);
+  
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(15);
 
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["customers", "profiles-list"],
+    queryFn: () => CustomerService.fetchCustomersWithOrderStats(),
+  });
+
+  const customers = data?.customers || [];
+  const orderStats = data?.orderStats || {};
+
+  // Reset page when queries/filters change to avoid being stranded
   useEffect(() => {
-    (async () => {
-      const [{ data: customersData }, { data: networkData }] = await Promise.all([
-        supabase
-          .from("customers")
-          .select("id, user_id, usuario, id_comprador, nome_completo, plan_name, email, cpf, qualification, status, telefone, numero_pedidos, total_compras, created_at, customer_type, plan_id, cidade, estado")
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("network_relationships")
-          .select("customer_id, sponsor_customer_id, level")
-          .limit(1000),
-      ]);
-
-      // Contar diretos para cada customer
-      const directCounts = new Map<string, number>();
-      (networkData || []).forEach((n: any) => {
-        if (n.sponsor_customer_id) {
-          directCounts.set(n.sponsor_customer_id, (directCounts.get(n.sponsor_customer_id) || 0) + 1);
-        }
-      });
-
-      // Encontrar nível de cada customer
-      const customerLevels = new Map<string, number>();
-      (networkData || []).forEach((n: any) => {
-        customerLevels.set(n.customer_id, n.level);
-      });
-
-      // Enriquecer customers com dados de rede
-      const enrichedCustomers = (customersData || []).map((c: any) => ({
-        ...c,
-        direct_count: directCounts.get(c.id) || 0,
-        level: customerLevels.get(c.id) || 0,
-      }));
-
-      setCustomers(enrichedCustomers);
-    })();
-  }, []);
+    setCurrentPage(1);
+  }, [q, qual]);
 
   const filtered = useMemo(
     () =>
       customers.filter(
         (c) =>
-          (qual === "all" || (c.plan_name || c.qualification || "") === qual) &&
+          (qual === "all" || (c.qualification || "") === qual) &&
           (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())),
       ),
     [q, qual, customers],
   );
 
-  const filterOptions = useMemo(() => {
-    const values = Array.from(
-      new Set(
-        customers
-          .map((c) => c.plan_name || c.qualification)
-          .filter((value): value is string => Boolean(value)),
-      ),
-    ).sort((a, b) => a.localeCompare(b, "pt-BR"));
-
-    return ["all", ...values];
-  }, [customers]);
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filtered.slice(startIndex, startIndex + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="CRM"
         title="Distribuidores"
-        subtitle={`${customers.length.toLocaleString("pt-BR")} registros Â· ${customers
+        subtitle={`${customers.length.toLocaleString("pt-BR")} registros · ${customers
           .filter((c) => c.status === "active")
           .length.toLocaleString("pt-BR")} ativos`}
-        actions={<Button size="sm">Novo distribuidor</Button>}
+        actions={<Button size="sm" onClick={() => refetch()}>Atualizar base</Button>}
       />
 
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-wrap items-center gap-3">
@@ -100,10 +76,10 @@ function CustomersPage() {
           <span className="font-medium">
             {customers.filter((c) => (c.status || "") !== "active").length} distribuidores
           </span>{" "}
-          em atenÃ§Ã£o. <span className="text-muted-foreground">Use os filtros para priorizaÃ§Ã£o.</span>
+          em atenção. <span className="text-muted-foreground">Use os filtros para priorização.</span>
         </p>
-        <Button size="sm" variant="outline">
-          Atualizar base
+        <Button size="sm" variant="outline" onClick={() => refetch()}>
+          Recarregar
         </Button>
       </div>
 
@@ -113,23 +89,23 @@ function CustomersPage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nome completo ou identificação..."
+            placeholder="Buscar por nome ou identificação…"
             className="h-9 pl-8 bg-card/60"
           />
         </div>
         <div className="flex gap-1.5 flex-wrap">
-          {filterOptions.map((v) => (
+          {["all", "Bronze", "Prata", "Ouro", "Diamante", "Black"].map((v) => (
             <button
               key={v}
               onClick={() => setQual(v)}
               className={cn(
-                "rounded-md border border-border px-3 py-1.5 text-xs",
+                "rounded-md border border-border px-3 py-1.5 text-xs transition-all",
                 qual === v
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card/40 text-muted-foreground hover:text-foreground",
               )}
             >
-              {v === "all" ? "Todos os planos" : v}
+              {v === "all" ? "Todas qualificações" : v}
             </button>
           ))}
         </div>
@@ -143,75 +119,185 @@ function CustomersPage() {
           <thead className="bg-background/40 text-left">
             <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-2.5 font-medium">Distribuidor</th>
-              <th className="px-4 py-2.5 font-medium">Tipo</th>
-              <th className="px-4 py-2.5 font-medium">Plano</th>
+              <th className="px-4 py-2.5 font-medium">Qualificação</th>
               <th className="px-4 py-2.5 font-medium">Status</th>
-              <th className="px-4 py-2.5 font-medium text-right">Diretos</th>
-              <th className="px-4 py-2.5 font-medium text-right">Nível</th>
               <th className="px-4 py-2.5 font-medium text-right">Pedidos</th>
               <th className="px-4 py-2.5 font-medium text-right">LTV</th>
+              <th className="px-4 py-2.5 font-medium">Telefone</th>
               <th className="px-4 py-2.5 font-medium" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {filtered.slice(0, 40).map((c) => (
-              <tr key={c.id} className="hover:bg-accent/30 transition-colors">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/40 to-fuchsia-500/40 grid place-items-center text-[11px] font-medium">
-                      {getCustomerInitials(c)}
-                    </div>
-                    <div>
-                      <Link to="/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary">
-                        {getCustomerLabel(c)}
-                      </Link>
-                      <div className="text-[11px] text-muted-foreground">
-                        {c.cidade || "-"} / {c.estado || "-"}
+            {isLoading ? (
+              Array.from({ length: pageSize }).map((_, idx) => (
+                <tr key={`skeleton-${idx}`}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+                      <div className="space-y-1">
+                        <div className="h-4 w-28 bg-muted rounded animate-pulse" />
+                        <div className="h-3 w-16 bg-muted rounded animate-pulse" />
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <Badge variant={c.customer_type === "distribuidor" ? "default" : "secondary"} className="text-[10px] capitalize">
-                    {c.customer_type || "-"}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <Badge variant="outline" className="text-[10px]">
-                    {c.plan_name || c.qualification || "-"}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={cn(
-                      "inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize",
-                      statusStyles[String(c.status || "pending").toLowerCase()] || statusStyles.pending,
-                    )}
-                  >
-                    {String(c.status || "pending").toLowerCase()}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums text-xs">{c.direct_count || 0}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-xs">G{c.level || 0}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{Number(c.numero_pedidos || 0).toLocaleString("pt-BR")}</td>
-                <td className="px-4 py-3 text-right tabular-nums font-medium">
-                  {Number(c.total_compras || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link
-                    to="/customers/$id"
-                    params={{ id: c.id }}
-                    className="inline-flex items-center gap-0.5 text-xs text-primary"
-                  >
-                    Abrir 360 <ArrowUpRight className="h-3 w-3" />
-                  </Link>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 w-12 bg-muted rounded animate-pulse" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="h-4 w-8 bg-muted rounded animate-pulse ml-auto" />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="h-4 w-14 bg-muted rounded animate-pulse ml-auto" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="h-4 w-16 bg-muted rounded animate-pulse ml-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : paginatedCustomers.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
+                  Nenhum distribuidor encontrado com os filtros atuais.
                 </td>
               </tr>
-            ))}
+            ) : (
+              paginatedCustomers.map((c) => {
+                const stats = orderStats[c.id] || { count: 0, ltv: 0 };
+                return (
+                  <tr key={c.id} className="hover:bg-accent/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/40 to-fuchsia-500/40 grid place-items-center text-[11px] font-medium text-white shadow-sm">
+                          {getCustomerInitials(c)}
+                        </div>
+                        <div>
+                          <Link to="/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
+                            {getCustomerLabel(c)}
+                          </Link>
+                          <div className="text-[11px] text-muted-foreground">{c.id_comprador || c.user_id || "-"}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline" className="text-[10px]">
+                        {c.qualification || "-"}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={cn(
+                          "inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize",
+                          statusStyles[c.status || "pending"],
+                        )}
+                      >
+                        {c.status || "pending"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {stats.count.toLocaleString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums font-medium text-emerald-500">
+                      {formatBRL(stats.ltv)}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{c.telefone || "-"}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        to="/customers/$id"
+                        params={{ id: c.id }}
+                        className="inline-flex items-center gap-0.5 text-xs text-primary font-medium hover:underline"
+                      >
+                        Abrir 360 <ArrowUpRight className="h-3 w-3" />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
+
+        {/* Dynamic Pagination Controls */}
+        {!isLoading && totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 border-t border-border/60 bg-background/20">
+            <div className="text-xs text-muted-foreground">
+              Exibindo <span className="font-semibold text-foreground">{Math.min(filtered.length, (currentPage - 1) * pageSize + 1)}</span> a{" "}
+              <span className="font-semibold text-foreground">{Math.min(filtered.length, currentPage * pageSize)}</span> de{" "}
+              <span className="font-semibold text-foreground">{filtered.length}</span> distribuidores
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Itens por página:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-card border border-border rounded-md px-2 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
+                >
+                  {[10, 15, 25, 50, 100].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1;
+                  if (currentPage > 3) {
+                    pageNum = currentPage - 3 + i;
+                  }
+                  if (pageNum + (4 - i) > totalPages) {
+                    pageNum = Math.max(1, totalPages - 4 + i);
+                  }
+
+                  if (pageNum > totalPages) return null;
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      className="h-8 w-8 text-xs font-medium"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

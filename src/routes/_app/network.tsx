@@ -1,32 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
 import { ResponsiveContainer, Treemap, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { KpiCard } from "@/components/widgets/kpi-card";
-import { supabase } from "@/lib/supabase-client";
+import { CustomerService } from "@/services/customers";
+import { NetworkService } from "@/services/network";
 
 export const Route = createFileRoute("/_app/network")({ component: NetworkPage });
 
 function NetworkPage() {
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [legs, setLegs] = useState<any[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const [{ data: customerData }, { data: relationshipData }] = await Promise.all([
-        supabase.from("customers").select("id, usuario, id_comprador, qualification, status, cidade, estado, user_id").order("created_at", { ascending: false }).limit(20),
-        supabase.from("network_relationships").select("*").order("created_at", { ascending: false }).limit(12),
+  const { data: networkData, isLoading } = useQuery({
+    queryKey: ["network", "genealogy"],
+    queryFn: async () => {
+      const [customerData, relationshipData] = await Promise.all([
+        CustomerService.fetchRecentCustomers(20),
+        NetworkService.fetchRecentNetworkRelationships(12),
       ]);
-      setCustomers(customerData || []);
-      setLegs((relationshipData || []).map((r: any, i: number) => ({
+      const legs = (relationshipData || []).map((r: any, i: number) => ({
         name: `G${i + 1}`,
         esquerda: Number(r.left_count || r.left_side_count || 0),
         direita: Number(r.right_count || r.right_side_count || 0),
-      })));
-    })();
-  }, []);
+      }));
+      return {
+        customers: customerData || [],
+        legs,
+      };
+    }
+  });
 
-  const data = customers.map((c) => ({ name: (c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
+  const customers = networkData?.customers || [];
+  const legs = networkData?.legs || [];
+
+  const data = customers.map((c) => ({ name: (c.name || c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
 
   return (
     <div className="space-y-6">

@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDownToLine, TrendingUp, Sparkles, Lock, Clock, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
 import { ResponsiveContainer, Tooltip, Cell, Pie, PieChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { supabase } from "@/lib/supabase-client";
+import { WalletService } from "@/services/wallets";
+import { useQuery } from "@tanstack/react-query";
 
 type WalletRow = {
   balance_available?: number | null;
@@ -30,31 +31,22 @@ function formatBRL(value: number) {
 }
 
 function FinancePage() {
-  const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
-  const [wallet, setWallet] = useState<WalletRow>({});
-
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const [{ data: withdrawalsData }, { data: bonusWalletData }, { data: mainWalletData }] = await Promise.all([
-        supabase.from("withdrawals").select("id, description, type, amount, created_at, wallet_type").order("created_at", { ascending: false }).limit(50),
-        supabase.from("bonus_wallets").select("balance, available_balance, frozen_balance, total_earned").limit(1).maybeSingle(),
-        supabase.from("wallets").select("balance, available_balance, frozen_balance").limit(1).maybeSingle(),
+  const { data: financeData, isLoading } = useQuery({
+    queryKey: ["office-finance"],
+    queryFn: async () => {
+      const [withdrawalsData, profileData] = await Promise.all([
+        WalletService.fetchRecentWithdrawals(50),
+        WalletService.fetchWorkspaceSettings(),
       ]);
-      if (!mounted) return;
-      setWithdrawals((withdrawalsData as WithdrawalRow[]) || []);
-      setWallet({
-        balance_available: Number((bonusWalletData?.available_balance || 0) + (mainWalletData?.available_balance || 0)),
-        balance_blocked: Number((bonusWalletData?.frozen_balance || 0) + (mainWalletData?.frozen_balance || 0)),
-        balance_pending: Number((bonusWalletData?.balance || 0) + (mainWalletData?.balance || 0) - (bonusWalletData?.available_balance || 0) - (mainWalletData?.available_balance || 0)),
-        total_year: Number(bonusWalletData?.total_earned || 0),
-        total_month: Number(bonusWalletData?.total_earned || 0) * 0.1, // Estimativa mensal
-      });
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+      return {
+        withdrawals: (withdrawalsData as WithdrawalRow[]) || [],
+        wallet: (profileData as WalletRow) || {},
+      };
+    }
+  });
+
+  const withdrawals = financeData?.withdrawals || [];
+  const wallet = financeData?.wallet || {};
 
   const earnings = useMemo(() => {
     const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];

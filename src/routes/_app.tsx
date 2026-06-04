@@ -1,11 +1,10 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { CopilotDrawer } from "@/components/app/copilot-drawer";
 import { SidebarNav } from "@/components/app/sidebar-nav";
 import { Topbar } from "@/components/app/topbar";
 import { RouteGuard, useAuth } from "@/modules/auth";
-import { getPrimaryPathForRole } from "@/modules/auth/navigation";
 import { UserRole } from "@/shared/types/roles";
 
 export const Route = createFileRoute("/_app")({
@@ -13,14 +12,7 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayoutSecure() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate({ to: getPrimaryPathForRole(user.role), replace: true });
-    }
-  }, [loading, user, navigate]);
+  const { loading } = useAuth();
 
   if (loading) {
     return (

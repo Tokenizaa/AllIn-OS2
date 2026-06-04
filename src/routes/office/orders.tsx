@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ShoppingBag, Search, Filter, Download, RotateCcw, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
-import { supabase } from "@/lib/supabase-client";
+import { OrderService } from "@/services/orders";
 
 type OrderRow = {
   id: string;
@@ -33,28 +34,17 @@ function formatBRL(value: number) {
 }
 
 function OrdersPage() {
-  const [orders, setOrders] = useState<OrderRow[]>([]);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("id, order_number, status, order_type, payment_method, total_amount, customer_name, created_at")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (mounted) setOrders((data as OrderRow[]) || []);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { data: oRows = [], isLoading } = useQuery<OrderRow[]>({
+    queryKey: ["office-orders"],
+    queryFn: () => OrderService.fetchOfficeOrders(200) as Promise<OrderRow[]>,
+  });
 
   const filteredOrders = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter((order) => {
+    if (!q) return oRows;
+    return oRows.filter((order) => {
       return [
         order.order_number,
         order.customer_name,
@@ -65,7 +55,7 @@ function OrdersPage() {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q));
     });
-  }, [orders, search]);
+  }, [oRows, search]);
 
   const total = filteredOrders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
   const ticket = filteredOrders.length ? total / filteredOrders.length : 0;
@@ -108,19 +98,33 @@ function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id} className="border-b border-border/40 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs">{order.order_number || order.id}</td>
-                  <td className="px-4 py-3">{order.customer_name || "-"}</td>
-                  <td className="px-4 py-3"><Badge variant="outline" className={statusColors[String(order.status || "pendente")] || statusColors.pendente}>{order.status || "pendente"}</Badge></td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{order.order_type || "-"}</td>
-                  <td className="px-4 py-3 text-xs">{order.payment_method || "-"}</td>
-                  <td className="px-4 py-3 text-right font-semibold">{formatBRL(Number(order.total_amount || 0))}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs"><RotateCcw className="h-3 w-3" /> Reorder</Button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground animate-pulse">
+                    Carregando pedidos...
                   </td>
                 </tr>
-              ))}
+              ) : filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                    Nenhum pedido encontrado.
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="border-b border-border/40 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs">{order.order_number || order.id}</td>
+                    <td className="px-4 py-3">{order.customer_name || "-"}</td>
+                    <td className="px-4 py-3"><Badge variant="outline" className={statusColors[String(order.status || "pendente")] || statusColors.pendente}>{order.status || "pendente"}</Badge></td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{order.order_type || "-"}</td>
+                    <td className="px-4 py-3 text-xs">{order.payment_method || "-"}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{formatBRL(Number(order.total_amount || 0))}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs"><RotateCcw className="h-3 w-3" /> Reorder</Button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

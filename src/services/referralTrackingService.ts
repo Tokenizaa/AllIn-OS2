@@ -30,9 +30,13 @@ export const referralTrackingService = {
       .from('referral_tracking')
       .select('*')
       .eq('user_id', userId)
-      .maybeSingle();
+      .single();
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned
+        return null;
+      }
       console.error('[referralTrackingService] Error fetching referral tracking:', error);
       throw error;
     }

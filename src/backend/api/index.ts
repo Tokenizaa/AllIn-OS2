@@ -1,6 +1,15 @@
 // Central API exports for frontend consumption
 // This file provides a single entry point for all API functions
 
+// Auth
+export {
+  login,
+  register,
+  refreshToken,
+  changePassword,
+  logout,
+} from "../modules/auth/api/auth.api";
+
 // Customers
 export {
   getCustomers,

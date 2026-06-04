@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { QrCode, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/distributor/stat-card";
-import { supabase } from "@/lib/supabase-client";
+import { ProductService } from "@/services/products";
 import { useAuth } from "@/modules/auth";
 
 type ProductRow = { id: string; name?: string | null; description?: string | null; price?: number | null; category?: string | null };
@@ -18,18 +19,11 @@ function formatBRL(value: number) {
 function StorePage() {
   const { user } = useAuth();
   const isCustomer = user?.role === "customer";
-  const [products, setProducts] = useState<ProductRow[]>([]);
 
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const { data } = await supabase.from("products").select("id, name, description, price, category").order("created_at", { ascending: false }).limit(12);
-      if (mounted) setProducts((data as ProductRow[]) || []);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { data: products = [], isLoading } = useQuery<ProductRow[]>({
+    queryKey: ["office-store-products"],
+    queryFn: () => ProductService.fetchStoresProducts(12) as Promise<ProductRow[]>,
+  });
 
   const storeAnalytics = useMemo(() => ({
     visitas_mes: products.length * 120,
@@ -45,6 +39,14 @@ function StorePage() {
       { name: "WhatsApp", value: 25 },
     ],
   }), [products]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground animate-pulse text-sm">Carregando produtos e loja...</div>
+      </div>
+    );
+  }
 
   if (isCustomer) {
     return (

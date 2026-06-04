@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Check, Crown, Sparkles, ArrowUp, History } from "lucide-react";
@@ -6,8 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase-client";
+import { PlanService } from "@/services/plans";
+import { ProfileService } from "@/services/profiles";
 import { getPlanRule } from "@/modules/plans/mlm-rules";
+import { useQuery } from "@tanstack/react-query";
 
 type PlanRow = {
   id: string;
@@ -18,16 +20,6 @@ type PlanRow = {
   benefits?: string[] | null;
   is_active?: boolean | null;
   sort_order?: number | null;
-  bonus_usage_percentage?: number | null;
-};
-
-type CustomerPlanRow = {
-  id: string;
-  customer_id: string;
-  plan_id: string;
-  status: string;
-  activated_at: string;
-  plan_name?: string | null;
 };
 
 type ProfileRow = {
@@ -42,33 +34,26 @@ function formatBRL(value: number) {
 }
 
 function PlanPage() {
-  const [plans, setPlans] = useState<PlanRow[]>([]);
-  const [customerPlan, setCustomerPlan] = useState<CustomerPlanRow | null>(null);
-  const [profile, setProfile] = useState<ProfileRow | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const [{ data: plansData }, { data: customerPlanData }, { data: profileData }] = await Promise.all([
-        supabase.from("plans").select("id, name, price, commission_percent, generations, benefits, is_active, sort_order, bonus_usage_percentage").eq("is_active", true).order("sort_order", { ascending: true }),
-        supabase.from("customer_plans").select("id, customer_id, plan_id, status, activated_at").eq("status", "active").order("activated_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("profiles").select("name, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+  const { data: planPageData, isLoading } = useQuery({
+    queryKey: ["office-plan"],
+    queryFn: async () => {
+      const [plansData, profileData] = await Promise.all([
+        PlanService.fetchActivePlans(),
+        ProfileService.fetchLastProfile(),
       ]);
-      if (!mounted) return;
-      setPlans((plansData as PlanRow[]) || []);
-      setCustomerPlan((customerPlanData as CustomerPlanRow) || null);
-      setProfile((profileData as ProfileRow) || null);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+      return {
+        plans: (plansData as PlanRow[]) || [],
+        profile: (profileData as ProfileRow) || null,
+      };
+    }
+  });
 
-  // Encontrar plano ativo do customer
-  const activePlan = customerPlan ? plans.find(p => p.id === customerPlan.plan_id) : plans[0];
-  const current = activePlan || plans[0];
-  const next = plans.find(p => p.id !== current?.id) || plans[0];
-  const createdAt = customerPlan?.activated_at ? new Date(customerPlan.activated_at).toLocaleDateString("pt-BR") : (profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "-");
+  const plans = planPageData?.plans || [];
+  const profile = planPageData?.profile || null;
+
+  const current = plans[0];
+  const next = plans[1] || plans[0];
+  const createdAt = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "-";
   const currentRule = getPlanRule(current?.name);
 
   const planCards = useMemo(() => plans.slice(0, 4), [plans]);

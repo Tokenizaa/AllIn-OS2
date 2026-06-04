@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
-import { supabase } from "@/lib/supabase-client";
+import { OrderService } from "@/services/orders";
 
 export const Route = createFileRoute("/_app/orders/")({ component: OrdersPage });
 
@@ -14,23 +14,13 @@ const statusColor: Record<string, string> = {
 };
 
 function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
+  const { data: ordersPageData, isLoading } = useQuery({
+    queryKey: ["orders", "list"],
+    queryFn: () => OrderService.fetchOrdersAndCustomers(60),
+  });
 
-  useEffect(() => {
-    (async () => {
-      const [{ data: ordersData }, { data: customersData }] = await Promise.all([
-        supabase.from("orders").select("id, customer_id, numero_pedido, status_pedido, payment_method, items, valor_total_pedido, valor_total, created_at").order("created_at", { ascending: false }).limit(60),
-        supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata").order("created_at", { ascending: false }).limit(250),
-      ]);
-      setOrders(ordersData || []);
-      setCustomers(customersData || []);
-    })();
-  }, []);
-
-  const customersById = useMemo(() => {
-    return new Map(customers.map((customer) => [customer.id, customer]));
-  }, [customers]);
+  const orders = ordersPageData?.orders || [];
+  const customers = ordersPageData?.customers || [];
 
   const total = orders.reduce((sum, o) => sum + Number(o.valor_total_pedido || o.valor_total || 0), 0);
 
@@ -55,37 +45,51 @@ function OrdersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {orders.map((o) => {
-              const customer = customersById.get(o.customer_id);
-              const customerLabel = customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
-              return (
-                <tr key={o.id} className="hover:bg-accent/30">
-                  <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>
-                  <td className="px-4 py-3">
-                    {customer ? (
-                      <Link to="/customers/$id" params={{ id: customer.id }} className="hover:text-primary">
-                        {customerLabel}
-                      </Link>
-                    ) : (
-                      o.customer_id || "-"
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize ${statusColor[o.status_pedido || "pendente"]}`}>
-                      {o.status_pedido || "pendente"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{o.payment_method || "-"}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{Array.isArray(o.items) ? o.items.length : 0}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-medium">
-                    R$ {(Number(o.valor_total_pedido || o.valor_total || 0)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "-"}
-                  </td>
-                </tr>
-              );
-            })}
+            {isLoading ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground animate-pulse">
+                  Carregando pedidos...
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                  Nenhum pedido encontrado.
+                </td>
+              </tr>
+            ) : (
+              orders.map((o) => {
+                const customer = customers.find((x) => x.id === o.customer_id);
+                const customerLabel = customer?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
+                return (
+                  <tr key={o.id} className="hover:bg-accent/30">
+                    <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>
+                    <td className="px-4 py-3">
+                      {customer ? (
+                        <Link to="/customers/$id" params={{ id: customer.id }} className="hover:text-primary">
+                          {customerLabel}
+                        </Link>
+                      ) : (
+                        o.customer_id || "-"
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize ${statusColor[o.status_pedido || "pendente"]}`}>
+                        {o.status_pedido || "pendente"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{o.payment_method || "-"}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{Array.isArray(o.items) ? o.items.length : 0}</td>
+                    <td className="px-4 py-3 text-right tabular-nums font-medium">
+                      R$ {(Number(o.valor_total_pedido || o.valor_total || 0)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "-"}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

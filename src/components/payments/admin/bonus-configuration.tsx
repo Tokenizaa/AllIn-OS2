@@ -9,7 +9,7 @@ import { Badge } from '../../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
-import { Gift, Plus, Edit, Trash2, Percent, Users } from 'lucide-react';
+import { Gift, Plus, Edit, Trash2, Percent, Calendar, Users } from 'lucide-react';
 
 interface BonusRule {
   id: string;
@@ -28,7 +28,7 @@ interface BonusRule {
 }
 
 export function BonusConfiguration() {
-  const [bonusRules, setBonusRules] = useState<BonusRule[]>([
+  const [bonusRules] = useState<BonusRule[]>([
     {
       id: 'bonus_001',
       name: 'Welcome Bonus',
@@ -75,9 +75,7 @@ export function BonusConfiguration() {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleToggleActive = (ruleId: string) => {
-    setBonusRules((rules) =>
-      rules.map((rule) => (rule.id === ruleId ? { ...rule, isActive: !rule.isActive } : rule)),
-    );
+    // TODO: Toggle rule active status
   };
 
   const handleEdit = (rule: BonusRule) => {
@@ -86,7 +84,7 @@ export function BonusConfiguration() {
   };
 
   const handleDelete = (ruleId: string) => {
-    setBonusRules((rules) => rules.filter((rule) => rule.id !== ruleId));
+    // TODO: Delete bonus rule
   };
 
   const handleAddRule = () => {
@@ -95,11 +93,7 @@ export function BonusConfiguration() {
   };
 
   const handleSave = (config: Partial<BonusRule>) => {
-    if (selectedRule) {
-      setBonusRules((rules) =>
-        rules.map((rule) => (rule.id === selectedRule.id ? { ...rule, ...config } : rule)),
-      );
-    }
+    // TODO: Save bonus rule
     setIsEditing(false);
     setSelectedRule(null);
   };

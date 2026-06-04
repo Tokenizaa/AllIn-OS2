@@ -37,20 +37,20 @@ export class AuthService {
       }
 
       // Fetch user profile from database
-      const profile = await SupabaseService.fetchUserProfile(user.id);
+      const userProfile = await SupabaseService.fetchUserProfile(user.id);
       
-      if (!profile) {
+      if (!userProfile) {
         setLoading(false);
         throw new Error("Perfil de usuário não encontrado.");
       }
 
-      if (profile.status === "suspended") {
+      if (userProfile.status === "suspended") {
         setLoading(false);
         throw new Error("Conta bloqueada por políticas de conformidade interna.");
       }
 
-      setUser(profile);
-      return profile;
+      setUser(userProfile);
+      return userProfile;
     } catch (error) {
       setLoading(false);
       throw error;
@@ -120,17 +120,17 @@ export class AuthService {
       }
 
       // Fetch complete user profile
-      const profile = await SupabaseService.fetchUserProfile(user.id);
+      const userProfile = await SupabaseService.fetchUserProfile(user.id);
       
-      if (!profile) {
+      if (!userProfile) {
         if (setLoading) setLoading(false);
         throw new Error("Erro ao recuperar perfil criado.");
       }
 
       // Set active session for the registered user
-      if (setUser) setUser(profile);
+      if (setUser) setUser(userProfile);
       if (setLoading) setLoading(false);
-      return profile;
+      return userProfile;
     } catch (error) {
       if (setLoading) setLoading(false);
       throw error;
@@ -177,9 +177,9 @@ export class AuthService {
     }
 
     if (user.id === userId) {
-      const profile = await SupabaseService.fetchUserProfile(userId);
-      if (profile) {
-        setUser(profile);
+      const updatedProfile = await SupabaseService.fetchUserProfile(userId);
+      if (updatedProfile) {
+        setUser(updatedProfile);
       }
     }
   }

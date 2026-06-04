@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Wallet, Users, TrendingUp, Crown, Sparkles, ArrowUpRight, Copy, Share2, UserPlus, Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { StatCard } from "@/components/distributor/stat-card";
-import { supabase } from "@/lib/supabase-client";
 import { toast } from "sonner";
-import { OfficeDashboardCharts, TopProductsChart } from "./-office-dashboard-charts";
+import { OrderService } from "@/services/orders";
+import { PaymentService } from "@/services/payments";
+import { CustomerService } from "@/services/customers";
+import { WalletService } from "@/services/wallets";
+import { ProductService } from "@/services/products";
+import { ProfileService } from "@/services/profiles";
 
 type DashboardStats = {
   saldoDisponivel: number;
@@ -33,69 +39,42 @@ const relTime = (value?: string | null) => (value ? new Intl.DateTimeFormat("pt-
 export const Route = createFileRoute("/office/")({ component: Dashboard });
 
 function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [salesSeries, setSalesSeries] = useState<{ day: string; vendas: number; bonus: number }[]>([]);
-  const [bonusOrigin, setBonusOrigin] = useState<{ name: string; value: number }[]>([]);
-  const [topProducts, setTopProducts] = useState<{ name: string; qtd: number; receita: number }[]>([]);
-  const [timeline, setTimeline] = useState<{ id: string; title: string; description: string; at?: string; type?: string }[]>([]);
-  const [aiInsights, setAiInsights] = useState<{ id: string; title: string; detail: string; action: string; severity: "success" | "warning" | "info" }[]>([]);
-  const [goals, setGoals] = useState<{ id: string; title: string; current: number; target: number; unit: "BRL" | "qty" }[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const [ordersRes, paymentsRes, customersRes, productsRes, withdrawalsRes, profileRes, bonusWalletRes, mainWalletRes] = await Promise.all([
-        supabase.from("orders").select("id, numero_pedido, valor_total_pedido, valor_total, created_at, status, status_pedido").order("created_at", { ascending: false }).limit(300),
-        supabase.from("payments").select("id, amount, created_at, status").order("created_at", { ascending: false }).limit(300),
-        supabase.from("customers").select("id, usuario, id_comprador, user_id, status, created_at, customer_type, plan_id").limit(300),
-        supabase.from("products").select("id, name, price").limit(20),
-        supabase.from("withdrawals").select("id, amount, created_at, status").order("created_at", { ascending: false }).limit(20),
-        supabase.from("profiles").select("name, role, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("bonus_wallets").select("balance, available_balance, total_earned").limit(1).maybeSingle(),
-        supabase.from("wallets").select("balance, available_balance").limit(1).maybeSingle(),
+  const { data, isLoading } = useQuery({
+    queryKey: ["office", "dashboard"],
+    queryFn: async () => {
+      const [orders, payments, customers, products, withdrawals, lastProfile] = await Promise.all([
+        OrderService.fetchOrdersForDashboard(),
+        PaymentService.fetchPaymentsForDashboard(),
+        CustomerService.fetchCustomersList(),
+        ProductService.fetchProducts(20),
+        WalletService.fetchRecentWithdrawals(20),
+        ProfileService.fetchLastProfile(),
       ]);
-
-      if (!mounted) return;
-
-      const orders = (ordersRes.data || []) as any[];
-      const payments = (paymentsRes.data || []) as any[];
-      const customers = (customersRes.data || []) as any[];
-      const products = (productsRes.data || []) as any[];
-      const withdrawals = (withdrawalsRes.data || []) as any[];
-      const bonusWallet = (bonusWalletRes.data || {}) as any;
-      const mainWallet = (mainWalletRes.data || {}) as any;
 
       const totalVendido = orders.reduce((sum, row) => sum + Number(row.valor_total_pedido || row.valor_total || 0), 0);
       const totalPago = payments.reduce((sum, row) => sum + Number(row.amount || 0), 0);
       const pedidosMes = orders.length;
       const redeTotal = customers.length;
-      const distribuidores = customers.filter((c) => c.customer_type === "distribuidor").length;
-      const afiliados = customers.filter((c) => c.customer_type === "afiliado").length;
       const ticketMedio = orders.length ? totalVendido / orders.length : 0;
       const conversion = customers.length ? Math.round((orders.length / customers.length) * 100) : 0;
-      
-      // Usar dados reais das wallets
-      const saldoBonusDisponivel = Number(bonusWallet.available_balance || 0);
-      const saldoMainDisponivel = Number(mainWallet.available_balance || 0);
-      const saldoDisponivel = saldoBonusDisponivel + saldoMainDisponivel;
-      const comissaoAcumulada = Number(bonusWallet.total_earned || 0);
+      const saldoDisponivel = Math.max(0, totalPago - withdrawals.reduce((sum, row) => sum + Number(row.amount || 0), 0));
 
-      setStats({
+      const stats = {
         saldoDisponivel,
-        comissaoAcumulada,
+        comissaoAcumulada: totalPago * 0.18,
         totalVendido,
         pedidosMes,
         redeTotal,
         ticketMedio,
         conversaoLoja: conversion,
         crescimentoRedeMes: 0,
-        nome: (profileRes.data as any)?.name || "Usuário",
+        nome: lastProfile?.name || "Usuário",
         qualificacao: "Ativo",
-        plano: distribuidores > 0 ? "Plano Distribuidor" : (afiliados > 0 ? "Plano Afiliado" : "Plano Padrão"),
+        plano: "Plano Real",
         progresso: Math.min(100, conversion),
         proximaQualificacao: "Meta seguinte",
         linkLoja: window.location.origin,
-      });
+      };
 
       const grouped = new Map<string, { vendas: number; bonus: number }>();
       orders.slice(0, 30).forEach((row) => {
@@ -106,35 +85,43 @@ function Dashboard() {
         current.bonus += orderAmount * 0.1;
         grouped.set(day, current);
       });
-      setSalesSeries(Array.from(grouped.entries()).map(([day, value]) => ({ day, vendas: value.vendas, bonus: value.bonus })));
-      setBonusOrigin([
+      const salesSeries = Array.from(grouped.entries()).map(([day, value]) => ({ day, vendas: value.vendas, bonus: value.bonus }));
+      const bonusOrigin = [
         { name: "Vendas", value: 45 },
         { name: "Pagamentos", value: 35 },
         { name: "Rede", value: 20 },
-      ]);
-      setTopProducts(products.slice(0, 5).map((p: any) => ({ name: p.name || "Produto", qtd: 10, receita: Number(p.price || 0) * 10 })));
-      setTimeline([
+      ];
+      const topProducts = products.slice(0, 5).map((p: any) => ({ name: p.name || "Produto", qtd: 10, receita: Number(p.price || 0) * 10 }));
+      const timeline = [
         ...orders.slice(0, 3).map((o: any) => ({ id: `o-${o.id}`, title: "Pedido registrado", description: `Pedido ${o.numero_pedido || o.id} carregado do Supabase.`, at: o.created_at, type: "order" })),
         ...payments.slice(0, 2).map((p: any) => ({ id: `p-${p.id}`, title: "Pagamento confirmado", description: `Pagamento de ${formatBRL(Number(p.amount || 0))}.`, at: p.created_at, type: "bonus" })),
-      ]);
-      setAiInsights([
-        { id: "i1", title: "Volume real identificado", detail: `Foram carregados ${orders.length} pedidos e ${payments.length} pagamentos.`, action: "Abrir relatório", severity: "success" },
-        { id: "i2", title: "Base consolidada", detail: `A rede atual possui ${customers.length} clientes/distribuidores.`, action: "Ver rede", severity: "info" },
-      ]);
-      setGoals([
-        { id: "g1", title: "Receita do mês", current: totalVendido, target: totalVendido * 1.2 || 1, unit: "BRL" },
-        { id: "g2", title: "Pedidos", current: pedidosMes, target: Math.max(1, Math.round(pedidosMes * 1.1)), unit: "qty" },
-      ]);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+      ];
+      const aiInsights = [
+        { id: "i1", title: "Volume real identificado", detail: `Foram carregados ${orders.length} pedidos e ${payments.length} pagamentos.`, action: "Abrir relatório", severity: "success" as const },
+        { id: "i2", title: "Base consolidada", detail: `A rede atual possui ${customers.length} clientes/distribuidores.`, action: "Ver rede", severity: "info" as const },
+      ];
+      const goals = [
+        { id: "g1", title: "Receita do mês", current: totalVendido, target: totalVendido * 1.2 || 1, unit: "BRL" as const },
+        { id: "g2", title: "Pedidos", current: pedidosMes, target: Math.max(1, Math.round(pedidosMes * 1.1)), unit: "qty" as const },
+      ];
 
-  const current = stats;
-  if (!current) {
+      return {
+        stats,
+        salesSeries,
+         bonusOrigin,
+         topProducts,
+         timeline,
+         aiInsights,
+         goals,
+       };
+     },
+   });
+ 
+  if (isLoading || !data) {
     return <div className="p-6 text-sm text-muted-foreground">Carregando dados reais...</div>;
   }
+
+  const { stats: current, salesSeries, bonusOrigin, topProducts, timeline, aiInsights, goals } = data;
 
   return (
     <div className="space-y-6">
@@ -167,7 +154,34 @@ function Dashboard() {
         <StatCard label="Cadastros diretos" value={String(current.redeTotal)} delta={0} icon={Users} accent="warning" />
       </div>
 
-      <OfficeDashboardCharts salesSeries={salesSeries} bonusOrigin={bonusOrigin} topProducts={topProducts} />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/60 p-5">
+          <h3 className="text-sm font-semibold">Vendas & Bônus · últimos registros</h3>
+          <div className="h-72 mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={salesSeries}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="day" stroke="var(--color-muted-foreground)" fontSize={11} />
+                <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickFormatter={(v) => `${(v / 1000).toFixed(1)}k`} />
+                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
+                <Area type="monotone" dataKey="vendas" stroke="var(--color-primary)" fill="url(#g1)" strokeWidth={2} />
+                <Area type="monotone" dataKey="bonus" stroke="var(--color-success)" fill="url(#g2)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
+          <h3 className="text-sm font-semibold">Origem dos bônus</h3>
+          <div className="h-56 mt-3">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={bonusOrigin} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="none">{bonusOrigin.map((_, i) => <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />)}</Pie>
+                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2 space-y-3">
@@ -228,7 +242,15 @@ function Dashboard() {
         <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
           <h3 className="text-sm font-semibold">Top produtos</h3>
           <div className="h-44 mt-3">
-          <TopProductsChart data={topProducts} />
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={topProducts} layout="vertical" margin={{ left: 0, right: 12 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="name" stroke="var(--color-muted-foreground)" fontSize={10} width={120} />
+                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
+                <Bar dataKey="qtd" fill="var(--color-primary)" radius={[0, 6, 6, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/modules/auth";
 import { useDistributor } from "@/lib/distributor-context";
-import { supabase } from "@/lib/supabase-client";
+import { ProductService } from "@/services/products";
 import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -15,19 +16,16 @@ function ProductDetailPage() {
   const { id } = Route.useParams();
   const { triggerBinomialBonusPay, addAuditLog } = useAuth();
   const { currentDistributor, setDistributorBySlug } = useDistributor();
-  const [prod, setProd] = useState<any>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [custName, setCustName] = useState("");
   const [custEmail, setCustEmail] = useState("");
   const [custCPF, setCustCPF] = useState("");
   const [custPhone, setCustPhone] = useState("");
 
-  useEffect(() => {
-    void (async () => {
-      const { data } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
-      setProd(data || null);
-    })();
-  }, [id]);
+  const { data: prod = null, isLoading } = useQuery({
+    queryKey: ["product-detail", id],
+    queryFn: () => ProductService.fetchProductById(id),
+  });
 
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get("ref")?.toLowerCase().trim();
@@ -38,7 +36,8 @@ function ProductDetailPage() {
   const distName = currentDistributor.name;
   const distRank = currentDistributor.rank;
 
-  if (!prod) return <div className="p-8 text-sm text-muted-foreground">Carregando produto real...</div>;
+  if (isLoading) return <div className="p-8 text-sm text-center text-muted-foreground animate-pulse">Carregando produto real...</div>;
+  if (!prod) return <div className="p-8 text-sm text-center text-muted-foreground">Produto não encontrado.</div>;
 
   const formatBRL = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
   const finalPrice = Number(prod.price || 0);

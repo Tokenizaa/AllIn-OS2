@@ -1,6 +1,5 @@
-﻿import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
-import { walletService } from '../backend/modules/payments/services/wallet.service';
+import { walletService } from '../../backend/modules/payments/services/wallet.service';
 
 // Validation schemas
 const creditWalletSchema = z.object({
@@ -36,143 +35,140 @@ const unfreezeWalletSchema = z.object({
 });
 
 // Get wallet by customer
-export const getWallet = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.getWalletByCustomerId(data.customerId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet' };
-    }
-  });
+export const getWallet = async (data: { customerId: string }) => {
+  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+  try {
+    const result = await walletService.getWalletByCustomerId(parsed.customerId);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet' };
+  }
+};
 
 // Ensure wallet exists
-export const ensureWallet = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.ensureWallet(data.customerId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure wallet' };
-    }
-  });
+export const ensureWallet = async (data: { customerId: string }) => {
+  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+  try {
+    const result = await walletService.ensureWallet(parsed.customerId);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure wallet' };
+  }
+};
 
 // Credit wallet
-export const creditWallet = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => creditWalletSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.creditWallet(
-        data.customerId,
-        data.amount,
-        data.description,
-        data.referenceId,
-        data.referenceType
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to credit wallet' };
-    }
-  });
+export const creditWallet = async (data: any) => {
+  const parsed = creditWalletSchema.parse(data);
+  try {
+    const result = await walletService.creditWallet(
+      parsed.customerId,
+      parsed.amount,
+      parsed.description,
+      parsed.referenceId,
+      parsed.referenceType
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to credit wallet' };
+  }
+};
 
 // Debit wallet
-export const debitWallet = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => debitWalletSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.debitWallet(
-        data.customerId,
-        data.amount,
-        data.description,
-        data.referenceId,
-        data.referenceType
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to debit wallet' };
-    }
-  });
+export const debitWallet = async (data: any) => {
+  const parsed = debitWalletSchema.parse(data);
+  try {
+    const result = await walletService.debitWallet(
+      parsed.customerId,
+      parsed.amount,
+      parsed.description,
+      parsed.referenceId,
+      parsed.referenceType
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to debit wallet' };
+  }
+};
 
 // Freeze wallet funds
-export const freezeWallet = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => freezeWalletSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.freezeWallet(
-        data.customerId,
-        data.amount,
-        data.description,
-        data.referenceId,
-        data.referenceType
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to freeze wallet' };
-    }
-  });
+export const freezeWallet = async (data: any) => {
+  const parsed = freezeWalletSchema.parse(data);
+  try {
+    const result = await walletService.freezeWallet(
+      parsed.customerId,
+      parsed.amount,
+      parsed.description,
+      parsed.referenceId,
+      parsed.referenceType
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to freeze wallet' };
+  }
+};
 
 // Unfreeze wallet funds
-export const unfreezeWallet = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => unfreezeWalletSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.unfreezeWallet(
-        data.customerId,
-        data.amount,
-        data.description,
-        data.referenceId,
-        data.referenceType
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to unfreeze wallet' };
-    }
-  });
+export const unfreezeWallet = async (data: any) => {
+  const parsed = unfreezeWalletSchema.parse(data);
+  try {
+    const result = await walletService.unfreezeWallet(
+      parsed.customerId,
+      parsed.amount,
+      parsed.description,
+      parsed.referenceId,
+      parsed.referenceType
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to unfreeze wallet' };
+  }
+};
 
 // Get wallet transactions
-export const getWalletTransactions = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => z.object({
+export const getWalletTransactions = async (data: {
+  customerId: string;
+  page?: number;
+  limit?: number;
+  transactionType?: 'credit' | 'debit' | 'freeze' | 'unfreeze';
+}) => {
+  const parsed = z.object({
     customerId: z.string().uuid(),
     page: z.number().default(1),
     limit: z.number().default(20),
     transactionType: z.enum(['credit', 'debit', 'freeze', 'unfreeze']).optional(),
-  }).parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await walletService.getTransactions(
-        data.customerId,
-        data.page,
-        data.limit,
-        data.transactionType
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get transactions' };
-    }
-  });
+  }).parse(data);
+
+  try {
+    const result = await walletService.getTransactions(
+      parsed.customerId,
+      parsed.page,
+      parsed.limit,
+      parsed.transactionType
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to get transactions' };
+  }
+};
 
 // Get wallet balance
-export const getWalletBalance = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => z.object({ customerId: z.string().uuid() }).parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const wallet = await walletService.getWalletByCustomerId(data.customerId);
-      if (!wallet) {
-        return { success: false, error: 'Wallet not found' };
-      }
-      return {
-        success: true,
-        data: {
-          balance: wallet.balance,
-          availableBalance: wallet.available_balance,
-          frozenBalance: wallet.frozen_balance,
-          currency: wallet.currency,
-        },
-      };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet balance' };
+export const getWalletBalance = async (data: { customerId: string }) => {
+  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+  try {
+    const wallet = await walletService.getWalletByCustomerId(parsed.customerId);
+    if (!wallet) {
+      return { success: false, error: 'Wallet not found' };
     }
-  });
-
+    return {
+      success: true,
+      data: {
+        balance: wallet.balance,
+        availableBalance: wallet.available_balance,
+        frozenBalance: wallet.frozen_balance,
+        currency: wallet.currency,
+      },
+    };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet balance' };
+  }
+};

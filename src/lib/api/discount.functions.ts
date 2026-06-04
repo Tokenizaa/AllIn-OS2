@@ -1,6 +1,5 @@
-﻿import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
-import { discountEngineService } from '../backend/modules/payments/services/discount-engine.service';
+import { discountEngineService } from '../../backend/modules/payments/services/discount-engine.service';
 
 // Validation schemas
 const calculateDiscountSchema = z.object({
@@ -40,75 +39,70 @@ const validateCouponSchema = z.object({
 });
 
 // Calculate discount
-export const calculateDiscount = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => calculateDiscountSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await discountEngineService.calculateDiscount(
-        data.originalAmount,
-        data.customerId,
-        data.productId,
-        data.categoryId,
-        data.couponCode
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to calculate discount' };
-    }
-  });
+export const calculateDiscount = async (data: any) => {
+  const parsed = calculateDiscountSchema.parse(data);
+  try {
+    const result = await discountEngineService.calculateDiscount(
+      parsed.originalAmount,
+      parsed.customerId,
+      parsed.productId,
+      parsed.categoryId,
+      parsed.couponCode
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to calculate discount' };
+  }
+};
 
 // Create coupon
-export const createCoupon = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => createCouponSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await discountEngineService.createCoupon(
-        data.code,
-        data.discountRuleId,
-        data.customerId,
-        data.expiresAt ? new Date(data.expiresAt) : undefined,
-        data.usageLimit
-      );
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to create coupon' };
-    }
-  });
+export const createCoupon = async (data: any) => {
+  const parsed = createCouponSchema.parse(data);
+  try {
+    const result = await discountEngineService.createCoupon(
+      parsed.code,
+      parsed.discountRuleId,
+      parsed.customerId,
+      parsed.expiresAt ? new Date(parsed.expiresAt) : undefined,
+      parsed.usageLimit
+    );
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to create coupon' };
+  }
+};
 
 // Create discount rule
-export const createDiscountRule = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => createDiscountRuleSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await discountEngineService.createDiscountRule({
-        name: data.name,
-        description: data.description,
-        discount_type: data.discount_type,
-        discount_value: data.discount_value,
-        min_order_amount: data.min_order_amount,
-        max_discount_amount: data.max_discount_amount,
-        applicable_products: data.applicable_products,
-        applicable_categories: data.applicable_categories,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        usage_limit: data.usage_limit,
-        is_active: data.is_active,
-      });
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to create discount rule' };
-    }
-  });
+export const createDiscountRule = async (data: any) => {
+  const parsed = createDiscountRuleSchema.parse(data);
+  try {
+    const result = await discountEngineService.createDiscountRule({
+      name: parsed.name,
+      description: parsed.description,
+      discount_type: parsed.discount_type,
+      discount_value: parsed.discount_value,
+      min_order_amount: parsed.min_order_amount,
+      max_discount_amount: parsed.max_discount_amount,
+      applicable_products: parsed.applicable_products,
+      applicable_categories: parsed.applicable_categories,
+      start_date: parsed.start_date,
+      end_date: parsed.end_date,
+      usage_limit: parsed.usage_limit,
+      is_active: parsed.is_active,
+    });
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to create discount rule' };
+  }
+};
 
 // Validate coupon
-export const validateCoupon = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => validateCouponSchema.parse(data))
-  .handler(async ({ data }) => {
-    try {
-      const result = await discountEngineService.validateCoupon(data.couponCode, data.customerId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to validate coupon' };
-    }
-  });
-
+export const validateCoupon = async (data: any) => {
+  const parsed = validateCouponSchema.parse(data);
+  try {
+    const result = await discountEngineService.validateCoupon(parsed.couponCode, parsed.customerId);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to validate coupon' };
+  }
+};

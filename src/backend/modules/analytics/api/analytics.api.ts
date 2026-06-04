@@ -1,4 +1,4 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { AnalyticsService } from "../services/analytics.service";
 
@@ -113,4 +113,3 @@ export const getBonusDistribution = createServerFn({ method: "GET" })
       };
     }
   });
-

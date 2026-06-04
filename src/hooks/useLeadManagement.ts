@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SupabaseService } from '@/modules/auth/services/supabase.service';
-import { supabase } from '@/lib/supabase-client';
+import { LeadService } from '@/services/leads';
 
 export interface LeadData {
   id?: string;
@@ -14,37 +13,45 @@ export const useLeadManagement = (userId?: string) => {
   const [currentLead, setCurrentLead] = useState<LeadData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch leads from Supabase
+  // Fetch leads from Supabase via LeadService
   useEffect(() => {
+    let mounted = true;
     const fetchLeads = async () => {
       setLoading(true);
-      const leadsData = await SupabaseService.fetchLeads(userId);
-      // Transform database leads to match expected format
-      const transformedLeads = leadsData.map(l => ({
-        id: l.id,
-        name: l.name,
-        whatsapp: l.whatsapp,
-        leadId: l.lead_id,
-      }));
-      setLeads(transformedLeads);
-      setLoading(false);
+      try {
+        const leadsData = await LeadService.fetchLeads(userId);
+        // Transform database leads to match expected format
+        const transformedLeads = leadsData.map(l => ({
+          id: l.id,
+          name: l.name,
+          whatsapp: l.whatsapp || l.phone || '',
+          leadId: l.lead_id || '',
+        }));
+        if (mounted) {
+          setLeads(transformedLeads);
+        }
+      } catch (err) {
+        console.error("[useLeadManagement] fetch failed:", err);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
     };
     fetchLeads();
+    return () => {
+      mounted = false;
+    };
   }, [userId]);
 
-  // Save lead to Supabase
+  // Save lead via LeadService
   const saveLead = async (leadData: LeadData) => {
-    const { error } = await supabase.from("leads").insert({
+    await LeadService.saveLead({
       name: leadData.name,
       whatsapp: leadData.whatsapp,
-      lead_id: leadData.leadId,
+      leadId: leadData.leadId,
       user_id: userId || null,
     });
-
-    if (error) {
-      console.error("[useLeadManagement] Failed to save lead:", error);
-      throw error;
-    }
 
     setLeads([...leads, leadData]);
     setCurrentLead(leadData);

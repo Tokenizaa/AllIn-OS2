@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useDistributor } from "@/lib/distributor-context";
 import { useProducts } from "@/contexts/ProductsContext";
@@ -18,11 +18,11 @@ function ProductSearchPage() {
   
   const routeSlug = params.slug?.toLowerCase().trim();
   
-  useEffect(() => {
+  useState(() => {
     if (routeSlug) {
       setDistributorBySlug(routeSlug);
     }
-  }, [routeSlug, setDistributorBySlug]);
+  });
 
   const sponsorSlug = currentDistributor.slug;
   const { products, loading } = useProducts();
@@ -113,7 +113,7 @@ function ProductSearchPage() {
             )}
 
             <div className="mt-16 text-center">
-              <Link to="/loja/$slug" params={{ slug: sponsorSlug }}>
+              <Link to={`/loja/${sponsorSlug}`}>
                 <Button variant="vibrantOutline" size="lg" className="text-lg px-8 py-6">
                   Voltar para a Loja
                 </Button>

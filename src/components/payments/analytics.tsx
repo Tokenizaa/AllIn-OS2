@@ -5,19 +5,19 @@ import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { BarChart3, PieChart, TrendingUp, Calendar, Download, RefreshCw, Loader2 } from "lucide-react";
-import { getOrderStats, getOrders } from "@/backend/api";
+import { AnalyticsService } from "@/services/analytics";
 
 export function PaymentAnalytics() {
   const [dateRange, setDateRange] = useState("30d");
 
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ["payment-analytics", "order-stats"],
-    queryFn: async () => (await getOrderStats()) as any,
+    queryFn: async () => (await AnalyticsService.fetchOrderStats()) as any,
   });
 
   const { data: ordersResult, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ["payment-analytics", "orders", dateRange],
-    queryFn: async () => (await getOrders({ page: 1, limit: 25 })) as any,
+    queryFn: async () => (await AnalyticsService.fetchRecentOrders({ page: 1, limit: 25 })) as any,
   });
 
   const orders = useMemo(() => (ordersResult?.data?.data || []) as any[], [ordersResult]);

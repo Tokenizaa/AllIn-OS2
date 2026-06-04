@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck, UploadCloud, FileText, CheckCircle2, Clock, Brain, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/lib/supabase-client";
+import { AnalyticsService } from "@/services/analytics";
 import { toast } from "sonner";
 
 interface UploadingFile { name: string; size: string; progress: number; status: "uploading" | "scanning" | "finished"; }
@@ -13,16 +14,19 @@ export const Route = createFileRoute("/office/verification")({ component: Verifi
 
 function VerificationPage() {
   const [pendingFiles, setPendingFiles] = useState<UploadingFile[]>([]);
-  const [docs, setDocs] = useState<{ id: string; nome: string; date?: string | null }[]>([]);
 
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      const { data } = await supabase.from("audit_log").select("id, action, created_at").order("created_at", { ascending: false }).limit(12);
-      if (mounted) setDocs((data || []).map((row: any) => ({ id: row.id, nome: row.action || "Documento", date: row.created_at })));
-    })();
-    return () => { mounted = false; };
-  }, []);
+  const { data: auditLogs = [], isLoading } = useQuery({
+    queryKey: ["office-verification-audit"],
+    queryFn: () => AnalyticsService.fetchAuditLogs(12),
+  });
+
+  const docs = useMemo(() => {
+    return auditLogs.map((row: any) => ({
+      id: row.id,
+      nome: row.action || "Documento",
+      date: row.created_at
+    }));
+  }, [auditLogs]);
 
   const handleFileUploadSimulate = (fileName: string, fileSize: string) => {
     if (pendingFiles.some(f => f.name === fileName)) return;
@@ -82,7 +86,18 @@ function VerificationPage() {
           <div className="space-y-5">
             <div className="flex items-center gap-2 border-b border-border/40 pb-3"><Clock className="h-5 w-5 text-primary shrink-0" /><h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Histórico</h3></div>
             <div className="space-y-3 text-xs">
-              {docs.map((doc) => <div key={doc.id} className="rounded-lg border border-border/60 bg-background/40 p-3"><p className="font-semibold text-white">{doc.nome}</p><p className="text-muted-foreground">{doc.date ? new Date(doc.date).toLocaleString("pt-BR") : "-"}</p></div>)}
+              {isLoading ? (
+                <div className="text-center py-4 text-muted-foreground animate-pulse">Carregando histórico...</div>
+              ) : docs.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">Nenhum registro encontrado.</div>
+              ) : (
+                docs.map((doc) => (
+                  <div key={doc.id} className="rounded-lg border border-border/60 bg-background/40 p-3">
+                    <p className="font-semibold text-white">{doc.nome}</p>
+                    <p className="text-muted-foreground">{doc.date ? new Date(doc.date).toLocaleString("pt-BR") : "-"}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -1,38 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase-client";
+import { PaymentService } from "@/services/payments";
+import { PlanService } from "@/services/plans";
+import { CustomerService } from "@/services/customers";
 import { computeGenerationBonus } from "@/modules/plans/mlm-rules";
 
 export const Route = createFileRoute("/_app/commissions")({ component: CommissionsPage });
 
 function CommissionsPage() {
-  const [rows, setRows] = useState<any[]>([]);
-  const [plans, setPlans] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const [{ data: payments }, { data: plansData }, { data: customersData }] = await Promise.all([
-        supabase.from("payments").select("id, amount, quantity, plan_id, plan_name, plano_id, created_at").order("created_at", { ascending: false }).limit(18),
-        supabase.from("plans").select("id, name, price, commission_percent, generations, benefits, is_active, sort_order").eq("is_active", true).order("sort_order", { ascending: true }),
-        supabase.from("customers").select("id, user_id, usuario, id_comprador, qualification, patrocinador_comprador, status, created_at").limit(300),
+  const { data: commissionsData, isLoading } = useQuery({
+    queryKey: ["commissions", "mlm"],
+    queryFn: async () => {
+      const [payments, plansData, customersData] = await Promise.all([
+        PaymentService.fetchPaymentsForCommissions(18),
+        PlanService.fetchActivePlans(),
+        CustomerService.fetchCustomersList(),
       ]);
 
-      setRows((payments || []).map((p: any, i: number) => ({
+      const rows = (payments || []).map((p: any, i: number) => ({
         id: p.id || i,
         ciclo: `Lançamento #${i + 1}`,
         qualificados: Number(p.quantity || 1),
         pago: Number(p.amount || 0),
         status: i < 2 ? "processando" : "pago",
         planKey: p.plan_id || p.plan_name || p.plano_id || null,
-      })));
-      setPlans(plansData || []);
-      setCustomers(customersData || []);
-    })();
-  }, []);
+      }));
+
+      return {
+        rows,
+        plans: plansData || [],
+        customers: customersData || [],
+      };
+    }
+  });
+
+  const rows = commissionsData?.rows || [];
+  const plans = commissionsData?.plans || [];
+  const customers = commissionsData?.customers || [];
 
   const total = rows.reduce((sum, r) => sum + Number(r.pago || 0), 0);
   const plan = plans[0];

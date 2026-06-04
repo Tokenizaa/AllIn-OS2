@@ -79,29 +79,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ? await SupabaseService.fetchUserProfile(session.user.id) : null;
+
         if (!isMounted) return;
 
-        if (session?.user) {
-          const profile = await SupabaseService.fetchUserProfile(session.user.id);
-          if (profile) {
-            setUser(profile);
+        if (currentUser) {
+          setUser(currentUser);
 
-            if (profile.role === UserRole.DISTRIBUIDOR) {
-              const dProf = await SupabaseService.fetchDistributorProfile(profile.id);
-              if (isMounted) {
-                setDistributorProfile(dProf);
-              }
+          if (currentUser.role === UserRole.DISTRIBUIDOR) {
+            const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);
+            if (isMounted) {
+              setDistributorProfile(dProf);
             }
+          }
 
-            try {
-              const tracking = await referralTrackingService.getReferralTracking(profile.id);
-              if (isMounted && tracking) {
-                setActiveSponsor(tracking.distributor_slug);
-                setActiveReferralMetadata(tracking.metadata);
-              }
-            } catch (error) {
-              console.error("[AuthProvider] Error loading referral tracking:", error);
+          try {
+            const tracking = await referralTrackingService.getReferralTracking(currentUser.id);
+            if (isMounted && tracking) {
+              setActiveSponsor(tracking.distributor_slug);
+              setActiveReferralMetadata(tracking.metadata);
             }
+          } catch (error) {
+            console.error("[AuthProvider] Error loading referral tracking:", error);
           }
         }
 
@@ -123,17 +122,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Check if current route is public auth route to skip profile loading
-      if (isPublicAuthRoute()) {
+      if (skipHeavyBootstrap) {
         return;
       }
 
-      const profile = await SupabaseService.fetchUserProfile(session.user.id);
-      if (!isMounted || !profile) return;
+      const currentUser = await SupabaseService.fetchUserProfile(session.user.id);
+      if (!isMounted || !currentUser) return;
 
-      setUser(profile);
-      if (profile.role === UserRole.DISTRIBUIDOR) {
-        const dProf = await SupabaseService.fetchDistributorProfile(profile.id);
+      setUser(currentUser);
+      if (currentUser.role === UserRole.DISTRIBUIDOR) {
+        const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);
         if (isMounted) {
           setDistributorProfile(dProf);
         }

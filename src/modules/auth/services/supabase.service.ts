@@ -8,11 +8,17 @@ import { UserRole } from "@/shared/types/roles";
  */
 export class SupabaseService {
   /**
-   * Fetch user profile from profiles table
-   * Note: Auth user data should be passed from the session, not fetched here
+   * Fetch user profile from auth.users + profiles
    */
   static async fetchUserProfile(userId: string): Promise<User | null> {
     try {
+      // Get auth user
+      const { data: authUser, error: authError } = await supabase.auth.getUser();
+      if (authError || !authUser.user) {
+        console.error("[SupabaseService] Error fetching auth user:", authError);
+        return null;
+      }
+
       // Get profile data
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -25,25 +31,21 @@ export class SupabaseService {
         return null;
       }
 
-      if (!profile) {
-        return null;
-      }
-
-      // Return profile data - auth user data should be merged by caller
+      // Combine auth user and profile data
       return {
-        id: profile.user_id,
-        email: profile.email || "",
-        name: profile.name || "",
-        role: (profile.role as UserRole) || UserRole.CLIENTE_FINAL,
-        status: profile.status || "active",
-        active: profile.status === "active",
-        avatar: profile.avatar || null,
-        phone: profile.phone || null,
-        cpf: profile.cpf || null,
-        created_at: profile.created_at || "",
-        last_login: profile.updated_at || profile.created_at || "",
-        referral_code: profile.referral_code || null,
-        sponsor_id: profile.sponsor_id || null,
+        id: authUser.user.id,
+        email: authUser.user.email || "",
+        name: profile?.name || authUser.user.email?.split("@")[0] || "",
+        role: (profile?.role as UserRole) || UserRole.CLIENTE_FINAL,
+        status: profile?.status || "active",
+        active: profile?.status === "active",
+        avatar: profile?.avatar || null,
+        phone: profile?.phone || null,
+        cpf: profile?.cpf || null,
+        created_at: authUser.user.created_at,
+        last_login: authUser.user.last_sign_in_at || authUser.user.created_at,
+        referral_code: profile?.referral_code || null,
+        sponsor_id: profile?.sponsor_id || null,
       };
     } catch (error) {
       console.error("[SupabaseService] Error in fetchUserProfile:", error);
@@ -74,7 +76,7 @@ export class SupabaseService {
     try {
       const { data, error } = await supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, qualification, status, metadata")
+        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, qualification, status, plan_id, metadata")
         .eq("user_id", userId)
         .maybeSingle();
 

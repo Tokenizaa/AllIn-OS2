@@ -1,4 +1,4 @@
-﻿import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { NetworkService } from "../services/network.service";
 import { paginationSchema } from "../../../shared/dto/pagination.dto";
@@ -99,4 +99,3 @@ export const getNetworkStats = createServerFn({ method: "GET" })
       };
     }
   });
-

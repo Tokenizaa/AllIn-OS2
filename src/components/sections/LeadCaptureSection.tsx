@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase-client';
+import { LeadService } from '@/services/leads';
 
 const LeadCaptureSection = () => {
   const [name, setName] = useState('');
@@ -30,22 +30,16 @@ const LeadCaptureSection = () => {
     setIsSubmitting(true);
 
     try {
-      // Save to Supabase leads table (SSOT)
-      const { error } = await supabase
-        .from("leads")
-        .insert({
-          name: name.trim(),
-          phone: whatsapp.trim(),
-          source: "landing_page",
-          status: "new",
-          metadata: {
-            captured_at: new Date().toISOString(),
-          },
-        });
-
-      if (error) {
-        throw error;
-      }
+      // Save to Supabase leads table via LeadService (SSOT)
+      await LeadService.saveLead({
+        name: name.trim(),
+        phone: whatsapp.trim(),
+        source: "landing_page",
+        status: "new",
+        metadata: {
+          captured_at: new Date().toISOString(),
+        },
+      });
 
       // Dispatch custom event for tracking
       window.dispatchEvent(new CustomEvent('leadCaptured', {
