@@ -1,40 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
 import { InsightCard } from "@/components/widgets/insight-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomerLabel } from "@/lib/customer-label";
-import { PaymentService } from "@/services/payments";
-import { OrderService } from "@/services/orders";
-import { CustomerService } from "@/services/customers";
+import { useAnalytics } from "@/hooks/analytics/useAnalytics";
 
 export const Route = createFileRoute("/_app/insights")({ component: InsightsPage });
 
 function InsightsPage() {
-  const { data: paymentsResult, isLoading: paymentsLoading } = useQuery({
-    queryKey: ["insights", "payments"],
-    queryFn: async () => {
-      const payments = await PaymentService.fetchRecentPayments(5);
-      return { data: { data: payments } };
-    },
-  });
-
-  const { data: ordersResult, isLoading: ordersLoading } = useQuery({
-    queryKey: ["insights", "orders"],
-    queryFn: async () => {
-      const orders = await OrderService.fetchOrdersList(5);
-      return { data: { data: orders } };
-    },
-  });
-
-  const { data: customersResult, isLoading: customersLoading } = useQuery({
-    queryKey: ["insights", "customers"],
-    queryFn: async () => {
-      const customers = await CustomerService.fetchRecentCustomers(5);
-      return { data: { data: customers } };
-    },
-  });
+  const { stats: paymentsResult, orders: ordersResult, customers: customersResult } = useAnalytics();
 
   const insights = useMemo(() => {
     const payments = paymentsResult?.data?.data || [];
@@ -66,7 +41,7 @@ function InsightsPage() {
     ].slice(0, 9);
   }, [paymentsResult, ordersResult, customersResult]);
 
-  const loading = paymentsLoading || ordersLoading || customersLoading;
+  const loading = paymentsResult.isLoading || ordersResult.isLoading || customersResult.isLoading;
 
   return (
     <div className="space-y-6">

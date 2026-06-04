@@ -4,24 +4,24 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Calculator, TrendingUp, Users, DollarSign } from "lucide-react";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { simulateCommission } from "../../lib/api/bonus.functions";
 
 export function MLMCommissionSimulator() {
   const [sellerId, setSellerId] = useState("");
   const [orderAmount, setOrderAmount] = useState(1000);
 
-  const mutation = useMutation({
-    mutationFn: async (input: { seller_id: string; order_amount: number }) => simulateCommission(input),
+  const { data: simulation, refetch: simulationRefetch, isFetching } = useQuery({
+    queryKey: ["mlm-simulation", sellerId, orderAmount],
+    queryFn: async () => simulateCommission({ seller_id: sellerId, order_amount: orderAmount }),
+    enabled: false,
   });
 
   const handleSimulate = () => {
     if (sellerId) {
-      mutation.mutate({ seller_id: sellerId, order_amount: orderAmount });
+      void simulationRefetch();
     }
   };
-
-  const simulation = mutation.data?.simulation;
 
   return (
     <Card>
@@ -56,8 +56,8 @@ export function MLMCommissionSimulator() {
           </div>
         </div>
 
-        <Button onClick={handleSimulate} className="w-full" disabled={mutation.isPending}>
-          {mutation.isPending ? "Calculando..." : "Simular Comissão"}
+        <Button onClick={handleSimulate} className="w-full" disabled={isFetching}>
+          {isFetching ? "Calculando..." : "Simular Comissão"}
         </Button>
 
         {simulation && (

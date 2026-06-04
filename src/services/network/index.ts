@@ -19,5 +19,34 @@ export const NetworkService = {
       .limit(limit);
     if (error) throw error;
     return data || [];
+  },
+
+  async fetchSponsorRelationship(customerId: string) {
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("customer_id,sponsor_customer_id,level")
+      .eq("customer_id", customerId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async fetchUplineRelationships(customerId: string) {
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("customer_id,sponsor_customer_id,level")
+      .eq("customer_id", customerId)
+      .order("level", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async countDirectRelationships(customerId: string) {
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("customer_id")
+      .eq("sponsor_customer_id", customerId);
+    if (error) throw error;
+    return data?.length || 0;
   }
 };

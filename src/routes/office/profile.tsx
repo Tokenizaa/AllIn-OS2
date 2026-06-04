@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { User, Building, Shield, Camera, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileService } from "@/services/profiles";
 import { toast } from "sonner";
+import { useMyProfile } from "@/hooks/profiles/useMyProfile";
 
 type ProfileRow = {
   id: string;
@@ -26,10 +25,7 @@ export const Route = createFileRoute("/office/profile")({ component: ProfilePage
 function ProfilePage() {
   const [isCopied, setIsCopied] = useState(false);
 
-  const { data: profile = null, isLoading } = useQuery<ProfileRow | null>({
-    queryKey: ["office-profile"],
-    queryFn: () => ProfileService.fetchMyProfile() as Promise<ProfileRow | null>,
-  });
+  const { data: profile = null, isLoading } = useMyProfile();
 
   const copySponsorLink = async () => {
     const value = profile?.sponsor_id || "";

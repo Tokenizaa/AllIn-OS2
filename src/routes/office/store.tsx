@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { QrCode, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/distributor/stat-card";
 import { ProductService } from "@/services/products";
 import { useAuth } from "@/modules/auth";
+import { useProducts } from "@/hooks/products/useProducts";
 
 type ProductRow = { id: string; name?: string | null; description?: string | null; price?: number | null; category?: string | null };
 
@@ -20,10 +20,7 @@ function StorePage() {
   const { user } = useAuth();
   const isCustomer = user?.role === "customer";
 
-  const { data: products = [], isLoading } = useQuery<ProductRow[]>({
-    queryKey: ["office-store-products"],
-    queryFn: () => ProductService.fetchStoresProducts(12) as Promise<ProductRow[]>,
-  });
+  const { data: products = [], isLoading } = useProducts(12);
 
   const storeAnalytics = useMemo(() => ({
     visitas_mes: products.length * 120,

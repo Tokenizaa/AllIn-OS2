@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getAllPlans, getPlanAnalytics } from "../../lib/api/plans.functions";
+import { usePlans } from "@/hooks/plans/usePlans";
+import { usePlanAnalytics } from "@/hooks/plans/usePlanAnalytics";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Plus, TrendingUp, Users, DollarSign, Activity } from "lucide-react";
@@ -8,15 +8,8 @@ import { PlanAnalytics } from "./PlanAnalytics";
 import { UpgradeSuggestions } from "./UpgradeSuggestions";
 
 export function PlansDashboard() {
-  const { data: plans, isLoading: plansLoading } = useQuery({
-    queryKey: ["plans"],
-    queryFn: getAllPlans,
-  });
-
-  const { data: analytics, isLoading: analyticsLoading } = useQuery({
-    queryKey: ["plan-analytics"],
-    queryFn: getPlanAnalytics,
-  });
+  const { data: plans, isLoading: plansLoading } = usePlans();
+  const { data: analytics, isLoading: analyticsLoading } = usePlanAnalytics();
 
   if (plansLoading || analyticsLoading) {
     return <div className="p-8">Carregando...</div>;

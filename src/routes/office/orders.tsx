@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { ShoppingBag, Search, Filter, Download, RotateCcw, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
-import { OrderService } from "@/services/orders";
+import { useOrders } from "@/hooks/orders/useOrders";
 
 type OrderRow = {
   id: string;
@@ -36,10 +35,7 @@ function formatBRL(value: number) {
 function OrdersPage() {
   const [search, setSearch] = useState("");
 
-  const { data: oRows = [], isLoading } = useQuery<OrderRow[]>({
-    queryKey: ["office-orders"],
-    queryFn: () => OrderService.fetchOfficeOrders(200) as Promise<OrderRow[]>,
-  });
+  const { data: oRows = [], isLoading } = useOrders(200);
 
   const filteredOrders = useMemo(() => {
     const q = search.trim().toLowerCase();

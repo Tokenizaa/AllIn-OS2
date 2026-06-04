@@ -1,37 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
 import { ResponsiveContainer, Treemap, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { KpiCard } from "@/components/widgets/kpi-card";
-import { CustomerService } from "@/services/customers";
-import { NetworkService } from "@/services/network";
+import { useNetworkMembers } from "@/hooks/network/useNetworkMembers";
 
 export const Route = createFileRoute("/_app/network")({ component: NetworkPage });
 
 function NetworkPage() {
-  const { data: networkData, isLoading } = useQuery({
-    queryKey: ["network", "genealogy"],
-    queryFn: async () => {
-      const [customerData, relationshipData] = await Promise.all([
-        CustomerService.fetchRecentCustomers(20),
-        NetworkService.fetchRecentNetworkRelationships(12),
-      ]);
-      const legs = (relationshipData || []).map((r: any, i: number) => ({
-        name: `G${i + 1}`,
-        esquerda: Number(r.left_count || r.left_side_count || 0),
-        direita: Number(r.right_count || r.right_side_count || 0),
-      }));
-      return {
-        customers: customerData || [],
-        legs,
-      };
-    }
-  });
+  const { data: networkData, isError, error, refetch } = useNetworkMembers(12);
 
   const customers = networkData?.customers || [];
   const legs = networkData?.legs || [];
 
   const data = customers.map((c) => ({ name: (c.name || c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Rede MLM" title="Genealogia inteligente" subtitle="Falha ao carregar a rede." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

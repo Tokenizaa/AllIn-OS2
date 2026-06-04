@@ -2,18 +2,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Check, Star, TrendingUp, Users } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getPlanBonuses } from "../../lib/api/plans.functions";
+import { usePlanBonuses } from "@/hooks/plans/usePlanBonuses";
 
 interface PlanCardProps {
   plan: any;
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
-  const { data: bonuses } = useQuery({
-    queryKey: ["plan-bonuses", plan.id],
-    queryFn: () => getPlanBonuses({ planId: plan.id }),
-  });
+  const { data: bonuses } = usePlanBonuses(plan.id);
 
   const generationBonuses = bonuses?.filter((b: any) => b.bonus_type === "generation") || [];
   const directBonuses = bonuses?.filter((b: any) => b.bonus_type === "direct_bonus") || [];

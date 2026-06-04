@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useProductDetail } from "@/hooks/products/useProductDetail";
 import { useAuth } from "@/modules/auth";
 import { useDistributor } from "@/lib/distributor-context";
-import { ProductService } from "@/services/products";
 import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -22,10 +21,7 @@ function ProductDetailPage() {
   const [custCPF, setCustCPF] = useState("");
   const [custPhone, setCustPhone] = useState("");
 
-  const { data: prod = null, isLoading } = useQuery({
-    queryKey: ["product-detail", id],
-    queryFn: () => ProductService.fetchProductById(id),
-  });
+  const { data: prod = null, isLoading } = useProductDetail(id);
 
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get("ref")?.toLowerCase().trim();

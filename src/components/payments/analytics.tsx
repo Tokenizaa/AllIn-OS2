@@ -1,29 +1,19 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { BarChart3, PieChart, TrendingUp, Calendar, Download, RefreshCw, Loader2 } from "lucide-react";
-import { AnalyticsService } from "@/services/analytics";
+import { useAnalytics } from "@/hooks/analytics/useAnalytics";
 
 export function PaymentAnalytics() {
   const [dateRange, setDateRange] = useState("30d");
 
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
-    queryKey: ["payment-analytics", "order-stats"],
-    queryFn: async () => (await AnalyticsService.fetchOrderStats()) as any,
-  });
-
-  const { data: ordersResult, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
-    queryKey: ["payment-analytics", "orders", dateRange],
-    queryFn: async () => (await AnalyticsService.fetchRecentOrders({ page: 1, limit: 25 })) as any,
-  });
-
-  const orders = useMemo(() => (ordersResult?.data?.data || []) as any[], [ordersResult]);
+  const { stats, orders } = useAnalytics();
+  const ordersList = useMemo(() => (orders.data?.data || []) as any[], [orders.data]);
 
   const paymentMethodDistribution = useMemo(() => {
-    const grouped = orders.reduce((acc: Record<string, { count: number; revenue: number }>, order: any) => {
+    const grouped = ordersList.reduce((acc: Record<string, { count: number; revenue: number }>, order: any) => {
       const method = order.forma_pagamento || "outro";
       const entry = acc[method] || { count: 0, revenue: 0 };
       entry.count += 1;
@@ -39,23 +29,23 @@ export function PaymentAnalytics() {
       percentage: Math.round(((value as { count: number; revenue: number }).count / totalCount) * 100),
       revenue: Number((value as { count: number; revenue: number }).revenue.toFixed(2)),
     }));
-  }, [orders]);
+  }, [ordersList]);
 
   const topOrders = useMemo(() => {
-    return [...orders]
+    return [...ordersList]
       .sort((a: any, b: any) => Number(b.valor_total || 0) - Number(a.valor_total || 0))
       .slice(0, 5);
-  }, [orders]);
+  }, [ordersList]);
 
-  const totalRevenue = Number((stats as any)?.data?.totalRevenue || (stats as any)?.data?.total_revenue || 0);
-  const totalOrders = Number((stats as any)?.data?.totalOrders || (stats as any)?.data?.total_orders || 0);
+  const totalRevenue = Number((stats.data as any)?.data?.totalRevenue || (stats.data as any)?.data?.total_revenue || 0);
+  const totalOrders = Number((stats.data as any)?.data?.totalOrders || (stats.data as any)?.data?.total_orders || 0);
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   const handleRefresh = async () => {
-    await Promise.all([refetchStats(), refetchOrders()]);
+    await Promise.all([stats.refetch(), orders.refetch()]);
   };
 
-  const loading = statsLoading || ordersLoading;
+  const loading = stats.isLoading || orders.isLoading;
 
   return (
     <div className="space-y-6">
@@ -126,11 +116,11 @@ export function PaymentAnalytics() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Loading orders...
                 </div>
-              ) : orders.length === 0 ? (
+              ) : ordersList.length === 0 ? (
                 <div className="text-sm text-muted-foreground">No orders found for the selected period.</div>
               ) : (
                 <div className="space-y-4">
-                  {orders.slice(0, 8).map((order: any) => (
+                  {ordersList.slice(0, 8).map((order: any) => (
                     <div key={order.id} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="font-medium">{order.usuario || order.comprador || "Cliente"}</span>
@@ -140,7 +130,7 @@ export function PaymentAnalytics() {
                         <div
                           className="bg-primary h-2 rounded-full transition-all"
                           style={{
-                            width: `${Math.max(6, (Number(order.valor_total || 0) / Math.max(...orders.map((o: any) => Number(o.valor_total || 0)), 1)) * 100)}%`,
+                            width: `${Math.max(6, (Number(order.valor_total || 0) / Math.max(...ordersList.map((o: any) => Number(o.valor_total || 0)), 1)) * 100)}%`,
                           }}
                         />
                       </div>

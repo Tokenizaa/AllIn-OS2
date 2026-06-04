@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCustomer360 } from "@/hooks/customers/useCustomer360";
 import {
   Mail,
   MapPin,
@@ -24,9 +25,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
 import { toast } from "sonner";
-import { CustomerService } from "@/services/customers";
-import { OrderService } from "@/services/orders";
-import { WalletService } from "@/services/wallets";
 
 const statusStyles: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
@@ -34,6 +32,8 @@ const statusStyles: Record<string, string> = {
   inactive: "bg-red-500/10 text-red-500/30 border-red-500/30",
   churned: "bg-muted text-muted-foreground border-border",
 };
+
+const EMPTY_LIST: any[] = [];
 
 function formatBRL(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -52,52 +52,15 @@ export const Route = createFileRoute("/_app/customers/$id")({
 
 function Customer360() {
   const { customer: c } = Route.useLoaderData();
-  const queryClient = useQueryClient();
 
-  const { data: queryData, isLoading, refetch } = useQuery({
-    queryKey: ["customer-360", c.id],
-    queryFn: async () => {
-      const [orderData, sponsorData] = await Promise.all([
-        OrderService.fetchOrdersByCustomerId(c.id),
-        c.patrocinador_comprador
-          ? CustomerService.fetchCustomerByCompradorId(c.patrocinador_comprador)
-          : Promise.resolve(null),
-      ]);
+  const { data: queryData, isLoading, isError, error, refetch } = useCustomer360(c.id, c.patrocinador_comprador, c.id_comprador);
 
-      // wallets table select
-      const walletData = await WalletService.fetchWalletByCustomerId(c.id);
-
-      let txData: any[] = [];
-      if (walletData) {
-        txData = await WalletService.fetchWalletTransactionsByWalletId(walletData.id);
-      }
-
-      // points_wallets select
-      const ptsData = await WalletService.fetchPointsWalletByCustomerId(c.id);
-
-      // downlines check
-      let downlineData: any[] = [];
-      if (c.id_comprador) {
-        downlineData = await CustomerService.fetchDownlines(c.id_comprador);
-      }
-
-      return {
-        orders: orderData || [],
-        sponsor: sponsorData || null,
-        wallet: walletData || null,
-        pointsWallet: ptsData || null,
-        walletTransactions: txData,
-        downlines: downlineData,
-      };
-    }
-  });
-
-  const orders = queryData?.orders || [];
+  const orders = queryData?.orders ?? EMPTY_LIST;
   const sponsor = queryData?.sponsor || null;
   const wallet = queryData?.wallet || null;
   const pointsWallet = queryData?.pointsWallet || null;
-  const walletTransactions = queryData?.walletTransactions || [];
-  const downlines = queryData?.downlines || [];
+  const walletTransactions = queryData?.walletTransactions ?? EMPTY_LIST;
+  const downlines = queryData?.downlines ?? EMPTY_LIST;
 
   // Manual Note
   const [customNotes, setCustomNotes] = useState<any[]>([]);
@@ -155,7 +118,7 @@ function Customer360() {
   const handleCreateWallet = async () => {
     try {
       await WalletService.createWallet(c.id);
-      await queryClient.invalidateQueries({ queryKey: ["customer-360", c.id] });
+      await refetch();
       toast.success("Carteira financeira criada com sucesso no banco de dados!");
     } catch (err: any) {
       toast.error("Erro ao provisionar carteira: " + err.message);
@@ -166,7 +129,7 @@ function Customer360() {
   const handleCreatePointsWallet = async () => {
     try {
       await WalletService.createPointsWallet(c.id);
-      await queryClient.invalidateQueries({ queryKey: ["customer-360", c.id] });
+      await refetch();
       toast.success("Carteira de pontos criada com sucesso no banco de dados!");
     } catch (err: any) {
       toast.error("Erro ao provisionar pontos: " + err.message);
@@ -202,7 +165,7 @@ function Customer360() {
         txDesc || "Lançamento de ajuste administrativo"
       );
 
-      await queryClient.invalidateQueries({ queryKey: ["customer-360", c.id] });
+      await refetch();
       setTxAmount("");
       setTxDesc("");
       setShowAddTx(false);
@@ -241,6 +204,18 @@ function Customer360() {
       })),
     ];
   }, [customNotes, orders, c.created_at]);
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Customer 360" title={getCustomerLabel(c)} subtitle="Falha ao carregar dados estruturados." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

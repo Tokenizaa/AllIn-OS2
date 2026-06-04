@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { Network, Users, TrendingUp, Sparkles, UserPlus, GitMerge, Search, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CustomerService } from "@/services/customers";
+import { useNetwork } from "@/hooks/network/useNetwork";
 import { getCustomerLabel } from "@/lib/customer-label";
 
 type NodeRow = {
@@ -27,10 +26,7 @@ function NetworkPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "leader" | "critical">("all");
 
-  const { data: nodes = [], isLoading } = useQuery<NodeRow[]>({
-    queryKey: ["office-network-nodes"],
-    queryFn: () => CustomerService.fetchNetworkMembers(500) as Promise<NodeRow[]>,
-  });
+  const { data: nodes = [], isLoading } = useNetwork(500);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

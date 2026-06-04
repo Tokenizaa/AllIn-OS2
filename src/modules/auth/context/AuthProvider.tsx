@@ -8,8 +8,8 @@ import { InviteService } from "../services/invite.service";
 import { AuditService } from "../services/audit.service";
 import { SupabaseService } from "../services/supabase.service";
 import { referralTrackingService } from "@/services/referralTrackingService";
+import { authService } from "@/services/auth/auth.service";
 import { UserRole } from "@/shared/types/roles";
-import { supabase } from "@/lib/supabase-client";
 
 /**
  * AuthProvider - Main authentication provider
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await authService.getSession();
         const currentUser = session?.user ? await SupabaseService.fetchUserProfile(session.user.id) : null;
 
         if (!isMounted) return;
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     })();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: authListener } = authService.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
       if (!session?.user) {
         setUser(null);

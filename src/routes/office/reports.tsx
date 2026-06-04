@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { BarChart3, TrendingUp, ArrowUpRight, FileSpreadsheet, FileText, Activity, ShoppingCart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PaymentService } from "@/services/payments";
+import { usePayments } from "@/hooks/payments/usePayments";
 import { toast } from "sonner";
 
 type ReportPoint = { month: string; vendas: number; comissoes: number; retencao: number; conversao: number };
@@ -21,10 +20,7 @@ function ReportsPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<"vendas" | "comissoes" | "retencao">("vendas");
 
-  const { data: payments = [], isLoading } = useQuery({
-    queryKey: ["office-reports-payments", timeframe],
-    queryFn: () => PaymentService.fetchPaymentsForReports(500),
-  });
+  const { data: payments = [], isLoading } = usePayments(500);
 
   const points = useMemo<ReportPoint[]>(() => {
     const monthMap = new Map<string, { vendas: number; comissoes: number; count: number }>();

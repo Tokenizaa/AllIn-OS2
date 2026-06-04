@@ -82,11 +82,18 @@ export class WebhookProcessorService {
 
   private async markWebhookAsProcessed(event: WebhookEvent, success: boolean, errorMessage?: string): Promise<void> {
     try {
+      const { data: existingWebhook } = await supabase
+        .from('gateway_webhooks')
+        .select('processing_attempts')
+        .eq('payload', event.payload)
+        .eq('processed', false)
+        .maybeSingle();
+
       const { error } = await supabase
         .from('gateway_webhooks')
         .update({
           processed: true,
-          processing_attempts: supabase.rpc('increment', { table_name: 'gateway_webhooks', column_name: 'processing_attempts' }),
+          processing_attempts: Number(existingWebhook?.processing_attempts || 0) + 1,
           error_message: errorMessage,
           processed_at: new Date().toISOString(),
         })
