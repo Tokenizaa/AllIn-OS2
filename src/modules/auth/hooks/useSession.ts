@@ -24,11 +24,11 @@ export const useSession = () => {
   };
 
   const refreshSession = (): void => {
-    console.log("[useSession] Session refresh is handled by Supabase auth state");
+    // Session refresh is handled by Supabase auth state
   };
 
   const clearSession = (): void => {
-    console.log("[useSession] Session clearing is handled by Supabase logout");
+    // Session clearing is handled by Supabase logout
   };
 
   return {

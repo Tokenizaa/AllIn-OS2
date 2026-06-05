@@ -277,8 +277,6 @@ export class InviteService {
         `Usuário ${userId} marcado para deleção (auth.users requer admin privileges)`,
         null
       );
-
-      console.log("[InviteService] User data deleted from tables, auth.users deletion requires admin privileges");
     } catch (error) {
       console.error("[InviteService] Error in deleteUserAndInviteSession:", error);
       throw error;

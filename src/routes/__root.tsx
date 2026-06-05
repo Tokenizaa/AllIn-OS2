@@ -84,33 +84,23 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <HeadContent />
-      </head>
-      <body className="dark bg-[#06080d] text-white">
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <AuthProvider>
-              <DistributorProvider>
-                <StoreSettingsProvider>
-                  <CartProvider>
-                    <ProductsProvider>
-                      <StyleProvider>
-                        <Outlet />
-                      </StyleProvider>
-                    </ProductsProvider>
-                  </CartProvider>
-                </StoreSettingsProvider>
-              </DistributorProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-        <Scripts />
-      </body>
-    </html>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <DistributorProvider>
+            <StoreSettingsProvider>
+              <CartProvider>
+                <ProductsProvider>
+                  <StyleProvider>
+                    <Outlet />
+                  </StyleProvider>
+                </ProductsProvider>
+              </CartProvider>
+            </StoreSettingsProvider>
+          </DistributorProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

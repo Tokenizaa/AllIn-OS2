@@ -1,23 +1,10 @@
-import jwt from "jsonwebtoken";
-const jwtSign = jwt.sign;
-const jwtVerify = jwt.verify;
 import { LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto, AuthResponse } from "../dto/auth.dto";
 import { CustomerRepository } from "../../customers/repositories/customer.repository";
 import { ProfileRepository } from "../../profiles/repositories/profile.repository";
 import { UserRole } from "../../../shared/types/common.types";
+import { getSupabaseClient } from "../../../infra/supabase/client";
 
-// In production, these must be in environment variables
-const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret_please_change_in_production";
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "default_jwt_refresh_secret_please_change_in_production";
-const JWT_EXPIRES_IN = "1h";
-const JWT_REFRESH_EXPIRES_IN = "7d";
-
-if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-  console.warn(
-    "⚠️ WARNING: Missing JWT_SECRET or JWT_REFRESH_SECRET in environment. " +
-    "Using fallback secrets for development/testing mode."
-  );
-}
+const supabase = getSupabaseClient();
 
 export class AuthService {
   private customerRepository: CustomerRepository;
@@ -46,20 +33,26 @@ export class AuthService {
     const profile = await this.profileRepository.findByUserId(customer.id);
     const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
 
-    // Generate tokens with role from profiles
-    const accessToken = this.generateAccessToken(customer.id, customer.email, role);
-    const refreshToken = this.generateRefreshToken(customer.id);
+    // Use Supabase Auth for login
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: dto.email,
+      password: dto.password,
+    });
+
+    if (authError) {
+      throw new Error(authError.message);
+    }
 
     return {
       user: {
         id: customer.id,
         name: customer.name,
         email: customer.email,
-        role: role, // Role from profiles table
+        role: role,
       },
-      accessToken,
-      refreshToken,
-      expiresIn: 3600, // 1 hour in seconds
+      accessToken: authData.session.access_token,
+      refreshToken: authData.session.refresh_token,
+      expiresIn: 3600,
     };
   }
 
@@ -78,8 +71,15 @@ export class AuthService {
       }
     }
 
-    // In production, hash the password
-    // const passwordHash = await bcrypt.hash(dto.password, 10);
+    // Use Supabase Auth for registration
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: dto.email,
+      password: dto.password,
+    });
+
+    if (authError) {
+      throw new Error(authError.message);
+    }
 
     // Create customer
     const customer = await this.customerRepository.create({
@@ -94,7 +94,6 @@ export class AuthService {
     });
 
     // Create profile with default role (cliente_final)
-    // This can be overridden based on business logic later
     await this.profileRepository.create({
       user_id: customer.id,
       name: customer.name,
@@ -107,56 +106,55 @@ export class AuthService {
     const profile = await this.profileRepository.findByUserId(customer.id);
     const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
 
-    // Generate tokens with role from profiles
-    const accessToken = this.generateAccessToken(customer.id, customer.email, role);
-    const refreshToken = this.generateRefreshToken(customer.id);
+    return {
+      user: {
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        role: role,
+      },
+      accessToken: authData.session?.access_token || "",
+      refreshToken: authData.session?.refresh_token || "",
+      expiresIn: 3600,
+    };
+  }
+
+  async refreshToken(dto: RefreshTokenDto): Promise<AuthResponse> {
+    // Use Supabase Auth for refresh token
+    const { data: authData, error: authError } = await supabase.auth.refreshSession({
+      refresh_token: dto.refreshToken,
+    });
+
+    if (authError) {
+      throw new Error(authError.message);
+    }
+
+    // Get customer from the session
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      throw new Error("Invalid refresh token");
+    }
+
+    const customer = await this.customerRepository.findByEmail(user.email);
+    if (!customer) {
+      throw new Error("Invalid refresh token");
+    }
+
+    // Get user role from profiles table
+    const profile = await this.profileRepository.findByUserId(customer.id);
+    const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
 
     return {
       user: {
         id: customer.id,
         name: customer.name,
         email: customer.email,
-        role: role, // Role from profiles table
+        role: role,
       },
-      accessToken,
-      refreshToken,
+      accessToken: authData.session.access_token,
+      refreshToken: authData.session.refresh_token,
       expiresIn: 3600,
     };
-  }
-
-  async refreshToken(dto: RefreshTokenDto): Promise<AuthResponse> {
-    try {
-      // Verify refresh token
-      const decoded = jwtVerify(dto.refreshToken, JWT_REFRESH_SECRET) as { userId: string };
-
-      // Get customer
-      const customer = await this.customerRepository.findById(decoded.userId);
-      if (!customer) {
-        throw new Error("Invalid refresh token");
-      }
-
-      // Get user role from profiles table (NOT from customers)
-      const profile = await this.profileRepository.findByUserId(customer.id);
-      const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
-
-      // Generate new tokens with role from profiles
-      const accessToken = this.generateAccessToken(customer.id, customer.email, role);
-      const refreshToken = this.generateRefreshToken(customer.id);
-
-      return {
-        user: {
-          id: customer.id,
-          name: customer.name,
-          email: customer.email,
-          role: role, // Role from profiles table
-        },
-        accessToken,
-        refreshToken,
-        expiresIn: 3600,
-      };
-    } catch {
-      throw new Error("Invalid refresh token");
-    }
   }
 
   async changePassword(userId: string, _dto: ChangePasswordDto): Promise<void> {
@@ -166,49 +164,48 @@ export class AuthService {
       throw new Error("Customer not found");
     }
 
-    // In production, verify current password
-    // const isPasswordValid = await bcrypt.compare(dto.currentPassword, customer.password_hash);
-    // if (!isPasswordValid) {
-    //   throw new Error("Invalid current password");
-    // }
+    // Use Supabase Auth for password change
+    const { error: authError } = await supabase.auth.updateUser({
+      password: _dto.newPassword,
+    });
 
-    // In production, hash new password
-    // const newPasswordHash = await bcrypt.hash(dto.newPassword, 10);
-
-    // Update customer with new password hash
-    // await this.customerRepository.update(userId, { password_hash: newPasswordHash });
-
-    // For now, just acknowledge the change
+    if (authError) {
+      throw new Error(authError.message);
+    }
   }
 
   async logout(_userId: string): Promise<void> {
     void _userId;
-    // In production, add refresh token to blacklist
-    // For now, just acknowledge the logout
-  }
-
-  private generateAccessToken(userId: string, email: string, role: string): string {
-    return jwtSign(
-      { userId, email, role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
-  }
-
-  private generateRefreshToken(userId: string): string {
-    return jwtSign(
-      { userId },
-      JWT_REFRESH_SECRET,
-      { expiresIn: JWT_REFRESH_EXPIRES_IN }
-    );
+    // Use Supabase Auth for logout
+    const { error: authError } = await supabase.auth.signOut();
+    if (authError) {
+      throw new Error(authError.message);
+    }
   }
 
   verifyAccessToken(token: string): { userId: string; email: string; role: string } {
-    try {
-      const decoded = jwtVerify(token, JWT_SECRET) as { userId: string; email: string; role: string };
-      return decoded;
-    } catch {
+    // Use Supabase Auth to verify token
+    // This is a simplified version - in production, you should use Supabase's built-in session management
+    const { data: { user }, error } = supabase.auth.getUser(token);
+    
+    if (error || !user?.email) {
       throw new Error("Invalid access token");
     }
+
+    // Get customer from email
+    return this.customerRepository.findByEmail(user.email).then(customer => {
+      if (!customer) {
+        throw new Error("Invalid access token");
+      }
+
+      return this.profileRepository.findByUserId(customer.id).then(profile => {
+        const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
+        return {
+          userId: customer.id,
+          email: customer.email,
+          role: role,
+        };
+      });
+    });
   }
 }

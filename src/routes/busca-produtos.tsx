@@ -96,8 +96,8 @@ function ProductSearchPage() {
                     description={product.caption2}
                     price={product.price}
                     tag={product.produtoTag}
-                    onDetailsClick={() => console.log("Details clicked", product.id)}
-                    onAddToCart={() => console.log("Add to cart", product.id)}
+                    onDetailsClick={() => {/* Details click handler */}}
+                    onAddToCart={() => {/* Add to cart handler */}}
                   />
                 ))}
               </div>

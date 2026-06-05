@@ -1,1 +1,0 @@
-function a(i){return i?.usuario||i?.id_comprador||i?.user_id||i?.email||i?.name||i?.id||"Cliente"}function n(i){return a(i).split(" ").map(e=>e[0]).filter(Boolean).slice(0,2).join("").toUpperCase()}export{n as a,a as g};

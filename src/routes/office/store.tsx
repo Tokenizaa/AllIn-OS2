@@ -7,6 +7,7 @@ import { StatCard } from "@/components/distributor/stat-card";
 import { ProductService } from "@/services/products";
 import { useAuth } from "@/modules/auth";
 import { useProducts } from "@/hooks/products/useProducts";
+import { UserRole } from "@/shared/types/roles";
 
 type ProductRow = { id: string; name?: string | null; description?: string | null; price?: number | null; category?: string | null };
 
@@ -18,7 +19,7 @@ function formatBRL(value: number) {
 
 function StorePage() {
   const { user } = useAuth();
-  const isCustomer = user?.role === "customer";
+  const isCustomer = user?.role === UserRole.CLIENTE_FINAL;
 
   const { data: products = [], isLoading } = useProducts(12);
 

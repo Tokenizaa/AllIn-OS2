@@ -43,7 +43,7 @@ export function InvitesManagement() {
   // Form states
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("gestão_admin");
+  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.GESTAO_ADMIN);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
@@ -79,7 +79,8 @@ export function InvitesManagement() {
         email: email,
         role: selectedRole,
         permissions: selectedPermissions,
-        notes: notes
+        notes: notes,
+        invited_by: "system"
       });
 
       // Notification toast
@@ -98,7 +99,7 @@ export function InvitesManagement() {
       // Reset states and close modal
       setFullName("");
       setEmail("");
-      setSelectedRole("gestão_admin");
+      setSelectedRole(UserRole.GESTAO_ADMIN);
       setSelectedPermissions([]);
       setNotes("");
       setOpenInviteModal(false);

@@ -7,6 +7,7 @@ import { Users, TrendingUp, Trophy, Award, ChevronRight, Calculator } from "luci
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PublicHeader } from "@/components/app/public-header";
+import { UserRole } from "@/shared/types/roles";
 
 export const Route = createFileRoute("/seja-distribuidor/$slug")({
   component: DistributorRecruitmentPage,
@@ -77,7 +78,7 @@ function DistributorRecruitmentPage() {
     setSubmittingReg(true);
     try {
       // Execute simulated register with distributor role
-      await register(name, email, "distributor", {
+      await register(name, email, UserRole.DISTRIBUIDOR, {
         phone,
         cpf,
         sponsor_id: sponsorSlug,
