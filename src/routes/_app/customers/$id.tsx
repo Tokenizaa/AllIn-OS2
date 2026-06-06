@@ -1,6 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCustomer360 } from "@/hooks/customers/useCustomer360";
+import { useCreateWallet } from "@/hooks/mutations/wallets/useCreateWallet";
+import { useCreatePointsWallet } from "@/hooks/mutations/wallets/useCreatePointsWallet";
+import { useUpdateWalletBalance } from "@/hooks/mutations/wallets/useUpdateWalletBalance";
+import { useCreateWalletTransaction } from "@/hooks/mutations/wallets/useCreateWalletTransaction";
 import {
   Mail,
   MapPin,
@@ -25,8 +30,6 @@ import { KpiCard } from "@/components/widgets/kpi-card";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
 import { toast } from "sonner";
 import { CustomerService } from "@/services/customers";
-import { OrderService } from "@/services/orders";
-import { WalletService } from "@/services/wallets";
 
 const statusStyles: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
@@ -34,6 +37,8 @@ const statusStyles: Record<string, string> = {
   inactive: "bg-red-500/10 text-red-500/30 border-red-500/30",
   churned: "bg-muted text-muted-foreground border-border",
 };
+
+const EMPTY_LIST: any[] = [];
 
 function formatBRL(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -43,61 +48,33 @@ const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
 
 export const Route = createFileRoute("/_app/customers/$id")({
   component: Customer360,
-  loader: async ({ params }) => {
-    const data = await CustomerService.fetchCustomerById(params.id);
-    if (!data) throw notFound();
-    return { customer: data };
-  },
 });
 
 function Customer360() {
-  const { customer: c } = Route.useLoaderData();
-  const queryClient = useQueryClient();
+  const { id } = Route.useParams();
 
-  const { data: queryData, isLoading, refetch } = useQuery({
-    queryKey: ["customer-360", c.id],
-    queryFn: async () => {
-      const [orderData, sponsorData] = await Promise.all([
-        OrderService.fetchOrdersByCustomerId(c.id),
-        c.patrocinador_comprador
-          ? CustomerService.fetchCustomerByCompradorId(c.patrocinador_comprador)
-          : Promise.resolve(null),
-      ]);
-
-      // wallets table select
-      const walletData = await WalletService.fetchWalletByCustomerId(c.id);
-
-      let txData: any[] = [];
-      if (walletData) {
-        txData = await WalletService.fetchWalletTransactionsByWalletId(walletData.id);
-      }
-
-      // points_wallets select
-      const ptsData = await WalletService.fetchPointsWalletByCustomerId(c.id);
-
-      // downlines check
-      let downlineData: any[] = [];
-      if (c.id_comprador) {
-        downlineData = await CustomerService.fetchDownlines(c.id_comprador);
-      }
-
-      return {
-        orders: orderData || [],
-        sponsor: sponsorData || null,
-        wallet: walletData || null,
-        pointsWallet: ptsData || null,
-        walletTransactions: txData,
-        downlines: downlineData,
-      };
-    }
+  const { data: customer, isLoading: isLoadingCustomer, isError: isErrorCustomer, error: customerError } = useQuery({
+    queryKey: ["customer", id],
+    queryFn: () => CustomerService.fetchCustomerById(id),
   });
 
-  const orders = queryData?.orders || [];
+  const { data: queryData, isLoading, isError, error, refetch } = useCustomer360(
+    customer?.id,
+    customer?.patrocinador_comprador,
+    customer?.id_comprador
+  );
+
+  const createWallet = useCreateWallet();
+  const createPointsWallet = useCreatePointsWallet();
+  const updateWalletBalance = useUpdateWalletBalance();
+  const createWalletTransaction = useCreateWalletTransaction();
+
+  const orders = queryData?.orders ?? EMPTY_LIST;
   const sponsor = queryData?.sponsor || null;
   const wallet = queryData?.wallet || null;
   const pointsWallet = queryData?.pointsWallet || null;
-  const walletTransactions = queryData?.walletTransactions || [];
-  const downlines = queryData?.downlines || [];
+  const walletTransactions = queryData?.walletTransactions ?? EMPTY_LIST;
+  const downlines = queryData?.downlines ?? EMPTY_LIST;
 
   // Manual Note
   const [customNotes, setCustomNotes] = useState<any[]>([]);
@@ -139,7 +116,8 @@ function Customer360() {
   }, [orders]);
 
   const churnRisk = useMemo(() => {
-    if (c.status === "inactive" || c.status === "churned") return "95% (Crítico)";
+    if (!customer) return "N/A";
+    if (customer.status === "inactive" || customer.status === "churned") return "95% (Crítico)";
     if (orders.length === 0) return "75% (Sem Compras)";
     
     const lastOrderDate = new Date(Math.max(...orders.map(o => new Date(o.created_at || 0).getTime())));
@@ -149,28 +127,26 @@ function Customer360() {
     if (daysSinceLastOrder > 30) return "60% (Risco Médio)";
     if (daysSinceLastOrder > 15) return "35% (Alerta Leve)";
     return "12% (Estável / Baixo)";
-  }, [c.status, orders]);
+  }, [customer?.status, orders]);
 
   // Initialize financial wallet
-  const handleCreateWallet = async () => {
-    try {
-      await WalletService.createWallet(c.id);
-      await queryClient.invalidateQueries({ queryKey: ["customer-360", c.id] });
-      toast.success("Carteira financeira criada com sucesso no banco de dados!");
-    } catch (err: any) {
-      toast.error("Erro ao provisionar carteira: " + err.message);
-    }
+  const handleCreateWallet = () => {
+    if (!customer) return;
+    createWallet.mutate(customer.id, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
   };
 
   // Initialize points loyalty wallet
-  const handleCreatePointsWallet = async () => {
-    try {
-      await WalletService.createPointsWallet(c.id);
-      await queryClient.invalidateQueries({ queryKey: ["customer-360", c.id] });
-      toast.success("Carteira de pontos criada com sucesso no banco de dados!");
-    } catch (err: any) {
-      toast.error("Erro ao provisionar pontos: " + err.message);
-    }
+  const handleCreatePointsWallet = () => {
+    if (!customer) return;
+    createPointsWallet.mutate(customer.id, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
   };
 
   // Add adjustment tx to finance
@@ -190,26 +166,31 @@ function Customer360() {
     const balanceBefore = wallet.balance || 0;
     const balanceAfter = balanceBefore + change;
 
-    try {
-      await WalletService.updateWalletBalance(wallet.id, balanceAfter);
-
-      await WalletService.createWalletTransaction(
-        wallet.id,
-        txType,
-        amt,
-        balanceBefore,
-        balanceAfter,
-        txDesc || "Lançamento de ajuste administrativo"
-      );
-
-      await queryClient.invalidateQueries({ queryKey: ["customer-360", c.id] });
-      setTxAmount("");
-      setTxDesc("");
-      setShowAddTx(false);
-      toast.success(`Saldo atualizado com sucesso (${txType === "credit" ? "Crédito" : "Débito"} de ${formatBRL(amt)}).`);
-    } catch (err: any) {
-      toast.error("Erro ao lançar transação financeira: " + err.message);
-    }
+    updateWalletBalance.mutate(
+      { walletId: wallet.id, balance: balanceAfter },
+      {
+        onSuccess: () => {
+          createWalletTransaction.mutate(
+            {
+              walletId: wallet.id,
+              transaction_type: txType,
+              amount: amt,
+              balance_before: balanceBefore,
+              balance_after: balanceAfter,
+              description: txDesc || "Lançamento de ajuste administrativo",
+            },
+            {
+              onSuccess: () => {
+                refetch();
+                setTxAmount("");
+                setTxDesc("");
+                setShowAddTx(false);
+              },
+            }
+          );
+        },
+      }
+    );
   };
 
   // Timeline entries
@@ -231,7 +212,7 @@ function Customer360() {
   const tl = useMemo(() => {
     return [
       ...customNotes,
-      { id: "1", type: "note" as const, title: "Ficha Operacional", description: "Distribuidor sincronizado com os dados do Supabase.", at: c.created_at || new Date().toISOString() },
+      { id: "1", type: "note" as const, title: "Ficha Operacional", description: "Distribuidor sincronizado com os dados do Supabase.", at: customer?.created_at || new Date().toISOString() },
       ...orders.slice(0, 4).map((o, index) => ({
         id: `order-tl-${index}`,
         type: "order" as const,
@@ -240,13 +221,30 @@ function Customer360() {
         at: o.created_at || new Date().toISOString(),
       })),
     ];
-  }, [customNotes, orders, c.created_at]);
+  }, [customNotes, orders, customer?.created_at]);
 
-  if (isLoading) {
+  if (isErrorCustomer) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Customer 360" title="Cliente não encontrado" subtitle="Falha ao carregar dados do cliente." />
+        <p className="text-sm text-destructive">Erro: {customerError instanceof Error ? customerError.message : "falha desconhecida"}</p>
+      </div>
+    );
+  }
+
+  if (isLoadingCustomer || isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 bg-background">
         <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         <p className="text-xs text-muted-foreground animate-pulse font-medium">Carregando dados estruturados do Supabase...</p>
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Customer 360" title="Cliente não encontrado" subtitle="O cliente solicitado não existe." />
       </div>
     );
   }
@@ -258,14 +256,14 @@ function Customer360() {
           Distribuidores
         </Link>
         <span>/</span>
-        <span className="text-foreground">{getCustomerLabel(c)}</span>
+        <span className="text-foreground">{getCustomerLabel(customer)}</span>
       </div>
 
       <PageHeader
         eyebrow="Customer 360"
-        title={getCustomerLabel(c)}
-        subtitle={`${c.plano_id || c.plan_id || "Plano Integral"} · ${c.qualification || "Bronze"} · Ativo desde ${
-          c.created_at ? new Date(c.created_at).toLocaleDateString("pt-BR") : "-"
+        title={getCustomerLabel(customer)}
+        subtitle={`${customer.plano_id || customer.plan_id || "Plano Integral"} · ${customer.qualification || "Bronze"} · Ativo desde ${
+          customer.created_at ? new Date(customer.created_at).toLocaleDateString("pt-BR") : "-"
         }`}
         actions={
           <>
@@ -284,34 +282,34 @@ function Customer360() {
         <div className="lg:col-span-1 rounded-xl border border-border bg-card/60 p-5 space-y-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary to-fuchsia-500 grid place-items-center text-lg font-semibold text-white shadow-md">
-              {getCustomerInitials(c)}
+              {getCustomerInitials(customer)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-semibold truncate text-white">{getCustomerLabel(c)}</p>
-              <p className="text-xs text-muted-foreground truncate">{c.id_comprador || c.usuario}</p>
+              <p className="font-semibold truncate text-white">{getCustomerLabel(customer)}</p>
+              <p className="text-xs text-muted-foreground truncate">{customer.id_comprador || customer.usuario}</p>
             </div>
           </div>
           
           <div className="space-y-2 text-xs border-t border-border/60 pt-3">
             <p className="flex items-center gap-2 text-muted-foreground">
-              <Mail className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{c.user_id || c.id_comprador || "Sem ID"}</span>
+              <Mail className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{customer.user_id || customer.id_comprador || "Sem ID"}</span>
             </p>
             <p className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="h-3.5 w-3.5 shrink-0" /> <span>{c.telefone || "-"}</span>
+              <Phone className="h-3.5 w-3.5 shrink-0" /> <span>{customer.telefone || "-"}</span>
             </p>
             <p className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 shrink-0" /> <span>{c.cidade || "-"}/{c.estado || "-"}</span>
+              <MapPin className="h-3.5 w-3.5 shrink-0" /> <span>{customer.cidade || "-"}/{customer.estado || "-"}</span>
             </p>
             <p className="flex items-center gap-2 text-muted-foreground">
-              <Shield className="h-3.5 w-3.5 shrink-0" /> <span>CPF {c.metadata?.cpf || c.cpf || "-"}</span>
+              <Shield className="h-3.5 w-3.5 shrink-0" /> <span>CPF {customer.metadata?.cpf || customer.cpf || "-"}</span>
             </p>
           </div>
           
           <div className="flex flex-wrap gap-1.5 pt-1">
-            <Badge variant="outline" className="bg-primary/5 ">{c.qualification || "Bronze"}</Badge>
-            <Badge variant="outline" className="bg-primary/5">{c.plano_id || c.plan_id || "Integral"}</Badge>
-            <Badge variant="outline" className={cn("capitalize font-semibold", statusStyles[c.status || "pending"])}>
-              {c.status || "pending"}
+            <Badge variant="outline" className="bg-primary/5 ">{customer.qualification || "Bronze"}</Badge>
+            <Badge variant="outline" className="bg-primary/5">{customer.plano_id || customer.plan_id || "Integral"}</Badge>
+            <Badge variant="outline" className={cn("capitalize font-semibold", statusStyles[customer.status || "pending"])}>
+              {customer.status || "pending"}
             </Badge>
           </div>
           
@@ -585,7 +583,7 @@ function Customer360() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-white">Parceiros da Rede (Indicações Diretas)</h3>
-                <p className="text-xs text-muted-foreground">Listagem em tempo real de distribuidores cujo sponsor direta é @{c.id_comprador || c.usuario}</p>
+                <p className="text-xs text-muted-foreground">Listagem em tempo real de distribuidores cujo sponsor direta é @{customer.id_comprador || customer.usuario}</p>
               </div>
               <Badge variant="outline" className="px-2.5 py-1 text-xs text-white border-white/20">
                 {downlines.length} Diretos Cadastrados
@@ -768,7 +766,7 @@ function Customer360() {
                   
                   <div className="text-xs text-muted-foreground space-y-1.5 p-3 rounded-lg border border-border/40">
                     <p className="text-white"><strong>Notas de Compliance:</strong></p>
-                    <p>1. O documento bancário deve estar no CPF/CNPJ titular cadastrado ({c.metadata?.cpf || c.cpf || "CPF ausente"}). Não são permitidos pagamentos para terceiros.</p>
+                    <p>1. O documento bancário deve estar no CPF/CNPJ titular cadastrado ({customer.metadata?.cpf || customer.cpf || "CPF ausente"}). Não são permitidos pagamentos para terceiros.</p>
                     <p>2. Os limites anuais de pagamento tributado são recalculados com base no envio do PIS/NIT para recolhimento de INSS.</p>
                   </div>
                 </div>

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
-import { OrderService } from "@/services/orders";
+import { useOrderList } from "@/hooks/orders/useOrderList";
 
 export const Route = createFileRoute("/_app/orders/")({ component: OrdersPage });
 
@@ -14,15 +13,24 @@ const statusColor: Record<string, string> = {
 };
 
 function OrdersPage() {
-  const { data: ordersPageData, isLoading } = useQuery({
-    queryKey: ["orders", "list"],
-    queryFn: () => OrderService.fetchOrdersAndCustomers(60),
-  });
+  const { data: ordersPageData, isLoading, isError, error, refetch } = useOrderList(60);
 
   const orders = ordersPageData?.orders || [];
   const customers = ordersPageData?.customers || [];
 
   const total = orders.reduce((sum, o) => sum + Number(o.valor_total_pedido || o.valor_total || 0), 0);
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Comercial" title="Pedidos" subtitle="Falha ao carregar pedidos." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

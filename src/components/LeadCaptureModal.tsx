@@ -23,7 +23,6 @@ export default function LeadCaptureModal({ isOpen, onClose, onLeadCaptured }: Le
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Iniciando captura de lead...', { name, whatsapp });
     
     // Validar nome
     if (!validateName(name)) {
@@ -48,7 +47,6 @@ export default function LeadCaptureModal({ isOpen, onClose, onLeadCaptured }: Le
     setIsSubmitting(true);
 
     try {
-      console.log('Salvando lead localmente...');
       
       // Formatar dados
       const formattedName = formatName(name);
@@ -70,7 +68,7 @@ export default function LeadCaptureModal({ isOpen, onClose, onLeadCaptured }: Le
       // Atualizar estado do chat
       updateChatStateWithLead(newLead);
 
-      console.log('Lead salvo com sucesso:', newLead);
+      // Lead saved successfully
 
       // Notificar componente pai
       onLeadCaptured(newLead);

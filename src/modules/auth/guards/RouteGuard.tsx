@@ -46,13 +46,11 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
   const location = useLocation();
   const inferredPermission = requiredPermission || resolvePathPermission(location.pathname);
 
-  console.log("[RouteGuard] Render. path:", location.pathname, "loading:", loading, "hasUser:", !!user, "userRole:", user?.role, "allowedRoles:", allowedRoles);
+  // RouteGuard render
 
   useEffect(() => {
-    console.log("[RouteGuard] useEffect fired. path:", location.pathname, "loading:", loading, "hasUser:", !!user, "userRole:", user?.role);
     if (!loading) {
       if (!user) {
-        console.log("[RouteGuard] No user found. Redirecting to /login from:", location.pathname);
         // Redirect to Login page and preserve return url
         navigate({
           to: "/login",
@@ -63,7 +61,6 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
 
       // Check role permissions
       if (allowedRoles && !allowedRoles.includes(user.role)) {
-        console.log("[RouteGuard] Role mismatch! user.role:", user.role, "is not in:", allowedRoles);
         // Role mismatch redirect to their respective primary view
         navigate({ to: getPrimaryPathForRole(user.role) });
         return;
@@ -71,7 +68,6 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
 
       // Check specific modular permission
       if (inferredPermission && !hasPermission(inferredPermission.module, inferredPermission.action || "read")) {
-        console.log("[RouteGuard] Missing permission. module:", inferredPermission.module, "action:", inferredPermission.action);
         // No permission error card redirect or similar
         navigate({ to: getRoleRedirectPath(user) });
       }
@@ -79,7 +75,6 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
   }, [user, loading, allowedRoles, inferredPermission, navigate, location.pathname, hasPermission]);
 
   if (loading) {
-    console.log("[RouteGuard] Still loading, showing loader spinner.");
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#07090e] text-white">
         <div className="relative flex items-center justify-center">

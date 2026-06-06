@@ -44,7 +44,7 @@ export const OrderService = {
   async fetchOrdersAndCustomers(limit = 60) {
     const [{ data: ordersData, error: ordersError }, { data: customersData, error: customersError }] = await Promise.all([
       supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(limit),
-      supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata, name").order("created_at", { ascending: false }),
+      supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
     ]);
     if (ordersError) throw ordersError;
     if (customersError) throw customersError;

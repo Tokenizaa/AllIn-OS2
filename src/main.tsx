@@ -4,6 +4,9 @@ import { RouterProvider } from "@tanstack/react-router";
 import { getRouter } from "./router";
 import "./styles.css";
 
+// Validate environment variables at startup
+import "@/config/env";
+
 const router = getRouter();
 
 // Register the router instance for type safety

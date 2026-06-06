@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useAuditLogs } from "@/hooks/system/useAuditLogs";
 
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/widgets/page-header";
@@ -12,13 +13,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/system")({ component: SystemPage });
 
-const auditLogs = [
-  { id: "1", actor: "admin@allin.io", action: "CREATE_USER", entity: "profiles", at: "Hoje 09:20" },
-  { id: "2", actor: "gestao@allin.io", action: "APPROVE_INVITE", entity: "admin_invites", at: "Hoje 08:52" },
-  { id: "3", actor: "financeiro@allin.io", action: "UPDATE_GATEWAY", entity: "payments_gateways", at: "Ontem 17:15" },
-];
-
 function SystemPage() {
+  const { data: auditLogs = [], isLoading, isError, error, refetch } = useAuditLogs(10);
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Sistema" title="Admin & Auditoria" subtitle="Falha ao carregar auditoria." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -77,7 +86,13 @@ function SystemPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {auditLogs.map((log) => (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                      Carregando auditoria...
+                    </td>
+                  </tr>
+                ) : auditLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-accent/30">
                     <td className="px-4 py-3 font-mono text-xs">{log.actor}</td>
                     <td className="px-4 py-3">

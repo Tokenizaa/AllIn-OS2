@@ -2,7 +2,8 @@ import { z } from "zod";
 import { computeGenerationBonus, getPlanRule } from "@/modules/plans/mlm-rules";
 import { getActiveCustomerPlan as getActiveCustomerPlanApi, getPlanBonuses as getPlanBonusesApi, getPlanById as getPlanByIdApi } from "../../backend/api";
 import { getCustomerLabel } from "@/lib/customer-label";
-import { supabase } from "@/lib/supabase-client";
+import { CustomerService } from "@/services/customers";
+import { NetworkService } from "@/services/network";
 
 type CustomerRow = {
   id: string;
@@ -48,42 +49,19 @@ type PlanMetadata = {
 };
 
 async function fetchCustomer(customerId: string) {
-  const { data, error } = await supabase
-    .from("customers")
-    .select("id,user_id,usuario,id_comprador,patrocinador_comprador,qualification,status,metadata,plan_id,plan_name,plano_id")
-    .eq("id", customerId)
-    .limit(1);
-  if (error) throw error;
-  return (data?.[0] as CustomerRow) || null;
+  return (await CustomerService.fetchCustomerById(customerId)) as CustomerRow | null;
 }
 
 async function fetchSponsor(customerId: string) {
-  const { data, error } = await supabase
-    .from("network_relationships")
-    .select("customer_id,sponsor_customer_id,level")
-    .eq("customer_id", customerId)
-    .limit(1);
-  if (error) throw error;
-  return (data?.[0] as NetworkRow) || null;
+  return (await NetworkService.fetchSponsorRelationship(customerId)) as NetworkRow | null;
 }
 
 async function fetchUpline(customerId: string) {
-  const { data, error } = await supabase
-    .from("network_relationships")
-    .select("customer_id,sponsor_customer_id,level")
-    .eq("customer_id", customerId)
-    .order("level", { ascending: true });
-  if (error) throw error;
-  return (data as NetworkRow[]) || [];
+  return (await NetworkService.fetchUplineRelationships(customerId)) as NetworkRow[];
 }
 
 async function countDirects(customerId: string) {
-  const { data, error } = await supabase
-    .from("network_relationships")
-    .select("customer_id")
-    .eq("sponsor_customer_id", customerId);
-  if (error) throw error;
-  return data?.length || 0;
+  return NetworkService.countDirectRelationships(customerId);
 }
 
 function resolvePlanKey(customer: CustomerRow | null): string | null {

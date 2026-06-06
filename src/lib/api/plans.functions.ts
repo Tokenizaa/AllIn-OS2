@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
   getPlans as getPlansApi,
-  getPlanBySlug as getPlanBySlugApi,
   getPlanBonuses as getPlanBonusesApi,
   createPlan as createPlanApi,
   updatePlan as updatePlanApi,
@@ -26,16 +25,6 @@ export const getAllPlans = async () => {
     throw new Error(result.error || "Failed to fetch plans");
   }
   return result.data.data;
-};
-
-// Get plan by slug
-export const getPlanBySlug = async (data: { slug: string }) => {
-  const parsed = z.object({ slug: z.string() }).parse(data);
-  const result = await getPlanBySlugApi({ slug: parsed.slug });
-  if (!result.success) {
-    throw new Error(result.error || "Failed to fetch plan");
-  }
-  return result.data;
 };
 
 // Get plan bonuses

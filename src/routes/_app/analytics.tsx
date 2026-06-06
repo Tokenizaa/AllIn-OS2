@@ -1,36 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useAnalytics } from "@/hooks/analytics/useAnalytics";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnalyticsService } from "@/services/analytics";
-import { CustomerService } from "@/services/customers";
 
 export const Route = createFileRoute("/_app/analytics")({ component: AnalyticsPage });
 
 function AnalyticsPage() {
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["analytics", "orders", "stats"],
-    queryFn: () => AnalyticsService.fetchOrderStats(),
-  });
+  const { stats, orders, customers } = useAnalytics();
 
-  const { data: ordersResult, isLoading: ordersLoading } = useQuery({
-    queryKey: ["analytics", "orders", "recent"],
-    queryFn: () => AnalyticsService.fetchRecentOrders({ page: 1, limit: 50 }),
-  });
+  const { data: statsData, isLoading: statsLoading, isError: statsIsError, error: statsError, refetch: refetchStats } = stats;
+  const { data: ordersResult, isLoading: ordersLoading, isError: ordersIsError, error: ordersError, refetch: refetchOrders } = orders;
+  const { data: customersData, isLoading: customersLoading, isError: customersIsError, error: customersError, refetch: refetchCustomers } = customers;
 
-  const { data: customers } = useQuery({
-    queryKey: ["analytics", "customers"],
-    queryFn: () => CustomerService.fetchAnalyticsCustomers(),
-  });
-
-  const orders = useMemo(() => ordersResult?.data?.data || [], [ordersResult]);
+  const ordersList = useMemo(() => ordersResult?.data?.data || [], [ordersResult]);
 
   const revenueSeries = useMemo(() => {
     // Show in chronological order (left to right) by reversing the recent orders slice
-    return orders.slice(0, 12).reverse().map((order: any, index: number) => {
+    return ordersList.slice(0, 12).reverse().map((order: any, index: number) => {
       let dayLabel = `D${index + 1}`;
       if (order.data_criacao_pedido) {
         const d = new Date(order.data_criacao_pedido);
@@ -49,13 +38,13 @@ function AnalyticsPage() {
         ano_anterior: Number(order.valor_total || 0) * 0.82,
       });
     });
-  }, [orders]);
+  }, [ordersList]);
 
   const getCustomerName = (order: any) => {
-    if (!customers || customers.length === 0) {
+    if (!customersData || customersData.length === 0) {
       return order.usuario || order.comprador || "Cliente";
     }
-    const found = customers.find(
+    const found = customersData.find(
       (c: any) =>
         (order.user_id && c.user_id === order.user_id) ||
         (order.customer_id && c.id === order.customer_id) ||
@@ -66,24 +55,24 @@ function AnalyticsPage() {
   };
 
   const channelMix = useMemo(() => {
-    const methods = orders.reduce((acc: Record<string, number>, order: any) => {
+    const methods = ordersList.reduce((acc: Record<string, number>, order: any) => {
       const key = order.forma_pagamento || "outro";
       acc[key] = (acc[key] || 0) + Number(order.valor_total || 0);
       return acc;
     }, {});
     return Object.entries(methods).map(([name, value]) => ({ name, value: Math.round(Number(value)) }));
-  }, [orders]);
+  }, [ordersList]);
 
   const networkLegs = useMemo(() => {
-    const total = Number(stats?.data?.totalOrders || 0);
-    const active = Number(stats?.data?.deliveredOrders || 0);
-    const pending = Number(stats?.data?.pendingOrders || 0);
+    const total = Number(statsData?.data?.totalOrders || 0);
+    const active = Number(statsData?.data?.deliveredOrders || 0);
+    const pending = Number(statsData?.data?.pendingOrders || 0);
     return [
       { name: "Pedidos", esquerda: total, direita: active },
       { name: "Entregues", esquerda: active, direita: pending },
-      { name: "Faturamento", esquerda: Number(stats?.data?.totalRevenue || 0), direita: Number(stats?.data?.processingOrders || 0) },
+      { name: "Faturamento", esquerda: Number(statsData?.data?.totalRevenue || 0), direita: Number(statsData?.data?.processingOrders || 0) },
     ];
-  }, [stats]);
+  }, [statsData]);
 
   const isLoading = statsLoading || ordersLoading;
   const cohort = Array.from({ length: 12 }).map((_, i) => ({ mes: `M${i + 1}`, retencao: Math.max(20, 100 - i * 4) }));
@@ -102,15 +91,31 @@ function AnalyticsPage() {
     );
   }
 
+  if (statsIsError || ordersIsError) {
+    const message =
+      (statsError instanceof Error && statsError.message) ||
+      (ordersError instanceof Error && ordersError.message) ||
+      "falha desconhecida";
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Executive" title="Analytics" subtitle="Falha ao carregar dados reais." />
+        <p className="text-sm text-destructive">Erro: {message}</p>
+        <button className="text-sm underline" onClick={() => { void refetchStats(); void refetchOrders(); }}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Executive" title="Analytics" subtitle="KPIs operacionais com dados reais de pedidos." />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Receita total" value={`R$ ${Number(stats?.data?.totalRevenue || 0).toLocaleString()}`} helper={`${Number(stats?.data?.totalOrders || 0)} pedidos`} />
-        <MetricCard title="Pedidos" value={Number(stats?.data?.totalOrders || 0).toString()} helper={`${Number(stats?.data?.pendingOrders || 0)} pendentes`} />
-        <MetricCard title="Entregues" value={Number(stats?.data?.deliveredOrders || 0).toString()} helper={`${Number(stats?.data?.shippedOrders || 0)} enviados`} />
-        <MetricCard title="Cancelados" value={Number(stats?.data?.cancelledOrders || 0).toString()} helper="Monitoramento de perda" />
+        <MetricCard title="Receita total" value={`R$ ${Number(statsData?.data?.totalRevenue || 0).toLocaleString()}`} helper={`${Number(statsData?.data?.totalOrders || 0)} pedidos`} />
+        <MetricCard title="Pedidos" value={Number(statsData?.data?.totalOrders || 0).toString()} helper={`${Number(statsData?.data?.pendingOrders || 0)} pendentes`} />
+        <MetricCard title="Entregues" value={Number(statsData?.data?.deliveredOrders || 0).toString()} helper={`${Number(statsData?.data?.shippedOrders || 0)} enviados`} />
+        <MetricCard title="Cancelados" value={Number(statsData?.data?.cancelledOrders || 0).toString()} helper="Monitoramento de perda" />
       </div>
 
       <Tabs defaultValue="operacional" className="space-y-4">
@@ -175,7 +180,7 @@ function AnalyticsPage() {
           <div className="rounded-xl border border-border bg-card/60 p-5">
             <h3 className="text-sm font-semibold mb-3">Últimos pedidos</h3>
             <div className="space-y-3">
-              {orders.slice(0, 10).map((order: any) => (
+              {ordersList.slice(0, 10).map((order: any) => (
                 <div key={order.id} className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm">
                   <div>
                     <div className="font-medium">{getCustomerName(order)}</div>

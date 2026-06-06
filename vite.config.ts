@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -8,15 +7,6 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
-    tanstackStart({
-      importProtection: {
-        behavior: "error",
-        client: {
-          files: ["**/server/**"],
-          specifiers: ["server-only"],
-        },
-      },
-    }),
     react(),
   ],
   resolve: {
@@ -39,12 +29,9 @@ export default defineConfig({
     // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
     watch: process.env.DISABLE_HMR === "true" ? null : {},
   },
-  ssr: {
-    external: ["jsonwebtoken"],
-  },
   build: {
     rollupOptions: {
-      external: ["jsonwebtoken", "@/backend/modules/auth/services/auth.service"],
+      external: ["jsonwebtoken"],
     },
   },
 });

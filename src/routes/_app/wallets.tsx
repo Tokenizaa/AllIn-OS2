@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useWithdrawals } from "@/hooks/wallets/useWithdrawals";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
@@ -7,35 +7,26 @@ import { ShieldAlert } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WalletDashboard } from "@/components/payments/wallet-dashboard";
 import { PaymentHistory } from "@/components/payments/payment-history";
-import { WalletService } from "@/services/wallets";
 
 export const Route = createFileRoute("/_app/wallets")({ component: WalletsPage });
 
 function WalletsPage() {
-  const { data: saquesData, isLoading } = useQuery({
-    queryKey: ["wallets", "withdrawals"],
-    queryFn: async () => {
-      const withdrawalsData = await WalletService.fetchWithdrawals();
-      const transformedWithdrawals = withdrawalsData.map(w => ({
-        id: w.id,
-        user: w.user_name,
-        valor: Number(w.valor || 0),
-        metodo: w.metodo,
-        status: w.status,
-        risco: w.risco,
-      }));
-      const summary = {
-        total: transformedWithdrawals.reduce((sum, w) => sum + Number(w.valor || 0), 0),
-        pending: transformedWithdrawals.filter(w => w.status === "pendente").length,
-        approved: transformedWithdrawals.filter(w => w.status === "aprovado").length,
-        anomalies: transformedWithdrawals.filter(w => w.risco).length,
-      };
-      return { saques: transformedWithdrawals, summary };
-    }
-  });
+  const { data: saquesData, isError, error, refetch } = useWithdrawals();
 
   const saques = saquesData?.saques || [];
   const summary = saquesData?.summary || { total: 0, pending: 0, approved: 0, anomalies: 0 };
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Financeiro" title="Carteiras & Saques" subtitle="Falha ao carregar saques." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

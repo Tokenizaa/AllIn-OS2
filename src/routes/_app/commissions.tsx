@@ -1,42 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCommissions } from "@/hooks/commissions/useCommissions";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
-import { PaymentService } from "@/services/payments";
-import { PlanService } from "@/services/plans";
-import { CustomerService } from "@/services/customers";
 import { computeGenerationBonus } from "@/modules/plans/mlm-rules";
 
 export const Route = createFileRoute("/_app/commissions")({ component: CommissionsPage });
 
 function CommissionsPage() {
-  const { data: commissionsData, isLoading } = useQuery({
-    queryKey: ["commissions", "mlm"],
-    queryFn: async () => {
-      const [payments, plansData, customersData] = await Promise.all([
-        PaymentService.fetchPaymentsForCommissions(18),
-        PlanService.fetchActivePlans(),
-        CustomerService.fetchCustomersList(),
-      ]);
-
-      const rows = (payments || []).map((p: any, i: number) => ({
-        id: p.id || i,
-        ciclo: `Lançamento #${i + 1}`,
-        qualificados: Number(p.quantity || 1),
-        pago: Number(p.amount || 0),
-        status: i < 2 ? "processando" : "pago",
-        planKey: p.plan_id || p.plan_name || p.plano_id || null,
-      }));
-
-      return {
-        rows,
-        plans: plansData || [],
-        customers: customersData || [],
-      };
-    }
-  });
+  const { data: commissionsData, isError, error, refetch } = useCommissions();
 
   const rows = commissionsData?.rows || [];
   const plans = commissionsData?.plans || [];
@@ -44,8 +16,20 @@ function CommissionsPage() {
 
   const total = rows.reduce((sum, r) => sum + Number(r.pago || 0), 0);
   const plan = plans[0];
-  const activeDirects = useMemo(() => customers.filter((c) => String(c.patrocinador_comprador || "").length > 0 && (c.status || "").toLowerCase() === "active").length, [customers]);
+  const activeDirects = customers.filter((c) => String(c.patrocinador_comprador || "").length > 0 && (c.status || "").toLowerCase() === "active").length;
   const simulation = computeGenerationBonus(plan?.name, total || 1000, activeDirects);
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Rede MLM" title="Comissões & Ciclos" subtitle="Falha ao carregar comissões." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

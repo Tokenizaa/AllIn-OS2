@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
 import { ResponsiveContainer, Tooltip, Cell, Pie, PieChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { WalletService } from "@/services/wallets";
-import { useQuery } from "@tanstack/react-query";
+import { useOfficeFinance } from "@/hooks/office/useOfficeFinance";
 
 type WalletRow = {
   balance_available?: number | null;
@@ -31,19 +30,7 @@ function formatBRL(value: number) {
 }
 
 function FinancePage() {
-  const { data: financeData, isLoading } = useQuery({
-    queryKey: ["office-finance"],
-    queryFn: async () => {
-      const [withdrawalsData, profileData] = await Promise.all([
-        WalletService.fetchRecentWithdrawals(50),
-        WalletService.fetchWorkspaceSettings(),
-      ]);
-      return {
-        withdrawals: (withdrawalsData as WithdrawalRow[]) || [],
-        wallet: (profileData as WalletRow) || {},
-      };
-    }
-  });
+  const { data: financeData, isError, error, refetch } = useOfficeFinance();
 
   const withdrawals = financeData?.withdrawals || [];
   const wallet = financeData?.wallet || {};
@@ -66,6 +53,17 @@ function FinancePage() {
   const blocked = Number(wallet.balance_blocked || 0);
   const pending = Number(wallet.balance_pending || 0);
   const totalYear = Number(wallet.total_year || 0);
+
+  if (isError) {
+    return (
+      <div className="p-6 text-sm text-destructive">
+        Erro ao carregar financeiro: {error instanceof Error ? error.message : "falha desconhecida"}.
+        <button className="ml-3 underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

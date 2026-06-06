@@ -5,6 +5,7 @@ import { SupabaseService } from "@/modules/auth/services/supabase.service";
 import { Award } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { UserRole } from "@/shared/types/roles";
 
 export const Route = createFileRoute("/ativacao")({
   component: ActivationPage,
@@ -45,7 +46,7 @@ function ActivationPage() {
     if (!loading) {
       if (!user) {
         navigate({ to: "/login" });
-      } else if (user.role !== "distributor") {
+      } else if (user.role !== UserRole.DISTRIBUIDOR) {
         navigate({ to: "/" });
       } else if (user.status === "active") {
         navigate({ to: "/office" });

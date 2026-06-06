@@ -26,7 +26,6 @@ export {
 export {
   getPlans,
   getPlanById,
-  getPlanBySlug,
   createPlan,
   updatePlan,
   deletePlan,

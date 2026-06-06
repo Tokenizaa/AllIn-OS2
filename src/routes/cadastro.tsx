@@ -4,6 +4,7 @@ import { useAuth } from "@/modules/auth";
 import { UserPlus, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { UserRole } from "@/shared/types/roles";
 
 export const Route = createFileRoute("/cadastro")({
   component: RegisterPage,
@@ -19,7 +20,7 @@ function RegisterPage() {
   const [cpf, setCpf] = useState("");
   const [sponsorCode, setSponsorCode] = useState(activeSponsor || "");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"distributor" | "customer">("distributor");
+  const [role, setRole] = useState<UserRole>(UserRole.DISTRIBUIDOR);
   const [loading, setLoading] = useState(false);
   const [sponsorName, setSponsorName] = useState<string | null>(null);
 
@@ -28,7 +29,7 @@ function RegisterPage() {
     if (sponsorCode.trim()) {
       const match = usersList.find(
         (u) =>
-          u.role === "distributor" &&
+          u.role === UserRole.DISTRIBUIDOR &&
           (u.referral_code?.toLowerCase() === sponsorCode.trim().toLowerCase() ||
             u.id.toLowerCase() === sponsorCode.trim().toLowerCase())
       );
@@ -57,7 +58,7 @@ function RegisterPage() {
       return;
     }
 
-    if (role === "customer" && !sponsorCode) {
+    if (role === UserRole.CLIENTE_FINAL && !sponsorCode) {
       toast.error("Clientes finais precisam ter um patrocinador associado.");
       return;
     }
@@ -78,7 +79,7 @@ function RegisterPage() {
 
       toast.success(`Cadastro efetuado com sucesso! Logado como ${userResult.name}.`);
 
-      if (userResult.role === "distributor") {
+      if (userResult.role === UserRole.DISTRIBUIDOR) {
         navigate({ to: "/ativacao" });
       } else {
         navigate({ to: "/office/store" });

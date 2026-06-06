@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Search, Download, Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { useAuth } from '@/modules/auth';
-import { useQuery } from '@tanstack/react-query';
 import { getCustomerPayments } from '../../lib/api/payment.functions';
 import { toast } from 'sonner';
+import { usePayments } from '@/hooks/payments/usePayments';
 
 interface Payment {
   id: string;
@@ -30,28 +30,7 @@ export function PaymentHistory() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [methodFilter, setMethodFilter] = useState<string>('all');
 
-  const { data: paymentsData, isLoading, refetch } = useQuery({
-    queryKey: ['payment-history-list', customerId],
-    queryFn: async () => {
-      if (!customerId) return [];
-      const res = await getCustomerPayments({ customerId, limit: 50 });
-      if (res.success && res.data) {
-        const paymentList = Array.isArray(res.data) ? res.data : (res.data as any).data || [];
-        return paymentList.map((p: any) => ({
-          id: p.id,
-          amount: Number(p.amount || 0),
-          currency: p.currency || 'BRL',
-          status: p.status as Payment['status'],
-          paymentMethod: (p.payment_method || 'pix') as Payment['paymentMethod'],
-          createdAt: p.created_at,
-          orderId: p.order_id,
-          customerName: user?.name || 'Distribuidor',
-        })) as Payment[];
-      }
-      return [];
-    },
-    enabled: !!customerId,
-  });
+  const { data: paymentsData, isLoading, refetch } = usePayments(50);
 
   const payments = paymentsData || [];
 

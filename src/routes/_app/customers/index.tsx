@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Filter, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CustomerService } from "@/services/customers";
 import { cn } from "@/lib/utils";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
+import { useCustomers } from "@/hooks/customers/useCustomers";
 
 export const Route = createFileRoute("/_app/customers/")({ component: CustomersPage });
 
@@ -30,10 +29,7 @@ function CustomersPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["customers", "profiles-list"],
-    queryFn: () => CustomerService.fetchCustomersWithOrderStats(),
-  });
+  const { data, isLoading, refetch } = useCustomers();
 
   const customers = data?.customers || [];
   const orderStats = data?.orderStats || {};

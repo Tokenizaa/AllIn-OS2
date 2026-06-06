@@ -45,7 +45,6 @@ export class AuditLogService {
         return null;
       }
 
-      console.log("[AuditLogService] Audit logged successfully:", data.id);
       return data;
     } catch (error) {
       console.error("[AuditLogService] Error in logAudit:", error);

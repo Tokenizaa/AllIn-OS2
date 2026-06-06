@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck, UploadCloud, FileText, CheckCircle2, Clock, Brain, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { AnalyticsService } from "@/services/analytics";
 import { toast } from "sonner";
+import { useAuditLogs } from "@/hooks/audit/useAuditLogs";
 
 interface UploadingFile { name: string; size: string; progress: number; status: "uploading" | "scanning" | "finished"; }
 
@@ -15,10 +14,7 @@ export const Route = createFileRoute("/office/verification")({ component: Verifi
 function VerificationPage() {
   const [pendingFiles, setPendingFiles] = useState<UploadingFile[]>([]);
 
-  const { data: auditLogs = [], isLoading } = useQuery({
-    queryKey: ["office-verification-audit"],
-    queryFn: () => AnalyticsService.fetchAuditLogs(12),
-  });
+  const { data: auditLogs = [], isLoading } = useAuditLogs(12);
 
   const docs = useMemo(() => {
     return auditLogs.map((row: any) => ({

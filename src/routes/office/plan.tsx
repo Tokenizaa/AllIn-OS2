@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 import { PlanService } from "@/services/plans";
 import { ProfileService } from "@/services/profiles";
 import { getPlanRule } from "@/modules/plans/mlm-rules";
-import { useQuery } from "@tanstack/react-query";
+import { usePlans } from "@/hooks/plans/usePlans";
+import { useMyProfile } from "@/hooks/profiles/useMyProfile";
 
 type PlanRow = {
   id: string;
@@ -27,6 +28,8 @@ type ProfileRow = {
   created_at?: string | null;
 };
 
+const EMPTY_PLANS: PlanRow[] = [];
+
 export const Route = createFileRoute("/office/plan")({ component: PlanPage });
 
 function formatBRL(value: number) {
@@ -34,22 +37,11 @@ function formatBRL(value: number) {
 }
 
 function PlanPage() {
-  const { data: planPageData, isLoading } = useQuery({
-    queryKey: ["office-plan"],
-    queryFn: async () => {
-      const [plansData, profileData] = await Promise.all([
-        PlanService.fetchActivePlans(),
-        ProfileService.fetchLastProfile(),
-      ]);
-      return {
-        plans: (plansData as PlanRow[]) || [],
-        profile: (profileData as ProfileRow) || null,
-      };
-    }
-  });
+  const { data: plansData = [], isLoading: plansLoading, isError, error, refetch } = usePlans();
+  const { data: profileData = null, isLoading: profileLoading } = useMyProfile();
 
-  const plans = planPageData?.plans || [];
-  const profile = planPageData?.profile || null;
+  const plans = plansData ?? EMPTY_PLANS;
+  const profile = profileData || null;
 
   const current = plans[0];
   const next = plans[1] || plans[0];
@@ -57,6 +49,23 @@ function PlanPage() {
   const currentRule = getPlanRule(current?.name);
 
   const planCards = useMemo(() => plans.slice(0, 4), [plans]);
+
+  const loading = plansLoading || profileLoading;
+
+  if (isError) {
+    return (
+      <div className="p-6 text-sm text-destructive">
+        Erro ao carregar planos: {error instanceof Error ? error.message : "falha desconhecida"}.
+        <button className="ml-3 underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="p-6 text-sm text-muted-foreground">Carregando planos...</div>;
+  }
 
   return (
     <div className="space-y-6">
