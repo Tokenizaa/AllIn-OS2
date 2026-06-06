@@ -51,7 +51,7 @@ function AnalyticsPage() {
         (order.comprador && c.id_comprador === order.comprador) ||
         (order.usuario && c.usuario === order.usuario)
     );
-    return found?.name || order.usuario || order.comprador || "Cliente";
+    return (found as any)?.name || order.usuario || order.comprador || "Cliente";
   };
 
   const channelMix = useMemo(() => {

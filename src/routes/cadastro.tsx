@@ -120,9 +120,9 @@ function RegisterPage() {
             <div className="grid grid-cols-2 gap-3 p-1 rounded-xl bg-background/50 border border-border/40">
               <button
                 type="button"
-                onClick={() => setRole("distributor")}
+                onClick={() => setRole("distributor" as any)}
                 className={`py-2 px-3 text-xs font-semibold rounded-lg transition-all ${
-                  role === "distributor"
+                  role === "distributor" as any
                     ? "bg-primary text-primary-foreground shadow"
                     : "text-muted-foreground hover:text-white"
                 }`}
@@ -131,9 +131,9 @@ function RegisterPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setRole("customer")}
+                onClick={() => setRole("customer" as any)}
                 className={`py-2 px-3 text-xs font-semibold rounded-lg transition-all ${
-                  role === "customer"
+                  role === "customer" as any
                     ? "bg-primary text-primary-foreground shadow"
                     : "text-muted-foreground hover:text-white"
                 }`}
@@ -200,7 +200,7 @@ function RegisterPage() {
               <div className="space-y-1 bg-background/30 p-3 rounded-lg border border-border/40">
                 <div className="flex justify-between items-center">
                   <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">ID do Patrocinador / Sponsor</label>
-                  {role === "customer" && <span className="text-[9px] font-bold text-red-400 uppercase tracking-widest leading-none">Obrigatório</span>}
+                  {role === "customer" as any && <span className="text-[9px] font-bold text-red-400 uppercase tracking-widest leading-none">Obrigatório</span>}
                 </div>
                 <input
                   type="text"
@@ -224,7 +224,7 @@ function RegisterPage() {
                   </p>
                 ) : (
                   <p className="mt-1 text-[11px] text-muted-foreground font-sans">
-                    {role === "customer" 
+                    {role === "customer" as any 
                       ? "O cliente necessita estar associado a um distribuidor patrocinador para efetuar compras corporativas."
                       : "Caso não possua sponsor, você ficará vinculado ao ID master admin."
                     }
@@ -245,7 +245,7 @@ function RegisterPage() {
               </div>
 
               {/* Informative alerts based on role */}
-              {role === "distributor" ? (
+              {role === "distributor" as any ? (
                 <div className="text-[11px] text-muted-foreground border-l-2 border-primary pl-2.5 py-0.5 leading-relaxed font-sans">
                   Após o cadastro, você precisará <strong className="text-white">efetuar a ativação de seu escritório corporativo</strong> selecionando um pacote de distribuidor inicial.
                 </div>

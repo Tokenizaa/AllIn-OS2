@@ -124,7 +124,7 @@ function LojaPage() {
         <PublicHeader />
         <main className="flex-1 pt-20">
           <StoreHeroSection 
-            storeInfo={storeInfo} 
+            storeInfo={storeInfo as any} 
             onWhatsAppClick={handleWhatsAppContact}
             onProductsClick={handleScrollToProducts}
           />
@@ -144,7 +144,7 @@ function LojaPage() {
           
           <ReviewsAndContact
             reviews={reviews}
-            storeInfo={storeInfo}
+            storeInfo={storeInfo as any}
             onWhatsAppClick={handleWhatsAppContact}
             onInstagramClick={handleInstagramContact}
           />

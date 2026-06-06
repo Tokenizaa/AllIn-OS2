@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
 import { SupabaseService } from "@/modules/auth/services/supabase.service";
-import { Award } from "lucide-react";
+import { Award, ArrowRight, QrCode, CreditCard, ClipboardCopy, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { UserRole } from "@/shared/types/roles";

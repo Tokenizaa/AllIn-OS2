@@ -5,165 +5,126 @@ import { SupabaseService } from "./supabase.service";
 
 /**
  * Authentication service for handling user login, registration, and logout
- * Now uses Supabase for real authentication
+ * Pure business logic without UI state management
  */
 export class AuthService {
   /**
    * Login user with email and password using Supabase
+   * Returns user profile without managing UI state
    */
   static async login(
     email: string,
-    password: string,
-    setUser: (user: User) => void,
-    setLoading: (loading: boolean) => void
+    password: string
   ): Promise<User> {
-    setLoading(true);
-    
-    try {
-      // Login with Supabase
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    // Login with Supabase
+    const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        setLoading(false);
-        throw new Error(error.message || "Credenciais inválidas.");
-      }
-
-      if (!user) {
-        setLoading(false);
-        throw new Error("Credenciais inválidas: usuário não encontrado.");
-      }
-
-      // Fetch user profile from database
-      const userProfile = await SupabaseService.fetchUserProfile(user.id);
-      
-      if (!userProfile) {
-        setLoading(false);
-        throw new Error("Perfil de usuário não encontrado.");
-      }
-
-      if (userProfile.status === "suspended") {
-        setLoading(false);
-        throw new Error("Conta bloqueada por políticas de conformidade interna.");
-      }
-
-      setUser(userProfile);
-      return userProfile;
-    } catch (error) {
-      setLoading(false);
-      throw error;
+    if (error) {
+      throw new Error(error.message || "Credenciais inválidas.");
     }
+
+    if (!user) {
+      throw new Error("Credenciais inválidas: usuário não encontrado.");
+    }
+
+    // Fetch user profile from database
+    const userProfile = await SupabaseService.fetchUserProfile(user.id);
+    
+    if (!userProfile) {
+      throw new Error("Perfil de usuário não encontrado.");
+    }
+
+    if (userProfile.status === "suspended") {
+      throw new Error("Conta bloqueada por políticas de conformidade interna.");
+    }
+
+    return userProfile;
   }
 
   /**
    * Register new user using Supabase
+   * Returns user profile without managing UI state
    */
   static async register(
     name: string,
     email: string,
     role: UserRole,
     extra?: { phone?: string; cpf?: string; sponsor_id?: string; password?: string },
-    activeSponsor?: string | null,
-    activeReferralMetadata?: any | null,
-    setUser?: (user: User) => void,
-    setDistributorProfile?: (profile: any) => void,
-    setLoading?: (loading: boolean) => void
+    activeSponsor?: string | null
   ): Promise<User> {
-    if (setLoading) setLoading(true);
-    
-    try {
-      // Register with Supabase Auth
-      const { data: { user }, error } = await supabase.auth.signUp({
-        email,
-        password: extra?.password || (() => { throw new Error("Senha obrigatória para registro."); })(),
-        options: {
-          data: {
-            name,
-            role,
-            phone: extra?.phone,
-            cpf: extra?.cpf,
-            sponsor_id: extra?.sponsor_id || activeSponsor,
-          },
-        },
-      });
-
-      if (error) {
-        if (setLoading) setLoading(false);
-        throw new Error(error.message || "Erro ao registrar usuário.");
-      }
-
-      if (!user) {
-        if (setLoading) setLoading(false);
-        throw new Error("Erro ao criar usuário.");
-      }
-
-      // Create profile in database
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          user_id: user.id,
+    // Register with Supabase Auth
+    const { data: { user }, error } = await supabase.auth.signUp({
+      email,
+      password: extra?.password || (() => { throw new Error("Senha obrigatória para registro."); })(),
+      options: {
+        data: {
           name,
-          email,
           role,
-          status: role === UserRole.DISTRIBUIDOR ? "pending" : "active",
           phone: extra?.phone,
           cpf: extra?.cpf,
           sponsor_id: extra?.sponsor_id || activeSponsor,
-          referral_code: role === UserRole.DISTRIBUIDOR ? name.toLowerCase().replace(/\s+/g, "") : null,
-        });
+        },
+      },
+    });
 
-      if (profileError) {
-        if (setLoading) setLoading(false);
-        throw new Error("Erro ao criar perfil de usuário.");
-      }
-
-      // Fetch complete user profile
-      const userProfile = await SupabaseService.fetchUserProfile(user.id);
-      
-      if (!userProfile) {
-        if (setLoading) setLoading(false);
-        throw new Error("Erro ao recuperar perfil criado.");
-      }
-
-      // Set active session for the registered user
-      if (setUser) setUser(userProfile);
-      if (setLoading) setLoading(false);
-      return userProfile;
-    } catch (error) {
-      if (setLoading) setLoading(false);
-      throw error;
+    if (error) {
+      throw new Error(error.message || "Erro ao registrar usuário.");
     }
+
+    if (!user) {
+      throw new Error("Erro ao criar usuário.");
+    }
+
+    // Create profile in database
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        user_id: user.id,
+        name,
+        email,
+        role,
+        status: role === UserRole.DISTRIBUIDOR ? "pending" : "active",
+        phone: extra?.phone,
+        cpf: extra?.cpf,
+        sponsor_id: extra?.sponsor_id || activeSponsor,
+        referral_code: role === UserRole.DISTRIBUIDOR ? name.toLowerCase().replace(/\s+/g, "") : null,
+      });
+
+    if (profileError) {
+      throw new Error("Erro ao criar perfil de usuário.");
+    }
+
+    // Fetch complete user profile
+    const userProfile = await SupabaseService.fetchUserProfile(user.id);
+    
+    if (!userProfile) {
+      throw new Error("Erro ao recuperar perfil criado.");
+    }
+
+    return userProfile;
   }
 
   /**
    * Logout user using Supabase
+   * Does not manage UI state
    */
-  static async logout(
-    user: User | null,
-    setUser: (user: User | null) => void,
-    setDistributorProfile: (profile: any) => void,
-    setLoading: (loading: boolean) => void
-  ): Promise<void> {
-    setLoading(true);
-    
+  static async logout(): Promise<void> {
     await supabase.auth.signOut();
-    setUser(null);
-    setDistributorProfile(null);
-    setLoading(false);
   }
 
   /**
    * Change user role (admin only) using Supabase
+   * Returns updated profile without managing UI state
    */
   static async changeUserRole(
     userId: string,
     targetRole: UserRole,
-    user: User | null,
-    setUser: (user: User) => void
-  ): Promise<void> {
-    if (!user || user.role !== UserRole.ADMIN_MASTER) {
+    currentUser: User | null
+  ): Promise<User | null> {
+    if (!currentUser || currentUser.role !== UserRole.ADMIN_MASTER) {
       throw new Error("Acesso negado: Requer privilégio Admin Master.");
     }
 
@@ -176,23 +137,10 @@ export class AuthService {
       throw new Error(error.message || "Erro ao alterar role do usuário.");
     }
 
-    if (user.id === userId) {
-      const updatedProfile = await SupabaseService.fetchUserProfile(userId);
-      if (updatedProfile) {
-        setUser(updatedProfile);
-      }
+    if (currentUser.id === userId) {
+      return await SupabaseService.fetchUserProfile(userId);
     }
-  }
 
-  /**
-   * Clear sponsor tracking
-   */
-  static clearSponsor(
-    setActiveSponsor: (sponsor: string | null) => void,
-    setActiveReferralMetadata: (metadata: any) => void
-  ): void {
-    setActiveSponsor(null);
-    setActiveReferralMetadata(null);
-    // Sponsor tracking is managed by the referral table.
+    return null;
   }
 }

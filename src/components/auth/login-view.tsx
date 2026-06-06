@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Crown, Eye, EyeOff, Headphones, LogIn, ShieldCheck, Sparkles, Users, Wallet } from "lucide-react";
+import { Crown, Eye, EyeOff, Headphones, LogIn, ShieldCheck, Sparkles, Users, Wallet, Network, TrendingUp, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ export function LoginView() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   useEffect(() => {
     if (user) {
       navigate({ to: getRoleRedirectPath(user), replace: true });
@@ -28,10 +30,10 @@ export function LoginView() {
     setLoading(true);
     try {
       const loggedUser = await login(nextEmail, nextPassword);
-      toast.success(`Bem-vindo, ${loggedUser.name}!`);
+      toast.success(`Bem-vindo de volta, ${loggedUser.name}!`);
       navigate({ to: redirectTo || getRoleRedirectPath(loggedUser), replace: true });
     } catch (error: any) {
-      toast.error(error?.message || "Erro ao efetuar login.");
+      toast.error(error?.message || "Erro ao efetuar login. Verifique suas credenciais.");
     } finally {
       setLoading(false);
     }
@@ -47,6 +49,7 @@ export function LoginView() {
   };
 
   const onQuickLogin = async (account: TestLoginAccount) => {
+    if (loading) return;
     setEmail(account.email);
     setPassword(account.password);
     await submitLogin(account.email, account.password, getDemoRedirectPath(account.role));
@@ -65,24 +68,36 @@ export function LoginView() {
           </div>
 
           <div className="max-w-xl space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/70">
-              <Sparkles className="h-3.5 w-3.5 text-[#ffb84d]" />
-              Acesso rapido com perfis de teste
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              Sistema de Gestão de Rede
             </span>
-            <h1 className="text-5xl font-semibold leading-tight tracking-tight">
-              Login simples, sem peso visual e sem perder os atalhos de perfil.
+            <h1 className="text-5xl font-bold leading-tight tracking-tight">
+              Construa sua rede de distribuição com inteligência
             </h1>
-            <p className="max-w-lg text-sm leading-6 text-white/60">
-              Entre com sua conta ou use os botoes demo para validar cada area do sistema com um clique.
+            <p className="max-w-lg text-base leading-relaxed text-slate-300">
+              Acesse sua conta para gerenciar sua rede de distribuidores, acompanhar comissões, e expandir seu negócio de venda direta com ferramentas profissionais.
             </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-white/40">Fluxo</p>
-                <p className="mt-2 text-sm text-white/80">Autenticacao normal com redirecionamento por role.</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-5 backdrop-blur-sm">
+                <Network className="h-6 w-6 text-primary mb-3" />
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Rede de Distribuidores</p>
+                <p className="text-sm text-slate-300">Gerencie sua rede binária e unilevel com visualização completa.</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-white/40">Teste</p>
-                <p className="mt-2 text-sm text-white/80">Perfis demo apontando para rotas reais do app.</p>
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-5 backdrop-blur-sm">
+                <TrendingUp className="h-6 w-6 text-emerald-400 mb-3" />
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Comissões em Tempo Real</p>
+                <p className="text-sm text-slate-300">Acompanhe seus ganhos e bônus com relatórios detalhados.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-5 backdrop-blur-sm">
+                <Building2 className="h-6 w-6 text-fuchsia-400 mb-3" />
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Escritório Virtual</p>
+                <p className="text-sm text-slate-300">Ferramentas completas para gerenciar seu negócio de qualquer lugar.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-5 backdrop-blur-sm">
+                <Users className="h-6 w-6 text-cyan-400 mb-3" />
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Venda Direta</p>
+                <p className="text-sm text-slate-300">Loja virtual integrada para maximizar suas vendas.</p>
               </div>
             </div>
           </div>
@@ -105,11 +120,13 @@ export function LoginView() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/10 bg-[#0b1019]/95 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8">
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-white/35">Acesso</p>
-                <h2 className="text-3xl font-semibold tracking-tight">Entrar na plataforma</h2>
-                <p className="text-sm text-white/55">Use e-mail e senha ou escolha um perfil demo.</p>
+            <div className="rounded-[28px] border border-slate-800/50 bg-slate-900/50 backdrop-blur-xl p-6 shadow-2xl shadow-black/30 sm:p-8">
+              <div className="space-y-3 mb-8">
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Acesso à Plataforma</p>
+                <h2 className="text-3xl font-bold tracking-tight text-white">Entre na sua conta</h2>
+                <p className="text-sm text-slate-400">
+                  Acesse seu painel de distribuidor e gerencie sua rede de negócios
+                </p>
               </div>
 
               {activeSponsor && (
@@ -177,47 +194,53 @@ export function LoginView() {
                 </Button>
               </form>
 
-              <div className="mt-7 flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/10" />
-                <span className="text-[11px] uppercase tracking-[0.3em] text-white/35">Perfis de teste</span>
-                <div className="h-px flex-1 bg-white/10" />
-              </div>
+              {isDevelopment && (
+                <>
+                  <div className="mt-7 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-slate-700/50" />
+                    <span className="text-[11px] uppercase tracking-[0.3em] text-slate-500">Ambiente de Desenvolvimento</span>
+                    <div className="h-px flex-1 bg-slate-700/50" />
+                  </div>
 
-              <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                {getTestLoginAccounts().map((account) => {
-                  const icon =
-                    account.role === UserRole.ADMIN_MASTER || account.role === UserRole.GESTAO_ADMIN ? <Crown className="h-4 w-4 text-amber-300" /> :
-                    account.role === UserRole.FINANCEIRO ? <Wallet className="h-4 w-4 text-sky-300" /> :
-                    account.role === UserRole.SUPORTE ? <Headphones className="h-4 w-4 text-cyan-300" /> :
-                    <Users className="h-4 w-4 text-fuchsia-300" />;
+                  <div className="mt-5 space-y-3">
+                    <p className="text-xs text-slate-400 text-center mb-3">Acesso rápido para testes:</p>
+                    <div className="grid gap-2">
+                      {getTestLoginAccounts().map((account) => {
+                        const icon =
+                          account.role === UserRole.ADMIN_MASTER || account.role === UserRole.GESTAO_ADMIN ? <Crown className="h-4 w-4 text-amber-400" /> :
+                          account.role === UserRole.FINANCEIRO ? <Wallet className="h-4 w-4 text-sky-400" /> :
+                          account.role === UserRole.SUPORTE ? <Headphones className="h-4 w-4 text-cyan-400" /> :
+                          <Users className="h-4 w-4 text-fuchsia-400" />;
 
-                  return (
-                    <Button
-                      key={account.email}
-                      type="button"
-                      variant="outline"
-                      disabled={loading}
-                      onClick={() => onQuickLogin(account)}
-                      className="h-auto min-h-12 justify-start gap-3 rounded-xl border-white/10 bg-white/5 px-4 py-3 text-left text-white hover:bg-white/10 hover:text-white"
-                    >
-                      {icon}
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-sm font-medium">{account.label}</span>
-                        <span className="truncate text-[11px] text-white/35">{getDemoRedirectPath(account.role)}</span>
-                      </span>
-                    </Button>
-                  );
-                })}
-              </div>
+                        return (
+                          <Button
+                            key={account.email}
+                            type="button"
+                            variant="outline"
+                            disabled={loading}
+                            onClick={() => onQuickLogin(account)}
+                            className="h-auto min-h-12 justify-start gap-3 rounded-xl border-slate-700/50 bg-slate-800/30 px-4 py-3 text-left text-white hover:bg-slate-700/50 hover:text-white transition-all"
+                          >
+                            {icon}
+                            <span className="flex min-w-0 flex-1 flex-col">
+                              <span className="truncate text-sm font-medium">{account.label}</span>
+                              <span className="truncate text-[11px] text-slate-400">{getDemoRedirectPath(account.role)}</span>
+                            </span>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
 
-              <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-                <p className="text-sm text-white/55">
-                  Ainda nao tem conta?{" "}
-                  <Link to="/seja-distribuidor" className="font-medium text-[#ffb84d] hover:text-[#ffd56b] hover:underline">
-                    Seja um distribuidor
+              <div className="mt-6 pt-6 border-t border-slate-800/50 text-center">
+                <p className="text-sm text-slate-400">
+                  Ainda não tem conta?{" "}
+                  <Link to="/cadastro" className="font-semibold text-primary hover:text-primary/80 hover:underline">
+                    Cadastre-se como distribuidor
                   </Link>
                 </p>
-                <p className="text-xs text-white/35">Acesso preparado para desktop e mobile.</p>
               </div>
             </div>
           </div>

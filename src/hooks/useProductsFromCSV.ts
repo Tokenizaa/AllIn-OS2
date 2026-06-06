@@ -30,7 +30,7 @@ export const useProductsFromCSV = () => {
         productCount: count,
       }));
       
-      setCategories(categoriesData);
+      setCategories(categoriesData as any);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load products');
       console.error('Error loading products:', err);

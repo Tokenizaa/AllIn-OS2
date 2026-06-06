@@ -7,6 +7,7 @@ import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/app/public-header";
 
 export const Route = createFileRoute("/produto/$id")({ component: ProductDetailPage });

@@ -104,7 +104,7 @@ function ProductSearchPage() {
             )}
 
             <div className="mt-16 text-center">
-              <Link to={isDefaultTenant ? "/loja" : `/loja/${sponsorSlug}`}>
+              <Link to={isDefaultTenant ? "/loja" : `/loja/${sponsorSlug}` as any}>
                 <Button variant="vibrantOutline" size="lg" className="text-lg px-8 py-6">
                   Voltar para a Loja
                 </Button>

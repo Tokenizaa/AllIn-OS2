@@ -895,28 +895,112 @@ actions={<Button size="sm">Rodar ciclo</Button>}
 
 ### Pedidos
 
-**STATUS:** PENDENTE
+**STATUS:** PARCIAL
 
 **Arquivos:**
-- `src/routes/orders.tsx`
-- `src/routes/office/orders.tsx`
-- `src/components/orders/`
-- `src/hooks/orders/`
+- `src/routes/_app/orders/index.tsx`
+- `src/hooks/orders/useOrderList.ts`
+- `src/hooks/orders/useOrders.ts`
+- `src/services/orders/index.ts`
 
 **Validações:**
-- [ ] Pedidos
-- [ ] Status
-- [ ] Sincronização
+- [x] Pedidos
+- [x] Status
+- [x] Sincronização
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
+#### 🟡 MÉDIO - Paginação Não Implementada
+**Local:** `src/hooks/orders/useOrderList.ts` e `src/services/orders/index.ts`
+```typescript
+// useOrderList.ts
+export function useOrderList(limit = 60) {
+  return useQuery({
+    queryKey: [...queryKeys.orders, "list", limit],
+    queryFn: () => OrderService.fetchOrdersAndCustomers(limit),
+  });
+}
 
-**Impacto:**
+// orders/index.ts fetchOrdersAndCustomers
+const [{ data: ordersData, error: ordersError }, { data: customersData, error: customersError }] = await Promise.all([
+  supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(limit),
+  ...
+]);
+```
+**Descrição:** A página de pedidos usa um limite fixo de 60 registros sem paginação real. Para grandes volumes, isso é ineficiente e não escala.
 
-**Correção Recomendada:**
+**Causa Raiz:** Falta de paginação no backend (Supabase).
 
-**Prioridade:**
+**Impacto:** Médio - Performance degrada com mais pedidos. Limite fixo de 60 pedidos.
+
+**Correção Recomendada:** Implementar paginação no backend usando range() do Supabase e adicionar controles de paginação na UI.
+
+**Prioridade:** MÉDIA
+
+---
+
+#### 🟡 MÉDIO - Não Há Filtros por Status, Data ou Cliente
+**Local:** `src/routes/_app/orders/index.tsx`
+**Descrição:** A página de pedidos não tem filtros por status, período de data ou cliente. Usuário não consegue filtrar pedidos específicos.
+
+**Causa Raiz:** Funcionalidade não implementada.
+
+**Impacto:** Médio - Usuário precisa navegar por todos os pedidos para encontrar o que deseja.
+
+**Correção Recomendada:** Implementar filtros:
+- Status (pago, pendente, enviado, entregue, cancelado)
+- Período de data
+- Cliente (busca)
+- Valor mínimo/máximo
+
+**Prioridade:** MÉDIA
+
+---
+
+#### 🟢 BAIXO - Inconsistência de Nomes de Campos
+**Local:** `src/routes/_app/orders/index.tsx` e `src/services/orders/index.ts`
+**Descrição:** Código usa múltiplos nomes para o mesmo conceito:
+- `status_pedido` vs `status` (status do pedido)
+- `valor_total_pedido` vs `valor_total` (valor do pedido)
+- `numero_pedido` vs `id` (identificador do pedido)
+
+**Causa Raiz:** Schema inconsistente ou código não migrado.
+
+**Impacto:** Baixo - Pode causar bugs em queries e exibição de dados.
+
+**Correção Recomendada:** Padronizar nomes de campos no banco e migrar código.
+
+**Prioridade:** BAIXA
+
+---
+
+#### 🟢 BAIXO - Campo Items Pode Não Estar Sendo Carregado
+**Local:** `src/routes/_app/orders/index.tsx` linha 90
+```typescript
+{Array.isArray(o.items) ? o.items.length : 0}
+```
+**Descrição:** A query de orders usa `select("*")` mas o campo `items` pode não estar sendo carregado se for uma tabela relacionada ou JSONB. O check `Array.isArray` sugere incerteza sobre a estrutura.
+
+**Causa Raiz:** Schema não documentado ou query não otimizada.
+
+**Impacto:** Baixo - Contagem de itens pode estar incorreta.
+
+**Correção Recomendada:** Verificar schema da tabela orders e ajustar query para carregar items corretamente (join ou select específico).
+
+**Prioridade:** BAIXA
+
+---
+
+#### 🟢 BAIXO - Não Há Sincronização com Sistema Externo
+**Descrição:** Não há evidência de sincronização de pedidos com sistema externo (ERP, gateway de pagamento, etc.). Os dados parecem vir apenas do Supabase.
+
+**Causa Raiz:** Integração não implementada ou não necessária.
+
+**Impacto:** Baixo - Se houver sistema externo, pedidos podem não estar sincronizados.
+
+**Correção Recomendada:** Verificar se há necessidade de sincronização com sistema externo e implementar se necessário.
+
+**Prioridade:** BAIXA
 
 ---
 

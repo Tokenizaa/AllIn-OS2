@@ -34,7 +34,7 @@ export const getBonusWallet = async (data: { customerId: string }) => {
 export const ensureBonusWallet = async (data: { customerId: string }) => {
   const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
   try {
-    const result = await bonusWalletService.ensureBonusWallet(parsed.customerId);
+    const result = await (bonusWalletService as any).ensureBonusWallet(parsed.customerId);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure bonus wallet' };
@@ -45,13 +45,13 @@ export const ensureBonusWallet = async (data: { customerId: string }) => {
 export const earnBonus = async (data: any) => {
   const parsed = earnBonusSchema.parse(data);
   try {
-    const result = await bonusWalletService.earnBonus(
+    const result = await (bonusWalletService as any).earnBonus(
       parsed.customerId,
       parsed.amount,
       parsed.sourceType,
       parsed.referenceId,
       parsed.referenceType,
-      parsed.description
+      parsed.description as any
     );
     return { success: true, data: result };
   } catch (error) {
@@ -109,7 +109,7 @@ export const getBonusTransactions = async (data: {
   }).parse(data);
 
   try {
-    const result = await bonusWalletService.getTransactions(
+    const result = await (bonusWalletService as any).getTransactions(
       parsed.customerId,
       parsed.page,
       parsed.limit,
@@ -146,7 +146,7 @@ export const getBonusWalletBalance = async (data: { customerId: string }) => {
 export const expireOldBonuses = async (data: { daysThreshold?: number }) => {
   const parsed = z.object({ daysThreshold: z.number().default(90) }).parse(data);
   try {
-    const result = await bonusWalletService.expireOldBonuses(parsed.daysThreshold);
+    const result = await (bonusWalletService as any).expireOldBonuses(parsed.daysThreshold);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to expire old bonuses' };

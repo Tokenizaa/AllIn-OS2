@@ -31,8 +31,8 @@ function CustomersPage() {
 
   const { data, isLoading, refetch } = useCustomers();
 
-  const customers = data?.customers || [];
-  const orderStats = data?.orderStats || {};
+  const customers = (data as any)?.customers || [];
+  const orderStats = (data as any)?.orderStats || {};
 
   // Reset page when queries/filters change to avoid being stranded
   useEffect(() => {

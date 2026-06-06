@@ -14,24 +14,24 @@ function InsightsPage() {
   const insights = useMemo(() => {
     const payments = paymentsResult?.data?.data || [];
     const orders = ordersResult?.data?.data || [];
-    const customers = customersResult?.data?.data || [];
+    const customers = (customersResult as any)?.data?.data || [];
 
     return [
-      ...payments.map((p: any) => ({
+      ...(payments as any).map((p: any) => ({
         id: `pay-${p.id}`,
         title: "Pagamento registrado",
         detail: `Método ${p.payment_method || p.payment_method_type || "-"}`,
         severity: "success",
         action: "Abrir",
       })),
-      ...orders.map((o: any) => ({
+      ...(orders as any).map((o: any) => ({
         id: `ord-${o.id}`,
         title: "Pedido atualizado",
         detail: `Status ${o.status_pedido || o.status || "-"}`,
         severity: "info",
         action: "Abrir",
       })),
-      ...customers.map((c: any) => ({
+      ...(customers as any).map((c: any) => ({
         id: `cus-${c.id}`,
         title: "Cliente ativo",
         detail: getCustomerLabel(c),

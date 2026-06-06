@@ -11,7 +11,9 @@ export function useWalletData(customerId?: string | null) {
       if (!customerId) return null;
       try {
         await Promise.all([ensureWallet({ customerId }), ensureBonusWallet({ customerId }), ensurePointsWallet({ customerId })]);
-      } catch {}
+      } catch {
+        // Silently ignore wallet creation errors
+      }
       const [walletRes, bonusRes, pointsRes, txsRes, bonusTxsRes, pointsTxsRes] = await Promise.all([
         getWalletBalance({ customerId }),
         getBonusWalletBalance({ customerId }),
@@ -24,15 +26,15 @@ export function useWalletData(customerId?: string | null) {
       const bonusInfo = bonusRes.success ? bonusRes.data : { balance: 0, availableBalance: 0 };
       const pointsInfo = pointsRes.success ? pointsRes.data : { balance: 0, availableBalance: 0 };
       return {
-        balance: Number(balanceInfo.balance || 0),
-        availableBalance: Number(balanceInfo.availableBalance || 0),
-        frozenBalance: Number(balanceInfo.frozenBalance || 0),
+        balance: Number((balanceInfo as any).balance || 0),
+        availableBalance: Number((balanceInfo as any).availableBalance || 0),
+        frozenBalance: Number((balanceInfo as any).frozenBalance || 0),
         currency: "BRL",
-        bonusBalance: Number(bonusInfo.balance || 0),
-        points: Number(pointsInfo.balance || 0),
-        recentTransactions: txsRes.success && txsRes.data?.data ? txsRes.data.data : [],
-        bonusTransactions: bonusTxsRes.success && bonusTxsRes.data?.data ? bonusTxsRes.data.data : [],
-        pointsTransactions: pointsTxsRes.success && pointsTxsRes.data?.data ? pointsTxsRes.data.data : [],
+        bonusBalance: Number((bonusInfo as any).balance || 0),
+        points: Number((pointsInfo as any).balance || 0),
+        recentTransactions: txsRes.success && (txsRes.data as any)?.data ? (txsRes.data as any).data : [],
+        bonusTransactions: bonusTxsRes.success && (bonusTxsRes.data as any)?.data ? (bonusTxsRes.data as any).data : [],
+        pointsTransactions: pointsTxsRes.success && (pointsTxsRes.data as any)?.data ? (pointsTxsRes.data as any).data : [],
       };
     },
     enabled: !!customerId,

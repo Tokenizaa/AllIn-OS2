@@ -12,7 +12,7 @@ function NetworkPage() {
   const customers = networkData?.customers || [];
   const legs = networkData?.legs || [];
 
-  const data = customers.map((c) => ({ name: (c.name || c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
+  const data = customers.map((c: any) => ({ name: ((c as any).name || c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
 
   if (isError) {
     return (

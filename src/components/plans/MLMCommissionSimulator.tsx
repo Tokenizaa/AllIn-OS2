@@ -60,18 +60,18 @@ export function MLMCommissionSimulator() {
           {isFetching ? "Calculando..." : "Simular Comissão"}
         </Button>
 
-        {simulation && (
+        {simulation && "simulation" in simulation && (
           <div className="space-y-4 pt-4 border-t">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Plano Atual</span>
-              <span className="font-semibold">{simulation.plan.name}</span>
+              <span className="font-semibold">{simulation.simulation?.plan?.name}</span>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
                 <DollarSign className="h-5 w-5 text-green-500 mb-2" />
                 <span className="text-2xl font-bold">
-                  R$ {simulation.direct_commission.toLocaleString("pt-BR")}
+                  R$ {simulation.simulation?.direct_commission?.toLocaleString("pt-BR") || "0"}
                 </span>
                 <span className="text-xs text-muted-foreground">Comissão Direta</span>
               </div>
@@ -79,7 +79,7 @@ export function MLMCommissionSimulator() {
               <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
                 <TrendingUp className="h-5 w-5 text-blue-500 mb-2" />
                 <span className="text-2xl font-bold">
-                  R$ {simulation.breakdown.mlm.toLocaleString("pt-BR")}
+                  R$ {simulation.simulation?.breakdown?.mlm?.toLocaleString("pt-BR") || "0"}
                 </span>
                 <span className="text-xs text-muted-foreground">MLM</span>
               </div>
@@ -87,7 +87,7 @@ export function MLMCommissionSimulator() {
               <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
                 <Users className="h-5 w-5 text-purple-500 mb-2" />
                 <span className="text-2xl font-bold">
-                  R$ {simulation.breakdown.direct_bonus.toLocaleString("pt-BR")}
+                  R$ {simulation.simulation?.breakdown?.direct_bonus?.toLocaleString("pt-BR") || "0"}
                 </span>
                 <span className="text-xs text-muted-foreground">Bônus Extras</span>
               </div>
@@ -96,15 +96,15 @@ export function MLMCommissionSimulator() {
             <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950 rounded-lg">
               <span className="font-semibold">Total da Comissão</span>
               <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                R$ {simulation.total_commission.toLocaleString("pt-BR")}
+                R$ {simulation.simulation?.total_commission?.toLocaleString("pt-BR") || "0"}
               </span>
             </div>
 
-            {simulation.mlm_commissions.length > 0 && (
+            {simulation.simulation?.mlm_commissions && simulation.simulation.mlm_commissions.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-3">Distribuição por Geração</h4>
                 <div className="space-y-2">
-                  {simulation.mlm_commissions.map((comm: any, index: number) => (
+                  {simulation.simulation?.mlm_commissions?.map((comm: any, index: number) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-3 bg-muted rounded-lg"
@@ -124,11 +124,11 @@ export function MLMCommissionSimulator() {
               </div>
             )}
 
-            {simulation.direct_bonuses.length > 0 && (
+            {simulation.simulation?.direct_bonuses && simulation.simulation.direct_bonuses.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-3">Bônus Extras por Diretos</h4>
                 <div className="space-y-2">
-                  {simulation.direct_bonuses.map((bonus: any, index: number) => (
+                  {simulation.simulation?.direct_bonuses?.map((bonus: any, index: number) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-3 bg-muted rounded-lg"

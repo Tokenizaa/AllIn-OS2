@@ -8,7 +8,7 @@ import { InviteService } from "../services/invite.service";
 import { AuditService } from "../services/audit.service";
 import { SupabaseService } from "../services/supabase.service";
 import { referralTrackingService } from "@/services/referralTrackingService";
-import { authService } from "@/services/auth/auth.service";
+import { supabase } from "@/lib/supabase-client";
 import { UserRole } from "@/shared/types/roles";
 
 /**
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        const { data: { session } } = await authService.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         const currentUser = session?.user ? await SupabaseService.fetchUserProfile(session.user.id) : null;
 
         if (!isMounted) return;
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     })();
 
-    const { data: authListener } = authService.onAuthStateChange(async (_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
       if (!session?.user) {
         setUser(null);
@@ -146,35 +146,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auth methods using services
   const login = async (email: string, password: string) => {
-    return AuthService.login(
-      email,
-      password,
-      setUser,
-      setLoading
-    );
+    setLoading(true);
+    try {
+      const userProfile = await AuthService.login(email, password);
+      setUser(userProfile);
+      return userProfile;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (name: string, email: string, role: UserRole, extra?: any) => {
-    return AuthService.register(
-      name,
-      email,
-      role,
-      extra,
-      activeSponsor,
-      activeReferralMetadata,
-      setUser,
-      setDistributorProfile,
-      setLoading
-    );
+    setLoading(true);
+    try {
+      const userProfile = await AuthService.register(
+        name,
+        email,
+        role,
+        extra,
+        activeSponsor
+      );
+      setUser(userProfile);
+      if (role === UserRole.DISTRIBUIDOR) {
+        const dProf = await SupabaseService.fetchDistributorProfile(userProfile.id);
+        setDistributorProfile(dProf);
+      }
+      return userProfile;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {
-    return AuthService.logout(
-      user,
-      setUser,
-      setDistributorProfile,
-      setLoading
-    );
+    setLoading(true);
+    try {
+      await AuthService.logout();
+      setUser(null);
+      setDistributorProfile(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateProfile = async (updates: Partial<User>) => {
@@ -195,12 +206,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const changeUserRole = async (userId: string, targetRole: UserRole) => {
-    return AuthService.changeUserRole(
+    const updatedProfile = await AuthService.changeUserRole(
       userId,
       targetRole,
-      user,
-      setUser
+      user
     );
+    if (updatedProfile) {
+      setUser(updatedProfile);
+    }
   };
 
   const activateDistributorOffice = async (_planId: string) => {

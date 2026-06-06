@@ -68,7 +68,7 @@ function OrdersPage() {
             ) : (
               orders.map((o) => {
                 const customer = customers.find((x) => x.id === o.customer_id);
-                const customerLabel = customer?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
+                const customerLabel = (customer as any)?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
                 return (
                   <tr key={o.id} className="hover:bg-accent/30">
                     <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>

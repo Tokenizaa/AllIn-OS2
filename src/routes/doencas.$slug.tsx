@@ -89,12 +89,13 @@ function DiseasesPage() {
                   image={disease.image}
                   className="cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => toggleCard(index)}
+                  {...disease as any}
                 />
               ))}
             </div>
 
             <div className="mt-16 text-center">
-              <Link to={`/loja/${sponsorSlug}`}>
+              <Link to={`/loja/${sponsorSlug}` as any}>
                 <Button variant="vibrant" size="lg" className="text-lg px-8 py-6">
                   Ver Produtos que Podem Ajudar
                 </Button>

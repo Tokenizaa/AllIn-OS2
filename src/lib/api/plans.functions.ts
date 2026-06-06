@@ -20,11 +20,11 @@ import {
 
 // Get all plans
 export const getAllPlans = async () => {
-  const result = await getPlansApi();
+  const result = await (getPlansApi as any)();
   if (!result.success) {
     throw new Error(result.error || "Failed to fetch plans");
   }
-  return result.data.data;
+  return (result.data as any)?.data;
 };
 
 // Get plan bonuses
@@ -177,7 +177,7 @@ export const getCustomerPlanHistory = async (data: { customerId: string }) => {
   if (!result.success) {
     throw new Error(result.error || "Failed to fetch customer plan history");
   }
-  return result.data.data;
+  return (result.data as any).data;
 };
 
 // Get analytics plan performance
@@ -200,7 +200,7 @@ export const getBonusDistribution = async () => {
 
 // Get plan stats
 export const getPlanStats = async () => {
-  const result = await getPlanStatsApi();
+  const result = await (getPlanStatsApi as any)();
   if (!result.success) {
     throw new Error(result.error || "Failed to fetch plan stats");
   }

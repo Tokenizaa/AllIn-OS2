@@ -177,7 +177,7 @@ function DistributorPage() {
                 
                 <div className="p-3 bg-background/50 rounded-xl text-left text-xs font-mono space-y-1.5 border border-border/40">
                   <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider font-sans mb-1 text-center">Contato Autorizado</p>
-                  <p className="flex justify-between">Email: <span className="text-white truncate max-w-[150px]">{matchedUser?.email || `${sponsorSlug}@allin.io`}</span></p>
+                  <p className="flex justify-between">Email: <span className="text-white truncate max-w-[150px]">{(matchedUser as any)?.email || `${sponsorSlug}@allin.io`}</span></p>
                   <p className="flex justify-between">Código: <span className="text-emerald-400 font-bold">@{sponsorSlug}</span></p>
                 </div>
 

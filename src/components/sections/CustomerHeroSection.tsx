@@ -24,11 +24,11 @@ const CustomerHeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-            <Link to="/#problemas">
+            <a href="#problemas">
               <Button variant="vibrant" size="lg" className="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 Descubra como aliviar seus sintomas
               </Button>
-            </Link>
+            </a>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto text-left">

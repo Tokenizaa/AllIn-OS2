@@ -3,7 +3,7 @@
  * This file is kept for backward compatibility and will be removed in a future update
  */
 
-import { supabase, getFrontendClient, getBackendClient } from "./lib/supabase/client";
+import { supabase, getFrontendClient, getBackendClient } from "./supabase/client";
 
 // Re-export for backward compatibility
 export { supabase, getFrontendClient, getBackendClient };

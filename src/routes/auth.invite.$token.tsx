@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
-import { 
-  Eye, EyeOff, Mail, User, Lock, AlertTriangle, 
-  ShieldAlert, Sparkles, LogIn, ArrowRight, CheckCircle2, RefreshCw 
+import {
+  Eye, EyeOff, Mail, User, Lock, AlertTriangle,
+  ShieldAlert, Sparkles, LogIn, ArrowRight, CheckCircle2, RefreshCw
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { getRoleLabel, getRoleBadgeStyle } from "@/components/system/rbac-utils";
 
 export const Route = createFileRoute("/auth/invite/$token")({
@@ -35,7 +38,7 @@ function InviteActivationPage() {
     const match = getAdminInviteByToken(token);
     if (match) {
       setInvite(match);
-      setName(match.full_name); // Pre-fill name
+      setName((match as any).full_name); // Pre-fill name
     }
     setLoaded(true);
   }, [token, getAdminInviteByToken]);

@@ -50,7 +50,7 @@ export const ProductsProvider = ({ children }: { children: React.ReactNode }) =>
       setError(null);
 
       const productsData = await productsService.getAllProducts();
-      setProducts(productsData);
+      setProducts(productsData as any);
       
       // Extract categories from products
       const categoryMap = new Map<string, number>();

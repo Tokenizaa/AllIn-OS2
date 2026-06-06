@@ -1,45 +1,25 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { BarChart3, PieChart, TrendingUp, Calendar, Download, RefreshCw, Loader2 } from "lucide-react";
 import { useAnalytics } from "@/hooks/analytics/useAnalytics";
+import { usePaymentAnalyticsData } from "@/hooks/payments/usePaymentAnalyticsData";
 
 export function PaymentAnalytics() {
   const [dateRange, setDateRange] = useState("30d");
 
   const { stats, orders } = useAnalytics();
-  const ordersList = useMemo(() => (orders.data?.data || []) as any[], [orders.data]);
+  const ordersList = (orders.data?.data || []) as any[];
 
-  const paymentMethodDistribution = useMemo(() => {
-    const grouped = ordersList.reduce((acc: Record<string, { count: number; revenue: number }>, order: any) => {
-      const method = order.forma_pagamento || "outro";
-      const entry = acc[method] || { count: 0, revenue: 0 };
-      entry.count += 1;
-      entry.revenue += Number(order.valor_total || 0);
-      acc[method] = entry;
-      return acc;
-    }, {});
-
-    const totalCount = (Object.values(grouped) as Array<{ count: number; revenue: number }>).reduce((sum, item) => sum + item.count, 0) || 1;
-    return Object.entries(grouped).map(([method, value]) => ({
-      method,
-      count: (value as { count: number; revenue: number }).count,
-      percentage: Math.round(((value as { count: number; revenue: number }).count / totalCount) * 100),
-      revenue: Number((value as { count: number; revenue: number }).revenue.toFixed(2)),
-    }));
-  }, [ordersList]);
-
-  const topOrders = useMemo(() => {
-    return [...ordersList]
-      .sort((a: any, b: any) => Number(b.valor_total || 0) - Number(a.valor_total || 0))
-      .slice(0, 5);
-  }, [ordersList]);
-
-  const totalRevenue = Number((stats.data as any)?.data?.totalRevenue || (stats.data as any)?.data?.total_revenue || 0);
-  const totalOrders = Number((stats.data as any)?.data?.totalOrders || (stats.data as any)?.data?.total_orders || 0);
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const {
+    paymentMethodDistribution,
+    topOrders,
+    totalRevenue,
+    totalOrders,
+    avgOrderValue,
+  } = usePaymentAnalyticsData(ordersList, stats.data as any);
 
   const handleRefresh = async () => {
     await Promise.all([stats.refetch(), orders.refetch()]);
@@ -246,3 +226,4 @@ function MetricCard({ title, value, helper }: { title: string; value: string; he
     </Card>
   );
 }
+

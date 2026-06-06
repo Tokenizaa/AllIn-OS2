@@ -151,8 +151,8 @@ export class AuthService {
         email: customer.email,
         role: role,
       },
-      accessToken: authData.session.access_token,
-      refreshToken: authData.session.refresh_token,
+      accessToken: authData.session?.access_token || "",
+      refreshToken: authData.session?.refresh_token || "",
       expiresIn: 3600,
     };
   }
@@ -183,10 +183,10 @@ export class AuthService {
     }
   }
 
-  verifyAccessToken(token: string): { userId: string; email: string; role: string } {
+  async verifyAccessToken(token: string): Promise<{ userId: string; email: string; role: string }> {
     // Use Supabase Auth to verify token
     // This is a simplified version - in production, you should use Supabase's built-in session management
-    const { data: { user }, error } = supabase.auth.getUser(token);
+    const { data: { user }, error } = await supabase.auth.getUser(token);
     
     if (error || !user?.email) {
       throw new Error("Invalid access token");

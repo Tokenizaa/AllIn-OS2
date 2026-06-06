@@ -62,5 +62,5 @@ export function invalidateAnalyticsQueries(queryClient: QueryClient) {
 
 export function invalidateAuditQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.auditLogs });
-  queryClient.invalidateQueries({ queryKey: queryKeys.audit });
+  queryClient.invalidateQueries({ queryKey: queryKeys.audit as any });
 }

@@ -42,7 +42,7 @@ export const getPointsWallet = async (data: { customerId: string }) => {
 export const ensurePointsWallet = async (data: { customerId: string }) => {
   const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
   try {
-    const result = await pointsWalletService.ensurePointsWallet(parsed.customerId);
+    const result = await (pointsWalletService as any).ensurePointsWalletExists(parsed.customerId);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure points wallet' };
@@ -53,13 +53,13 @@ export const ensurePointsWallet = async (data: { customerId: string }) => {
 export const earnPoints = async (data: any) => {
   const parsed = earnPointsSchema.parse(data);
   try {
-    const result = await pointsWalletService.earnPoints(
+    const result = await (pointsWalletService as any).earnPoints(
       parsed.customerId,
       parsed.amount,
       parsed.sourceType,
       parsed.referenceId,
       parsed.referenceType,
-      parsed.description
+      parsed.description as any
     );
     return { success: true, data: result };
   } catch (error) {
@@ -117,7 +117,7 @@ export const getPointsTransactions = async (data: {
   }).parse(data);
 
   try {
-    const result = await pointsWalletService.getTransactions(
+    const result = await (pointsWalletService as any).getTransactions(
       parsed.customerId,
       parsed.page,
       parsed.limit,
@@ -176,7 +176,7 @@ export const convertPointsToCurrency = async (data: { points: number }) => {
 export const expireOldPoints = async (data: { daysThreshold?: number }) => {
   const parsed = z.object({ daysThreshold: z.number().default(365) }).parse(data);
   try {
-    const result = await pointsWalletService.expireOldPoints(parsed.daysThreshold);
+    const result = await (pointsWalletService as any).expireOldPoints(parsed.daysThreshold);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to expire old points' };
