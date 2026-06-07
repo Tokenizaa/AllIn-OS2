@@ -50,24 +50,12 @@ export default defineConfig({
             return "supabase";
           }
           
-          // Icons
+          // Icons - keep with react-vendor to avoid circular dependencies
           if (id.includes("lucide-react")) {
-            return "icons";
+            return "react-vendor";
           }
           
-          // Radix UI components - split by component type
-          if (id.includes("@radix-ui/react-dialog")) {
-            return "radix-dialog";
-          }
-          if (id.includes("@radix-ui/react-dropdown-menu")) {
-            return "radix-dropdown";
-          }
-          if (id.includes("@radix-ui/react-select")) {
-            return "radix-select";
-          }
-          if (id.includes("@radix-ui/react-tabs")) {
-            return "radix-tabs";
-          }
+          // Radix UI components
           if (id.includes("@radix-ui")) {
             return "ui-vendor";
           }
@@ -79,28 +67,13 @@ export default defineConfig({
             return "ui-utils";
           }
           
-          // Form libraries
-          if (id.includes("react-hook-form") || id.includes("zod")) {
-            return "forms";
-          }
-          
-          // Date libraries
-          if (id.includes("date-fns") || id.includes("react-day-picker")) {
-            return "date-utils";
-          }
-          
-          // Animation
-          if (id.includes("framer-motion")) {
-            return "animation";
-          }
-          
-          // Notifications
-          if (id.includes("sonner")) {
-            return "notifications";
-          }
-          
           // Other vendors
-          if (id.includes("node_modules")) {
+          if (id.includes("sonner") || 
+              id.includes("framer-motion") || 
+              id.includes("date-fns") ||
+              id.includes("react-day-picker") ||
+              id.includes("react-hook-form") ||
+              id.includes("zod")) {
             return "vendor";
           }
         },
