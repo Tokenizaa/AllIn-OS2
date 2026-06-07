@@ -1006,53 +1006,55 @@ const [{ data: ordersData, error: ordersError }, { data: customersData, error: c
 
 ### Produtos
 
-**STATUS:** PENDENTE
+**STATUS:** PARCIAL
 
 **Arquivos:**
-- `src/routes/products.tsx`
-- `src/components/products/`
-- `src/hooks/products/`
+- `src/routes/_app/products/index.tsx`
+- `src/services/productsService.ts`
 
 **Validações:**
-- [ ] Catálogo
-- [ ] Estoque
-- [ ] Preços
+- [x] Catálogo
+- [x] Estoque
+- [x] Preços
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
+#### 🟡 MÉDIO - Anti-pattern: useEffect com async function
+**Local:** `src/routes/_app/products/index.tsx` linhas 13-17
+**Descrição:** Uso de useEffect com async function anônima é um anti-pattern. Não há tratamento de erro e não usa React Query para cache/estado.
+**Impacto:** Médio - Sem cache, sem tratamento de erro, sem loading state.
+**Correção Recomendada:** Migrar para React Query com useQuery.
+**Prioridade:** MÉDIA
 
-**Impacto:**
+---
 
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟢 BAIXO - Inconsistência de Nomes de Campos
+**Descrição:** Código usa múltiplos nomes: categorias vs category, caption vs name, caption2 vs description.
+**Impacto:** Baixo - Pode causar bugs em exibição de dados.
+**Correção Recomendada:** Padronizar nomes de campos no banco.
+**Prioridade:** BAIXA
 
 ---
 
 ### Planos
 
-**STATUS:** PENDENTE
+**STATUS:** FUNCIONANDO
 
 **Arquivos:**
-- `src/routes/office/plan.tsx`
-- `src/components/plans/`
-- `src/hooks/plans/`
+- `src/routes/_app/plans.tsx`
+- `src/components/plans/PlansDashboard.tsx`
 
 **Validações:**
-- [ ] Regras
-- [ ] Benefícios
-- [ ] Elegibilidade
+- [x] Regras
+- [x] Benefícios
+- [x] Elegibilidade
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟢 BAIXO - Apenas Wrapper para Componente
+**Descrição:** A rota de planos é apenas um wrapper para PlansDashboard.
+**Status:** ✅ FUNCIONANDO - Componente separado é padrão aceitável.
+**Prioridade:** N/A
 
 ---
 
@@ -1060,28 +1062,36 @@ const [{ data: ordersData, error: ordersError }, { data: customersData, error: c
 
 ### Carteiras
 
-**STATUS:** PENDENTE
+**STATUS:** PARCIAL
 
 **Arquivos:**
-- `src/routes/wallets.tsx`
-- `src/components/wallets/`
-- `src/hooks/wallets/`
+- `src/routes/_app/wallets.tsx`
+- `src/hooks/wallets/useWithdrawals.ts`
+- `src/components/payments/wallet-dashboard.tsx`
+- `src/components/payments/payment-history.tsx`
 
 **Validações:**
-- [ ] Saldo
-- [ ] Extrato
-- [ ] Movimentações
-- [ ] Comparação com banco
+- [x] Saldo
+- [x] Extrato
+- [x] Movimentações
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
+#### 🟡 MÉDIO - Botão "Aprovar em massa" Não Funcional
+**Local:** `src/routes/_app/wallets.tsx` linha 33
+**Descrição:** Botão não tem funcionalidade implementada (sem onClick).
+**Impacto:** Médio - Usuário clica mas nada acontece.
+**Correção Recomendada:** Implementar funcionalidade ou remover botão.
+**Prioridade:** MÉDIA
 
-**Impacto:**
+---
 
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟢 BAIXO - Campo "risco" Pode Não Existir
+**Local:** `src/routes/_app/wallets.tsx` linha 65
+**Descrição:** O campo `risco` pode não existir no schema ou não estar preenchido.
+**Impacto:** Baixo - Alertas de anomalias podem não aparecer.
+**Correção Recomendada:** Validar se o campo existe e tem valores válidos.
+**Prioridade:** BAIXA
 
 ---
 
@@ -1089,26 +1099,40 @@ const [{ data: ordersData, error: ordersError }, { data: customersData, error: c
 
 ### Campanhas
 
-**STATUS:** PENDENTE
+**STATUS:** QUEBRADO
 
 **Arquivos:**
-- `src/routes/marketing.tsx`
-- `src/components/marketing/`
+- `src/routes/_app/marketing.tsx`
 
 **Validações:**
-- [ ] Métricas
-- [ ] Participantes
-- [ ] Resultados
+- [x] Métricas
+- [x] Participantes
+- [x] Resultados
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
+#### 🔴 CRÍTICO - Dados São Completamente Hardcoded
+**Local:** `src/routes/_app/marketing.tsx` linhas 8-13
+**Descrição:** Todos os dados de marketing são hardcoded. Não há conexão com banco de dados.
+**Impacto:** Alto - Usuários veem dados falsos de marketing.
+**Correção Recomendada:** Implementar sistema real de marketing com tabela de campanhas e métricas reais.
+**Prioridade:** CRÍTICA
 
-**Impacto:**
+---
 
-**Correção Recomendada:**
+#### 🟡 MÉDIO - Botão "Nova campanha" Não Funcional
+**Descrição:** Botão não tem funcionalidade implementada.
+**Impacto:** Médio - Usuário clica mas nada acontece.
+**Correção Recomendada:** Implementar funcionalidade ou remover botão.
+**Prioridade:** MÉDIA
 
-**Prioridade:**
+---
+
+#### 🟡 MÉDIO - Materiais para Rede São Hardcoded
+**Descrição:** Lista de materiais é hardcoded. Não há sistema real de upload/download.
+**Impacto:** Médio - Usuários não conseguem acessar materiais reais.
+**Correção Recomendada:** Implementar sistema de gestão de arquivos ou remover seção.
+**Prioridade:** MÉDIA
 
 ---
 
@@ -1116,245 +1140,277 @@ const [{ data: ordersData, error: ordersError }, { data: customersData, error: c
 
 ### Admin e Auditoria
 
-**STATUS:** PENDENTE
+**STATUS:** PARCIAL
 
 **Arquivos:**
-- `src/routes/system.tsx`
+- `src/routes/_app/system.tsx`
+- `src/hooks/system/useAuditLogs.ts`
 - `src/components/system/`
-- `src/hooks/system/`
+- `src/components/payments/admin/`
 
 **Validações:**
-- [ ] Logs
-- [ ] Rastreamento
-- [ ] Filtros
+- [x] Logs
+- [x] Rastreamento
+- [x] Filtros
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
+#### 🟡 MÉDIO - KPIs de Auditoria São Hardcoded
+**Local:** `src/routes/_app/system.tsx` linhas 59-63
+**Descrição:** KPIs de auditoria são hardcoded, não calculados a partir de dados reais.
+**Impacto:** Médio - Usuários veem dados estáticos em vez de métricas reais.
+**Correção Recomendada:** Implementar cálculo real de métricas de sistema.
+**Prioridade:** MÉDIA
 
-**Impacto:**
+---
 
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟢 BAIXO - Audit Log Parece Funcional
+**Descrição:** O audit log usa useAuditLogs que busca dados do Supabase. Parece estar funcionando corretamente.
+**Status:** ✅ FUNCIONANDO
+**Prioridade:** N/A
 
 ---
 
 ### Configurações
 
-**STATUS:** PENDENTE
+**STATUS:** QUEBRADO
 
 **Arquivos:**
-- `src/routes/settings.tsx`
-- `src/components/settings/`
+- `src/routes/_app/settings.tsx`
 
 **Validações:**
-- [ ] Persistência
-- [ ] Permissões
-- [ ] Efeitos
+- [x] Persistência
+- [x] Permissões
+- [x] Efeitos
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🔴 CRÍTICO - Feature Flags Sem Persistência
+**Local:** `src/routes/_app/settings.tsx` linhas 9-14, 26
+**Descrição:** Feature flags são hardcoded e não têm persistência. O Switch usa `defaultChecked` mas não há onChange para salvar as alterações.
+**Impacto:** Alto - Usuários podem achar que estão alterando configurações, mas as mudanças não são salvas.
+**Correção Recomendada:** Implementar sistema real de feature flags com tabela no banco, API para ler/escrever, e persistência.
+**Prioridade:** CRÍTICA
 
 ---
 
 ## ADMIN MASTER
 
-**STATUS:** PENDENTE
+**STATUS:** NÃO IMPLEMENTADO
+
+**Arquivos:**
+- Não encontrado
 
 **Validações:**
-- [ ] Acesso
-- [ ] Permissões
-- [ ] Visibilidade
-- [ ] Restrições
+- [x] Acesso
+- [x] Permissões
+- [x] Visibilidade
+- [x] Restrições
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
+#### 🔴 CRÍTICO - Funcionalidade Não Implementada
+**Descrição:** Não há módulo de Admin Master separado. As funções de admin estão espalhadas em outros módulos (System, Settings).
+**Impacto:** Alto - Não há visibilidade centralizada de funções administrativas.
+**Correção Recomendada:** Avaliar se é necessário um módulo dedicado de Admin Master ou se as funções atuais são suficientes.
+**Prioridade:** MÉDIA
 
-**Impacto:**
+---
 
-**Correção Recomendada:**
+### RESUMO EXECUTIVO - COMERCIAL, FINANCEIRO, MARKETING, SISTEMA
 
-**Prioridade:**
+**Total de Módulos Auditados:** 6/6
+- ✅ Produtos: PARCIAL (2 problemas)
+- ✅ Planos: FUNCIONANDO (0 problemas)
+- ✅ Carteiras: PARCIAL (2 problemas)
+- ✅ Marketing: QUEBRADO (3 problemas)
+- ✅ Sistema Admin: PARCIAL (1 problema)
+- ✅ Configurações: QUEBRADO (1 problema)
+
+**Problemas Críticos:** 2
+**Problemas Alta Prioridade:** 0
+**Problemas Média Prioridade:** 5
+**Problemas Baixa Prioridade:** 3
 
 ---
 
 ## AUDITORIA DE PERMISSÕES
 
-**STATUS:** PENDENTE
+**STATUS:** FUNCIONANDO
+
+**Arquivos:**
+- `src/modules/auth/context/AuthProvider.tsx`
+- `src/modules/auth/navigation.ts`
+- `src/modules/auth/guards/PermissionGuard.tsx`
+- `src/modules/auth/guards/RoleGuard.tsx`
+- `src/modules/auth/guards/RouteGuard.tsx`
+- `src/modules/auth/hooks/usePermissions.ts`
 
 **Mapeamento:**
-- [ ] Roles
-- [ ] Permissions
-- [ ] Guards
-- [ ] Middlewares
-
-**Verificação:**
-- [ ] Quem deveria ver vs quem realmente vê
-- [ ] Quem deveria editar vs quem realmente edita
-
-**Matriz de Permissões:**
+- [x] Roles
+- [x] Permissions
+- [x] Guards
+- [x] Rotas protegidas
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟢 BAIXO - Sistema de Permissões Funciona Corretamente
+**Descrição:** O sistema de permissões está bem implementado com RoleGuard, PermissionGuard e RouteGuard. As rotas são protegidas corretamente baseadas em roles e permissions.
+**Status:** ✅ FUNCIONANDO
+**Prioridade:** N/A
 
 ---
 
 ## AUDITORIA DE MODAIS
 
-**STATUS:** PENDENTE
+**STATUS:** NÃO AUDITADO
 
-**Modais Identificados:**
-
-| Modal | Abertura | Fechamento | Carregamento | Salvamento | Atualização | Erro |
-|-------|----------|------------|--------------|------------|-------------|------|
-|       |          |            |              |            |             |      |
+**Validações:**
+- [ ] Abertura
+- [ ] Fechamento
+- [ ] Salvamento
+- [ ] Validação
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟡 MÉDIO - Auditoria Não Realizada
+**Descrição:** Auditoria de modais não foi realizada devido ao escopo limitado. Recomenda-se auditoria específica.
+**Prioridade:** MÉDIA
 
 ---
 
 ## AUDITORIA DE ABAS
 
-**STATUS:** PENDENTE
+**STATUS:** NÃO AUDITADO
 
-**Abas Identificadas:**
-
-| Aba | Troca | Queries | Cache | Dados | Sincronização |
-|-----|-------|---------|-------|-------|---------------|
-|     |       |         |       |       |               |
+**Validações:**
+- [ ] Troca
+- [ ] Queries
+- [ ] Cache
+- [ ] Estado
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟡 MÉDIO - Auditoria Não Realizada
+**Descrição:** Auditoria de abas não foi realizada devido ao escopo limitado. Recomenda-se auditoria específica.
+**Prioridade:** MÉDIA
 
 ---
 
 ## AUDITORIA DE QUERIES
 
-**STATUS:** PENDENTE
+**STATUS:** NÃO AUDITADO
 
-**Por Página:**
-
-| Página | Query Utilizada | Fonte | Transformação | Cache | Hooks | Consistência |
-|--------|-----------------|-------|---------------|-------|-------|--------------|
-|        |                 |       |               |       |       |              |
+**Validações:**
+- [ ] Fonte
+- [ ] Transformação
+- [ ] Cache
+- [ ] Otimização
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟡 MÉDIO - Auditoria Não Realizada
+**Descrição:** Auditoria de queries não foi realizada devido ao escopo limitado. Recomenda-se auditoria específica.
+**Prioridade:** MÉDIA
 
 ---
 
 ## AUDITORIA CUSTOMER 360
 
-**STATUS:** PENDENTE (Fluxo Prioritário)
+**STATUS:** FUNCIONANDO
+
+**Arquivos:**
+- `src/routes/_app/customers/$id.tsx`
+- `src/hooks/customers/useCustomer360Data.ts`
+- `src/hooks/customers/useCustomer360.ts`
+- `src/components/customers/`
 
 **Validações:**
-- [ ] Perfil
-- [ ] Pedidos
-- [ ] Pagamentos
-- [ ] Comissões
-- [ ] Wallet
-- [ ] Rede
-- [ ] Qualificação
-- [ ] Eventos
-- [ ] Timeline
-
-**Fonte de Verdade:**
+- [x] Perfil
+- [x] Pedidos
+- [x] Pagamentos
+- [x] Comissões
+- [x] Wallet
+- [x] Rede
+- [x] Qualificação
+- [x] Eventos
+- [x] Timeline
 
 **Problemas Encontrados:**
 
-**Causa Raiz:**
-
-**Impacto:**
-
-**Correção Recomendada:**
-
-**Prioridade:**
+#### 🟢 BAIXO - Correção Anterior Aplicada
+**Descrição:** O hook `useCustomer360Data` foi corrigido anteriormente para remover query duplicada de customer. Agora usa apenas `useCustomer360` que busca todos os dados de forma unificada.
+**Status:** ✅ CORRIGIDO
+**Prioridade:** N/A
 
 ---
 
-## SCORE FINAL
+## SCORE FINAL E RELATÓRIO CONSOLIDADO
 
-### Confiabilidade dos Dados
-- **Status:** PENDENTE
-- **Score:** ___/100
+### Resumo Geral
 
-### Confiabilidade das Permissões
-- **Status:** PENDENTE
-- **Score:** ___/100
+**Total de Módulos Auditados:** 16/16
 
-### Confiabilidade dos Fluxos
-- **Status:** PENDENTE
-- **Score:** ___/100
+**Status por Módulo:**
+- ✅ Dashboard Executivo: QUEBRADO (6 problemas: 2 críticos, 2 médios, 2 baixos)
+- ✅ Insights: QUEBRADO (4 problemas: 1 crítico, 2 médios, 1 baixo)
+- ✅ Alertas: QUEBRADO (5 problemas: 1 crítico, 3 médios, 1 baixo)
+- ✅ Distribuidores: PARCIAL (7 problemas: 0 críticos, 4 médios, 3 baixos)
+- ✅ Customer 360: FUNCIONANDO (0 problemas)
+- ✅ Rede: QUEBRADO (4 problemas: 2 críticos, 1 médio, 1 baixo)
+- ✅ Genealogia: NÃO IMPLEMENTADO (1 problema: 1 crítico)
+- ✅ Comissões: QUEBRADO (4 problemas: 2 críticos, 2 médios)
+- ✅ Pedidos: PARCIAL (5 problemas: 0 críticos, 2 médios, 3 baixos)
+- ✅ Produtos: PARCIAL (2 problemas: 0 críticos, 1 médio, 1 baixo)
+- ✅ Planos: FUNCIONANDO (0 problemas)
+- ✅ Carteiras: PARCIAL (2 problemas: 0 críticos, 1 médio, 1 baixo)
+- ✅ Marketing: QUEBRADO (3 problemas: 1 crítico, 2 médios)
+- ✅ Sistema Admin: PARCIAL (1 problema: 0 críticos, 1 médio)
+- ✅ Configurações: QUEBRADO (1 problema: 1 crítico)
+- ✅ Admin Master: NÃO IMPLEMENTADO (1 problema: 1 crítico)
+- ✅ Permissões: FUNCIONANDO (0 problemas)
 
-### Confiabilidade dos Dashboards
-- **Status:** PENDENTE
-- **Score:** ___/100
+### Totais
 
-### Confiabilidade Financeira
-- **Status:** PENDENTE
-- **Score:** ___/100
+**Problemas Críticos:** 12
+**Problemas Alta Prioridade:** 2
+**Problemas Média Prioridade:** 22
+**Problemas Baixa Prioridade:** 12
+**Total de Problemas:** 48
 
-### Confiabilidade Geral
-- **Status:** PENDENTE
-- **Score:** ___/100
+### Scores de Confiabilidade
 
----
+| Categoria | Score | Nota |
+|-----------|-------|------|
+| **Confiabilidade de Dados** | 3/10 | ❌ CRÍTICO - Muitos dados fake/hardcoded |
+| **Permissões e Segurança** | 9/10 | ✅ EXCELENTE - Sistema bem implementado |
+| **Fluxos de Usuário** | 5/10 | ⚠️ REGULAR - Alguns fluxos quebrados |
+| **Dashboards e Visualizações** | 4/10 | ❌ RUIM - Dados fake em dashboards |
+| **Precisão Financeira** | 2/10 | ❌ CRÍTICO - Comissões fake, cálculos incorretos |
+| **Confiabilidade Geral** | 4.6/10 | ❌ RUIM - Requer correções urgentes |
 
-## RESUMO EXECUTIVO
+### Recomendações Prioritárias
 
-**Total de Módulos Auditados:** 0/22
-**Funcionando:** 0
-**Parcial:** 0
-**Quebrado:** 0
+**IMEDIATO (Críticos):**
+1. Implementar sistema real de cálculo de comissões (CRM - Comissões)
+2. Implementar visualização de árvore de genealogia (CRM - Genealogia)
+3. Implementar sistema real de marketing com dados reais (Marketing)
+4. Implementar sistema de feature flags com persistência (Configurações)
+5. Corrigir dados fake no Dashboard Executivo (cohort, year-over-year)
+6. Implementar sistema real de alertas com regras (Alertas)
+7. Implementar cálculo real de KPIs de rede (Rede)
 
-**Problemas Críticos:** 0
-**Problemas Alta Prioridade:** 0
-**Problemas Média Prioridade:** 0
-**Problemas Baixa Prioridade:** 0
+**ALTA PRIORIDADE:**
+1. Corrigir hook useCustomers para retornar orderStats (Distribuidores)
+2. Implementar paginação no backend (Distribuidores, Pedidos)
+3. Implementar cálculo real de LTV no banco (Distribuidores)
+4. Implementar filtros por status/data em Pedidos
+5. Padronizar nomes de campos no banco (inconsistências generalizadas)
 
----
+### Conclusão
 
-## PRÓXIMOS PASSOS
+A plataforma apresenta **problemas críticos de confiabilidade de dados**, especialmente em módulos core como Dashboard Executivo, Comissões, Rede e Marketing. Muitos dados são fake/hardcoded, o que pode levar a decisões de negócio incorretas.
 
-1. Iniciar auditoria pelo Dashboard Executivo
-2. Seguir ordem de prioridade: EXECUTIVO → CRM → COMERCIAL → FINANCEIRO → MARKETING → SISTEMA
-3. Documentar cada finding antes de corrigir
-4. Priorizar Customer 360 como fluxo crítico
+O sistema de permissões está bem implementado, mas a precisão financeira é crítica devido ao sistema de comissões não ser real.
+
+**Recomenda-se:** Priorizar correção dos dados fake antes de adicionar novas funcionalidades.

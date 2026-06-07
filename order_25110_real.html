@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="pt_BR" >
+<head>
+    <meta charset="UTF-8"/>
+    <title>Pedidos</title>
+    <base href="https://allinbrasil.com.br/loja/admin/"/>
+            <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+    <script type="text/javascript" src="view/javascript/jquery/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
+    
+    <link href="view/javascript/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>
+    <link href="view/javascript/font-glyphicons/font-glyphicons.css" type="text/css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:200normal,200italic,300normal,300italic,400normal,400italic,600normal,600italic,700normal,700italic,900normal,900italic|0&subset=all" type="text/css" rel="stylesheet"/>
+    <link href="https://s3-sa-east-1.amazonaws.com/public-http-files/UploadArquivo/Arquivos/all_in_esp_br/Layouts/Css/lojaver69ce5ef75e526.min.css" type="text/css" rel="stylesheet"/>
+    
+    <link href="view/javascript/summernote/summernote.css" rel="stylesheet"/>
+    <script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>
+    <script type="text/javascript" src="view/javascript/cidades.js"></script>
+    <script type="text/javascript" src="https://allinbrasil.com.br/src/Modulos/Layouts/RecursosCarregadosEmTodosLayouts/Recursos/Terceiros/dialogBootstrap/dialogBootstrap.js"></script>
+
+    <script type="text/javascript" src="view/javascript/jqueryPluginCommonjs.js"></script>
+    <script src="view/javascript/jquery/datetimepicker/moment.js" type="text/javascript"></script>
+    <script src="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet"
+          media="screen"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/zenburn.min.css">
+    <script type="text/javascript" src="https://allinbrasil.com.br/src/Ferramentas/Layouts/Recursos/Plugins/select2/select2.min.js"></script>
+    <script type="text/javascript" src="https://allinbrasil.com.br/src/Ferramentas/Layouts/Recursos/Plugins/select2/i18n/pt-BR.js"></script>
+    <link href="https://allinbrasil.com.br/src/Ferramentas/Layouts/Recursos/Plugins/select2/select2-bootstrap.css" type="text/css" rel="stylesheet"/>
+    <link href="https://allinbrasil.com.br/src/Ferramentas/Layouts/Recursos/Plugins/select2/select2.css" type="text/css" rel="stylesheet" />
+    <script src="view/javascript/mascara.js" type="text/javascript"></script>
+    <script src="view/javascript/setMascara.js" type="text/javascript"></script>
+    <script src="view/javascript/checkboxSlide.js" type="text/javascript"></script>
+    <script>
+        var baseUrl = 'https://allinbrasil.com.br/';
+        var escritorioId = 5;
+        var distribuidorLogadoId = 0; 
+
+        jQuery(function () {
+            //jQuery("#input-fax").mask('(99)99999999Z', {translation: {'Z': {pattern: /[0-9]/, optional: true}}});
+            jQuery("#input-postcode1").mask('99999-999');
+            jQuery(".mcep").mask('99999-999');
+            $('.campo-tipo-numerico').mask('000000000000000000000.00', {reverse: true});
+            $('#input-custom-field1').mask('000.000.000-00', {reverse: false});
+            $('.campo-tipo-numerico-opencart').mask('0000000000000000000.0000', {reverse: true});
+            $('.campo-tipo-inteiro').mask('000000000000000000000', {reverse: true});
+        });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $.ajaxSetup({ contentType: 'application/x-www-form-urlencoded' });
+        });
+    </script>
+
+            <script src="view/javascript/common.js?time=1780846535" type="text/javascript"></script>
+        <link href="https://s3-sa-east-1.amazonaws.com/public-http-files/UploadArquivo/Arquivos/all_in_esp_br/Configuracao/favicon_sistema_62fa50cf2b355_2_1.png"
+          rel="icon"/>
+    <link href="https://s3-sa-east-1.amazonaws.com/public-http-files/UploadArquivo/Arquivos/all_in_esp_br/Configuracao/favicon_sistema_62fa50cf2b355_2_1.png"
+          rel="apple-touch-icon" sizes="180x180"/>
+    <link href="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Css/padrao.css" rel="stylesheet" type="text/css"/><link href="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Terceiros/toastr/toastr.min.css" rel="stylesheet" type="text/css"/></head>
+<body  >
+<div id="container">
+    <header id="header" class="navbar navbar-static-top">
+        <div class="mobile-menu-button">
+            <a type="button" class="button-menu pull-left "><i class="fa fa-bars fa-lg"></i></a>    
+        </div>
+        <div class="navbar-header">
+            
+            <a href="https://allinbrasil.com.br/loja/admin/common/dashboard?token=6652ec3843a5543515076d13d4d4c89b" class="navbar-brand"><img style="max-height: 28px"
+                                                                     src=" https://s3-sa-east-1.amazonaws.com/public-http-files/UploadArquivo/Arquivos/all_in_esp_br/Configuracao/logomarca_sistema_5eee718d4c5bf_logo-h.png"
+                                                                     alt="Sistema de gestão loja virtual"
+                                                                     title="Sistema de gestão loja virtual"/></a></div>
+                    <ul class="nav pull-right">
+                <li class="dropdown">
+                                    </li>
+                                
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown"><span
+                            class="label label-danger pull-left"></span> <i
+                            class="fa fa-bell fa-lg"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-right alerts-dropdown">
+                        <li class="dropdown-header">
+                            Pedidos - All-in life style                        </li>
+                        <li>
+                            <a>
+                  <span
+                      class="label label-success pull-right">
+                     715                  </span>
+                                Aguardando Pagamento                            </a>
+                        </li>
+                        <li>
+                            <a>
+                                <span
+                                    class="label label-success pull-right">
+                                    21369                                </span>
+                                Pago                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/review?token=6652ec3843a5543515076d13d4d4c89b&amp;filter_status=0">
+                  <span class="label label-success pull-right">
+                      7                  </span>
+                                Comentários                            </a>
+                        </li>
+                                                    <li class="divider"></li>
+                            <li>
+                                <a>
+                                    <span class="label label-success pull-right">1</span>
+                                    Lojas em avaliação                                </a>
+                            </li>
+                                                                        
+                    </ul>
+                </li>
+                <li><a href="https://allinbrasil.com.br/loja/admin/common/logout?token=6652ec3843a5543515076d13d4d4c89b"><span
+                            class="hidden-xs hidden-sm hidden-md">Sair</span> <i
+                            class="fa fa-sign-out fa-lg"></i></a></li>
+            </ul>
+        
+            </header>
+<style>
+    pre code{
+        background-color: #444 !important;
+    }
+    .notificacao-msg0{
+       background: #f0f0f0;
+       border: 1px solid #ccc;
+       font-weight: bold;
+    }
+    
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .select2-container--open {
+        z-index: 10000055 !important;
+    }
+</style>
+<nav id="column-left">
+            <ul id="menu">
+                <li id="user">
+                    <a class="user_dados">
+                        <span>Junior - Industria</span>
+                    </a>
+                    <a type="button" class="button-menu pull-left"><i class="fa fa-bars fa-lg"></i></a>
+                </li>
+                <li id="dashboard">
+                    <a href="https://allinbrasil.com.br/loja/admin/common/dashboard?token=6652ec3843a5543515076d13d4d4c89b">
+                        <i class="fa fa-dashboard fa-fw"></i>
+                        <span>Painel de controle</span>
+                    </a>
+                </li>
+                <li id="catalog">
+                    <a class="parent">
+                        <i class="fa fa-tags fa-fw"></i>
+                        <span>Catálogo</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/category?token=6652ec3843a5543515076d13d4d4c89b">Departamentos</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/product?token=6652ec3843a5543515076d13d4d4c89b">Produtos</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/kit?token=6652ec3843a5543515076d13d4d4c89b">Kit de Produtos</a>
+                        </li>
+                        <li>
+                            <a class="parent">Atributos</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/catalog/attribute?token=6652ec3843a5543515076d13d4d4c89b">Atributos</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/catalog/attribute_group?token=6652ec3843a5543515076d13d4d4c89b">Grupos de atributos</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/option?token=6652ec3843a5543515076d13d4d4c89b">Opções</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/manufacturer?token=6652ec3843a5543515076d13d4d4c89b">Fabricantes</a>
+                        </li>
+                         <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/information?token=6652ec3843a5543515076d13d4d4c89b">Páginas de informações</a>
+                        </li>
+                                                <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/review?token=6652ec3843a5543515076d13d4d4c89b">Comentários</a>
+                        </li>
+                                                <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/stock?token=6652ec3843a5543515076d13d4d4c89b">Estoque</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li id="extension">
+
+                    <a class="parent">
+                        <i class="fa fa-puzzle-piece fa-fw"></i>
+                        <span>Extensões</span>
+                    </a>
+                    <ul>
+
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/extension/shipping?token=6652ec3843a5543515076d13d4d4c89b">Fretes</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/extension/payment?token=6652ec3843a5543515076d13d4d4c89b">Pagamentos</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/extension/total?token=6652ec3843a5543515076d13d4d4c89b">Total do pedido</a>
+                        </li>
+                                                                                                                                                                    </ul>
+                </li>
+
+                                <li id="sale">
+                    <a class="parent">
+                        <i class="fa fa-shopping-cart fa-fw"></i>
+                        <span>Vendas</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/sale/order?token=6652ec3843a5543515076d13d4d4c89b">Pedidos</a>
+                        </li>
+                                                                            <li>
+                                <a href="https://allinbrasil.com.br/loja/admin/sale/carrinhos_abandonados/relatorio?token=6652ec3843a5543515076d13d4d4c89b">Carrinhos Abandonados</a>
+                            </li>
+                                                <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/sale/return?token=6652ec3843a5543515076d13d4d4c89b">Devoluções</a>
+                        </li>
+
+                        <li>
+                            <a class="parent">Clientes</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/sale/customer?token=6652ec3843a5543515076d13d4d4c89b">Clientes</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/sale/custom_field?token=6652ec3843a5543515076d13d4d4c89b">Personalizar cadastro</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/sale/customer_ban_ip?token=6652ec3843a5543515076d13d4d4c89b">IPs banidos</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li id="financeiro" >
+                    <a class="parent">
+                        <i class="fa fa-usd fa-fw"></i>
+                        <span>Financeiro</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/finance/cadastrar_conta_bancaria?token=6652ec3843a5543515076d13d4d4c89b">Cadastrar Conta Para CD</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/finance/solicitacao_saque?token=6652ec3843a5543515076d13d4d4c89b">Solicitação de Saque</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/finance/transacoes_financeiras?token=6652ec3843a5543515076d13d4d4c89b">Relatório das Transações</a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/finance/relatorio_faturamento?token=6652ec3843a5543515076d13d4d4c89b">Relatório de Faturamento Anual</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/finance/fechamento_caixa?token=6652ec3843a5543515076d13d4d4c89b">Fechamento de Caixa</a>
+                        </li>
+                    </ul>
+                                    </li>
+
+                <li id="system">
+                    <a class="parent">
+                        <i class="fa fa-cog fa-fw"></i>
+                        <span>Configurações</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/setting/store?token=6652ec3843a5543515076d13d4d4c89b">Lojas/CDs</a>
+                        </li>
+
+                        <li>
+                            <a class="parent">Design</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/design/banner?token=6652ec3843a5543515076d13d4d4c89b">Banners</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="parent">Usuários</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/user/user?token=6652ec3843a5543515076d13d4d4c89b">Usuário</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/user/user_permission?token=6652ec3843a5543515076d13d4d4c89b">Grupos de usuários</a>
+                                </li>
+                                                            </ul>
+                        </li>
+                        <li>
+                            <a class="parent">Dados auxiliares</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/courier?token=6652ec3843a5543515076d13d4d4c89b">Transportadoras</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/stock_status?token=6652ec3843a5543515076d13d4d4c89b">Situações de estoque</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/order_status?token=6652ec3843a5543515076d13d4d4c89b">Situações de pedidos</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/currency?token=6652ec3843a5543515076d13d4d4c89b">Moedas</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/country?token=6652ec3843a5543515076d13d4d4c89b">Países</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/zone?token=6652ec3843a5543515076d13d4d4c89b">Estados</a>
+                                </li>
+                                 <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/etiquetas?token=6652ec3843a5543515076d13d4d4c89b">Etiquetas</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/geo_zone?token=6652ec3843a5543515076d13d4d4c89b">Regiões geográficas</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/length_class?token=6652ec3843a5543515076d13d4d4c89b">Unidades de medida</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/localisation/weight_class?token=6652ec3843a5543515076d13d4d4c89b">Unidades de peso</a>
+                                </li>
+                                <li>
+                                    <a class="parent">Devoluções</a>
+                                    <ul>
+                                        <li>
+                                            <a href="https://allinbrasil.com.br/loja/admin/localisation/return_status?token=6652ec3843a5543515076d13d4d4c89b">Situações</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://allinbrasil.com.br/loja/admin/localisation/return_action?token=6652ec3843a5543515076d13d4d4c89b">Soluções</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://allinbrasil.com.br/loja/admin/localisation/return_reason?token=6652ec3843a5543515076d13d4d4c89b">Motivos</a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="parent">
+                        <i class="fa fa-upload"></i>
+                        <span>Importar</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/importacao/produtos?token=6652ec3843a5543515076d13d4d4c89b">
+                                Produtos                            </a>
+                        </li>
+                        <li>
+                            <a href="https://allinbrasil.com.br/loja/admin/catalog/importacao/promocoes?token=6652ec3843a5543515076d13d4d4c89b">
+                                Promoções por Produto                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="https://allinbrasil.com.br/loja/admin/catalog/exportacao?token=6652ec3843a5543515076d13d4d4c89b">
+                        <i class="fa fa-download"></i>
+                        <span>Exportar</span>
+                    </a>
+
+                </li>
+                <li id="reports">
+                    <a class="parent">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>
+                        <span>Relatórios</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a class="parent">Vendas</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/sale_order?token=6652ec3843a5543515076d13d4d4c89b">Pedidos</a>
+                                </li>
+                                
+                                                    
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/sale_order_detalhado?token=6652ec3843a5543515076d13d4d4c89b">Pedidos Detalhados</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/sale_shipping?token=6652ec3843a5543515076d13d4d4c89b">Fretes</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/sale_return?token=6652ec3843a5543515076d13d4d4c89b">Devoluções</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/faturamento_detalhado?token=6652ec3843a5543515076d13d4d4c89b">Faturamento Detalhado</a>
+                                </li>
+                                                                                            </ul>
+                        </li>
+                        <li>
+                            <a class="parent">Produtos</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/product_viewed?token=6652ec3843a5543515076d13d4d4c89b">Visualizados</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/product_purchased?token=6652ec3843a5543515076d13d4d4c89b">Vendidos</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/product_purchased/produtosPorOpcao?token=6652ec3843a5543515076d13d4d4c89b">Vendidos (Produtos por Opção)</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/product_purchased/valorEstoque?token=6652ec3843a5543515076d13d4d4c89b">Valor de estoque do produto</a>
+                                </li>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/product_purchased/estoquePorLoja?token=6652ec3843a5543515076d13d4d4c89b">Estoque do produto por loja</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="parent">Clientes</a>
+                            <ul>
+                                <li>
+                                    <a href="https://allinbrasil.com.br/loja/admin/report/customer_order?token=6652ec3843a5543515076d13d4d4c89b">Pedidos</a>
+                                </li>
+                                                            </ul>
+                    </ul>
+                </li>
+                
+            </ul>
+        </nav>
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="hold-title">
+                <h1>Pedidos</h1>
+                <div class="pull-right">
+                    <a href="https://allinbrasil.com.br/loja/admin/sale/order/comanda?token=6652ec3843a5543515076d13d4d4c89b&amp;order_id=25110" target="_blank" data-toggle="tooltip"
+                       title="Imprimir comanda" class="btn btn-info">
+                        <i class="fa fa-ticket"></i>
+                    </a>
+                    <a href="https://allinbrasil.com.br/loja/admin/sale/order/invoice?token=6652ec3843a5543515076d13d4d4c89b&amp;order_id=25110" target="_blank" data-toggle="tooltip"
+                       title="Imprimir fatura" class="btn btn-info">
+                        <i class="fa fa-print"></i>
+                    </a>
+                    <a href="https://allinbrasil.com.br/loja/admin/sale/order/shipping?token=6652ec3843a5543515076d13d4d4c89b&amp;order_id=25110" target="_blank" data-toggle="tooltip"
+                       title="Imprimir lista de entregas" class="btn btn-info">
+                        <i class="fa fa-truck"></i>
+                    </a>
+    <!--                <a
+                        href="https://allinbrasil.com.br/loja/admin/sale/order/edit?token=6652ec3843a5543515076d13d4d4c89b&amp;order_id=25110" data-toggle="tooltip" title="Editar"
+                        class="btn btn-primary">
+                        <i class="fa fa-pencil"></i>
+                    </a>-->
+                    <a href="https://allinbrasil.com.br/loja/admin/sale/order?token=6652ec3843a5543515076d13d4d4c89b" data-toggle="tooltip" title="Cancelar"
+                       class="btn btn-default">
+                        <i class="fa fa-reply"></i>
+                    </a>
+                </div>
+            </div>
+            <ul class="breadcrumb">
+                                    <li><a href="https://allinbrasil.com.br/loja/admin/common/dashboard?token=6652ec3843a5543515076d13d4d4c89b">Principal</a></li>
+                                    <li><a href="https://allinbrasil.com.br/loja/admin/sale/order?token=6652ec3843a5543515076d13d4d4c89b">Pedidos</a></li>
+                            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+	        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-list"></i> Pedidos</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#tab-order" data-toggle="tab">Detalhes do pedido</a></li>
+                    <li><a href="#tab-distribuidor" data-toggle="tab">Detalhes do distribuidor</a></li>
+                    <li><a href="#tab-payment" data-toggle="tab">Detalhes do pagamento</a></li>
+                                            <li><a href="#tab-shipping" data-toggle="tab">Detalhes de envio</a></li>
+                                        <li><a href="#tab-product" data-toggle="tab">Produtos</a></li>
+                    <li><a href="#tab-pagamento" data-toggle="tab">Pagamento</a></li>
+                    <li><a href="#tab-history" data-toggle="tab">Histórico</a></li>
+                                                                            </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab-order">                        
+                        <table class="table table-bordered">
+                            <tr>
+                                <td>Pedido nº:</td>
+                                <td>#25110</td>
+                            </tr>
+                            <tr>
+                                <td>Fatura nº:</td>
+                                <td>                                        <button id="button-invoice" class="btn btn-success btn-xs"><i
+                                                class="fa fa-cog"></i> Gerar</button>
+                                    </td>
+                            </tr>
+                                                                                                                <tr>
+                                <td>Loja:</td>
+                                <td>All-in life style</td>
+                            </tr>
+                            <tr>
+                                <td>URL da loja:</td>
+                                <td><a href="https://allinbrasil.com.br/loja/" target="_blank">https://allinbrasil.com.br/loja/</a>
+                                </td>
+                            </tr>
+                                                            <tr>
+                                    <td>Cliente:</td>
+                                    <td>
+                                        <a href="https://allinbrasil.com.br/loja/admin/sale/customer/edit?token=6652ec3843a5543515076d13d4d4c89b&amp;customer_id=919"
+                                           target="_blank">AngelaRegina dos Santos</a>
+
+                                    </td>
+                                </tr>
+                                                                                    <tr>
+                                <td>Patrocinador</td>
+                                <td>Usuário: Jussaraavila  Nome: Jussara Avila</td>
+                            </tr>
+                            
+                                                            <tr>
+                                    <td>Tipo de cliente:</td>
+                                    <td>Distribuidor/Consumo inteligente</td>
+                                </tr>
+                                                        <tr>
+                                <td>E-mail</td>
+                                <td><a href="mailto:emporium.af.itj@gmail.com">emporium.af.itj@gmail.com</a></td>
+                            </tr>
+                            <tr>
+                                <td>Telefone:</td>
+                                <td>(47) 99175-9247</td>
+                            </tr>
+                                                                                        <tr>
+                                    <td>CNPJ:</td>
+                                    <td>09550894000168</td>
+                                </tr>
+                                                            <tr>
+                                    <td>Tipo de pessoa:</td>
+                                    <td>Jurídica</td>
+                                </tr>
+                                                        <tr>
+                                <td>Total:</td>
+                                <td>R$464,55</td>
+                            </tr>
+                                                                                        <tr>
+                                    <td>Situação do pedido:</td>
+                                    <td id="order-status">Pedido Realizado</td>
+                                </tr>
+                                                                                                                    <tr>
+                                    <td>Endereço IP:</td>
+                                    <td>177.2.44.41</td>
+                                </tr>
+                                                                                                                    <tr>
+                                    <td>Navegador:</td>
+                                    <td>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36</td>
+                                </tr>
+                                                                                        <tr>
+                                    <td>Idioma:</td>
+                                    <td>pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7</td>
+                                </tr>
+                                                        <tr>
+                                <td>Cadastro:</td>
+                                <td>05/06/2026 21:19:57</td>
+                            </tr>
+                            <tr>
+                                <td>Modificação:</td>
+                                <td>05/06/2026 21:19:57</td>
+                            </tr>
+                                                    </table>
+                                                <div class="col-md-12">
+    <h4>Campos personalizados</h4>
+        <div class="pull-right">
+        <button type="button" data-target="#modal-valor-campos-pedido" data-toggle="modal" class="btn btn-xs btn-primary"><i class="fa fa-pencil"></i> Editar</button>
+    </div>
+        <div class="clearfix"></div>
+    <div class="table-responsive" style="margin-top: 10px;">
+        <table class="table">
+            <tr>
+                <th>Campo</th>
+                <th>Valor</th>
+            </tr>
+                            <tr>
+                    <td>teste</td>
+                    <td>teste</td>
+                </tr>
+                    </table>
+    </div>
+    
+                <div class="modal fade bs-modal-lg" id="modal-valor-campos-pedido" role="dialog" aria-hidden="true"  >
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" id="botao-fechar-modal-superior" data-dismiss="modal" aria-hidden="true"></button>
+                                <h4 class="modal-title"></h4>
+                            </div>
+                            <div class="modal-body"><!-- Inicio do formulário --><style>
+                .formulario_corpoformulario_campos_pedido{
+					max-width:100%;
+					margin:0 auto;
+				}
+				.modal.load-bootstrap{
+					top: 0 !important;
+				}
+				.modal.load-bootstrap .modal-dialog{
+					padding-top: 15% !important;
+				}
+                </style><script>var idFormulario = '#formulario_campos_pedido'; var textMensagemTraducao='Mensagem'; var textErrorTraducao='Erro'; var textAtencaoTraducao='Atenção'; var textSucessoTraduacao='Sucesso'; </script><div class="formulario_corpo formulario_corpoformulario_campos_pedido"><form  target='' class='form form_loja_admin_sale_order' id='formulario_campos_pedido' action='https://allinbrasil.com.br/loja/admin/sale/campos_pedido?token=6652ec3843a5543515076d13d4d4c89b&idPedido=25110' method='POST' enctype='multipart/form-data'><div class="panel panel-default"><div class="panel-heading"><div class="panel-title pull-left">Valores dos campos personalizados do pedido #25110</div><div class='buttons-group pull-right'><button type='submit' class='btn btn-success' ><i class="fa fa-floppy-o"></i> Salvar</button></div><div class='clearfix'></div><div class="clearfix"></div></div><div class="panel-body"><input type='hidden' value='1' name='formulario85485b13f42bc34578bf034fbc0dc82e1aeb52f1' /><div class="container-fluid"><input type='hidden' class='form-control hidden6a258fc6f251b' name='edaaa0f8423d1c7e1db0fa31b2778ed0' value='8ae6e65a2bae0620f8c5d8e5a231717cabb6b533670be316cdc13524fa9d4385' /><div class="row"><div class='col-md-12 form-group' ><label>teste</label><div class='clearfix'></div><input type='text' class='form-control input6a258fc6f25c5' name='campo___1' value='teste' placeholder='teste' /></div></div></div><hr><div class='buttons-group pull-right'><button type='submit' class='btn btn-success' ><i class="fa fa-floppy-o"></i> Salvar</button></div><div class='clearfix'></div></div></div></form></div><!-- Fim do formulário--></div>
+                            <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" id="botao-fechar-modal-inferior" data-dismiss="modal">Fechar</button>
+                                    </div>
+                        </div>
+                    </div>
+                </div></div>
+<script>
+    $(function () {
+        formularioEventos.adicionarEventoSucesso("formulario_campos_pedido", function (resposta) {
+            resposta.redirecionar = location.href;
+        });
+    });
+
+</script>
+
+
+                    </div>
+                    <div class="tab-pane" id="tab-distribuidor">
+
+                        
+                                                    <div class="alert alert-info">Essa é um compra própria para o distribuidor
+                                <b>diekirch</b></div>
+                                                
+                        <table class="table table-bordered">
+                            <tr>
+                                <td>Nome</td>
+                                <td>Angela Regina dos Santos</td>
+                            </tr>
+                            <tr>
+                                <td>Patrocinador</td>
+                                <td>Usuário: Jussaraavila  Nome: Jussara Avila</td>
+                            </tr>
+                            <tr>
+                                <td>Data Nascimento</td>
+                                <td>03/04/1968</td>
+                            </tr>
+                            <tr>
+                                <td>E-mail</td>
+                                <td>emporium.af.itj@gmail.com</td>
+                            </tr>
+                            <tr>
+                                <td>Endereço</td>
+                                <td>Rua Pedro Camilo Vicente</td>
+                            </tr>
+                            <tr>
+                                <td>Cidade / Estado</td>
+                                <td>Itajaí</td>
+                            </tr>
+                            
+                                <tr>
+                                    <td>CNPJ</td>
+                                    <td>09550894000168</td>
+                                </tr>
+                                <tr>
+                                    <td>IE</td>
+                                    <td>ISENTO</td>
+                                </tr>
+                                <tr>
+                                    <td>Razão Social</td>
+                                    <td>Angela Regina dos Santos ME</td>
+                                </tr>
+                                <tr>
+                                    <td>Nome Fantasia</td>
+                                    <td>Emporium AF</td>
+                                </tr>
+
+                                                                                </table>
+                    </div>
+                    <div class="tab-pane" id="tab-payment">
+                        <p>As informações apresentadas dizem respeito ao pagador da transação.</p>
+                        <table id='tabelaPagamento' class="table table-bordered">
+                            <tr>
+                                <td>Nome:</td>
+                                <td>Angela</td>
+                            </tr>
+                            <tr>
+                                <td>Sobrenome:</td>
+                                <td>Regina dos Santos</td>
+                            </tr>
+                                                                                                                          <tr>
+                                    <td>Empresa:</td>
+                                    <td>All-in life style</td>
+                                </tr>
+                                                        <tr>
+                                <td>Endereço:</td>
+                                <td>Rua Pedro Camilo Vicente</td>
+                            </tr>
+                                                            <tr>
+                                    <td>Bairro:</td>
+                                    <td>Cordeiros</td>
+                                </tr>
+                                                        <tr>
+                                <td>Cidade:</td>
+                                <td>Itajaí</td>
+                            </tr>
+                                                            <tr>
+                                    <td>CEP:</td>
+                                    <td>88310050</td>
+                                </tr>
+                                                        <tr>
+                                <td>Estado:</td>
+                                <td>Santa Catarina</td>
+                            </tr>
+                                                            <tr>
+                                    <td>UF:</td>
+                                    <td>SC</td>
+                                </tr>
+                                                        <tr>
+                                <td>País:</td>
+                                <td>Brasil</td>
+                            </tr>
+                                                            <tr data-sort="20">
+                                    <td>Complemento:</td>
+                                    <td></td>
+                                </tr>
+                                                            <tr data-sort="4">
+                                    <td>Número:</td>
+                                    <td>24</td>
+                                </tr>
+                                                    </table>
+                    </div>
+                                            <div class="tab-pane" id="tab-shipping">
+                            <p>As informações apresentadas dizem respeito ao destinatário e ao endereço de entrega do pedido</p>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td>Nome:</td>
+                                    <td>Angela</td>
+                                </tr>
+                                <tr>
+                                    <td>Sobrenome:</td>
+                                    <td>Regina dos Santos</td>
+                                </tr>
+                                                                                                                                            <tr>
+                                        <td>Telefone</td>
+                                        <td>(47) 99175-9247</td>
+                                    </tr>
+                                                                                                    <tr>
+                                        <td>Empresa:</td>
+                                        <td>All-in life style</td>
+                                    </tr>
+                                                                <tr>
+                                    <td>Endereço:</td>
+                                    <td>Rua Pedro Camilo Vicente</td>
+                                </tr>
+                                                                    <tr>
+                                        <td>Bairro:</td>
+                                        <td>Cordeiros</td>
+                                    </tr>
+                                                                <tr>
+                                    <td>Cidade:</td>
+                                    <td>Itajaí</td>
+                                </tr>
+                                                                    <tr>
+                                        <td>CEP:</td>
+                                        <td>88310050</td>
+                                    </tr>
+                                                                <tr>
+                                    <td>Estado:</td>
+                                    <td>Santa Catarina</td>
+                                </tr>
+                                                                    <tr>
+                                        <td>UF:</td>
+                                        <td>SC</td>
+                                    </tr>
+                                                                <tr>
+                                    <td>País:</td>
+                                    <td>Brasil</td>
+                                </tr>
+                                                                    <tr data-sort="20">
+                                        <td>Complemento:</td>
+                                        <td></td>
+                                    </tr>
+                                                                    <tr data-sort="4">
+                                        <td>Número:</td>
+                                        <td>24</td>
+                                    </tr>
+                                                                                                    <tr>
+                                        <td>Frete:</td>
+                                        <td>Frete Grátis regra distribuidor</td>
+                                    </tr>
+                                                                                            </table>
+                        </div>
+                                        <div class="tab-pane" id="tab-product">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <td class="text-left">Produto</td>
+                                <td class="text-left">Modelo</td>
+                                <td class="text-left">SKU</td>
+                                <td class="text-right">Quantidade</td>
+                                <td class="text-right">Valor</td>
+                                <td class="text-right">Total</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                              
+                                <tr>
+                                    <td colspan="5"><b>Sem categoria</b></td>
+                                                            <tr>
+                                    <td class="text-left">
+                                        <a href="https://allinbrasil.com.br/loja/admin/catalog/product/edit?token=6652ec3843a5543515076d13d4d4c89b&amp;product_id=360">NEW CLASSIC  LAMINADO</a>
+                                        </br><small> - Tamanho : 36</small>                                    </td>
+                                    <td class="text-left">P.000609</td>
+                                    <td class="text-left"></td>
+                                    <td class="text-right">1</td>
+                                    <td class="text-right">R$464,55</td>
+                                    <td class="text-right">R$464,55</td>
+                                </tr>
+                                                            <tr>
+                                    <td class="text-left">
+                                        <a href="https://allinbrasil.com.br/loja/admin/catalog/product/edit?token=6652ec3843a5543515076d13d4d4c89b&amp;product_id=360">NEW CLASSIC  LAMINADO</a>
+                                        </br><small> - Tamanho : 43</small>                                    </td>
+                                    <td class="text-left">P.000609</td>
+                                    <td class="text-left"></td>
+                                    <td class="text-right">1</td>
+                                    <td class="text-right">R$464,55</td>
+                                    <td class="text-right">R$464,55</td>
+                                </tr>
+                                                            </tr>
+                                                                                                                    <tr>
+                                    <td colspan="4" class="text-right"><b>Sub-total por categoria</b>:</td>
+                                    <td class="text-right"></td>
+                                </tr>
+                                                            <tr>
+                                    <td colspan="4" class="text-right"><b>Sem categoria</b>:</td>
+                                    <td class="text-right"><b>R$929,10</b></td>
+                                </tr>
+                                                            <tr>
+                                    <td colspan="4" class="text-right">Sub-total:</td>
+                                    <td class="text-right">R$929,10</td>
+                                </tr>
+                                                            <tr>
+                                    <td colspan="4" class="text-right">Desconto Distribuidor 50%:</td>
+                                    <td class="text-right">R$-464,55</td>
+                                </tr>
+                                                            <tr>
+                                    <td colspan="4" class="text-right">Frete Grátis regra distribuidor:</td>
+                                    <td class="text-right">R$0,00</td>
+                                </tr>
+                                                            <tr>
+                                    <td colspan="4" class="text-right">Total:</td>
+                                    <td class="text-right">R$464,55</td>
+                                </tr>
+                                                        </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="tab-pagamento">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <td colspan="2">
+                                        Resumo pagamento                                    </td>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <td>Valor total</td>
+                                <td class="col-md-2"> R$ 464,55</td>
+                            </tr>
+                            <tr>
+                                <td>Valor confirmado</td>
+                                <td class="col-md-2"> R$ 0,00</td>
+                            </tr>
+                        </table>
+                        <hr />
+                        <div>
+                            <div class="listagem-box"><div id="llojtsapaoedcfd4ffc695" data-url-recarregar="https://allinbrasil.com.br/loja/admin/sale/order/listagemPagamento?token=6652ec3843a5543515076d13d4d4c89b&order_id=25110"><link href='https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Css/padrao.css' rel='stylesheet' type='text/css'>
+<link href='https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Terceiros/bootstrap-datepicker/css/bootstrap-datetimepicker.css' rel='stylesheet' type='text/css'>
+<link href='https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Css/bootstrap-dropdown.css' rel='stylesheet' type='text/css'>
+<script src='https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Terceiros/momentjs/moment-with-locales.min.js'></script>
+<script src='https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Terceiros/bootstrap-datepicker/js/bootstrap-datetimepicker.js'></script>
+<script src='https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Js/listagem.js?1780846534'></script>
+<div class="table-listagem-corpo"><div class="table-responsive"><table class="table table-hover table-bordered table-listing"><thead><tr><th class='white-space-nowrap text-center'>Nº Pagamento</th><th class='white-space-nowrap text-center'>Forma</th><th class='white-space-nowrap text-center'>Método</th><th class='white-space-nowrap text-center'>Valor</th><th class='white-space-nowrap text-center'>Confirmado</th><th class='white-space-nowrap text-center'>Data pagamento</th><th class="acoes white-space-nowrap text-center">Ações</th></tr></thead></tfoot><tbody><tr class='listagem-linhas'><td class='' data-label='Nº Pagamento'>1030590</td><td class='' data-label='Forma'><div class='text-center' ><small >Boleto 7 dias com desconto de 5%</small><br><small>(mmn_cartao_maquina_externa)</small></div></td><td class='' data-label='Método'></td><td class='' data-label='Valor'>R$464,55</td><td class='' data-label='Confirmado'>Não</td><td class='' data-label='Data pagamento'></td><td class='text-center' data-label='Ações'></td></tr></tbody></table></div><div class="table-responsive"><table class='table table-bordered'><tr></tr></table></div></div></div></div><script>
+                        $(document).ready(function(){
+                            $('#llojtsapaoedcfd4ffc695').listagem();
+                            $('input[type="hidden"][name="per_page"]').val('0');
+                            $('.listagem_info_coluna').on('click',function(e){
+                              var text = $(this).attr('info');
+                              $('#__modal_listagem_info_coluna .modal-body').html(text); 
+                              $('#__modal_listagem_info_coluna').modal('show');
+                            });                     
+                        });
+                        
+
+                  </script>                        </div>
+
+                        
+                    </div>
+                    <div class="tab-pane" id="tab-history">
+                        <div id="history"></div>
+                        <br/>
+                        <fieldset>
+                            <legend>Detalhes do histórico</legend>
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"
+                                           for="input-order-status">Situação do pedido</label>
+                                    <div class="col-sm-10">
+                                        <select name="order_status_id" id="input-order-status" class="form-control">
+                                                                                                                                                <option
+                                                        value="22">Aguardando Envio do Boleto</option>
+                                                                                                                                                                                                <option
+                                                        value="2">Aguardando pagamento</option>
+                                                                                                                                                                                                <option
+                                                        value="21">Ajuste de Sistema</option>
+                                                                                                                                                                                                <option
+                                                        value="28">baixa automatica</option>
+                                                                                                                                                                                                <option
+                                                        value="7">Cancelado pela Operadora</option>
+                                                                                                                                                                                                <option
+                                                        value="11">Cancelamento Revertido</option>
+                                                                                                                                                                                                <option
+                                                        value="14">Despachado</option>
+                                                                                                                                                                                                <option
+                                                        value="15">Em analise Financeira</option>
+                                                                                                                                                                                                <option
+                                                        value="13">Entregue</option>
+                                                                                                                                                                                                <option
+                                                        value="16">Estornado</option>
+                                                                                                                                                                                                <option
+                                                        value="26">Impresso </option>
+                                                                                                                                                                                                <option
+                                                        value="31">liberado impressao</option>
+                                                                                                                                                                                                <option
+                                                        value="10">Não Aprovado</option>
+                                                                                                                                                                                                <option
+                                                        value="8">Negado</option>
+                                                                                                                                                                                                <option
+                                                        value="6">Pedido Cancelado</option>
+                                                                                                                                                                                                <option
+                                                        value="5">Pedido concluido</option>
+                                                                                                                                                                                                <option
+                                                        value="30">Pedido em Feira</option>
+                                                                                                                                                                                                <option
+                                                        value="4">Pedido enviado para cliente</option>
+                                                                                                                                                                                                <option
+                                                        value="3">Pedido Pago</option>
+                                                                                                                                                                                                <option value="1"
+                                                            selected="selected">Pedido Realizado</option>
+                                                                                                                                                                                                <option
+                                                        value="27">Pendente</option>
+                                                                                                                                                                                                <option
+                                                        value="29">Pré Venda</option>
+                                                                                                                                                                                                <option
+                                                        value="12">Processando Pedido</option>
+                                                                                                                                                                                                <option
+                                                        value="9">TESTE JUNIOR</option>
+                                                                                                                                    </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Cliente notificado</label>
+                                    <div class="col-sm-10">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="notify" value="1"> Sim                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="notify" value="0" checked="checked"> Não                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"
+                                           for="input-comment">Comentário</label>
+                                    <div class="col-sm-10">
+                                        <textarea name="comment" rows="8" id="input-comment"
+                                                  class="form-control"></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="text-right">
+                                <button id="button-history" data-loading-text="Carregando..."
+                                        class="btn btn-primary"><i
+                                        class="fa fa-plus-circle"></i> Adicionar histórico</button>
+                            </div>
+                        </fieldset>
+                    </div>
+                                                                            </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript"><!--
+
+        $(document).delegate('#button-invoice', 'click', function () {
+            $.ajax({
+                url: 'https://allinbrasil.com.br/loja/admin/sale/order/createInvoiceNo?token=6652ec3843a5543515076d13d4d4c89b&order_id=25110',
+                dataType: 'json',
+                beforeSend: function () {
+                    $('#button-invoice').button('loading');
+                },
+                complete: function () {
+                    $('#button-invoice').button('reset');
+                },
+                success: function (json) {
+                    $('.alert').remove();
+
+                    if (json['error']) {
+                        $('#tab-order').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+                    }
+
+                    if (json['invoice_no']) {
+                        $('#button-invoice').replaceWith(json['invoice_no']);
+                    }
+                },
+                error: function (xhr) {
+                    alertDialog(xhr.responseText);
+                }
+            });
+        });
+
+        $(document).delegate('#button-reward-add', 'click', function () {
+            $.ajax({
+                url: 'https://allinbrasil.com.br/loja/admin/sale/order/addreward?token=6652ec3843a5543515076d13d4d4c89b&order_id=25110',
+                type: 'post',
+                dataType: 'json',
+                beforeSend: function () {
+                    $('#button-reward-add').button('loading');
+                },
+                complete: function () {
+                    $('#button-reward-add').button('reset');
+                },
+                success: function (json) {
+                    $('.alert').remove();
+
+                    if (json['error']) {
+                        $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+                    }
+
+                    if (json['success']) {
+                        $('#content > .container-fluid').prepend('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+                        $('#button-reward-add').replaceWith('<button id="button-reward-remove" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i> Remover pontos</button>');
+                    }
+                },
+                error: function (xhr) {
+                    alertDialog(xhr.responseText);
+                }
+            });
+        });
+
+        $(document).delegate('#button-reward-remove', 'click', function () {
+            $.ajax({
+                url: 'https://allinbrasil.com.br/loja/admin/sale/order/removereward?token=6652ec3843a5543515076d13d4d4c89b&order_id=25110',
+                type: 'post',
+                dataType: 'json',
+                beforeSend: function () {
+                    $('#button-reward-remove').button('loading');
+                },
+                complete: function () {
+                    $('#button-reward-remove').button('reset');
+                },
+                success: function (json) {
+                    $('.alert').remove();
+
+                    if (json['error']) {
+                        $('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+                    }
+
+                    if (json['success']) {
+                        $('#content > .container-fluid').prepend('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+                        $('#button-reward-remove').replaceWith('<button id="button-reward-add" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i> Adicionar pontos</button>');
+                    }
+                },
+                error: function (xhr) {
+                    alertDialog(xhr.responseText);
+                }
+            });
+        });
+
+        $('#history').delegate('.pagination a', 'click', function (e) {
+            e.preventDefault();
+
+            $('#history').load(this.href);
+        });
+
+        $('#history').load('https://allinbrasil.com.br/loja/admin/sale/order/history?token=6652ec3843a5543515076d13d4d4c89b&order_id=25110');
+
+        $('#button-history').on('click', function () {
+            if (typeof verifyStatusChange == 'function') {
+                if (verifyStatusChange() == false) {
+                    return false;
+                }
+            }
+
+            $.ajax({
+                url: 'https://allinbrasil.com.br/loja/admin/sale/order/api?token=6652ec3843a5543515076d13d4d4c89b&api=api/order/history&order_id=25110',
+                type: 'post',
+                dataType: 'json',
+                data: 'order_status_id=' + encodeURIComponent($('select[name=\'order_status_id\']').val()) + '&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + '&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + encodeURIComponent($('textarea[name=\'comment\']').val()),
+                beforeSend: function () {
+                    $('#button-history').button('loading');
+                },
+                complete: function () {
+                    $('#button-history').button('reset');
+                },
+                success: function (json) {
+                    $('.alert').remove();
+
+                    if (json['error']) {
+                        $('#history').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                    }
+
+                    if (json['success']) {
+                        $('#history').load('https://allinbrasil.com.br/loja/admin/sale/order/history?token=6652ec3843a5543515076d13d4d4c89b&order_id=25110');
+
+                        $('#history').before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+                        $('textarea[name=\'comment\']').val('');
+
+                        $('#order-status').html($('select[name=\'order_status_id\'] option:selected').text());
+                    }
+                },
+                error: function (xhr) {
+                    alertDialog(xhr.responseText);
+                }
+            });
+        });
+
+        function changeStatus() {
+            var status_id = $('select[name="order_status_id"]').val();
+        }
+
+        $(document).ready(function () {
+            changeStatus();
+        });
+
+        $('select[name="order_status_id"]').change(function () {
+            changeStatus();
+        });
+        //--></script>
+
+    <script type="text/javascript"><!--
+        // Sort the custom fields
+        $('#tab-payment tr[data-sort]').detach().each(function () {
+            if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#tab-payment tr').length) {
+                $('#tab-payment tr').eq($(this).attr('data-sort')).before(this);
+            }
+
+            if ($(this).attr('data-sort') > $('#tab-payment tr').length) {
+                $('#tab-payment tr:last').after(this);
+            }
+
+            if ($(this).attr('data-sort') < -$('#tab-payment tr').length) {
+                $('#tab-payment tr:first').before(this);
+            }
+        });
+
+        $('#tab-shipping tr[data-sort]').detach().each(function () {
+            if ($(this).attr('data-sort') >= 0 && $(this).attr('data-sort') <= $('#tab-shipping tr').length) {
+                $('#tab-shipping tr').eq($(this).attr('data-sort')).before(this);
+            }
+
+            if ($(this).attr('data-sort') > $('#tab-shipping tr').length) {
+                $('#tab-shipping tr:last').after(this);
+            }
+
+            if ($(this).attr('data-sort') < -$('#tab-shipping tr').length) {
+                $('#tab-shipping tr:first').before(this);
+            }
+        });
+        //--></script>
+</div>
+</div>
+<script src="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Terceiros/sugar.min.js"></script>
+<script src="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Terceiros/dialogBootstrap/dialogBootstrap.js"></script>
+<script src="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Terceiros/JSON.js"></script>
+<script src="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Terceiros/toastr/toastr.js"></script>
+<script src="https://allinbrasil.com.br/src/Ferramentas/Formulario/Temas/Padrao/Recursos/Js/salvarDados.js"></script>
+<script>
+                $(function() {
+                    
+                });
+        </script>
+                <div class="modal fade bs-modal-lg" id="modalInformacao" role="dialog" aria-hidden="true"  >
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" id="botao-fechar-modal-superior" data-dismiss="modal" aria-hidden="true"></button>
+                                <h4 class="modal-title">Informações sobre o pagamento</h4>
+                            </div>
+                            <div class="modal-body"></div>
+                            <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" id="botao-fechar-modal-inferior" data-dismiss="modal">Fechar</button>
+                                    </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade bs-modal-lg" id="__modal_listagem_info_coluna" role="dialog" aria-hidden="true"  >
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" id="botao-fechar-modal-superior" data-dismiss="modal" aria-hidden="true"></button>
+                                <h4 class="modal-title">Info</h4>
+                            </div>
+                            <div class="modal-body"></div>
+                            <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" id="botao-fechar-modal-inferior" data-dismiss="modal">Fechar</button>
+                                    </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade bs-modal-lg" id="modal-valor-campos-pedido" role="dialog" aria-hidden="true"  >
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" id="botao-fechar-modal-superior" data-dismiss="modal" aria-hidden="true"></button>
+                                <h4 class="modal-title"></h4>
+                            </div>
+                            <div class="modal-body"><!-- Inicio do formulário --><style>
+                .formulario_corpoformulario_campos_pedido{
+					max-width:100%;
+					margin:0 auto;
+				}
+				.modal.load-bootstrap{
+					top: 0 !important;
+				}
+				.modal.load-bootstrap .modal-dialog{
+					padding-top: 15% !important;
+				}
+                </style><script>var idFormulario = '#formulario_campos_pedido'; var textMensagemTraducao='Mensagem'; var textErrorTraducao='Erro'; var textAtencaoTraducao='Atenção'; var textSucessoTraduacao='Sucesso'; </script><div class="formulario_corpo formulario_corpoformulario_campos_pedido"><form  target='' class='form form_loja_admin_sale_order' id='formulario_campos_pedido' action='https://allinbrasil.com.br/loja/admin/sale/campos_pedido?token=6652ec3843a5543515076d13d4d4c89b&idPedido=25110' method='POST' enctype='multipart/form-data'><div class="panel panel-default"><div class="panel-heading"><div class="panel-title pull-left">Valores dos campos personalizados do pedido #25110</div><div class='buttons-group pull-right'><button type='submit' class='btn btn-success' ><i class="fa fa-floppy-o"></i> Salvar</button></div><div class='clearfix'></div><div class="clearfix"></div></div><div class="panel-body"><input type='hidden' value='1' name='formulario85485b13f42bc34578bf034fbc0dc82e1aeb52f1' /><div class="container-fluid"><input type='hidden' class='form-control hidden6a258fc6f251b' name='edaaa0f8423d1c7e1db0fa31b2778ed0' value='8ae6e65a2bae0620f8c5d8e5a231717cabb6b533670be316cdc13524fa9d4385' /><div class="row"><div class='col-md-12 form-group' ><label>teste</label><div class='clearfix'></div><input type='text' class='form-control input6a258fc6f25c5' name='campo___1' value='teste' placeholder='teste' /></div></div></div><hr><div class='buttons-group pull-right'><button type='submit' class='btn btn-success' ><i class="fa fa-floppy-o"></i> Salvar</button></div><div class='clearfix'></div></div></div></form></div><!-- Fim do formulário--></div>
+                            <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" id="botao-fechar-modal-inferior" data-dismiss="modal">Fechar</button>
+                                    </div>
+                        </div>
+                    </div>
+                </div></body>
+</html>
+
+<script>
+    $(function(){
+        
+                
+               
+        
+    });
+
+</script>
+
+<style>
+    div.mensagem-rapida{
+        width: 99%;
+        margin: auto;
+        margin-top: 2px;
+        
+    }
+</style>

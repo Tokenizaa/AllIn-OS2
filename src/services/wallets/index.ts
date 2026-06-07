@@ -141,5 +141,33 @@ export const WalletService = {
       .maybeSingle();
     if (error) throw error;
     return data;
-  }
+  },
+
+  async approveWithdrawals(withdrawalIds: string[]) {
+    const { data, error } = await supabase
+      .from("withdrawals")
+      .update({
+        status: "approved",
+        approved_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", withdrawalIds)
+      .select();
+    if (error) throw error;
+    return data || [];
+  },
+
+  async rejectWithdrawals(withdrawalIds: string[]) {
+    const { data, error } = await supabase
+      .from("withdrawals")
+      .update({
+        status: "rejected",
+        rejected_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", withdrawalIds)
+      .select();
+    if (error) throw error;
+    return data || [];
+  },
 };

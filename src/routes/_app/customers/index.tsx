@@ -25,14 +25,15 @@ function formatBRL(value: number) {
 function CustomersPage() {
   const [q, setQ] = useState("");
   const [qual, setQual] = useState<string>("all");
-  
+
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
 
-  const { data, isLoading, refetch } = useCustomers();
+  const { data, isLoading, refetch } = useCustomers(currentPage, pageSize);
 
   const customers = (data as any)?.customers || [];
   const orderStats = (data as any)?.orderStats || {};
+  const totalCount = (data as any)?.totalCount || 0;
 
   // Reset page when queries/filters change to avoid being stranded
   useEffect(() => {
@@ -49,20 +50,16 @@ function CustomersPage() {
     [q, qual, customers],
   );
 
-  const totalPages = Math.ceil(filtered.length / pageSize);
-  const paginatedCustomers = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filtered.slice(startIndex, startIndex + pageSize);
-  }, [filtered, currentPage, pageSize]);
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="CRM"
         title="Distribuidores"
-        subtitle={`${customers.length.toLocaleString("pt-BR")} registros · ${customers
+        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${customers
           .filter((c) => c.status === "active")
-          .length.toLocaleString("pt-BR")} ativos`}
+          .length.toLocaleString("pt-BR")} ativos nesta página`}
         actions={<Button size="sm" onClick={() => refetch()}>Atualizar base</Button>}
       />
 
@@ -156,14 +153,14 @@ function CustomersPage() {
                   </td>
                 </tr>
               ))
-            ) : paginatedCustomers.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
                   Nenhum distribuidor encontrado com os filtros atuais.
                 </td>
               </tr>
             ) : (
-              paginatedCustomers.map((c) => {
+              filtered.map((c) => {
                 const stats = orderStats[c.id] || { count: 0, ltv: 0 };
                 return (
                   <tr key={c.id} className="hover:bg-accent/30 transition-colors">
@@ -224,7 +221,7 @@ function CustomersPage() {
             <div className="text-xs text-muted-foreground">
               Exibindo <span className="font-semibold text-foreground">{Math.min(filtered.length, (currentPage - 1) * pageSize + 1)}</span> a{" "}
               <span className="font-semibold text-foreground">{Math.min(filtered.length, currentPage * pageSize)}</span> de{" "}
-              <span className="font-semibold text-foreground">{filtered.length}</span> distribuidores
+              <span className="font-semibold text-foreground">{totalCount}</span> distribuidores
             </div>
 
             <div className="flex items-center gap-6">

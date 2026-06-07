@@ -35,7 +35,7 @@ function AnalyticsPage() {
       return ({
         day: dayLabel,
         receita: Number(order.valor_total || 0),
-        ano_anterior: Number(order.valor_total || 0) * 0.82,
+        // Removido: ano_anterior fake. Se não houver dados históricos reais, não mostrar comparação
       });
     });
   }, [ordersList]);
@@ -65,17 +65,18 @@ function AnalyticsPage() {
 
   const networkLegs = useMemo(() => {
     const total = Number(statsData?.data?.totalOrders || 0);
-    const active = Number(statsData?.data?.deliveredOrders || 0);
+    const delivered = Number(statsData?.data?.deliveredOrders || 0);
     const pending = Number(statsData?.data?.pendingOrders || 0);
+    const cancelled = Number(statsData?.data?.cancelledOrders || 0);
     return [
-      { name: "Pedidos", esquerda: total, direita: active },
-      { name: "Entregues", esquerda: active, direita: pending },
-      { name: "Faturamento", esquerda: Number(statsData?.data?.totalRevenue || 0), direita: Number(statsData?.data?.processingOrders || 0) },
+      { name: "Total", esquerda: total, direita: delivered },
+      { name: "Pendentes", esquerda: pending, direita: cancelled },
+      { name: "Faturamento", esquerda: Number(statsData?.data?.totalRevenue || 0), direita: 0 },
     ];
   }, [statsData]);
 
   const isLoading = statsLoading || ordersLoading;
-  const cohort = Array.from({ length: 12 }).map((_, i) => ({ mes: `M${i + 1}`, retencao: Math.max(20, 100 - i * 4) }));
+  // Removido: cohort fake. Implementar cálculo real de retenção se necessário
 
   if (isLoading) {
     return (
@@ -126,7 +127,7 @@ function AnalyticsPage() {
 
         <TabsContent value="operacional" className="space-y-4">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <Card title="Receita vs ano anterior">
+            <Card title="Receita por período">
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={revenueSeries}>
                   <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" />
@@ -134,19 +135,19 @@ function AnalyticsPage() {
                   <YAxis fontSize={11} stroke="var(--color-muted-foreground)" tickFormatter={(v) => `${(Number(v) / 1000).toFixed(0)}k`} />
                   <Tooltip contentStyle={ttStyle} />
                   <Area dataKey="receita" stroke="var(--color-primary)" fill="var(--color-primary)" fillOpacity={0.2} />
-                  <Area dataKey="ano_anterior" stroke="var(--color-info)" fill="transparent" />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
-            <Card title="Ciclo operacional">
+            <Card title="Status dos pedidos">
               <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={cohort}>
+                <BarChart data={networkLegs}>
                   <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" fontSize={11} stroke="var(--color-muted-foreground)" />
+                  <XAxis dataKey="name" fontSize={11} stroke="var(--color-muted-foreground)" />
                   <YAxis fontSize={11} stroke="var(--color-muted-foreground)" />
                   <Tooltip contentStyle={ttStyle} />
-                  <Line dataKey="retencao" stroke="var(--color-success)" strokeWidth={2} dot={false} />
-                </LineChart>
+                  <Bar dataKey="esquerda" fill="var(--color-primary)" />
+                  <Bar dataKey="direita" fill="var(--color-chart-2)" />
+                </BarChart>
               </ResponsiveContainer>
             </Card>
             <Card title="Mix por forma de pagamento">
@@ -161,17 +162,10 @@ function AnalyticsPage() {
                 </PieChart>
               </ResponsiveContainer>
             </Card>
-            <Card title="Volume por etapa">
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={networkLegs}>
-                  <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" />
-                  <XAxis dataKey="name" fontSize={11} stroke="var(--color-muted-foreground)" />
-                  <YAxis fontSize={11} stroke="var(--color-muted-foreground)" />
-                  <Tooltip contentStyle={ttStyle} />
-                  <Bar dataKey="esquerda" fill="var(--color-primary)" />
-                  <Bar dataKey="direita" fill="var(--color-chart-2)" />
-                </BarChart>
-              </ResponsiveContainer>
+            <Card title="Distribuição de status">
+              <div className="flex items-center justify-center h-[240px] text-sm text-muted-foreground">
+                <p>Dados de distribuição de status por período em desenvolvimento</p>
+              </div>
             </Card>
           </div>
         </TabsContent>

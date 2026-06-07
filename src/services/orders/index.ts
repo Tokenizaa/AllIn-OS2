@@ -21,14 +21,22 @@ export const OrderService = {
     return data || [];
   },
 
-  async fetchOrdersList(limit = 60) {
-    const { data, error } = await supabase
+  async fetchOrdersList(page = 1, pageSize = 15) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await supabase
       .from("orders")
-      .select("*")
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
-      .limit(limit);
+      .range(from, to);
     if (error) throw error;
-    return data || [];
+    return {
+      orders: data || [],
+      totalCount: count || 0,
+      page,
+      pageSize,
+    };
   },
 
   async fetchOfficeOrders(limit = 200) {
@@ -41,9 +49,12 @@ export const OrderService = {
     return data || [];
   },
 
-  async fetchOrdersAndCustomers(limit = 60) {
-    const [{ data: ordersData, error: ordersError }, { data: customersData, error: customersError }] = await Promise.all([
-      supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(limit),
+  async fetchOrdersAndCustomers(page = 1, pageSize = 15) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const [{ data: ordersData, error: ordersError, count: ordersCount }, { data: customersData, error: customersError }] = await Promise.all([
+      supabase.from("orders").select("*", { count: "exact" }).order("created_at", { ascending: false }).range(from, to),
       supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
     ]);
     if (ordersError) throw ordersError;
@@ -51,6 +62,9 @@ export const OrderService = {
     return {
       orders: ordersData || [],
       customers: customersData || [],
+      totalCount: ordersCount || 0,
+      page,
+      pageSize,
     };
   },
 

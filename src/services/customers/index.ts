@@ -41,12 +41,16 @@ export const CustomerService = {
     return data || [];
   },
 
-  async fetchCustomersWithOrderStats() {
-    const [{ data: customerData, error: customerError }, { data: allOrders, error: orderError }] = await Promise.all([
+  async fetchCustomersWithOrderStats(page = 1, pageSize = 15) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const [{ data: customerData, error: customerError, count: customerCount }, { data: allOrders, error: orderError }] = await Promise.all([
       supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, qualification, status, telefone, created_at, nome_completo")
-        .order("created_at", { ascending: false }),
+        .select("id, user_id, usuario, id_comprador, qualification, status, telefone, created_at, nome_completo", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to),
       supabase
         .from("orders")
         .select("id, customer_id, valor_total_pedido, valor_total, status_pedido, status"),
@@ -77,6 +81,9 @@ export const CustomerService = {
     return {
       customers: customerData || [],
       orderStats: statsMap,
+      totalCount: customerCount || 0,
+      page,
+      pageSize,
     };
   },
 

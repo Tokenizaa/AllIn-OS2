@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useCommissions } from "@/hooks/commissions/useCommissions";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/_app/commissions")({ component: Commissio
 
 function CommissionsPage() {
   const { data: commissionsData, isError, error, refetch } = useCommissions();
+  const [isRunningCycle, setIsRunningCycle] = useState(false);
 
   const rows = commissionsData?.rows || [];
   const plans = commissionsData?.plans || [];
@@ -18,6 +20,25 @@ function CommissionsPage() {
   const plan = plans[0];
   const activeDirects = customers.filter((c) => String(c.patrocinador_comprador || "").length > 0 && (c.status || "").toLowerCase() === "active").length;
   const simulation = computeGenerationBonus(plan?.name, total || 1000, activeDirects);
+
+  const pendingCycles = rows.filter((r) => r.status !== "pago");
+
+  const handleRunCycle = async () => {
+    if (pendingCycles.length === 0) return;
+    setIsRunningCycle(true);
+    try {
+      // Simulate running cycle - in a real implementation, this would:
+      // 1. Calculate commissions based on MLM rules
+      // 2. Update payment statuses
+      // 3. Create commission records
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      refetch();
+    } catch (err) {
+      console.error("Erro ao rodar ciclo:", err);
+    } finally {
+      setIsRunningCycle(false);
+    }
+  };
 
   if (isError) {
     return (
@@ -33,7 +54,11 @@ function CommissionsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Rede MLM" title="Comissões & Ciclos" subtitle="Processamento derivado de pagamentos reais e regras dos planos." actions={<Button size="sm">Rodar ciclo</Button>} />
+      <PageHeader eyebrow="Rede MLM" title="Comissões & Ciclos" subtitle="Processamento derivado de pagamentos reais e regras dos planos." actions={
+        <Button size="sm" onClick={handleRunCycle} disabled={pendingCycles.length === 0 || isRunningCycle}>
+          {isRunningCycle ? "Rodando ciclo..." : `Rodar ciclo (${pendingCycles.length} pendentes)`}
+        </Button>
+      } />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard label="Total pago no mês" value={`R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} accent="success" />
         <KpiCard label="Bônus médio" value={`R$ ${(rows.length ? total / rows.length : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} />

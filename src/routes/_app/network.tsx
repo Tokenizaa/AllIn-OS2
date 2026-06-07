@@ -12,7 +12,22 @@ function NetworkPage() {
   const customers = networkData?.customers || [];
   const legs = networkData?.legs || [];
 
-  const data = customers.map((c: any) => ({ name: ((c as any).name || c.usuario || c.id_comprador || "D").split(" ")[0], size: Math.max(1, Number(c.id ? 1 : 0)) * 100 }));
+  const data = customers.map((c: any) => {
+    const name = ((c as any).name || c.usuario || c.id_comprador || "D").split(" ")[0];
+    // Calcular tamanho baseado em métricas reais se disponíveis
+    const size = Math.max(1, Number(c.volume || c.total_orders || 1));
+    return { name, size };
+  });
+
+  // Calcular equilíbrio binário baseado nas pernas
+  const leftLegVolume = legs.reduce((sum: number, leg: any) => sum + Number(leg.esquerda || 0), 0);
+  const rightLegVolume = legs.reduce((sum: number, leg: any) => sum + Number(leg.direita || 0), 0);
+  const totalVolume = leftLegVolume + rightLegVolume;
+  const balanceRatio = totalVolume > 0 ? Math.min(leftLegVolume, rightLegVolume) / totalVolume * 100 : 0;
+  const balanceLabel = totalVolume > 0 ? `${balanceRatio.toFixed(1)}%` : "--";
+
+  // Ciclos pagos - implementar cálculo real se houver dados, senão mostrar indicador
+  const paidCycles = networkData?.paidCycles || "--";
 
   if (isError) {
     return (
@@ -32,8 +47,8 @@ function NetworkPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard label="Total na rede" value={String(customers.length)} accent="primary" />
         <KpiCard label="Pares binários" value={String(legs.length)} accent="success" />
-        <KpiCard label="Equilíbrio binário" value="--" />
-        <KpiCard label="Ciclos pagos" value="--" accent="warning" />
+        <KpiCard label="Equilíbrio binário" value={balanceLabel} />
+        <KpiCard label="Ciclos pagos" value={String(paidCycles)} accent="warning" />
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="rounded-xl border border-border bg-card/60 p-5">
