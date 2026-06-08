@@ -32,9 +32,7 @@ export function ProductDetailsDialog({ product, onClose, onAddToCart, formatBRL 
             </div>
 
             <img 
-              src={product.id === "prd_1" ? "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=300" :
-                   product.id === "prd_2" ? "https://images.unsplash.com/photo-1512152272829-e3139592d56f?auto=format&fit=crop&q=80&w=300" :
-                   "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=80&w=300"}
+              src={product.image || product.imgSrc || product.imgFluidSrc}
               alt={product.name}
               className="w-full h-36 object-cover rounded-xl"
             />

@@ -26,9 +26,6 @@ function NetworkPage() {
   const balanceRatio = totalVolume > 0 ? Math.min(leftLegVolume, rightLegVolume) / totalVolume * 100 : 0;
   const balanceLabel = totalVolume > 0 ? `${balanceRatio.toFixed(1)}%` : "--";
 
-  // Ciclos pagos - implementar cálculo real se houver dados, senão mostrar indicador
-  const paidCycles = networkData?.paidCycles || "--";
-
   if (isError) {
     return (
       <div className="space-y-3">
@@ -44,11 +41,10 @@ function NetworkPage() {
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Rede MLM" title="Genealogia inteligente" subtitle="Dados reais da rede no Supabase." />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <KpiCard label="Total na rede" value={String(customers.length)} accent="primary" />
         <KpiCard label="Pares binários" value={String(legs.length)} accent="success" />
         <KpiCard label="Equilíbrio binário" value={balanceLabel} />
-        <KpiCard label="Ciclos pagos" value={String(paidCycles)} accent="warning" />
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="rounded-xl border border-border bg-card/60 p-5">

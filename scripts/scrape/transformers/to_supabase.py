@@ -110,6 +110,50 @@ class SupabaseTransformer:
         if pedido.pagamento.pagamentos and pedido.pagamento.pagamentos[0].data_pagamento:
             data_pagamento_str = pedido.pagamento.pagamentos[0].data_pagamento.isoformat() if hasattr(pedido.pagamento.pagamentos[0].data_pagamento, 'isoformat') else str(pedido.pagamento.pagamentos[0].data_pagamento)
         
+        # Extrair hora do pagamento se disponível
+        hora_pagamento = None
+        if data_pagamento_str:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(data_pagamento_str.replace('Z', '+00:00'))
+                hora_pagamento = dt.time().isoformat()  # Converter para string
+            except:
+                pass
+        
+        # Extrair custo do frete (se "Frete Grátis" ou similar, usar 0)
+        custo_frete = 0.0
+        if pedido.envio and pedido.envio.frete and pedido.envio.frete != "Frete Grátis regra distribuidor":
+            try:
+                custo_frete = float(pedido.envio.frete.replace('R$', '').replace('.', '').replace(',', '.').strip())
+            except:
+                custo_frete = 0.0
+        
+        # Extrair payment_status (confirmado)
+        payment_status = None
+        if pedido.pagamento.pagamentos and pedido.pagamento.pagamentos[0]:
+            payment_status = "confirmado" if pedido.pagamento.pagamentos[0].confirmado else "pendente"
+        
+        # Extrair payment_method (forma de pagamento)
+        payment_method = None
+        if pedido.pagamento.pagamentos and pedido.pagamento.pagamentos[0]:
+            payment_method = pedido.pagamento.pagamentos[0].forma
+        
+        # Extrair payment_id (número do pagamento) - não usar pois é UUID no banco
+        # Usar gateway_transaction_id para o ID do pagamento
+        gateway_transaction_id = None
+        if pedido.pagamento.pagamentos and pedido.pagamento.pagamentos[0]:
+            gateway_transaction_id = str(pedido.pagamento.pagamentos[0].id) if pedido.pagamento.pagamentos[0].id else None
+        
+        # Extrair dados de envio com verificação de None
+        envio_estado = pedido.envio.estado if pedido.envio and hasattr(pedido.envio, 'estado') else None
+        envio_cidade = pedido.envio.cidade if pedido.envio and hasattr(pedido.envio, 'cidade') else None
+        envio_endereco = pedido.envio.endereco if pedido.envio and hasattr(pedido.envio, 'endereco') else None
+        envio_bairro = pedido.envio.bairro if pedido.envio and hasattr(pedido.envio, 'bairro') else None
+        envio_numero = pedido.envio.numero if pedido.envio and hasattr(pedido.envio, 'numero') else None
+        envio_complemento = pedido.envio.complemento if pedido.envio and hasattr(pedido.envio, 'complemento') else None
+        envio_cep = pedido.envio.cep if pedido.envio and hasattr(pedido.envio, 'cep') else None
+        envio_frete = pedido.envio.frete if pedido.envio and hasattr(pedido.envio, 'frete') else None
+        
         return {
             'numero_pedido': pedido.pedido.id,
             'status_pedido': pedido.pedido.situacao,
@@ -119,32 +163,49 @@ class SupabaseTransformer:
             'patrocinador_comprador': pedido.pedido.patrocinador_usuario,
             'telefone': pedido.pedido.telefone,
             'forma_pagamento': pedido.pagamento.pagamentos[0].forma if pedido.pagamento.pagamentos else None,
-            'estado': pedido.envio.estado,
-            'cidade': pedido.envio.cidade,
-            'endereco': pedido.envio.endereco,
-            'bairro': pedido.envio.bairro,
-            'numero': pedido.envio.numero,
-            'complemento': pedido.envio.complemento,
-            'cep': pedido.envio.cep,
-            'forma_entrega': pedido.envio.frete,
+            'estado': envio_estado,
+            'cidade': envio_cidade,
+            'endereco': envio_endereco,
+            'bairro': envio_bairro,
+            'numero': envio_numero,
+            'complemento': envio_complemento,
+            'cep': envio_cep,
+            'forma_entrega': envio_frete,
             'cancelado': pedido.pedido.situacao == 'cancelado',
             'pago': pedido.pagamento.pagamentos[0].confirmado if pedido.pagamento.pagamentos else False,
             'data_criacao': data_criacao_str,
             'data_pagamento': data_pagamento_str,
             'valor_total_pedido': pedido.pedido.total,
             'pagamentos': json.dumps(pagamentos_serializaveis),
-            'plano_comprador': pedido.distribuidor.nome_fantasia,
+            'plano_comprador': pedido.distribuidor.nome_fantasia if pedido.distribuidor and hasattr(pedido.distribuidor, 'nome_fantasia') else None,
             'customer_id': None,  # Será preenchido posteriormente via integração com customers
-            'distributor_id': None  # Será preenchido posteriormente via integração com profiles
+            'distributor_id': None,  # Será preenchido posteriormente via integração com profiles
+            # Campos adicionais mapeados
+            'loja': pedido.pedido.loja if hasattr(pedido.pedido, 'loja') and pedido.pedido.loja else "All-in life style",
+            'customer_name': pedido.pedido.cliente,
+            'tipo_compra': pedido.pedido.tipo_cliente if hasattr(pedido.pedido, 'tipo_cliente') else None,
+            'payment_method': payment_method,
+            'payment_status': payment_status,
+            'custo_frete': custo_frete,
+            'valor_total': pedido.pedido.total,
+            'status': pedido.pedido.situacao,
+            'order_number': pedido.pedido.id,
+            'order_type': pedido.pedido.tipo_cliente if hasattr(pedido.pedido, 'tipo_cliente') else None,
+            'data_criacao_pedido': data_criacao_str,
+            'hora_pagamento': hora_pagamento,
+            'gateway_transaction_id': gateway_transaction_id
         }
     
     def transform_order_items(self, pedido: PedidoCompleto):
         """Transformar dados de order_items para Supabase"""
         items = []
         for item in pedido.produtos.itens:
+            # Garantir que product_code não esteja vazio
+            product_code = item.sku if item.sku else f"{item.nome}-{item.modelo}".replace(' ', '-').upper()
+            
             items.append({
                 'order_id': pedido.pedido.id,  # ✅ CRÍTICO: Incluir order_id
-                'product_code': item.sku,
+                'product_code': product_code,
                 'product_name': item.nome,
                 'quantity': item.quantidade,
                 'unit_price': item.valor,

@@ -30,8 +30,8 @@ export const APP_NAV_SECTIONS: AppNavSection[] = [
     label: "Executivo",
     items: [
       { to: "/analytics", label: "Dashboard Executivo", icon: LayoutDashboard, module: "dashboard" },
-      { to: "/insights", label: "Insights", icon: Sparkles, badge: "5", module: "analytics" },
-      { to: "/alerts", label: "Alertas", icon: Bell, badge: "3", module: "dashboard" },
+      { to: "/insights", label: "Insights", icon: Sparkles, module: "analytics" },
+      { to: "/alerts", label: "Alertas", icon: Bell, module: "dashboard" },
     ],
   },
   {

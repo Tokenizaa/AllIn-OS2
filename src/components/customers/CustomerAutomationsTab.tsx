@@ -1,21 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getCustomerLabel } from "@/lib/customer-label";
+import { AutomationService } from "@/services/automations";
 
 interface CustomerAutomationsTabProps {
   customer: any;
 }
 
 export function CustomerAutomationsTab({ customer }: CustomerAutomationsTabProps) {
-  const [automations, setAutomations] = useState<any[]>([
-    { id: "auto-1", name: "E-mail de Boas-Vindas", description: "Disparado automaticamente no instante do cadastro da conta do distribuidor.", type: "E-mail", active: true, runs: 124 },
-    { id: "auto-2", name: "Alerta de Upgrade de Nível", description: "Incentiva o distribuidor enviando metas quando está próximo de atingir graduação.", type: "WhatsApp", active: true, runs: 45 },
-    { id: "auto-3", name: "Detecção de Inatividade (Churn)", description: "Notifica o patrocinador associado caso o distribuidor fique mais de 25 dias sem pedidos.", type: "Sistema", active: false, runs: 0 },
-    { id: "auto-4", name: "Cobrança de Renovação Periódica", description: "Dispara lembretes 30 e 15 dias antes de expirar o licenciamento ativo.", type: "SMS", active: true, runs: 12 },
-    { id: "auto-5", name: "WhatsApp de Cashback de Rede", description: "Mensagem automática comunicando crédito imediato de pontos de rede no ledger.", type: "WhatsApp", active: true, runs: 312 }
-  ]);
+  const [automations, setAutomations] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAutomations = async () => {
+      if (!customer?.id) return;
+      
+      setIsLoading(true);
+      try {
+        const autos = await AutomationService.fetchCustomerAutomations(customer.id);
+        setAutomations(autos);
+      } catch (error) {
+        console.error("Error loading automations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAutomations();
+  }, [customer?.id]);
 
   return (
     <div className="space-y-4">
@@ -41,10 +55,15 @@ export function CustomerAutomationsTab({ customer }: CustomerAutomationsTabProps
                   <span className="text-[10px] text-muted-foreground shrink-0">Runs: <strong className="text-white">{aut.runs}</strong></span>
                   <button
                     type="button"
-                    onClick={() => {
-                      const updated = automations.map(a => a.id === aut.id ? { ...a, active: !a.active } : a);
-                      setAutomations(updated);
-                      toast.success(`Automação "${aut.name}" ${!aut.active ? "ativada" : "pausada"}.`);
+                    onClick={async () => {
+                      const success = await AutomationService.updateAutomationStatus(aut.id, !aut.active);
+                      if (success) {
+                        const updated = automations.map(a => a.id === aut.id ? { ...a, active: !a.active } : a);
+                        setAutomations(updated);
+                        toast.success(`Automação "${aut.name}" ${!aut.active ? "ativada" : "pausada"}.`);
+                      } else {
+                        toast.error(`Falha ao ${!aut.active ? "ativar" : "pausar"} automação "${aut.name}".`);
+                      }
                     }}
                     className="focus:outline-none shrink-0"
                   >
@@ -63,10 +82,15 @@ export function CustomerAutomationsTab({ customer }: CustomerAutomationsTabProps
             
             <div className="border-t border-border pt-3 flex items-center justify-between">
               <button
-                onClick={() => {
-                  const updated = automations.map(a => a.id === aut.id ? { ...a, active: !a.active } : a);
-                  setAutomations(updated);
-                  toast.success(`Gatilho de rede "${aut.name}" foi ${!aut.active ? "ativado" : "desativado"}.`);
+                onClick={async () => {
+                  const success = await AutomationService.updateAutomationStatus(aut.id, !aut.active);
+                  if (success) {
+                    const updated = automations.map(a => a.id === aut.id ? { ...a, active: !a.active } : a);
+                    setAutomations(updated);
+                    toast.success(`Gatilho de rede "${aut.name}" foi ${!aut.active ? "ativado" : "desativado"}.`);
+                  } else {
+                    toast.error(`Falha ao ${!aut.active ? "ativar" : "desativar"} gatilho "${aut.name}".`);
+                  }
                 }}
                 className="text-[11px] text-muted-foreground font-semibold hover:text-white transition-all"
               >
@@ -76,10 +100,15 @@ export function CustomerAutomationsTab({ customer }: CustomerAutomationsTabProps
                 size="sm"
                 variant="ghost"
                 className="h-7 text-[11px] text-primary hover:bg-primary/10 font-bold"
-                onClick={() => {
-                  const updated = automations.map(a => a.id === aut.id ? { ...a, runs: a.runs + 1 } : a);
-                  setAutomations(updated);
-                  toast.success(`Disparando webhook/mensagem para ${getCustomerLabel(customer)} com sucesso.`);
+                onClick={async () => {
+                  const success = await AutomationService.incrementAutomationRuns(aut.id);
+                  if (success) {
+                    const updated = automations.map(a => a.id === aut.id ? { ...a, runs: a.runs + 1 } : a);
+                    setAutomations(updated);
+                    toast.success(`Disparando webhook/mensagem para ${getCustomerLabel(customer)} com sucesso.`);
+                  } else {
+                    toast.error(`Falha ao disparar gatilho "${aut.name}".`);
+                  }
                 }}
               >
                 Forçar Gatilho

@@ -6,6 +6,8 @@ Baseado em docs/reverse-engineering/loja-virtual-pedidos-mapping.md
 import requests
 from bs4 import BeautifulSoup
 import os
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 class LojaVirtualAuth:
@@ -13,6 +15,22 @@ class LojaVirtualAuth:
     
     def __init__(self):
         self.session = requests.Session()
+        # Configurar pool de conexões para evitar esgotamento de portas (WinError 10048)
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["HEAD", "GET", "OPTIONS"]
+        )
+        adapter = HTTPAdapter(
+            max_retries=retry_strategy,
+            pool_connections=10,
+            pool_maxsize=10,
+            pool_block=False
+        )
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        
         # Baseado no Playwright: URL de login é https://allinbrasil.com.br/publico/Autenticar/Formulario
         self.base_url = "https://allinbrasil.com.br"
         self.login_url = f"{self.base_url}/publico/Autenticar/Formulario"
@@ -125,3 +143,11 @@ class LojaVirtualAuth:
                 print("✅ Logout realizado")
         except Exception as e:
             print(f"⚠️ Erro durante logout: {e}")
+    
+    def close(self):
+        """Fechar a sessão e liberar recursos"""
+        try:
+            self.session.close()
+            print("✅ Sessão fechada")
+        except Exception as e:
+            print(f"⚠️ Erro ao fechar sessão: {e}")

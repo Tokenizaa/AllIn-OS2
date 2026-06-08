@@ -57,12 +57,38 @@ export function useOfficeDashboard() {
         grouped.set(day, current);
       });
       const salesSeries = Array.from(grouped.entries()).map(([day, value]) => ({ day, vendas: value.vendas, bonus: value.bonus }));
+      
+      // Calculate real bonus origin from payments data
+      const totalBonus = salesSeries.reduce((sum, s) => sum + s.bonus, 0);
+      const totalSales = salesSeries.reduce((sum, s) => sum + s.vendas, 0);
+      const totalPayments = totalPago;
+      
       const bonusOrigin = [
-        { name: "Vendas", value: 45 },
-        { name: "Pagamentos", value: 35 },
-        { name: "Rede", value: 20 },
+        { name: "Vendas", value: totalSales > 0 ? Math.round((totalSales / (totalSales + totalPayments)) * 100) : 50 },
+        { name: "Pagamentos", value: totalPayments > 0 ? Math.round((totalPayments / (totalSales + totalPayments)) * 100) : 50 },
+        { name: "Rede", value: 0 }, // Network bonus requires commission calculation
       ];
-      const topProducts = products.slice(0, 5).map((p: any) => ({ name: p.name || "Produto", qtd: 10, receita: Number(p.price || 0) * 10 }));
+      
+      // Calculate real top products from orders
+      const productSales = new Map<string, number>();
+      orders.forEach((order: any) => {
+        if (order.items && Array.isArray(order.items)) {
+          order.items.forEach((item: any) => {
+            const productName = item.name || item.product_name || "Produto Desconhecido";
+            const qty = Number(item.quantity || item.qtd || 1);
+            productSales.set(productName, (productSales.get(productName) || 0) + qty);
+          });
+        }
+      });
+      
+      const topProducts = Array.from(productSales.entries())
+        .map(([name, qtd]) => {
+          const product = products.find((p: any) => p.name === name);
+          const price = Number(product?.price || 0);
+          return { name, qtd, receita: price * qtd };
+        })
+        .sort((a, b) => b.qtd - a.qtd)
+        .slice(0, 5);
       const timeline = [
         ...orders.slice(0, 3).map((o: any) => ({ id: `o-${o.id}`, title: "Pedido registrado", description: `Pedido ${o.numero_pedido || o.id} carregado do Supabase.`, at: o.created_at, type: "order" })),
         ...payments.slice(0, 3).map((p: any) => ({ id: `p-${p.id}`, title: "Pagamento recebido", description: `Pagamento de R$${Number(p.amount || 0).toLocaleString("pt-BR")} processado.`, at: p.created_at, type: "payment" })),

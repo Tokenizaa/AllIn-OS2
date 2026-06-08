@@ -5,6 +5,8 @@ import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
 import { computeGenerationBonus } from "@/modules/plans/mlm-rules";
+import { CommissionService } from "@/services/commissions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/commissions")({ component: CommissionsPage });
 
@@ -27,14 +29,13 @@ function CommissionsPage() {
     if (pendingCycles.length === 0) return;
     setIsRunningCycle(true);
     try {
-      // Simulate running cycle - in a real implementation, this would:
-      // 1. Calculate commissions based on MLM rules
-      // 2. Update payment statuses
-      // 3. Create commission records
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Execute real commission cycle using the service
+      await CommissionService.runCycle();
       refetch();
+      toast.success("Ciclo de comissões executado com sucesso!");
     } catch (err) {
       console.error("Erro ao rodar ciclo:", err);
+      toast.error("Erro ao executar ciclo de comissões. Verifique se a função RPC está configurada.");
     } finally {
       setIsRunningCycle(false);
     }

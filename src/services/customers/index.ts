@@ -24,7 +24,7 @@ export const CustomerService = {
   async fetchDownlines(compradorId: string) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, usuario, id_comprador, qualification, status, telefone, created_at, cidade, estado, nome_completo")
+      .select("id, usuario, id_comprador, status, telefone, created_at, cidade, estado, nome_completo")
       .eq("patrocinador_comprador", compradorId)
       .order("created_at", { ascending: false });
     if (error) throw error;
@@ -34,7 +34,7 @@ export const CustomerService = {
   async fetchCustomersList(limit = 100) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, nome_completo, email, avatar_url, phone, status, qualification, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone")
+      .select("id, nome_completo, email, status, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone, plano_comprador")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -48,7 +48,7 @@ export const CustomerService = {
     const [{ data: customerData, error: customerError, count: customerCount }, { data: allOrders, error: orderError }] = await Promise.all([
       supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, qualification, status, telefone, created_at, nome_completo", { count: "exact" })
+        .select("id, user_id, usuario, id_comprador, status, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to),
       supabase
@@ -90,7 +90,7 @@ export const CustomerService = {
   async fetchRecentCustomers(limit = 20) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, usuario, id_comprador, qualification, status, cidade, estado, user_id, nome_completo")
+      .select("id, usuario, id_comprador, status, cidade, estado, user_id, nome_completo")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -100,7 +100,7 @@ export const CustomerService = {
   async fetchNetworkMembers(limit = 500) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, usuario, id_comprador, user_id, qualification, status, cidade, estado, nome_completo")
+      .select("id, usuario, id_comprador, user_id, status, cidade, estado, nome_completo")
       .limit(limit);
     if (error) throw error;
     return data || [];

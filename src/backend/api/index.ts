@@ -80,3 +80,7 @@ export {
   processPaymentWebhook,
   getPaymentStats,
 } from "../modules/payments/api/payments.api";
+
+// Copilot - Server-side only, not exported for frontend
+// The copilot API uses Express and is meant for server-side use only
+// Frontend should make HTTP requests to the backend endpoints instead

@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/widgets/page-header";
-import { useState } from "react";
-import { ChevronRight, ChevronDown, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, ChevronDown, Users, Loader2 } from "lucide-react";
+import { NetworkService } from "@/services/network";
+import { CustomerService } from "@/services/customers";
 
-export const Route = createFileRoute("/_app/genealogy")({ component: GenealogyPage });
+export const Route = createFileRoute("/_app/genealogy")({
+  component: GenealogyPage,
+});
 
 interface TreeNode {
   id: string;
@@ -15,43 +19,73 @@ interface TreeNode {
 
 function GenealogyPage() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [treeData, setTreeData] = useState<TreeNode | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Dados de exemplo - em produção, isso viria do Supabase
-  const treeData: TreeNode = {
-    id: "root",
-    name: "Você",
-    qualification: "Black",
-    status: "active",
-    children: [
-      {
-        id: "1",
-        name: "João Silva",
-        qualification: "Diamante",
-        status: "active",
-        children: [
-          { id: "1-1", name: "Maria Santos", qualification: "Ouro", status: "active" },
-          { id: "1-2", name: "Pedro Costa", qualification: "Prata", status: "active" },
-        ],
-      },
-      {
-        id: "2",
-        name: "Ana Oliveira",
-        qualification: "Ouro",
-        status: "active",
-        children: [
-          { id: "2-1", name: "Carlos Lima", qualification: "Prata", status: "active" },
-          { id: "2-2", name: "Julia Ferreira", qualification: "Bronze", status: "pending" },
-        ],
-      },
-      {
-        id: "3",
-        name: "Roberto Alves",
-        qualification: "Prata",
-        status: "active",
-        children: [],
-      },
-    ],
-  };
+  // Carregar dados reais do banco
+  useEffect(() => {
+    const loadGenealogyData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Buscar relacionamentos de rede
+        const relationships = await NetworkService.fetchNetworkRelationships(100);
+        
+        // Buscar dados dos clientes
+        const customerIds = [...new Set(relationships.map(r => r.customer_id))];
+        const customers = await Promise.all(
+          customerIds.map(id => CustomerService.fetchCustomerById(id))
+        );
+
+        // Construir árvore genealógica
+        const customerMap = new Map(customers.map(c => [c?.id, c]));
+        
+        // Encontrar nó raiz (sem sponsor ou sponsor é null)
+        const rootRelationship = relationships.find(r => !r.sponsor_customer_id);
+        const rootCustomer = rootRelationship ? customerMap.get(rootRelationship.customer_id) : customers[0];
+        
+        if (!rootCustomer) {
+          setTreeData(null);
+          return;
+        }
+
+        // Função recursiva para construir árvore
+        const buildTree = (customerId: string, visited = new Set<string>()): TreeNode | null => {
+          if (visited.has(customerId)) return null; // Evitar ciclos
+          visited.add(customerId);
+
+          const customer = customerMap.get(customerId);
+          if (!customer) return null;
+
+          // Buscar filhos diretos (onde este customer é sponsor)
+          const children = relationships
+            .filter(r => r.sponsor_customer_id === customerId)
+            .map(r => buildTree(r.customer_id, new Set(visited)))
+            .filter(Boolean) as TreeNode[];
+
+          return {
+            id: customer.id,
+            name: customer.name || customer.full_name || "Cliente",
+            qualification: customer.qualification || "Bronze",
+            status: customer.status || "active",
+            children: children.length > 0 ? children : undefined,
+          };
+        };
+
+        const tree = buildTree(rootCustomer.id);
+        setTreeData(tree);
+      } catch (err) {
+        console.error("Error loading genealogy data:", err);
+        setError("Falha ao carregar dados da genealogia");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadGenealogyData();
+  }, []);
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes((prev) => {
@@ -118,17 +152,33 @@ function GenealogyPage() {
         title="Genealogia"
         subtitle="Visualização hierárquica da rede de distribuidores"
       />
-      <div className="rounded-xl border border-border bg-card/40 p-6">
-        <div className="space-y-1">
-          {renderNode(treeData)}
+      
+      {isLoading ? (
+        <div className="rounded-xl border border-border bg-card/40 p-12 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Carregando dados da genealogia...</p>
+          </div>
         </div>
-      </div>
-      <div className="rounded-xl border border-border bg-card/40 p-4">
-        <p className="text-sm text-muted-foreground">
-          <span className="font-medium">Nota:</span> Esta é uma visualização básica da genealogia. 
-          Em produção, os dados serão carregados do Supabase com a estrutura completa da rede.
-        </p>
-      </div>
+      ) : error ? (
+        <div className="rounded-xl border border-border bg-card/40 p-12 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        </div>
+      ) : !treeData ? (
+        <div className="rounded-xl border border-border bg-card/40 p-12 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-muted-foreground">Nenhum dado de genealogia encontrado</p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card/40 p-6">
+          <div className="space-y-1">
+            {renderNode(treeData)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

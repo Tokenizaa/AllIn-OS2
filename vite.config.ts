@@ -32,7 +32,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
-      external: ["jsonwebtoken"],
+      external: ["jsonwebtoken", "express", "uuid", "crypto", "fs", "path", "os", "net", "tls", "http", "https", "stream"],
       output: {
         manualChunks(id) {
           // React core

@@ -163,9 +163,16 @@ function AnalyticsPage() {
               </ResponsiveContainer>
             </Card>
             <Card title="Distribuição de status">
-              <div className="flex items-center justify-center h-[240px] text-sm text-muted-foreground">
-                <p>Dados de distribuição de status por período em desenvolvimento</p>
-              </div>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={networkLegs}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                  <XAxis dataKey="name" fontSize={11} stroke="var(--color-muted-foreground)" />
+                  <YAxis fontSize={11} stroke="var(--color-muted-foreground)" />
+                  <Tooltip contentStyle={ttStyle} />
+                  <Bar dataKey="esquerda" fill="var(--color-chart-3)" />
+                  <Bar dataKey="direita" fill="var(--color-chart-4)" />
+                </BarChart>
+              </ResponsiveContainer>
             </Card>
           </div>
         </TabsContent>
