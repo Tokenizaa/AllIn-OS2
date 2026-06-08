@@ -1,13 +1,14 @@
--- FASE 13 Phase 5: Embeddings/RAG Implementation
+-- FASE 13 Phase 5: Embeddings/RAG Implementation (Ollama)
 -- This file contains the SQL migrations for Phase 5 of FASE 13
+-- Uses local Ollama instance for embeddings (nomic-embed-text model, 768 dimensions)
 
 -- Migration 1: Create customer_embeddings table
 CREATE TABLE IF NOT EXISTS customer_embeddings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-    embedding vector(1536),
+    embedding vector(768),
     content TEXT NOT NULL,
-    embedding_model TEXT DEFAULT 'text-embedding-3-small',
+    embedding_model TEXT DEFAULT 'nomic-embed-text',
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS customer_embeddings (
 
 CREATE INDEX IF NOT EXISTS idx_customer_embeddings_customer_id ON customer_embeddings(customer_id);
 CREATE INDEX IF NOT EXISTS idx_customer_embeddings_created_at ON customer_embeddings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_customer_embeddings_vector ON customer_embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
 ALTER TABLE customer_embeddings ENABLE ROW LEVEL SECURITY;
 
@@ -32,9 +34,9 @@ EXECUTE FUNCTION update_wallet_transactions_updated_at();
 CREATE TABLE IF NOT EXISTS product_embeddings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    embedding vector(1536),
+    embedding vector(768),
     content TEXT NOT NULL,
-    embedding_model TEXT DEFAULT 'text-embedding-3-small',
+    embedding_model TEXT DEFAULT 'nomic-embed-text',
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -42,6 +44,7 @@ CREATE TABLE IF NOT EXISTS product_embeddings (
 
 CREATE INDEX IF NOT EXISTS idx_product_embeddings_product_id ON product_embeddings(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_embeddings_created_at ON product_embeddings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_product_embeddings_vector ON product_embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
 ALTER TABLE product_embeddings ENABLE ROW LEVEL SECURITY;
 
@@ -61,9 +64,9 @@ CREATE TABLE IF NOT EXISTS document_embeddings (
     document_id TEXT NOT NULL,
     document_type TEXT NOT NULL,
     section_id TEXT,
-    embedding vector(1536),
+    embedding vector(768),
     content TEXT NOT NULL,
-    embedding_model TEXT DEFAULT 'text-embedding-3-small',
+    embedding_model TEXT DEFAULT 'nomic-embed-text',
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -72,6 +75,7 @@ CREATE TABLE IF NOT EXISTS document_embeddings (
 CREATE INDEX IF NOT EXISTS idx_document_embeddings_document_id ON document_embeddings(document_id);
 CREATE INDEX IF NOT EXISTS idx_document_embeddings_document_type ON document_embeddings(document_type);
 CREATE INDEX IF NOT EXISTS idx_document_embeddings_created_at ON document_embeddings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_document_embeddings_vector ON document_embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
 ALTER TABLE document_embeddings ENABLE ROW LEVEL SECURITY;
 
@@ -85,27 +89,12 @@ BEFORE UPDATE ON document_embeddings
 FOR EACH ROW
 EXECUTE FUNCTION update_wallet_transactions_updated_at();
 
--- Migration 4: Enable pgvector and create vector indexes
-CREATE EXTENSION IF NOT EXISTS vector;
-
-CREATE INDEX IF NOT EXISTS idx_customer_embeddings_vector 
-ON customer_embeddings 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
-
-CREATE INDEX IF NOT EXISTS idx_product_embeddings_vector 
-ON product_embeddings 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
-
-CREATE INDEX IF NOT EXISTS idx_document_embeddings_vector 
-ON document_embeddings 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
+-- Migration 4: Enable pgvector extension (already enabled in previous migration)
+-- Vector indexes created with table definitions above
 
 -- Migration 5: Create semantic search functions
 CREATE OR REPLACE FUNCTION search_customers_semantic(
-    query_embedding vector(1536),
+    query_embedding vector(768),
     match_threshold float DEFAULT 0.5,
     match_count int DEFAULT 10
 )
@@ -133,7 +122,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION search_products_semantic(
-    query_embedding vector(1536),
+    query_embedding vector(768),
     match_threshold float DEFAULT 0.5,
     match_count int DEFAULT 10
 )
@@ -161,7 +150,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION search_documents_semantic(
-    query_embedding vector(1536),
+    query_embedding vector(768),
     document_type_filter TEXT DEFAULT NULL,
     match_threshold float DEFAULT 0.5,
     match_count int DEFAULT 10

@@ -2,11 +2,11 @@ import { supabase } from "../../../shared/infrastructure/supabase/client";
 
 export class EmbeddingService {
   private static instance: EmbeddingService;
-  private apiKey: string | null = null;
+  private ollamaBaseUrl: string;
 
   private constructor() {
-    // Load OpenAI API key from environment or config
-    this.apiKey = process.env.OPENAI_API_KEY || null;
+    // Use local Ollama instance
+    this.ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
   }
 
   static getInstance(): EmbeddingService {
@@ -47,7 +47,7 @@ export class EmbeddingService {
           customer_id: customerId,
           embedding: embedding,
           content: content,
-          embedding_model: 'text-embedding-3-small',
+          embedding_model: 'nomic-embed-text',
           metadata: {
             customer_name: customer.nome_completo,
             customer_email: customer.email,
@@ -98,7 +98,7 @@ export class EmbeddingService {
           product_id: productId,
           embedding: embedding,
           content: content,
-          embedding_model: 'text-embedding-3-small',
+          embedding_model: 'nomic-embed-text',
           metadata: {
             product_name: product.nome,
             product_category: product.categoria,
@@ -140,7 +140,7 @@ export class EmbeddingService {
           section_id: sectionId,
           embedding: embedding,
           content: content,
-          embedding_model: 'text-embedding-3-small',
+          embedding_model: 'nomic-embed-text',
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'document_id,section_id'
@@ -156,35 +156,29 @@ export class EmbeddingService {
   }
 
   /**
-   * Generate embedding using OpenAI API
+   * Generate embedding using Ollama API
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key not configured');
-    }
-
     try {
-      const response = await fetch('https://api.openai.com/v1/embeddings', {
+      const response = await fetch(`${this.ollamaBaseUrl}/api/embeddings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          model: 'text-embedding-3-small',
-          input: text,
-          dimensions: 1536,
+          model: 'nomic-embed-text', // Ollama embedding model
+          prompt: text,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.statusText}`);
+        throw new Error(`Ollama API error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      return data.data[0].embedding;
+      return data.embedding;
     } catch (error) {
-      console.error('Error calling OpenAI API:', error);
+      console.error('Error calling Ollama API:', error);
       throw error;
     }
   }
