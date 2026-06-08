@@ -501,20 +501,28 @@ class OrdersExtractor:
         return None
     
     def _extract_sponsor_username(self, patrocinador_text):
-        """Extrair username do patrocinador (formato: usuario Nome)"""
+        """Extrair username do patrocinador (formato: Usuário: usuario Nome:)"""
         if not patrocinador_text:
             return None
-        # Formato esperado: "usuario Nome"
-        parts = patrocinador_text.split(' ', 1)
+        # Remover "Usuário:" do texto
+        cleaned_text = patrocinador_text.replace('Usuário:', '').strip()
+        # Formato esperado: "usuario Nome:"
+        parts = cleaned_text.split(' ', 1)
         return parts[0] if parts else None
     
     def _extract_sponsor_name(self, patrocinador_text):
-        """Extrair nome do patrocinador (formato: usuario Nome)"""
+        """Extrair nome do patrocinador (formato: Usuário: usuario Nome:)"""
         if not patrocinador_text:
             return None
-        # Formato esperado: "usuario Nome"
-        parts = patrocinador_text.split(' ', 1)
-        return parts[1] if len(parts) > 1 else None
+        # Remover "Usuário:" do texto
+        cleaned_text = patrocinador_text.replace('Usuário:', '').strip()
+        # Formato esperado: "usuario Nome:"
+        parts = cleaned_text.split(' ', 1)
+        # Remover "Nome:" se presente
+        if len(parts) > 1:
+            name_part = parts[1].replace('Nome:', '').strip()
+            return name_part if name_part else None
+        return None
     
     def _extract_float_from_text(self, text):
         """Extrair valor float de texto"""

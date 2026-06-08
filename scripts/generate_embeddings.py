@@ -11,7 +11,7 @@ SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_ANO
 # Ollama configuration
 OLLAMA_BASE_URL = 'http://localhost:11434'
 OLLAMA_MODEL = 'nomic-embed-text'
-REQUEST_TIMEOUT = 120  # 2 minutes timeout for slow machines
+REQUEST_TIMEOUT = 10800  # 180 minutes (3 hours) timeout for very slow machines
 DELAY_BETWEEN_REQUESTS = 3  # 3 seconds delay between requests
 
 def generate_embedding(text: str, max_retries: int = 5) -> list:
