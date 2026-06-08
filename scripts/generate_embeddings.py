@@ -11,9 +11,11 @@ SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_ANO
 # Ollama configuration
 OLLAMA_BASE_URL = 'http://localhost:11434'
 OLLAMA_MODEL = 'nomic-embed-text'
+REQUEST_TIMEOUT = 120  # 2 minutes timeout for slow machines
+DELAY_BETWEEN_REQUESTS = 3  # 3 seconds delay between requests
 
-def generate_embedding(text: str, max_retries: int = 3) -> list:
-    """Generate embedding using Ollama with retry logic"""
+def generate_embedding(text: str, max_retries: int = 5) -> list:
+    """Generate embedding using Ollama with retry logic for slow machines"""
     for attempt in range(max_retries):
         try:
             response = requests.post(
@@ -22,14 +24,14 @@ def generate_embedding(text: str, max_retries: int = 3) -> list:
                     'model': OLLAMA_MODEL,
                     'prompt': text
                 },
-                timeout=30
+                timeout=REQUEST_TIMEOUT
             )
             response.raise_for_status()
             return response.json()['embedding']
         except (requests.exceptions.RequestException, requests.exceptions.Timeout) as e:
             if attempt < max_retries - 1:
-                wait_time = (attempt + 1) * 2  # Exponential backoff: 2, 4, 6 seconds
-                print(f'  Retry {attempt + 1}/{max_retries} after {wait_time}s...')
+                wait_time = (attempt + 1) * 5  # Exponential backoff: 5, 10, 15, 20, 25 seconds
+                print(f'  Retry {attempt + 1}/{max_retries} after {wait_time}s (slow machine)...')
                 time.sleep(wait_time)
             else:
                 raise e
@@ -84,7 +86,7 @@ def generate_customer_embeddings(supabase: Client):
             }).execute()
             
             print(f'Generated embedding for customer {customer.get("nome_completo", customer["id"])}')
-            time.sleep(1)  # Delay between requests
+            time.sleep(DELAY_BETWEEN_REQUESTS)  # Delay between requests for slow machines
         except Exception as e:
             print(f'Error generating embedding for customer {customer["id"]}: {e}')
 
@@ -113,7 +115,7 @@ def generate_product_embeddings(supabase: Client):
             }).execute()
             
             print(f'Generated embedding for product {product.get("nome", product["id"])}')
-            time.sleep(1)  # Delay between requests
+            time.sleep(DELAY_BETWEEN_REQUESTS)  # Delay between requests for slow machines
         except Exception as e:
             print(f'Error generating embedding for product {product["id"]}: {e}')
 
