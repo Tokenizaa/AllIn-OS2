@@ -2,3 +2,14 @@ node_modules
 .env
 .env.local
 .env.*.local
+
+# Scrape data e checkpoints
+data/checkpoint.json
+scripts/data/json_backup/
+scripts/data/json_backup/*.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+scripts/**/__pycache__/
