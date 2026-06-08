@@ -6,6 +6,7 @@ import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
 import { computeGenerationBonus } from "@/modules/plans/mlm-rules";
 import { CommissionService } from "@/services/commissions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/commissions")({ component: CommissionsPage });
 
@@ -31,10 +32,10 @@ function CommissionsPage() {
       // Execute real commission cycle using the service
       await CommissionService.runCycle();
       refetch();
+      toast.success("Ciclo de comissões executado com sucesso!");
     } catch (err) {
       console.error("Erro ao rodar ciclo:", err);
-      // Fallback: if the RPC function doesn't exist yet, show error but don't crash
-      // This allows the UI to work while the backend function is being implemented
+      toast.error("Erro ao executar ciclo de comissões. Verifique se a função RPC está configurada.");
     } finally {
       setIsRunningCycle(false);
     }

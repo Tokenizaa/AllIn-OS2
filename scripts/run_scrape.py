@@ -113,14 +113,19 @@ def main():
     
     if not token or not loja_base_url:
         print("❌ Token ou URL base da loja não encontrados. Abortando.")
+        auth.close()
         return
     
-    # 2. Executar scrape completo automático (alinhamento de dados)
-    print("\n🎯 Iniciando scrape completo para alinhamento de dados...")
-    # Scrape completo sem limites - usando função corrigida com batch processing
-    scrape_orders_with_customers(session, loja_base_url, token, SUPABASE_URL, SUPABASE_KEY, limit_orders=None)
-    
-    print("\n🎉 Scrape finalizado!")
+    try:
+        # 2. Executar scrape completo automático (alinhamento de dados)
+        print("\n🎯 Iniciando scrape completo para alinhamento de dados...")
+        # Scrape completo sem limites - usando função corrigida com batch processing
+        scrape_orders_with_customers(session, loja_base_url, token, SUPABASE_URL, SUPABASE_KEY, limit_orders=None)
+        
+        print("\n🎉 Scrape finalizado!")
+    finally:
+        # Sempre fechar a sessão para liberar recursos
+        auth.close()
 
 
 def scrape_gap(session, loja_base_url, token, supabase_url, supabase_key):
@@ -440,7 +445,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                     order_items = transformer.transform_order_items(complete_order)
                     batch_order_items.extend(order_items)
                     
-                    time.sleep(1)  # Rate limiting
+                    time.sleep(2)  # Rate limiting aumentado para evitar esgotamento de portas
                 else:
                     print(f"⚠️ Falha ao extrair pedido {order_id}")
                 
@@ -551,11 +556,19 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                     time.sleep(10)
             
             per_page += 15
-            time.sleep(0.5)
+            time.sleep(1)  # Aumentado de 0.5 para 1 para reduzir pressão no servidor
             
         except Exception as e:
+            error_msg = str(e)
             print(f"❌ Erro ao extrair página (offset: {per_page}): {e}")
-            break
+            
+            # Tratamento específico para WinError 10048 (esgotamento de portas)
+            if "WinError 10048" in error_msg or "10048" in error_msg:
+                print("⚠️ Esgotamento de portas detectado. Aguardando 30 segundos para retomar...")
+                time.sleep(30)
+                continue  # Tentar novamente com o mesmo offset
+            else:
+                break  # Outros erros: parar o scrape
     
     # Salvar dados restantes
     print(f"\n📊 Salvando dados restantes...")

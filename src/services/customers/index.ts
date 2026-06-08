@@ -34,7 +34,7 @@ export const CustomerService = {
   async fetchCustomersList(limit = 100) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, nome_completo, email, avatar_url, phone, status, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone")
+      .select("id, nome_completo, email, status, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone, plano_comprador")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -48,7 +48,7 @@ export const CustomerService = {
     const [{ data: customerData, error: customerError, count: customerCount }, { data: allOrders, error: orderError }] = await Promise.all([
       supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, status, telefone, created_at, nome_completo", { count: "exact" })
+        .select("id, user_id, usuario, id_comprador, status, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to),
       supabase

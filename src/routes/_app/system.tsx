@@ -35,9 +35,12 @@ function useSystemMetrics() {
       
       const flagsCount = featureFlags?.length || 0;
 
-      // Integrations - count from a hypothetical integrations table or use hardcoded count
-      // For now, we'll use a placeholder since there's no integrations table
-      const integrationsCount = 0;
+      // Integrations - count from integrations table
+      const { data: integrations, error: integrationsError } = await supabase
+        .from("integrations")
+        .select("id", { count: "exact", head: true });
+      
+      const integrationsCount = integrations?.length || 0;
 
       return {
         adminUsers: adminCount,

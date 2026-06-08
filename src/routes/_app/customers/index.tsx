@@ -24,6 +24,8 @@ function formatBRL(value: number) {
 
 function CustomersPage() {
   const [q, setQ] = useState("");
+  const [planoFilter, setPlanoFilter] = useState<string>("all");
+  const [cidadeFilter, setCidadeFilter] = useState<string>("all");
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
@@ -34,18 +36,31 @@ function CustomersPage() {
   const orderStats = (data as any)?.orderStats || {};
   const totalCount = (data as any)?.totalCount || 0;
 
+  // Get unique values for filters
+  const uniquePlanos = useMemo(() => {
+    const planos = new Set(customers.map((c: any) => c.plano_comprador).filter(Boolean));
+    return Array.from(planos).sort();
+  }, [customers]);
+
+  const uniqueCidades = useMemo(() => {
+    const cidades = new Set(customers.map((c: any) => c.cidade).filter(Boolean));
+    return Array.from(cidades).sort();
+  }, [customers]);
+
   // Reset page when queries/filters change to avoid being stranded
   useEffect(() => {
     setCurrentPage(1);
-  }, [q]);
+  }, [q, planoFilter, cidadeFilter]);
 
   const filtered = useMemo(
     () =>
       customers.filter(
         (c) =>
-          (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())),
+          (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())) &&
+          (planoFilter === "all" || c.plano_comprador === planoFilter) &&
+          (cidadeFilter === "all" || c.cidade === cidadeFilter),
       ),
-    [q, customers],
+    [q, planoFilter, cidadeFilter, customers],
   );
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -84,9 +99,32 @@ function CustomersPage() {
             className="h-9 pl-8 bg-card/60"
           />
         </div>
-        <Button variant="outline" size="sm" className="ml-auto gap-1.5">
-          <Filter className="h-3.5 w-3.5" /> Mais filtros
-        </Button>
+        <div className="flex gap-1.5 flex-wrap items-center">
+          <select
+            value={planoFilter}
+            onChange={(e) => setPlanoFilter(e.target.value)}
+            className="bg-card border border-border rounded-md px-3 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
+          >
+            <option value="all">Todos os planos</option>
+            {uniquePlanos.map((plano) => (
+              <option key={plano} value={plano}>
+                {plano}
+              </option>
+            ))}
+          </select>
+          <select
+            value={cidadeFilter}
+            onChange={(e) => setCidadeFilter(e.target.value)}
+            className="bg-card border border-border rounded-md px-3 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
+          >
+            <option value="all">Todas as cidades</option>
+            {uniqueCidades.map((cidade) => (
+              <option key={cidade} value={cidade}>
+                {cidade}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card/40 overflow-hidden">
@@ -94,10 +132,11 @@ function CustomersPage() {
           <thead className="bg-background/40 text-left">
             <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-2.5 font-medium">Distribuidor</th>
+              <th className="px-4 py-2.5 font-medium">Plano</th>
+              <th className="px-4 py-2.5 font-medium">Cidade</th>
               <th className="px-4 py-2.5 font-medium">Status</th>
               <th className="px-4 py-2.5 font-medium text-right">Pedidos</th>
               <th className="px-4 py-2.5 font-medium text-right">LTV</th>
-              <th className="px-4 py-2.5 font-medium">Telefone</th>
               <th className="px-4 py-2.5 font-medium" />
             </tr>
           </thead>
@@ -115,6 +154,12 @@ function CustomersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
+                    <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="h-4 w-16 bg-muted rounded animate-pulse" />
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -123,9 +168,6 @@ function CustomersPage() {
                   <td className="px-4 py-3 text-right">
                     <div className="h-4 w-14 bg-muted rounded animate-pulse ml-auto" />
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="h-4 w-16 bg-muted rounded animate-pulse ml-auto" />
                   </td>
@@ -133,7 +175,7 @@ function CustomersPage() {
               ))
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
                   Nenhum distribuidor encontrado com os filtros atuais.
                 </td>
               </tr>
@@ -156,6 +198,16 @@ function CustomersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
+                      <span className="text-xs text-muted-foreground truncate max-w-[150px] block">
+                        {c.plano_comprador || "-"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs text-muted-foreground">
+                        {c.cidade || "-"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
                       <span
                         className={cn(
                           "inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize",
@@ -171,7 +223,6 @@ function CustomersPage() {
                     <td className="px-4 py-3 text-right tabular-nums font-medium text-emerald-500">
                       {formatBRL(stats.ltv)}
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{c.telefone || "-"}</td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         to="/customers/$id"
