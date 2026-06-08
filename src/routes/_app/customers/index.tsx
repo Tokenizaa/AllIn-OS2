@@ -267,7 +267,7 @@ function CustomersPage() {
 
                   return (
                     <Button
-                      key={pageNum}
+                      key={i}
                       variant={currentPage === pageNum ? "default" : "outline"}
                       className="h-8 w-8 text-xs font-medium"
                       onClick={() => setCurrentPage(pageNum)}

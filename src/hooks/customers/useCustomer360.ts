@@ -6,9 +6,10 @@ import { WalletService } from "@/services/wallets";
 
 export function useCustomer360(customerId?: string, sponsorId?: string | null, idComprador?: string | null) {
   return useQuery({
-    queryKey: queryKeys.customer360(customerId),
+    queryKey: queryKeys.customer360(customerId || ""),
     enabled: !!customerId,
     queryFn: async () => {
+      if (!customerId) throw new Error("customerId is required");
       const [orderData, sponsorData, walletData, ptsData, customerData] = await Promise.all([
         OrderService.fetchOrdersByCustomerId(customerId),
         sponsorId ? CustomerService.fetchCustomerByCompradorId(sponsorId) : Promise.resolve(null),

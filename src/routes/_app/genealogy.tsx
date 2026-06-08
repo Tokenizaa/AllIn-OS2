@@ -5,7 +5,9 @@ import { ChevronRight, ChevronDown, Users, Loader2 } from "lucide-react";
 import { NetworkService } from "@/services/network";
 import { CustomerService } from "@/services/customers";
 
-export const Route = createFileRoute("/_app/genealogy")({ component: GenealogyPage });
+export const Route = createFileRoute("/_app/genealogy")({
+  component: GenealogyPage,
+});
 
 interface TreeNode {
   id: string;
