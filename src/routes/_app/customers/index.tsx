@@ -24,7 +24,6 @@ function formatBRL(value: number) {
 
 function CustomersPage() {
   const [q, setQ] = useState("");
-  const [qual, setQual] = useState<string>("all");
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
@@ -38,16 +37,15 @@ function CustomersPage() {
   // Reset page when queries/filters change to avoid being stranded
   useEffect(() => {
     setCurrentPage(1);
-  }, [q, qual]);
+  }, [q]);
 
   const filtered = useMemo(
     () =>
       customers.filter(
         (c) =>
-          (qual === "all" || (c.qualification || "") === qual) &&
           (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())),
       ),
-    [q, qual, customers],
+    [q, customers],
   );
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -86,22 +84,6 @@ function CustomersPage() {
             className="h-9 pl-8 bg-card/60"
           />
         </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {["all", "Bronze", "Prata", "Ouro", "Diamante", "Black"].map((v) => (
-            <button
-              key={v}
-              onClick={() => setQual(v)}
-              className={cn(
-                "rounded-md border border-border px-3 py-1.5 text-xs transition-all",
-                qual === v
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card/40 text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {v === "all" ? "Todas qualificações" : v}
-            </button>
-          ))}
-        </div>
         <Button variant="outline" size="sm" className="ml-auto gap-1.5">
           <Filter className="h-3.5 w-3.5" /> Mais filtros
         </Button>
@@ -112,7 +94,6 @@ function CustomersPage() {
           <thead className="bg-background/40 text-left">
             <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-2.5 font-medium">Distribuidor</th>
-              <th className="px-4 py-2.5 font-medium">Qualificação</th>
               <th className="px-4 py-2.5 font-medium">Status</th>
               <th className="px-4 py-2.5 font-medium text-right">Pedidos</th>
               <th className="px-4 py-2.5 font-medium text-right">LTV</th>
@@ -134,9 +115,6 @@ function CustomersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="h-4 w-12 bg-muted rounded animate-pulse" />
-                  </td>
-                  <td className="px-4 py-3">
                     <div className="h-4 w-16 bg-muted rounded animate-pulse" />
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -155,7 +133,7 @@ function CustomersPage() {
               ))
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">
                   Nenhum distribuidor encontrado com os filtros atuais.
                 </td>
               </tr>
@@ -176,11 +154,6 @@ function CustomersPage() {
                           <div className="text-[11px] text-muted-foreground">{c.id_comprador || c.user_id || "-"}</div>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant="outline" className="text-[10px]">
-                        {c.qualification || "-"}
-                      </Badge>
                     </td>
                     <td className="px-4 py-3">
                       <span
