@@ -13,3 +13,6 @@ __pycache__/
 *.pyc
 *.pyo
 scripts/**/__pycache__/
+
+# Build files
+dist/
