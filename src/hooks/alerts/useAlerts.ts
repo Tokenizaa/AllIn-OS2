@@ -7,21 +7,24 @@ import { OrderService } from "@/services/orders";
 // Regras de alerta baseadas em lógica de negócio
 function calculateAlertSeverity(type: string, data: any): "critical" | "warning" | "info" {
   switch (type) {
-    case "withdrawal":
+    case "withdrawal": {
       // Saques com risco marcado ou valores altos são críticos
       if (data.risco) return "critical";
       if (Number(data.valor || 0) > 5000) return "warning";
       return "info";
-    case "payment":
+    }
+    case "payment": {
       // Pagamentos com valores altos são warnings
       if (Number(data.amount || 0) > 10000) return "warning";
       return "info";
-    case "order":
+    }
+    case "order": {
       // Pedidos cancelados são warnings
       const status = (data.status_pedido || data.status || "").toLowerCase();
       if (status === "cancelado") return "warning";
       if (status === "pendente" && Number(data.valor_total || 0) > 5000) return "warning";
       return "info";
+    }
     default:
       return "info";
   }
@@ -33,9 +36,10 @@ function generateAlertTitle(type: string, data: any): string {
       return `Saque de R$ ${Number(data.valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
     case "payment":
       return `Pagamento de R$ ${Number(data.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-    case "order":
+    case "order": {
       const status = data.status_pedido || data.status || "pendente";
       return `Pedido ${status} - R$ ${Number(data.valor_total || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    }
     default:
       return "Evento registrado";
   }
@@ -45,11 +49,13 @@ export function useAlerts(limit = 12) {
   return useQuery({
     queryKey: [...queryKeys.alerts, limit],
     queryFn: async () => {
-      const [payments, withdrawals, orders] = await Promise.all([
+      const [payments, withdrawals, ordersResult] = await Promise.all([
         PaymentService.fetchRecentPayments(5),
         WalletService.fetchRecentWithdrawals(5),
         OrderService.fetchOrdersList(5),
       ]);
+
+      const orders = ordersResult?.orders || [];
 
       const items = [
         ...(withdrawals || []).map((w: any) => ({

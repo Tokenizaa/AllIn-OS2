@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase-client";
 import { useAuditLogs } from "@/hooks/system/useAuditLogs";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +15,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/system")({ component: SystemPage });
 
+function useSystemMetrics() {
+  return useQuery({
+    queryKey: ["system-metrics"],
+    queryFn: async () => {
+      // Count admin users
+      const { data: adminUsers, error: adminError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("role", "admin");
+      
+      const adminCount = adminUsers?.length || 0;
+
+      // Count feature flags
+      const { data: featureFlags, error: flagsError } = await supabase
+        .from("feature_flags")
+        .select("id")
+        .eq("is_global", true);
+      
+      const flagsCount = featureFlags?.length || 0;
+
+      // Integrations - count from a hypothetical integrations table or use hardcoded count
+      // For now, we'll use a placeholder since there's no integrations table
+      const integrationsCount = 0;
+
+      return {
+        adminUsers: adminCount,
+        integrations: integrationsCount,
+        featureFlags: flagsCount,
+      };
+    },
+  });
+}
+
 function SystemPage() {
   const { data: auditLogs = [], isLoading, isError, error, refetch } = useAuditLogs(10);
+  const { data: metrics } = useSystemMetrics();
 
   if (isError) {
     return (
@@ -57,9 +93,9 @@ function SystemPage() {
         <TabsContent value="audit" className="space-y-4">
           <div className="grid gap-3 md:grid-cols-3">
             {[
-              { title: "Usuarios admin", value: "14 ativos", hint: "RBAC + SSO" },
-              { title: "Integracoes", value: "9 conectores", hint: "Pix, ERP, CRM, Email" },
-              { title: "Feature flags", value: "28 flags", hint: "Multi-tenant" },
+              { title: "Usuarios admin", value: `${metrics?.adminUsers || 0} ativos`, hint: "RBAC + SSO" },
+              { title: "Integracoes", value: `${metrics?.integrations || 0} conectores`, hint: "Pix, ERP, CRM, Email" },
+              { title: "Feature flags", value: `${metrics?.featureFlags || 0} flags`, hint: "Multi-tenant" },
             ].map((card) => (
               <div key={card.title} className="rounded-xl border border-border bg-card/60 p-4">
                 <p className="text-xs text-muted-foreground">{card.title}</p>

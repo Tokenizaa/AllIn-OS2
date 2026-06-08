@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Dashboard } from "./Dashboard";
 
 export const Route = createFileRoute("/office/")({
-  lazy: () => import("./Dashboard").then(m => ({ default: m.Dashboard })),
+  component: Dashboard,
 });

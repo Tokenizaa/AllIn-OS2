@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { FeatureFlagService } from "@/services/featureFlags";
 
 export const Route = createFileRoute("/_app/settings")({ component: SettingsPage });
 
@@ -14,10 +15,10 @@ const FEATURE_FLAGS = [
   { id: "realtime", label: "Realtime everywhere", desc: "Eventos em tempo real para todas as entidades operacionais.", defaultValue: false },
 ];
 
-// Hook para gerenciar feature flags com persistência em localStorage
+// Hook para gerenciar feature flags com persistência em banco e cache em localStorage
 function useFeatureFlags() {
   const [flags, setFlags] = useState<Record<string, boolean>>(() => {
-    // Carregar flags do localStorage ou usar valores padrão
+    // Carregar flags do localStorage como cache inicial
     const saved = localStorage.getItem("feature_flags");
     if (saved) {
       try {
@@ -28,21 +29,61 @@ function useFeatureFlags() {
     }
     return {};
   });
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Carregar flags do banco ao montar o componente
   useEffect(() => {
-    // Salvar flags no localStorage quando mudarem
-    localStorage.setItem("feature_flags", JSON.stringify(flags));
-  }, [flags]);
+    const loadFlagsFromDatabase = async () => {
+      try {
+        const dbFlags = await FeatureFlagService.getAllFlags();
+        if (Object.keys(dbFlags).length > 0) {
+          setFlags(dbFlags);
+          // Atualizar cache local
+          localStorage.setItem("feature_flags", JSON.stringify(dbFlags));
+        }
+      } catch (error) {
+        console.error("Error loading flags from database:", error);
+        // Fallback para localStorage se o banco falhar
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const toggleFlag = (id: string) => {
-    setFlags((prev) => ({ ...prev, [id]: !prev[id] }));
+    loadFlagsFromDatabase();
+  }, []);
+
+  // Salvar flags no localStorage como cache quando mudarem
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem("feature_flags", JSON.stringify(flags));
+    }
+  }, [flags, isLoading]);
+
+  const toggleFlag = async (id: string) => {
+    const newValue = !flags[id];
+    
+    // Atualizar estado local imediatamente para responsividade
+    setFlags((prev) => ({ ...prev, [id]: newValue }));
+
+    // Sincronizar com banco
+    try {
+      const success = await FeatureFlagService.setFlag(id, newValue);
+      if (!success) {
+        // Reverter mudança se falhar
+        setFlags((prev) => ({ ...prev, [id]: !newValue }));
+      }
+    } catch (error) {
+      console.error("Error updating flag in database:", error);
+      // Reverter mudança se falhar
+      setFlags((prev) => ({ ...prev, [id]: !newValue }));
+    }
   };
 
   const getFlagValue = (id: string, defaultValue: boolean) => {
     return flags[id] !== undefined ? flags[id] : defaultValue;
   };
 
-  return { flags, toggleFlag, getFlagValue };
+  return { flags, toggleFlag, getFlagValue, isLoading };
 }
 
 function SettingsPage() {

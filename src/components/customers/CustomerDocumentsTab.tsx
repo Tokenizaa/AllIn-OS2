@@ -1,21 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Shield, CheckCircle2, Clock, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { DocumentService } from "@/services/documents";
 
 interface CustomerDocumentsTabProps {
   customer: any;
 }
 
 export function CustomerDocumentsTab({ customer }: CustomerDocumentsTabProps) {
-  const [documents, setDocuments] = useState<any[]>([
-    { id: "doc-1", name: "Contrato de Distribuidor Associado", required: true, status: "approved", type: "PDF", updatedAt: "2026-05-15T10:00:00Z" },
-    { id: "doc-2", name: "Cédula de Identidade (RG/CNH)", required: true, status: "approved", type: "JPG", updatedAt: "2026-05-15T10:05:00Z" },
-    { id: "doc-3", name: "Comprovante de Residência Recente", required: true, status: "pending", type: "PNG", updatedAt: "2026-06-01T14:30:00Z" },
-    { id: "doc-4", name: "Inscrição PIS/NIT (Pessoa Física)", required: false, status: "missing", type: "-", updatedAt: null },
-    { id: "doc-5", name: "Declaração de Conta Bancária para Recebimentos", required: true, status: "missing", type: "-", updatedAt: null }
-  ]);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDocuments = async () => {
+      if (!customer?.id) return;
+      
+      setIsLoading(true);
+      try {
+        const docs = await DocumentService.fetchCustomerDocuments(customer.id);
+        setDocuments(docs);
+      } catch (error) {
+        console.error("Error loading documents:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDocuments();
+  }, [customer?.id]);
 
   return (
     <div className="space-y-4">
@@ -70,10 +84,15 @@ export function CustomerDocumentsTab({ customer }: CustomerDocumentsTabProps) {
                         size="icon"
                         variant="outline"
                         className="h-7 w-7 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10"
-                        onClick={() => {
-                          const updated = documents.map(d => d.id === doc.id ? { ...d, status: "approved", type: "PDF", updatedAt: new Date().toISOString() } : d);
-                          setDocuments(updated);
-                          toast.success(`Documento "${doc.name}" aprovado com sucesso.`);
+                        onClick={async () => {
+                          const success = await DocumentService.updateDocumentStatus(doc.id, "approved");
+                          if (success) {
+                            const updated = documents.map(d => d.id === doc.id ? { ...d, status: "approved", type: "PDF", updatedAt: new Date().toISOString() } : d);
+                            setDocuments(updated);
+                            toast.success(`Documento "${doc.name}" aprovado com sucesso.`);
+                          } else {
+                            toast.error(`Falha ao aprovar documento "${doc.name}".`);
+                          }
                         }}
                         title="Aprovar Documento"
                       >
@@ -85,10 +104,15 @@ export function CustomerDocumentsTab({ customer }: CustomerDocumentsTabProps) {
                         size="icon"
                         variant="outline"
                         className="h-7 w-7 text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                        onClick={() => {
-                          const updated = documents.map(d => d.id === doc.id ? { ...d, status: "missing", type: "-", updatedAt: null } : d);
-                          setDocuments(updated);
-                          toast.warning(`Documento "${doc.name}" removido ou reprovado.`);
+                        onClick={async () => {
+                          const success = await DocumentService.updateDocumentStatus(doc.id, "rejected");
+                          if (success) {
+                            const updated = documents.map(d => d.id === doc.id ? { ...d, status: "rejected", type: "-", updatedAt: null } : d);
+                            setDocuments(updated);
+                            toast.warning(`Documento "${doc.name}" removido ou reprovado.`);
+                          } else {
+                            toast.error(`Falha ao rejeitar documento "${doc.name}".`);
+                          }
                         }}
                         title="Recusar / Excluir"
                       >
@@ -100,10 +124,15 @@ export function CustomerDocumentsTab({ customer }: CustomerDocumentsTabProps) {
                         size="icon"
                         variant="outline"
                         className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
-                        onClick={() => {
-                          const updated = documents.map(d => d.id === doc.id ? { ...d, status: "pending", type: "PDF", updatedAt: new Date().toISOString() } : d);
-                          setDocuments(updated);
-                          toast.info(`Documento "${doc.name}" enviado para análise de compliance.`);
+                        onClick={async () => {
+                          const success = await DocumentService.updateDocumentStatus(doc.id, "pending");
+                          if (success) {
+                            const updated = documents.map(d => d.id === doc.id ? { ...d, status: "pending", type: "PDF", updatedAt: new Date().toISOString() } : d);
+                            setDocuments(updated);
+                            toast.info(`Documento "${doc.name}" enviado para análise de compliance.`);
+                          } else {
+                            toast.error(`Falha ao enviar documento "${doc.name}".`);
+                          }
                         }}
                         title="Simular Upload"
                       >
@@ -136,9 +165,16 @@ export function CustomerDocumentsTab({ customer }: CustomerDocumentsTabProps) {
           </div>
           
           <div className="border-t border-border pt-4 flex gap-2">
-            <Button size="sm" variant="outline" className="flex-1 text-white border-white/20" onClick={() => {
-              setDocuments(documents.map(d => ({ ...d, status: "approved", type: "PDF", updatedAt: new Date().toISOString() })));
-              toast.success("Todos os documentos regulatórios foram aprovados automaticamente!");
+            <Button size="sm" variant="outline" className="flex-1 text-white border-white/20" onClick={async () => {
+              const promises = documents.map(d => DocumentService.updateDocumentStatus(d.id, "approved"));
+              const results = await Promise.all(promises);
+              if (results.every(r => r)) {
+                const updated = documents.map(d => ({ ...d, status: "approved", type: "PDF", updatedAt: new Date().toISOString() }));
+                setDocuments(updated);
+                toast.success("Todos os documentos regulatórios foram aprovados automaticamente!");
+              } else {
+                toast.error("Falha ao aprovar alguns documentos.");
+              }
             }}>
               Aprovar Todos
             </Button>

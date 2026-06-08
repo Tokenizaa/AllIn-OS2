@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { formatPrice } from '@/utils/priceFormatter';
+import { useCart } from '@/contexts/CartContext';
 
 // Ícones simples para os botões de fechar e quantidade
 const CloseIcon = () => (
@@ -20,12 +21,29 @@ const ProductDetailModal = ({ product, onClose }: { product: any; onClose: () =>
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const { addItem } = useCart();
 
-  // Mock de tamanhos, já que não vem do CSV. Adapte se necessário.
-  const availableSizes = product.categorias ? product.categorias.includes('Vestuário') ? ['P', 'M', 'G', 'GG'] : [] : [];
+  // Tamanhos baseados nas categorias do produto (dados reais)
+  const availableSizes = product.categorias && Array.isArray(product.categorias) 
+    ? product.categorias.some((cat: string) => cat.toLowerCase().includes('vestuário') || cat.toLowerCase().includes('roupa')) 
+      ? ['P', 'M', 'G', 'GG'] 
+      : []
+    : [];
 
   const handleQuantityChange = (amount) => {
     setQuantity((prev) => Math.max(1, prev + amount));
+  };
+
+  const handleAddToCart = () => {
+    if (!selectedSize && availableSizes.length > 0) {
+      alert('Por favor, selecione um tamanho.');
+      return;
+    }
+    
+    addItem(product.caption.toLowerCase().replace(/\s+/g, '-'), quantity);
+    setSelectedSize(null);
+    setQuantity(1);
+    handleClose();
   };
 
   // Efeito para controlar a animação de entrada
@@ -112,7 +130,7 @@ const ProductDetailModal = ({ product, onClose }: { product: any; onClose: () =>
               </div>
 
               {/* Botão de Ação */}
-              <button className="w-full bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors text-lg shadow-md">
+              <button onClick={handleAddToCart} className="w-full bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors text-lg shadow-md">
                 Adicionar ao Carrinho
               </button>
             </div>

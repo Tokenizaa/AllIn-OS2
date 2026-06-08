@@ -4,7 +4,7 @@ import { CustomerService } from "@/services/customers";
 import { OrderService } from "@/services/orders";
 import { WalletService } from "@/services/wallets";
 
-export function useCustomer360(customerId: string, sponsorId?: string | null, idComprador?: string | null) {
+export function useCustomer360(customerId?: string, sponsorId?: string | null, idComprador?: string | null) {
   return useQuery({
     queryKey: queryKeys.customer360(customerId),
     enabled: !!customerId,

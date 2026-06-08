@@ -80,3 +80,12 @@ export {
   processPaymentWebhook,
   getPaymentStats,
 } from "../modules/payments/api/payments.api";
+
+// Copilot
+export {
+  chat,
+  getConversations,
+  getConversationMessages,
+  archiveConversation,
+  healthCheck,
+} from "../modules/copilot/api/copilot.api";
