@@ -9,18 +9,18 @@ export class NetworkService {
     this.repository = new NetworkRepository();
   }
 
-  async getNetworkTree(customerId: string, maxDepth: number = 5): Promise<NetworkTree | null> {
-    return this.repository.getNetworkTree(customerId, maxDepth);
+  async getNetworkTree(idComprador: string, maxDepth: number = 5): Promise<NetworkTree | null> {
+    return this.repository.getNetworkTree(idComprador, maxDepth);
   }
 
-  async getDownlines(customerId: string, params: PaginationParams & { maxDepth?: number }): Promise<PaginatedResponse<DownlineNode>> {
+  async getDownlines(idComprador: string, params: PaginationParams & { maxDepth?: number }): Promise<PaginatedResponse<DownlineNode>> {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const offset = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.repository.getDownlines(customerId, { limit, offset, maxDepth: params.maxDepth }),
-      this.repository.countDownlines(customerId),
+      this.repository.getDownlines(idComprador, { limit, offset, maxDepth: params.maxDepth }),
+      this.repository.countDownlines(idComprador),
     ]);
 
     return {
@@ -34,15 +34,15 @@ export class NetworkService {
     };
   }
 
-  async getUpline(customerId: string, maxLevels: number = 10): Promise<UplineNode[]> {
-    return this.repository.getUpline(customerId, maxLevels);
+  async getUpline(idComprador: string, maxLevels: number = 10): Promise<UplineNode[]> {
+    return this.repository.getUpline(idComprador, maxLevels);
   }
 
-  async getNetworkStats(customerId?: string): Promise<NetworkStats> {
-    return this.repository.getNetworkStats(customerId);
+  async getNetworkStats(idComprador?: string): Promise<NetworkStats> {
+    return this.repository.getNetworkStats(idComprador);
   }
 
-  async countDownlines(customerId: string): Promise<number> {
-    return this.repository.countDownlines(customerId);
+  async countDownlines(idComprador: string): Promise<number> {
+    return this.repository.countDownlines(idComprador);
   }
 }

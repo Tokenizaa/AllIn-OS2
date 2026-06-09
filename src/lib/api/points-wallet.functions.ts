@@ -3,7 +3,7 @@ import { pointsWalletService } from '../../backend/modules/payments/services/poi
 
 // Validation schemas
 const earnPointsSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   sourceType: z.enum(['purchase', 'referral', 'promotion', 'manual', 'rollback']),
   referenceId: z.string().optional(),
@@ -12,7 +12,7 @@ const earnPointsSchema = z.object({
 });
 
 const redeemPointsSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   referenceId: z.string().optional(),
   referenceType: z.enum(['order', 'manual']).optional(),
@@ -28,10 +28,10 @@ const convertPointsToCurrencySchema = z.object({
 });
 
 // Get points wallet by customer
-export const getPointsWallet = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const getPointsWallet = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await pointsWalletService.getPointsWalletByCustomerId(parsed.customerId);
+    const result = await pointsWalletService.getPointsWalletByidComprador(parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get points wallet' };
@@ -39,10 +39,10 @@ export const getPointsWallet = async (data: { customerId: string }) => {
 };
 
 // Ensure points wallet exists
-export const ensurePointsWallet = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const ensurePointsWallet = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await (pointsWalletService as any).ensurePointsWalletExists(parsed.customerId);
+    const result = await pointsWalletService.ensurePointsWalletExists(parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure points wallet' };
@@ -53,8 +53,8 @@ export const ensurePointsWallet = async (data: { customerId: string }) => {
 export const earnPoints = async (data: any) => {
   const parsed = earnPointsSchema.parse(data);
   try {
-    const result = await (pointsWalletService as any).earnPoints(
-      parsed.customerId,
+    const result = await pointsWalletService.earnPoints(
+      parsed.idComprador,
       parsed.amount,
       parsed.sourceType,
       parsed.referenceId,
@@ -72,7 +72,7 @@ export const redeemPoints = async (data: any) => {
   const parsed = redeemPointsSchema.parse(data);
   try {
     const result = await pointsWalletService.redeemPoints(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.amount,
       parsed.referenceId,
       parsed.referenceType,
@@ -85,15 +85,15 @@ export const redeemPoints = async (data: any) => {
 };
 
 // Get available points for payment
-export const getAvailablePointsForPayment = async (data: { customerId: string; productId?: string }) => {
+export const getAvailablePointsForPayment = async (data: { idComprador: string; productId?: string }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     productId: z.string().optional(),
   }).parse(data);
 
   try {
     const result = await pointsWalletService.getAvailablePointsForPayment(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.productId
     );
     return { success: true, data: result };
@@ -104,23 +104,23 @@ export const getAvailablePointsForPayment = async (data: { customerId: string; p
 
 // Get points wallet transactions
 export const getPointsTransactions = async (data: {
-  customerId: string;
+  idComprador: string;
   page?: number;
   limit?: number;
   transactionType?: 'earned' | 'redeemed';
 }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     page: z.number().default(1),
     limit: z.number().default(20),
     transactionType: z.enum(['earned', 'redeemed']).optional(),
   }).parse(data);
 
   try {
-    const result = await (pointsWalletService as any).getTransactions(
-      parsed.customerId,
-      parsed.page,
+    const result = await pointsWalletService.getTransactions(
+      parsed.idComprador,
       parsed.limit,
+      0,
       parsed.transactionType
     );
     return { success: true, data: result };
@@ -130,10 +130,10 @@ export const getPointsTransactions = async (data: {
 };
 
 // Get points wallet balance
-export const getPointsWalletBalance = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const getPointsWalletBalance = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const wallet = await pointsWalletService.getPointsWalletByCustomerId(parsed.customerId);
+    const wallet = await pointsWalletService.getPointsWalletByidComprador(parsed.idComprador);
     if (!wallet) {
       return { success: false, error: 'Points wallet not found' };
     }

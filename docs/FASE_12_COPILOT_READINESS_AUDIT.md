@@ -21,15 +21,17 @@ A auditoria revelou que o sistema possui **infraestrutura parcialmente pronta** 
 - ✅ Views de Customer360 e NetworkTree existentes
 
 **Pontos Críticos:**
-- ❌ Qualidade de dados severamente comprometida (100% customers sem email/CPF)
-- ❌ 80.2% dos orders com totais inconsistentes
-- ❌ 14.5% dos orders sem itens
-- ❌ 39% dos customers sem patrocinador
-- ❌ Múltiplas fontes de verdade não validadas
-- ❌ Tabelas de IA (embeddings, conversations) vazias ou inexistentes
-- ❌ Falta de observabilidade e logging estruturado
+- ⚠️ 44.7% dos customers sem CPF (554/1,239)
+- ✅ 82.6% dos customers com patrocinador_comprador (1,024/1,240) - CAMPO CORRETO
+- ❌ 100% dos customers sem user_id (0/1,240) - Origem desconhecida
+- ❌ 100% das wallets com saldo zero (1,631/1,631)
+- ❌ 0 comissões registradas no sistema
+- ❌ 0 transações de carteira
+- ❌ Tabelas de Copilot não existem (conversations, messages)
+- ❌ Tabelas de embeddings vazias (customer, product, document)
+- ❌ RLS desabilitado em tabelas críticas (customers, orders, order_items)
 
-**Score de Readiness Preliminar:** 4.5/10
+**Score de Readiness Preliminar:** 6.0/10
 
 ---
 
@@ -40,11 +42,12 @@ A auditoria revelou que o sistema possui **infraestrutura parcialmente pronta** 
 ### Tabelas (40+ tabelas)
 
 **Core Business:**
-- `customers` (1,631 rows) - Dados críticos faltando
-- `orders` (21 rows atuais, 22,195 históricos) - Inconsistências graves
-- `order_items` (91 rows atuais, 41,742 históricos) - total_price NULL
-- `products` - Catálogo de produtos
-- `plans` - Planos de assinatura
+- `customers` (1,240 rows) - 100% com email, 55.3% com CPF, 82.6% com patrocinador_comprador
+- `distribuidores` (976 rows) - 100% com email, 100% com cpf_cnpj, 100% com patrocinador
+- `orders` (54,450 rows) - 98.6% com valor_total, 100% com itens
+- `order_items` (53,911 rows) - Itens de pedidos
+- `products` (112 rows) - Catálogo de produtos
+- `plans` (7 rows) - Planos de assinatura
 - `profiles` (7 rows) - Perfis de usuários
 
 **Network/CRM:**
@@ -54,13 +57,14 @@ A auditoria revelou que o sistema possui **infraestrutura parcialmente pronta** 
 - `qualifications` - Qualificações
 
 **Financial:**
-- `wallets` (0 rows) - Carteiras principais
-- `bonus_wallets` (0 rows) - Carteiras de bônus
-- `points_wallets` (0 rows) - Carteiras de pontos
+- `wallets` (1,631 rows) - Carteiras principais (100% saldo zero)
+- `bonus_wallets` (1,631 rows) - Carteiras de bônus (1 com saldo positivo)
+- `points_wallets` (1,631 rows) - Carteiras de pontos
 - `transactions` (0 rows) - Transações
 - `withdrawals` (0 rows) - Saques
-- `payments` - Pagamentos
+- `payments` (43,717 rows) - Pagamentos
 - `payment_attempts` (0 rows) - Tentativas de pagamento
+- `commissions` (0 rows) - Comissões
 
 **Analytics/ML:**
 - `customer_metrics` - Métricas de clientes
@@ -72,8 +76,11 @@ A auditoria revelou que o sistema possui **infraestrutura parcialmente pronta** 
 - `campaign_intelligence` - Inteligência de campanhas
 
 **AI/Embeddings:**
-- `embeddings` - Tabela para vetores (existente mas vazia)
-- `customer_embeddings` - Embeddings de clientes (existente mas vazia)
+- `customer_embeddings` (0 rows) - Embeddings de clientes (vazia)
+- `product_embeddings` (0 rows) - Embeddings de produtos (vazia)
+- `document_embeddings` (0 rows) - Embeddings de documentos (vazia)
+- `copilot_conversations` - Tabela não existe
+- `copilot_messages` - Tabela não existe
 
 **Chatwoot/Marketing:**
 - `chatwoot_conversations` (0 rows)
@@ -301,13 +308,23 @@ src/backend/
 | network_id | customers | path | ✅ OK (array) |
 | wallet_id | wallets | customer_id | ❌ Tabela vazia |
 
-**2. Qualidade de Dados Severamente Comprometida**
+**2. Qualidade de Dados - Múltiplas Fontes de Verdade**
 
-- 100% customers sem email
-- 100% customers sem CPF
-- 39% customers sem patrocinador
-- 38.9% customers sem plan_id
-- 0 customers com user_id preenchido
+**Tabela customers (1,240 rows):**
+- ✅ 100% com email (1,240/1,240)
+- ⚠️ 55.3% com CPF (685/1,240)
+- ✅ 82.6% com patrocinador_comprador (1,024/1,240) - CAMPO CORRETO
+- ❌ 0% com user_id (0/1,240) - Origem desconhecida
+- 68.4% com plano_comprador (847/1,240)
+
+**Tabela distribuidores (976 rows) - Fonte de Verdade para MLM:**
+- ✅ 100% com email (976/976)
+- ✅ 100% com cpf_cnpj (976/976)
+- ✅ 100% com patrocinador (976/976)
+- Status: 9 Ativo, 808 Inativo, 159 Isento
+- Tipo: 963 Afiliado, 8 "Mínimo de 4 Diretos", 5 "Mínimo de 8 Diretos"
+
+**Problema:** Múltiplas tabelas para distribuidores sem sincronização clara
 
 **3. Múltiplas Implementações Não Validadas**
 
@@ -395,10 +412,11 @@ src/backend/
 - Sem histórico de mudanças de saldo
 - Sem auditoria de movimentações
 
-**4. Orders com Totais Inconsistentes**
-- 80.2% dos orders (17,810) com valor_total ≠ soma itens
-- 14.5% dos orders (3,209) sem itens
-- Impacto direto em cálculos financeiros
+**4. Orders com Qualidade de Dados Aceitável**
+- 98.6% dos orders (53,678/54,450) com valor_total preenchido
+- 100% dos orders (54,450/54,450) com itens
+- Apenas 1.4% (772/54,450) sem valor_total
+- ✅ Qualidade de dados de orders é ACEITÁVEL
 
 ---
 
@@ -639,11 +657,15 @@ src/backend/
 
 ## Críticos (Bloqueiam Implementação)
 
-1. **Qualidade de Dados**
-   - 100% customers sem email/CPF
-   - 80.2% orders com totais inconsistentes
-   - 39% customers sem patrocinador
-   - **Ação:** Executar scrape e correção de dados
+1. **Qualidade de Dados - Múltiplas Fontes de Verdade**
+   - ✅ 82.6% customers com patrocinador_comprador (1,024/1,240) - CAMPO CORRETO
+   - ❌ 100% customers sem user_id (0/1,240) - Origem desconhecida
+   - ⚠️ 44.7% customers sem CPF (554/1,240)
+   - ✅ 100% customers com email (1,240/1,240)
+   - ✅ Tabela distribuidores (976 rows) com dados 100% completos (email, cpf_cnpj, patrocinador)
+   - ✅ 98.6% orders com valor_total (53,678/54,450)
+   - ✅ 100% orders com itens (54,450/54,450)
+   - **Ação:** Definir fonte de verdade única (customers vs distribuidores) e investigar user_id
 
 2. **Tabelas de IA Vazias**
    - `embeddings` vazia
@@ -725,11 +747,14 @@ src/backend/
 **Prazo:** 1-2 semanas
 
 **Ações:**
-- [ ] Executar scrape para atualizar customers (emails, CPFs, telefones)
-- [ ] Atualizar patrocinadores de customers (636 faltantes)
-- [ ] Calcular total_price em order_items (41,742 registros)
-- [ ] Recalcular valor_total em orders (17,810 inconsistentes)
-- [ ] Investigar orders sem items (3,209 registros)
+- [ ] Definir fonte de verdade única (customers vs distribuidores)
+- [ ] Investigar origem do campo user_id em customers
+- [ ] Sincronizar dados entre customers e distribuidores
+- [ ] Completar CPF de customers (554/1,240 faltantes)
+- [ ] ✅ Emails já estão 100% preenchidos (1,240/1,240)
+- [ ] ✅ Patrocinador_comprador 82.6% preenchido (1,024/1,240)
+- [ ] ✅ Tabela distribuidores com dados 100% completos (976/976)
+- [ ] ✅ Orders com qualidade aceitável (98.6% com valor_total)
 - [ ] Validar integridade referencial
 
 **Responsável:** Backend Team
@@ -896,21 +921,21 @@ src/backend/
 
 | Área | Score | Status | Observações |
 |------|-------|--------|-------------|
-| **Database Readiness** | 3/10 | ❌ Crítico | Qualidade de dados severamente comprometida |
-| **Supabase Readiness** | 6/10 | ⚠️ Parcial | Infraestrutura OK, mas dados problemáticos |
+| **Database Readiness** | 7/10 | ✅ Bom | Distribuidores 100% completos, customers 82.6% patrocinador |
+| **Supabase Readiness** | 5/10 | ⚠️ Parcial | RLS desabilitado em 3 tabelas críticas |
 | **Backend Readiness** | 7/10 | ✅ Bom | Arquitetura modular bem estruturada |
 | **Frontend Readiness** | 7/10 | ✅ Bom | Hooks e componentes organizados |
-| **Customer360 Readiness** | 4/10 | ❌ Crítico | Múltiplas fontes não validadas |
-| **CRM Readiness** | 5/10 | ⚠️ Parcial | Consultas não validadas |
-| **Financial Readiness** | 2/10 | ❌ Crítico | Tabelas vazias, sem fonte oficial |
-| **Permissions Readiness** | 5/10 | ⚠️ Parcial | RLS OK, mas falta validação |
-| **Analytics Readiness** | 4/10 | ❌ Crítico | Tabelas existem mas não validadas |
+| **Customer360 Readiness** | 5/10 | ⚠️ Parcial | Múltiplas fontes não validadas (customers vs distribuidores) |
+| **CRM Readiness** | 7/10 | ✅ Bom | Distribuidores (976) com dados 100% completos |
+| **Financial Readiness** | 3/10 | ❌ Crítico | Wallets 100% saldo zero, 0 comissões |
+| **Permissions Readiness** | 4/10 | ❌ Crítico | RLS desabilitado em customers/orders/order_items |
+| **Analytics Readiness** | 5/10 | ⚠️ Parcial | Tabelas existem mas não validadas |
 | **RAG Readiness** | 3/10 | ❌ Crítico | Vector OK, mas embeddings vazios |
 | **Intent Readiness** | 6/10 | ⚠️ Parcial | Intents identificados mas não implementados |
 | **Skill Readiness** | 4/10 | ❌ Crítico | Skills identificados mas não implementados |
-| **Copilot Readiness** | 5/10 | ⚠️ Parcial | Módulo existe mas dados problemáticos |
+| **Copilot Readiness** | 3/10 | ❌ Crítico | Tabelas copilot não existem |
 
-## Score Geral: **4.5/10** ⚠️ PARCIALMENTE PREPARADO
+## Score Geral: **6.0/10** ⚠️ PARCIALMENTE PREPARADO
 
 ---
 
@@ -919,14 +944,31 @@ src/backend/
 O sistema possui **infraestrutura técnica adequada** para implementação de Copilot, mas enfrenta **gaps críticos de dados** que bloqueiam a implementação imediata.
 
 **Principais Bloqueadores:**
-1. Qualidade de dados severamente comprometida
-2. Tabelas de IA vazias ou inexistentes
-3. Falta de fonte única de verdade validada
+1. Múltiplas fontes de verdade (customers vs distribuidores) sem sincronização
+2. 100% customers sem user_id (0/1,240) - Origem desconhecida
+3. Tabelas de Copilot não existem (conversations, messages)
+4. Tabelas de embeddings vazias (customer, product, document)
+5. RLS desabilitado em tabelas críticas (customers, orders, order_items)
+6. 100% wallets com saldo zero (1,631/1,631)
+7. 0 comissões registradas no sistema
+
+**Pontos Positivos (Dados Reais):**
+- ✅ Tabela distribuidores (976) com dados 100% completos (email, cpf_cnpj, patrocinador)
+- ✅ 82.6% customers com patrocinador_comprador (1,024/1,240) - CAMPO CORRETO
+- ✅ 100% customers com email (1,240/1,240)
+- ✅ 55.3% customers com CPF (685/1,240)
+- ✅ 98.6% orders com valor_total (53,678/54,450)
+- ✅ 100% orders com itens (54,450/54,450)
+- ✅ Network relationships existem (995 registros)
+- ✅ Payments registrados (43,717 registros)
 
 **Recomendação:**
-1. Priorizar correção de qualidade de dados (1-2 semanas)
-2. Criar e popular tabelas de IA (3-5 dias)
-3. Consolidação de fontes de verdade (1 semana)
+1. Habilitar RLS nas tabelas críticas (IMEDIATO - segurança)
+2. Definir fonte de verdade única (customers vs distribuidores)
+3. Criar tabelas de Copilot (conversations, messages)
+4. Investigar origem do campo user_id em customers
+5. Implementar pipeline de embeddings (2-3 semanas)
+6. Consolidação de fontes de verdade (1 semana)
 
 **Após correção dos bloqueadores críticos, o sistema estará pronto para:**
 - Implementação de RAG com embeddings
@@ -934,10 +976,10 @@ O sistema possui **infraestrutura técnica adequada** para implementação de Co
 - Implementação de Context Engine validado
 - Implementação de Analytics Engine
 
-**Timeline Estimada para Copilot Completo:** 6-8 semanas após correção de dados críticos.
+**Timeline Estimada para Copilot Completo:** 5-7 semanas após correção de dados críticos.
 
 ---
 
 **Documento criado em:** 7 de Junho de 2026  
-**Versão:** 1.0  
+**Versão:** 1.2 (Atualizado com correções: patrocinador_comprador, tabela distribuidores)  
 **Autor:** Cascade AI Assistant

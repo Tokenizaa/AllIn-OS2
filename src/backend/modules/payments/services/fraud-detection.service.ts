@@ -9,7 +9,7 @@ export interface FraudRiskScore {
 }
 
 export interface FraudDetectionRequest {
-  customerId: string;
+  idComprador: string;
   amount: number;
   paymentMethod: string;
   customerEmail: string;
@@ -52,7 +52,7 @@ export class FraudDetectionService {
   }
 
   async assessRisk(request: FraudDetectionRequest): Promise<FraudRiskScore> {
-    logger.info('Assessing fraud risk', 'fraud-detection-service', { customerId: request.customerId, amount: request.amount });
+    logger.info('Assessing fraud risk', 'fraud-detection-service', { idComprador: request.idComprador, amount: request.amount });
 
     let score = 0;
     const factors: string[] = [];
@@ -88,7 +88,7 @@ export class FraudDetectionService {
 
     // Velocity checks (would need database integration)
     // For now, this is a placeholder
-    const recentTransactions = await this.getRecentTransactionCount(request.customerId);
+    const recentTransactions = await this.getRecentTransactionCount(request.idComprador);
     if (recentTransactions > 10) {
       score += 20;
       factors.push('High transaction velocity');
@@ -122,7 +122,7 @@ export class FraudDetectionService {
     const recommendation = this.getRecommendation(level);
 
     logger.info('Fraud risk assessment complete', 'fraud-detection-service', {
-      customerId: request.customerId,
+      idComprador: request.idComprador,
       score,
       level,
       factors,
@@ -151,7 +151,7 @@ export class FraudDetectionService {
     );
   }
 
-  private async getRecentTransactionCount(customerId: string): Promise<number> {
+  private async getRecentTransactionCount(idComprador: string): Promise<number> {
     try {
       const supabase = getBackendClient();
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -159,17 +159,17 @@ export class FraudDetectionService {
       const { data, error } = await supabase
         .from('payments')
         .select('id')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .gte('created_at', twentyFourHoursAgo);
       
       if (error) {
-        logger.error('Error fetching recent transactions', 'fraud-detection-service', { error, customerId });
+        logger.error('Error fetching recent transactions', 'fraud-detection-service', { error, idComprador });
         return 0;
       }
       
       return data?.length || 0;
     } catch (error) {
-      logger.error('Exception in getRecentTransactionCount', 'fraud-detection-service', { error, customerId });
+      logger.error('Exception in getRecentTransactionCount', 'fraud-detection-service', { error, idComprador });
       return 0;
     }
   }
@@ -297,14 +297,14 @@ export class FraudDetectionService {
     // TODO: Implement fraud reporting and blacklist logic
   }
 
-  async addToBlacklist(customerId: string, reason: string): Promise<void> {
-    void customerId;
-    logger.warn('Adding customer to fraud blacklist', 'fraud-detection-service', { customerId, reason });
+  async addToBlacklist(idComprador: string, reason: string): Promise<void> {
+    void idComprador;
+    logger.warn('Adding customer to fraud blacklist', 'fraud-detection-service', { idComprador, reason });
     // TODO: Implement blacklist management
   }
 
-  async isBlacklisted(customerId: string): Promise<boolean> {
-    void customerId;
+  async isBlacklisted(idComprador: string): Promise<boolean> {
+    void idComprador;
     // TODO: Implement blacklist check
     return false;
   }

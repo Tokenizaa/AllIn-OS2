@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase-client";
 
 export interface Document {
   id: string;
-  customer_id: string;
+  id_comprador: string;
   name: string;
   type: string;
   status: "approved" | "pending" | "missing" | "rejected";
@@ -12,11 +12,11 @@ export interface Document {
 }
 
 export const DocumentService = {
-  async fetchCustomerDocuments(customerId: string): Promise<Document[]> {
+  async fetchCustomerDocuments(idComprador: string): Promise<Document[]> {
     const { data, error } = await supabase
       .from("customer_documents")
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
     
     if (error) {

@@ -8,7 +8,7 @@ const paymentService = new PaymentService();
 export const getPayments = async (data: unknown) => {
   const parsed = paginationSchema.merge(filterSchema).merge(
     z.object({
-      customer_id: z.string().uuid().optional(),
+      id_comprador: z.string().optional(),
       status: z.string().optional(),
     })
   ).parse(data);

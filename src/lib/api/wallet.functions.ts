@@ -3,7 +3,7 @@ import { walletService } from '../../backend/modules/payments/services/wallet.se
 
 // Validation schemas
 const creditWalletSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   description: z.string(),
   referenceId: z.string().optional(),
@@ -11,7 +11,7 @@ const creditWalletSchema = z.object({
 });
 
 const debitWalletSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   description: z.string(),
   referenceId: z.string().optional(),
@@ -19,7 +19,7 @@ const debitWalletSchema = z.object({
 });
 
 const freezeWalletSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   description: z.string(),
   referenceId: z.string().optional(),
@@ -27,7 +27,7 @@ const freezeWalletSchema = z.object({
 });
 
 const unfreezeWalletSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   description: z.string(),
   referenceId: z.string().optional(),
@@ -35,10 +35,10 @@ const unfreezeWalletSchema = z.object({
 });
 
 // Get wallet by customer
-export const getWallet = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const getWallet = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await walletService.getWalletByCustomerId(parsed.customerId);
+    const result = await walletService.getWalletByidComprador(parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet' };
@@ -46,10 +46,10 @@ export const getWallet = async (data: { customerId: string }) => {
 };
 
 // Ensure wallet exists
-export const ensureWallet = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const ensureWallet = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await (walletService as any).ensureWallet(parsed.customerId);
+    const result = await walletService.ensureWalletExists(parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure wallet' };
@@ -61,7 +61,7 @@ export const creditWallet = async (data: any) => {
   const parsed = creditWalletSchema.parse(data);
   try {
     const result = await walletService.creditWallet(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.amount,
       parsed.description,
       parsed.referenceId,
@@ -78,7 +78,7 @@ export const debitWallet = async (data: any) => {
   const parsed = debitWalletSchema.parse(data);
   try {
     const result = await walletService.debitWallet(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.amount,
       parsed.description,
       parsed.referenceId,
@@ -94,10 +94,9 @@ export const debitWallet = async (data: any) => {
 export const freezeWallet = async (data: any) => {
   const parsed = freezeWalletSchema.parse(data);
   try {
-    const result = await (walletService as any).freezeWallet(
-      parsed.customerId,
+    const result = await walletService.freezeBalance(
+      parsed.idComprador,
       parsed.amount,
-      parsed.description,
       parsed.referenceId,
       parsed.referenceType
     );
@@ -111,10 +110,9 @@ export const freezeWallet = async (data: any) => {
 export const unfreezeWallet = async (data: any) => {
   const parsed = unfreezeWalletSchema.parse(data);
   try {
-    const result = await (walletService as any).unfreezeWallet(
-      parsed.customerId,
+    const result = await walletService.unfreezeBalance(
+      parsed.idComprador,
       parsed.amount,
-      parsed.description,
       parsed.referenceId,
       parsed.referenceType
     );
@@ -126,24 +124,23 @@ export const unfreezeWallet = async (data: any) => {
 
 // Get wallet transactions
 export const getWalletTransactions = async (data: {
-  customerId: string;
+  idComprador: string;
   page?: number;
   limit?: number;
   transactionType?: 'credit' | 'debit' | 'freeze' | 'unfreeze';
 }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     page: z.number().default(1),
     limit: z.number().default(20),
     transactionType: z.enum(['credit', 'debit', 'freeze', 'unfreeze']).optional(),
   }).parse(data);
 
   try {
-    const result = await (walletService as any).getTransactions(
-      parsed.customerId,
-      parsed.page,
+    const result = await walletService.getTransactions(
+      parsed.idComprador,
       parsed.limit,
-      parsed.transactionType
+      0
     );
     return { success: true, data: result };
   } catch (error) {
@@ -152,10 +149,10 @@ export const getWalletTransactions = async (data: {
 };
 
 // Get wallet balance
-export const getWalletBalance = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const getWalletBalance = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const wallet = await walletService.getWalletByCustomerId(parsed.customerId);
+    const wallet = await walletService.getWalletByidComprador(parsed.idComprador);
     if (!wallet) {
       return { success: false, error: 'Wallet not found' };
     }

@@ -12,11 +12,11 @@ export class NetworkRepository extends BaseRepository<any> {
     return rule?.label || fallback || planIdOrName || null;
   }
 
-  async getNetworkTree(customerId: string, maxDepth: number = 5): Promise<NetworkTree | null> {
+  async getNetworkTree(idComprador: string, maxDepth: number = 5): Promise<NetworkTree | null> {
     const { data, error } = await this.getClient()
       .from("network_tree_view")
       .select("*")
-      .eq("id", customerId)
+      .eq("id", idComprador)
       .single();
 
     if (error) throw error;
@@ -37,7 +37,7 @@ export class NetworkRepository extends BaseRepository<any> {
       plan_name: this.normalizePlanName(data.plan_id, data.plan_name),
     };
 
-    const children = await this.getDownlinesRecursive(customerId, 1, maxDepth);
+    const children = await this.getDownlinesRecursive(idComprador, 1, maxDepth);
 
     return {
       root,
@@ -85,7 +85,7 @@ export class NetworkRepository extends BaseRepository<any> {
     return trees;
   }
 
-  async getDownlines(customerId: string, options?: {
+  async getDownlines(idComprador: string, options?: {
     limit?: number;
     offset?: number;
     maxDepth?: number;
@@ -93,7 +93,7 @@ export class NetworkRepository extends BaseRepository<any> {
     let query = this.getClient()
       .from("network_tree_view")
       .select("*")
-      .eq("sponsor_id", customerId);
+      .eq("sponsor_id", idComprador);
 
     if (options?.limit) {
       query = query.limit(options.limit);
@@ -122,9 +122,9 @@ export class NetworkRepository extends BaseRepository<any> {
     }));
   }
 
-  async getUpline(customerId: string, maxLevels: number = 10): Promise<UplineNode[]> {
+  async getUpline(idComprador: string, maxLevels: number = 10): Promise<UplineNode[]> {
     const upline: UplineNode[] = [];
-    let currentId = customerId;
+    let currentId = idComprador;
     let level = 0;
 
     while (currentId && level < maxLevels) {
@@ -167,16 +167,16 @@ export class NetworkRepository extends BaseRepository<any> {
     return upline;
   }
 
-  async getNetworkStats(customerId?: string): Promise<NetworkStats> {
+  async getNetworkStats(idComprador?: string): Promise<NetworkStats> {
     let totalNetworkSize = 0;
     let activeDistributors = 0;
     let totalRevenue = 0;
 
-    if (customerId) {
+    if (idComprador) {
       const { data, error } = await this.getClient()
         .from("network_tree_view")
         .select("*")
-        .eq("id", customerId)
+        .eq("id", idComprador)
         .single();
 
       if (error) throw error;
@@ -207,11 +207,11 @@ export class NetworkRepository extends BaseRepository<any> {
     };
   }
 
-  async countDownlines(customerId: string): Promise<number> {
+  async countDownlines(idComprador: string): Promise<number> {
     const { count, error } = await this.getClient()
       .from("customers")
       .select("*", { count: "exact", head: true })
-      .eq("patrocinador_comprador", customerId);
+      .eq("patrocinador_comprador", idComprador);
 
     if (error) throw error;
     return count || 0;

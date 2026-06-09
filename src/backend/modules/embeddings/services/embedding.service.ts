@@ -19,18 +19,18 @@ export class EmbeddingService {
   /**
    * Generate embedding for customer data
    */
-  async generateCustomerEmbedding(customerId: string): Promise<void> {
+  async generateCustomerEmbedding(idComprador: string): Promise<void> {
     try {
       // Fetch customer data
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('*')
-        .eq('id', customerId)
+        .eq('id', idComprador)
         .single();
 
       if (customerError) throw customerError;
       if (!customer) {
-        console.log(`Customer ${customerId} not found`);
+        console.log(`Customer ${idComprador} not found`);
         return;
       }
 
@@ -44,7 +44,7 @@ export class EmbeddingService {
       const { error: insertError } = await supabase
         .from('customer_embeddings')
         .upsert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           embedding: embedding,
           content: content,
           embedding_model: 'nomic-embed-text',
@@ -55,12 +55,12 @@ export class EmbeddingService {
           },
           updated_at: new Date().toISOString(),
         }, {
-          onConflict: 'customer_id'
+          onConflict: 'id_comprador'
         });
 
       if (insertError) throw insertError;
 
-      console.log(`Customer embedding generated for ${customerId}`);
+      console.log(`Customer embedding generated for ${idComprador}`);
     } catch (error) {
       console.error('Error generating customer embedding:', error);
       throw error;

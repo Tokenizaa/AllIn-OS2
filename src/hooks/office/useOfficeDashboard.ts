@@ -30,18 +30,50 @@ export function useOfficeDashboard() {
       const conversion = customers.length ? Math.round((orders.length / customers.length) * 100) : 0;
       const saldoDisponivel = Math.max(0, totalPago - withdrawals.reduce((sum, row) => sum + Number(row.amount || 0), 0));
 
+      // Get customer bonus and plan data
+      const currentCustomer = customers[0]; // Assuming logged-in customer
+      let customerBonus = null;
+      let customerPlan = null;
+      let totalBonus = 0;
+      let directBonus = 0;
+      let networkBonus = 0;
+      let planName = "Plano Padrão";
+
+      if (currentCustomer?.id_comprador) {
+        try {
+          const [bonusData, planData] = await Promise.all([
+            CustomerService.fetchCustomerBonus(currentCustomer.id_comprador),
+            CustomerService.fetchCustomerPlan(currentCustomer.id_comprador),
+          ]);
+          customerBonus = bonusData;
+          customerPlan = planData;
+          
+          if (customerBonus) {
+            totalBonus = Number(customerBonus.total_bonus || 0);
+            directBonus = Number(customerBonus.direct_bonus || 0);
+            networkBonus = Number(customerBonus.network_bonus || 0);
+          }
+          
+          if (customerPlan?.plans) {
+            planName = customerPlan.plans.name || "Plano Padrão";
+          }
+        } catch (error) {
+          console.error("Error fetching customer bonus/plan:", error);
+        }
+      }
+
       const stats = {
         saldoDisponivel,
-        comissaoAcumulada: totalPago * 0.18,
+        comissaoAcumulada: totalBonus, // Use real bonus from database
         totalVendido,
         pedidosMes,
         redeTotal,
         ticketMedio,
         conversaoLoja: conversion,
         crescimentoRedeMes: 0,
-        nome: lastProfile?.name || "Usuário",
+        nome: lastProfile?.name || currentCustomer?.nome_completo || "Usuário",
         qualificacao: "Ativo",
-        plano: "Plano Real",
+        plano: planName,
         progresso: Math.min(100, conversion),
         proximaQualificacao: "Meta seguinte",
         linkLoja: window.location.origin,
@@ -53,20 +85,21 @@ export function useOfficeDashboard() {
         const current = grouped.get(day) || { vendas: 0, bonus: 0 };
         const orderAmount = Number(row.valor_total_pedido || row.valor_total || 0);
         current.vendas += orderAmount;
-        current.bonus += orderAmount * 0.1;
+        // Use real bonus percentage from plan if available, otherwise default to 10%
+        const bonusPercentage = customerPlan?.plans?.direct_bonus_percentage ? Number(customerPlan.plans.direct_bonus_percentage) / 100 : 0.1;
+        current.bonus += orderAmount * bonusPercentage;
         grouped.set(day, current);
       });
       const salesSeries = Array.from(grouped.entries()).map(([day, value]) => ({ day, vendas: value.vendas, bonus: value.bonus }));
       
       // Calculate real bonus origin from payments data
-      const totalBonus = salesSeries.reduce((sum, s) => sum + s.bonus, 0);
+      const totalBonusFromSeries = salesSeries.reduce((sum, s) => sum + s.bonus, 0);
       const totalSales = salesSeries.reduce((sum, s) => sum + s.vendas, 0);
       const totalPayments = totalPago;
       
       const bonusOrigin = [
-        { name: "Vendas", value: totalSales > 0 ? Math.round((totalSales / (totalSales + totalPayments)) * 100) : 50 },
-        { name: "Pagamentos", value: totalPayments > 0 ? Math.round((totalPayments / (totalSales + totalPayments)) * 100) : 50 },
-        { name: "Rede", value: 0 }, // Network bonus requires commission calculation
+        { name: "Vendas Diretas", value: directBonus > 0 ? Math.round((directBonus / (directBonus + networkBonus)) * 100) : 70 },
+        { name: "Rede", value: networkBonus > 0 ? Math.round((networkBonus / (directBonus + networkBonus)) * 100) : 30 },
       ];
       
       // Calculate real top products from orders
@@ -94,7 +127,7 @@ export function useOfficeDashboard() {
         ...payments.slice(0, 3).map((p: any) => ({ id: `p-${p.id}`, title: "Pagamento recebido", description: `Pagamento de R$${Number(p.amount || 0).toLocaleString("pt-BR")} processado.`, at: p.created_at, type: "payment" })),
       ];
 
-      return { stats, salesSeries, bonusOrigin, topProducts, timeline, orders, payments, customers, products, withdrawals };
+      return { stats, salesSeries, bonusOrigin, topProducts, timeline, orders, payments, customers, products, withdrawals, customerBonus, customerPlan };
     },
   });
 }

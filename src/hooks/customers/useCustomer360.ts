@@ -4,18 +4,18 @@ import { CustomerService } from "@/services/customers";
 import { OrderService } from "@/services/orders";
 import { WalletService } from "@/services/wallets";
 
-export function useCustomer360(customerId?: string, sponsorId?: string | null, idComprador?: string | null) {
+export function useCustomer360(idComprador?: string, sponsorId?: string | null) {
   return useQuery({
-    queryKey: queryKeys.customer360(customerId || ""),
-    enabled: !!customerId,
+    queryKey: queryKeys.customer360(idComprador || ""),
+    enabled: !!idComprador,
     queryFn: async () => {
-      if (!customerId) throw new Error("customerId is required");
+      if (!idComprador) throw new Error("idComprador is required");
       const [orderData, sponsorData, walletData, ptsData, customerData] = await Promise.all([
-        OrderService.fetchOrdersByCustomerId(customerId),
+        OrderService.fetchOrdersByidComprador(idComprador),
         sponsorId ? CustomerService.fetchCustomerByCompradorId(sponsorId) : Promise.resolve(null),
-        WalletService.fetchWalletByCustomerId(customerId),
-        WalletService.fetchPointsWalletByCustomerId(customerId),
-        CustomerService.fetchCustomerById(customerId),
+        WalletService.fetchWalletByidComprador(idComprador),
+        WalletService.fetchPointsWalletByidComprador(idComprador),
+        CustomerService.fetchCustomerByCompradorId(idComprador),
       ]);
       const txData = walletData ? await WalletService.fetchWalletTransactionsByWalletId(walletData.id) : [];
       const downlineData = idComprador ? await CustomerService.fetchDownlines(idComprador) : [];

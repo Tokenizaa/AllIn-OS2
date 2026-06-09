@@ -21,7 +21,7 @@ export class CommissionService {
       // Buscar informações do pedido
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .select('customer_id, valor_total, numero_pedido')
+        .select('id_comprador, valor_total_pedido, numero_pedido')
         .eq('id', orderId)
         .single();
 
@@ -35,24 +35,24 @@ export class CommissionService {
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('sponsor_id')
-        .eq('id', order.customer_id)
+        .eq('id', order.id_comprador)
         .single();
 
       if (customerError) throw customerError;
       if (!customer || !customer.sponsor_id) {
-        console.log(`No sponsor found for customer ${order.customer_id}`);
+        console.log(`No sponsor found for customer ${order.id_comprador}`);
         return;
       }
 
       // Definir porcentagem de comissão direta (pode ser configurável por plano)
       const commissionPercentage = 10; // 10% padrão
-      const commissionAmount = (parseFloat(order.valor_total) || 0) * (commissionPercentage / 100);
+      const commissionAmount = (parseFloat(order.valor_total_pedido) || 0) * (commissionPercentage / 100);
 
       // Criar registro de comissão
       const { error: insertError } = await supabase
         .from('commissions')
         .insert({
-          customer_id: customer.sponsor_id,
+          id_comprador: customer.sponsor_id,
           order_id: orderId,
           commission_type: 'direct',
           amount: commissionAmount,
@@ -61,7 +61,7 @@ export class CommissionService {
           calculated_at: new Date().toISOString(),
           metadata: {
             order_number: order.numero_pedido,
-            order_value: order.valor_total,
+            order_value: order.valor_total_pedido,
           },
         });
 
@@ -83,7 +83,7 @@ export class CommissionService {
       // Buscar informações do pedido
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .select('customer_id, valor_total, numero_pedido')
+        .select('id_comprador, valor_total_pedido, numero_pedido')
         .eq('id', orderId)
         .single();
 
@@ -97,18 +97,18 @@ export class CommissionService {
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('sponsor_id')
-        .eq('id', order.customer_id)
+        .eq('id', order.id_comprador)
         .single();
 
       if (customerError) throw customerError;
       if (!customer || !customer.sponsor_id) {
-        console.log(`No sponsor found for customer ${order.customer_id}`);
+        console.log(`No sponsor found for customer ${order.id_comprador}`);
         return;
       }
 
       // Buscar uplines recursivamente (até 5 níveis)
       const uplines = await this.getUplines(customer.sponsor_id, 5);
-      const orderValue = parseFloat(order.valor_total) || 0;
+      const orderValue = parseFloat(order.valor_total_pedido) || 0;
 
       // Definir porcentagens por nível (pode ser configurável)
       const levelPercentages = [5, 3, 2, 1, 0.5]; // 5%, 3%, 2%, 1%, 0.5%
@@ -125,7 +125,7 @@ export class CommissionService {
         const { error: insertError } = await supabase
           .from('commissions')
           .insert({
-            customer_id: upline.id,
+            id_comprador: upline.id,
             order_id: orderId,
             commission_type: 'indirect',
             amount: commissionAmount,
@@ -134,7 +134,7 @@ export class CommissionService {
             calculated_at: new Date().toISOString(),
             metadata: {
               order_number: order.numero_pedido,
-              order_value: order.valor_total,
+              order_value: order.valor_total_pedido,
               level: i + 1,
             },
           });
@@ -152,15 +152,15 @@ export class CommissionService {
   /**
    * Busca uplines recursivamente até um determinado nível
    */
-  private async getUplines(customerId: string, maxLevel: number): Promise<Array<{ id: string }>> {
+  private async getUplines(idComprador: string, maxLevel: number): Promise<Array<{ id: string }>> {
     const uplines: Array<{ id: string }> = [];
-    let currentCustomerId = customerId;
+    let currentidComprador = idComprador;
 
     for (let level = 0; level < maxLevel; level++) {
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('sponsor_id')
-        .eq('id', currentCustomerId)
+        .eq('id', currentidComprador)
         .single();
 
       if (customerError || !customer || !customer.sponsor_id) {
@@ -168,7 +168,7 @@ export class CommissionService {
       }
 
       uplines.push({ id: customer.sponsor_id });
-      currentCustomerId = customer.sponsor_id;
+      currentidComprador = customer.sponsor_id;
     }
 
     return uplines;
@@ -198,22 +198,22 @@ export class CommissionService {
   /**
    * Aprova comissões pendentes
    */
-  async approvePendingCommissions(customerId?: string): Promise<void> {
+  async approvePendingCommissions(idComprador?: string): Promise<void> {
     try {
       let query = supabase
         .from('commissions')
         .update({ status: 'approved', updated_at: new Date().toISOString() })
         .eq('status', 'pending');
 
-      if (customerId) {
-        query = query.eq('customer_id', customerId);
+      if (idComprador) {
+        query = query.eq('id_comprador', idComprador);
       }
 
       const { error } = await query;
 
       if (error) throw error;
 
-      console.log(`Pending commissions approved${customerId ? ` for customer ${customerId}` : ''}`);
+      console.log(`Pending commissions approved${idComprador ? ` for customer ${idComprador}` : ''}`);
     } catch (error) {
       console.error('Error approving pending commissions:', error);
       throw error;
@@ -247,12 +247,12 @@ export class CommissionService {
   /**
    * Busca comissões de um customer
    */
-  async getCustomerCommissions(customerId: string): Promise<any[]> {
+  async getCustomerCommissions(idComprador: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('commissions')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -267,12 +267,12 @@ export class CommissionService {
   /**
    * Calcula total de comissões pendentes para um customer
    */
-  async getPendingCommissionTotal(customerId: string): Promise<number> {
+  async getPendingCommissionTotal(idComprador: string): Promise<number> {
     try {
       const { data, error } = await supabase
         .from('commissions')
         .select('amount')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .eq('status', 'pending');
 
       if (error) throw error;

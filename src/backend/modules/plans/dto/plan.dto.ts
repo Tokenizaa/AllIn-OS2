@@ -75,7 +75,7 @@ export type CreatePlanBonusDto = z.infer<typeof createPlanBonusSchema>;
 
 export const customerPlanSchema = z.object({
   id: z.string().uuid(),
-  customer_id: z.string().uuid(),
+  id_comprador: z.string().uuid(),
   plan_id: z.string().uuid(),
   status: z.enum(["active", "inactive", "pending", "expired"]),
   activated_at: z.string().datetime().nullable(),
@@ -86,7 +86,7 @@ export const customerPlanSchema = z.object({
 export type CustomerPlan = z.infer<typeof customerPlanSchema>;
 
 export const activateCustomerPlanSchema = z.object({
-  customer_id: z.string().uuid(),
+  id_comprador: z.string().uuid(),
   plan_id: z.string().uuid(),
 });
 

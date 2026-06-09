@@ -4,7 +4,7 @@ import { GatewayType } from '../adapters/gateway-adapter.factory';
 import { PaymentRequest } from '../interfaces/payment-provider.interface';
 
 export interface BoletoPaymentRequest {
-  customerId: string;
+  idComprador: string;
   orderId?: string;
   amount: number;
   currency: string;
@@ -52,14 +52,14 @@ export class BoletoPaymentFlow {
   }
 
   async createBoletoPayment(request: BoletoPaymentRequest): Promise<BoletoPaymentResult> {
-    logger.info('Creating Boleto payment', 'boleto-payment-flow', { customerId: request.customerId, amount: request.amount });
+    logger.info('Creating Boleto payment', 'boleto-payment-flow', { idComprador: request.idComprador, amount: request.amount });
 
     try {
       const paymentService = new PaymentService();
       const paymentRequest: PaymentRequest = {
         amount: request.amount,
         currency: request.currency,
-        customerId: request.customerId,
+        idComprador: request.idComprador,
         orderId: request.orderId,
         paymentMethod: 'boleto',
         customer: request.customer,

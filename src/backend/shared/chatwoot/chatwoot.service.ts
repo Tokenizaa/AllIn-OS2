@@ -85,7 +85,7 @@ export class ChatwootService {
 
   // Create or get a conversation for a customer
   async createConversation(
-    customerId: string,
+    idComprador: string,
     customerEmail: string,
     customerName: string,
     customerPhone?: string
@@ -99,14 +99,14 @@ export class ChatwootService {
     const conversation = await this.request<{ conversation: any }>(`/api/v1/inboxes/${this.config!.inboxId}/contacts/${contact.id}/conversations`, {
       method: "POST",
       body: JSON.stringify({
-        source_id: customerId,
+        source_id: idComprador,
         message: {
           content: "Conversation started from system",
         },
       }),
     });
 
-    logger.info(`Created Chatwoot conversation for customer ${customerId}`, "chatwoot", {
+    logger.info(`Created Chatwoot conversation for customer ${idComprador}`, "chatwoot", {
       conversationId: conversation.conversation.id,
       contactId: contact.id,
     });
@@ -239,17 +239,17 @@ export class ChatwootService {
   }
 
   // Search conversations by customer
-  async searchConversations(customerId: string): Promise<ChatwootConversation[]> {
+  async searchConversations(idComprador: string): Promise<ChatwootConversation[]> {
     this.ensureConfigured();
 
     try {
       const response = await this.request<{ payload: any[] }>(
-        `/api/v1/conversations?filter[source_id]=${customerId}`
+        `/api/v1/conversations?filter[source_id]=${idComprador}`
       );
 
       return response.payload.map((conv) => this.mapConversation(conv));
     } catch (error) {
-      logger.error(`Failed to search conversations for customer ${customerId}`, "chatwoot", { error });
+      logger.error(`Failed to search conversations for customer ${idComprador}`, "chatwoot", { error });
       return [];
     }
   }

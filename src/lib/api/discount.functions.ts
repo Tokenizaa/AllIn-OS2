@@ -4,7 +4,7 @@ import { discountEngineService } from '../../backend/modules/payments/services/d
 // Validation schemas
 const calculateDiscountSchema = z.object({
   originalAmount: z.number().positive(),
-  customerId: z.string().uuid().optional(),
+  idComprador: z.string().optional(),
   productId: z.string().optional(),
   categoryId: z.string().optional(),
   couponCode: z.string().optional(),
@@ -13,7 +13,7 @@ const calculateDiscountSchema = z.object({
 const createCouponSchema = z.object({
   code: z.string().min(3),
   discountRuleId: z.string().uuid(),
-  customerId: z.string().uuid().optional(),
+  idComprador: z.string().optional(),
   expiresAt: z.string().optional(),
   usageLimit: z.number().optional(),
 });
@@ -35,7 +35,7 @@ const createDiscountRuleSchema = z.object({
 
 const validateCouponSchema = z.object({
   couponCode: z.string().min(3),
-  customerId: z.string().uuid().optional(),
+  idComprador: z.string().optional(),
 });
 
 // Calculate discount
@@ -44,7 +44,7 @@ export const calculateDiscount = async (data: any) => {
   try {
     const result = await discountEngineService.calculateDiscount(
       parsed.originalAmount,
-      parsed.customerId,
+      parsed.idComprador,
       parsed.productId,
       parsed.categoryId,
       parsed.couponCode
@@ -62,7 +62,7 @@ export const createCoupon = async (data: any) => {
     const result = await discountEngineService.createCoupon(
       parsed.code,
       parsed.discountRuleId,
-      parsed.customerId,
+      parsed.idComprador,
       parsed.expiresAt ? new Date(parsed.expiresAt) : undefined,
       parsed.usageLimit
     );
@@ -100,7 +100,7 @@ export const createDiscountRule = async (data: any) => {
 export const validateCoupon = async (data: any) => {
   const parsed = validateCouponSchema.parse(data);
   try {
-    const result = await discountEngineService.validateCoupon(parsed.couponCode, parsed.customerId);
+    const result = await discountEngineService.validateCoupon(parsed.couponCode, parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to validate coupon' };

@@ -177,11 +177,11 @@ export class FinancialAuditService {
       // Get unique customers
       const { data: customers } = await supabase
         .from('payments')
-        .select('customer_id')
+        .select('id_comprador')
         .gte('created_at', start)
         .lte('created_at', end);
 
-      const uniqueCustomers = new Set((customers || []).map(c => c.customer_id)).size;
+      const uniqueCustomers = new Set((customers || []).map(c => c.id_comprador)).size;
 
       return {
         totalRevenue,

@@ -6,13 +6,13 @@ import { queryKeys } from "./queryKeys";
  * All mutations should use these functions to invalidate related queries
  */
 
-export function invalidateCustomerQueries(queryClient: QueryClient, customerId?: string) {
+export function invalidateCustomerQueries(queryClient: QueryClient, idComprador?: string) {
   queryClient.invalidateQueries({ queryKey: queryKeys.customers });
-  if (customerId) {
-    queryClient.invalidateQueries({ queryKey: queryKeys.customer(customerId) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.customer360(customerId) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(customerId) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.paymentHistory(customerId) });
+  if (idComprador) {
+    queryClient.invalidateQueries({ queryKey: queryKeys.customer(idComprador) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.customer360(idComprador) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(idComprador) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.paymentHistory(idComprador) });
   }
   queryClient.invalidateQueries({ queryKey: queryKeys.network });
   queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
@@ -25,12 +25,12 @@ export function invalidateOrderQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.shipments });
 }
 
-export function invalidateWalletQueries(queryClient: QueryClient, customerId?: string) {
+export function invalidateWalletQueries(queryClient: QueryClient, idComprador?: string) {
   queryClient.invalidateQueries({ queryKey: queryKeys.wallets });
-  if (customerId) {
-    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(customerId) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.bonusWallet(customerId) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.pointsWallet(customerId) });
+  if (idComprador) {
+    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(idComprador) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.bonusWallet(idComprador) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.pointsWallet(idComprador) });
   }
   queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
   queryClient.invalidateQueries({ queryKey: queryKeys.commissions });

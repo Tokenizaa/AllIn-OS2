@@ -12,8 +12,8 @@ export const registerPaymentEventHandlers = () => {
     // TODO: Send payment confirmation
     // TODO: Trigger commission calculation
     try {
-      const { customerId, paymentId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, paymentId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Payment approved: ${paymentId}`);
         logger.info(`Updated Chatwoot timeline for payment ${paymentId}`, "payment-handler");
@@ -30,8 +30,8 @@ export const registerPaymentEventHandlers = () => {
     // TODO: Send payment failure notification
     // TODO: Retry payment if applicable
     try {
-      const { customerId, paymentId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, paymentId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Payment rejected: ${paymentId}`);
         logger.info(`Updated Chatwoot timeline for payment ${paymentId}`, "payment-handler");
@@ -48,8 +48,8 @@ export const registerPaymentEventHandlers = () => {
     // TODO: Send refund confirmation
     // TODO: Adjust commissions if applicable
     try {
-      const { customerId, paymentId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, paymentId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Payment refunded: ${paymentId}`);
         logger.info(`Updated Chatwoot timeline for payment ${paymentId}`, "payment-handler");

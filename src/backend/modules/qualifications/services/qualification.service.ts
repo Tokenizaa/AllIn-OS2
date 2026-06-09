@@ -58,13 +58,13 @@ export class QualificationService {
   /**
    * Verifica se um customer atingiu requisitos para upgrade de qualificação
    */
-  async checkQualificationUpgrade(customerId: string): Promise<void> {
+  async checkQualificationUpgrade(idComprador: string): Promise<void> {
     try {
       // Buscar qualificação atual do customer
       const { data: currentQualification, error: qualError } = await supabase
         .from('customer_qualifications')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .eq('status', 'active')
         .single();
 
@@ -76,24 +76,24 @@ export class QualificationService {
       const { data: metrics, error: metricsError } = await supabase
         .from('customer_metrics')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .single();
 
       if (metricsError && metricsError.code !== 'PGRST116') throw metricsError;
 
       if (!metrics) {
-        console.log(`No metrics found for customer ${customerId}`);
+        console.log(`No metrics found for customer ${idComprador}`);
         return;
       }
 
       // Buscar volume da equipe (downlines)
-      const teamVolume = await this.getTeamVolume(customerId);
+      const teamVolume = await this.getTeamVolume(idComprador);
 
       // Buscar número de downlines ativos
-      const activeDownlines = await this.getActiveDownlinesCount(customerId);
+      const activeDownlines = await this.getActiveDownlinesCount(idComprador);
 
       // Buscar número de downlines em nível específico
-      const downlinesAtLevel = await this.getDownlinesAtLevelCount(customerId, currentLevel);
+      const downlinesAtLevel = await this.getDownlinesAtLevelCount(idComprador, currentLevel);
 
       // Verificar qualificação mais alta que o customer pode atingir
       const levels = Object.keys(this.qualificationLevels);
@@ -118,10 +118,10 @@ export class QualificationService {
 
       // Se houve upgrade, atualizar qualificação
       if (newQualification !== currentLevel) {
-        await this.updateQualification(customerId, newQualification);
-        console.log(`Customer ${customerId} upgraded from ${currentLevel} to ${newQualification}`);
+        await this.updateQualification(idComprador, newQualification);
+        console.log(`Customer ${idComprador} upgraded from ${currentLevel} to ${newQualification}`);
       } else {
-        console.log(`Customer ${customerId} maintains qualification ${currentLevel}`);
+        console.log(`Customer ${idComprador} maintains qualification ${currentLevel}`);
       }
     } catch (error) {
       console.error('Error checking qualification upgrade:', error);
@@ -132,13 +132,13 @@ export class QualificationService {
   /**
    * Atualiza qualificação do customer
    */
-  async updateQualification(customerId: string, newQualification: string): Promise<void> {
+  async updateQualification(idComprador: string, newQualification: string): Promise<void> {
     try {
       // Desativar qualificação anterior
       const { error: updateError } = await supabase
         .from('customer_qualifications')
         .update({ status: 'inactive', updated_at: new Date().toISOString() })
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .eq('status', 'active');
 
       if (updateError && updateError.code !== 'PGRST116') throw updateError;
@@ -147,19 +147,19 @@ export class QualificationService {
       const { error: insertError } = await supabase
         .from('customer_qualifications')
         .insert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           qualification_id: newQualification,
           qualification_name: this.getQualificationName(newQualification),
           status: 'active',
           achieved_at: new Date().toISOString(),
           metadata: {
-            previous_qualification: await this.getCurrentQualification(customerId),
+            previous_qualification: await this.getCurrentQualification(idComprador),
           },
         });
 
       if (insertError) throw insertError;
 
-      console.log(`Qualification updated for customer ${customerId}: ${newQualification}`);
+      console.log(`Qualification updated for customer ${idComprador}: ${newQualification}`);
     } catch (error) {
       console.error('Error updating qualification:', error);
       throw error;
@@ -200,13 +200,13 @@ export class QualificationService {
   /**
    * Busca volume total da equipe (downlines)
    */
-  private async getTeamVolume(customerId: string): Promise<number> {
+  private async getTeamVolume(idComprador: string): Promise<number> {
     try {
       // Buscar todos os downlines
       const { data: downlines, error: downlinesError } = await supabase
         .from('customers')
         .select('id')
-        .eq('sponsor_id', customerId);
+        .eq('sponsor_id', idComprador);
 
       if (downlinesError) throw downlinesError;
 
@@ -217,7 +217,7 @@ export class QualificationService {
       const { data: metrics, error: metricsError } = await supabase
         .from('customer_metrics')
         .select('total_gasto')
-        .in('customer_id', downlineIds);
+        .in('id_comprador', downlineIds);
 
       if (metricsError) throw metricsError;
 
@@ -232,12 +232,12 @@ export class QualificationService {
   /**
    * Busca número de downlines ativos
    */
-  private async getActiveDownlinesCount(customerId: string): Promise<number> {
+  private async getActiveDownlinesCount(idComprador: string): Promise<number> {
     try {
       const { data: downlines, error: downlinesError } = await supabase
         .from('customers')
         .select('id')
-        .eq('sponsor_id', customerId)
+        .eq('sponsor_id', idComprador)
         .eq('status', 'active');
 
       if (downlinesError) throw downlinesError;
@@ -252,13 +252,13 @@ export class QualificationService {
   /**
    * Busca número de downlines em um nível específico
    */
-  private async getDownlinesAtLevelCount(customerId: string, minLevel: string): Promise<number> {
+  private async getDownlinesAtLevelCount(idComprador: string, minLevel: string): Promise<number> {
     try {
       // Buscar todos os downlines
       const { data: downlines, error: downlinesError } = await supabase
         .from('customers')
         .select('id')
-        .eq('sponsor_id', customerId);
+        .eq('sponsor_id', idComprador);
 
       if (downlinesError) throw downlinesError;
 
@@ -269,7 +269,7 @@ export class QualificationService {
       const { data: qualifications, error: qualError } = await supabase
         .from('customer_qualifications')
         .select('qualification_id')
-        .in('customer_id', downlineIds)
+        .in('id_comprador', downlineIds)
         .eq('status', 'active');
 
       if (qualError) throw qualError;
@@ -322,12 +322,12 @@ export class QualificationService {
   /**
    * Retorna qualificação atual do customer
    */
-  private async getCurrentQualification(customerId: string): Promise<string> {
+  private async getCurrentQualification(idComprador: string): Promise<string> {
     try {
       const { data: qual, error: qualError } = await supabase
         .from('customer_qualifications')
         .select('qualification_id')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .eq('status', 'active')
         .single();
 
@@ -343,12 +343,12 @@ export class QualificationService {
   /**
    * Busca qualificação de um customer
    */
-  async getCustomerQualification(customerId: string): Promise<any> {
+  async getCustomerQualification(idComprador: string): Promise<any> {
     try {
       const { data, error } = await supabase
         .from('customer_qualifications')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .eq('status', 'active')
         .single();
 
@@ -364,12 +364,12 @@ export class QualificationService {
   /**
    * Busca histórico de qualificações de um customer
    */
-  async getQualificationHistory(customerId: string): Promise<any[]> {
+  async getQualificationHistory(idComprador: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('customer_qualifications')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .order('achieved_at', { ascending: false });
 
       if (error) throw error;

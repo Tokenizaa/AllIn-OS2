@@ -4,7 +4,7 @@ import { GatewayType } from '../adapters/gateway-adapter.factory';
 import { PaymentRequest } from '../interfaces/payment-provider.interface';
 
 export interface PixPaymentRequest {
-  customerId: string;
+  idComprador: string;
   orderId?: string;
   amount: number;
   currency: string;
@@ -43,14 +43,14 @@ export class PixPaymentFlow {
   }
 
   async createPixPayment(request: PixPaymentRequest): Promise<PixPaymentResult> {
-    logger.info('Creating PIX payment', 'pix-payment-flow', { customerId: request.customerId, amount: request.amount });
+    logger.info('Creating PIX payment', 'pix-payment-flow', { idComprador: request.idComprador, amount: request.amount });
 
     try {
       const paymentService = new PaymentService();
       const paymentRequest: PaymentRequest = {
         amount: request.amount,
         currency: request.currency,
-        customerId: request.customerId,
+        idComprador: request.idComprador,
         orderId: request.orderId,
         paymentMethod: 'pix',
         customer: request.customer,

@@ -21,31 +21,31 @@ export const NetworkService = {
     return data || [];
   },
 
-  async fetchSponsorRelationship(customerId: string) {
+  async fetchSponsorRelationship(idComprador: string) {
     const { data, error } = await supabase
       .from("network_relationships")
-      .select("customer_id,sponsor_customer_id,level")
-      .eq("customer_id", customerId)
+      .select("id_comprador,sponsor_id_comprador,level")
+      .eq("id_comprador", idComprador)
       .maybeSingle();
     if (error) throw error;
     return data;
   },
 
-  async fetchUplineRelationships(customerId: string) {
+  async fetchUplineRelationships(idComprador: string) {
     const { data, error } = await supabase
       .from("network_relationships")
-      .select("customer_id,sponsor_customer_id,level")
-      .eq("customer_id", customerId)
+      .select("id_comprador,sponsor_id_comprador,level")
+      .eq("id_comprador", idComprador)
       .order("level", { ascending: true });
     if (error) throw error;
     return data || [];
   },
 
-  async countDirectRelationships(customerId: string) {
+  async countDirectRelationships(idComprador: string) {
     const { data, error } = await supabase
       .from("network_relationships")
-      .select("customer_id")
-      .eq("sponsor_customer_id", customerId);
+      .select("id_comprador")
+      .eq("sponsor_id_comprador", idComprador);
     if (error) throw error;
     return data?.length || 0;
   }

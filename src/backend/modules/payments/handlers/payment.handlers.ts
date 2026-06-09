@@ -23,11 +23,11 @@ export class PaymentEventHandlers {
     logger.info('Payment created event', 'payment-handlers', { data: event.data });
 
     try {
-      const { paymentId, customerId, orderId, amount, status } = event.data;
+      const { paymentId, idComprador, orderId, amount, status } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId && orderId) {
-        await chatwootService.addTimelineNote(customerId, `Payment #${paymentId} created for order #${orderId}. Amount: R$ ${amount.toFixed(2)}. Status: ${status}`);
+      if (idComprador && orderId) {
+        await chatwootService.addTimelineNote(idComprador, `Payment #${paymentId} created for order #${orderId}. Amount: R$ ${amount.toFixed(2)}. Status: ${status}`);
       }
 
       // Additional logic can be added here:
@@ -43,11 +43,11 @@ export class PaymentEventHandlers {
     logger.info('Payment approved event', 'payment-handlers', { data: event.data });
 
     try {
-      const { paymentId, customerId, orderId, amount } = event.data;
+      const { paymentId, idComprador, orderId, amount } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId && orderId) {
-        await chatwootService.addTimelineNote(customerId, `Payment #${paymentId} approved for order #${orderId}. Amount: R$ ${amount.toFixed(2)}`);
+      if (idComprador && orderId) {
+        await chatwootService.addTimelineNote(idComprador, `Payment #${paymentId} approved for order #${orderId}. Amount: R$ ${amount.toFixed(2)}`);
       }
 
       // Process payment splits if configured
@@ -67,11 +67,11 @@ export class PaymentEventHandlers {
     logger.info('Payment rejected event', 'payment-handlers', { data: event.data });
 
     try {
-      const { paymentId, customerId, orderId, amount } = event.data;
+      const { paymentId, idComprador, orderId, amount } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId && orderId) {
-        await chatwootService.addTimelineNote(customerId, `Payment #${paymentId} rejected for order #${orderId}. Amount: R$ ${amount.toFixed(2)}`);
+      if (idComprador && orderId) {
+        await chatwootService.addTimelineNote(idComprador, `Payment #${paymentId} rejected for order #${orderId}. Amount: R$ ${amount.toFixed(2)}`);
       }
 
       // Additional logic:
@@ -87,11 +87,11 @@ export class PaymentEventHandlers {
     logger.info('Payment refunded event', 'payment-handlers', { data: event.data });
 
     try {
-      const { paymentId, customerId, orderId, amount } = event.data;
+      const { paymentId, idComprador, orderId, amount } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId && orderId) {
-        await chatwootService.addTimelineNote(customerId, `Payment #${paymentId} refunded for order #${orderId}. Amount: R$ ${amount.toFixed(2)}`);
+      if (idComprador && orderId) {
+        await chatwootService.addTimelineNote(idComprador, `Payment #${paymentId} refunded for order #${orderId}. Amount: R$ ${amount.toFixed(2)}`);
       }
 
       // Additional logic:
@@ -107,11 +107,11 @@ export class PaymentEventHandlers {
     logger.info('Payment cancelled event', 'payment-handlers', { data: event.data });
 
     try {
-      const { paymentId, customerId, orderId } = event.data;
+      const { paymentId, idComprador, orderId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId && orderId) {
-        await chatwootService.addTimelineNote(customerId, `Payment #${paymentId} cancelled for order #${orderId}`);
+      if (idComprador && orderId) {
+        await chatwootService.addTimelineNote(idComprador, `Payment #${paymentId} cancelled for order #${orderId}`);
       }
 
       // Additional logic:
@@ -126,11 +126,11 @@ export class PaymentEventHandlers {
     logger.info('Wallet credited event', 'payment-handlers', { data: event.data });
 
     try {
-      const { customerId, amount, transactionId } = event.data;
+      const { idComprador, amount, transactionId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId) {
-        await chatwootService.addTimelineNote(customerId, `Wallet credited with R$ ${amount.toFixed(2)}. Transaction: #${transactionId}`);
+      if (idComprador) {
+        await chatwootService.addTimelineNote(idComprador, `Wallet credited with R$ ${amount.toFixed(2)}. Transaction: #${transactionId}`);
       }
 
       // Additional logic:
@@ -145,11 +145,11 @@ export class PaymentEventHandlers {
     logger.info('Wallet debited event', 'payment-handlers', { data: event.data });
 
     try {
-      const { customerId, amount, transactionId } = event.data;
+      const { idComprador, amount, transactionId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId) {
-        await chatwootService.addTimelineNote(customerId, `Wallet debited R$ ${amount.toFixed(2)}. Transaction: #${transactionId}`);
+      if (idComprador) {
+        await chatwootService.addTimelineNote(idComprador, `Wallet debited R$ ${amount.toFixed(2)}. Transaction: #${transactionId}`);
       }
 
       // Additional logic:
@@ -163,11 +163,11 @@ export class PaymentEventHandlers {
     logger.info('Bonus earned event', 'payment-handlers', { data: event.data });
 
     try {
-      const { customerId, amount, sourceType, transactionId } = event.data;
+      const { idComprador, amount, sourceType, transactionId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId) {
-        await chatwootService.addTimelineNote(customerId, `Bonus earned: R$ ${amount.toFixed(2)} from ${sourceType}. Transaction: #${transactionId}`);
+      if (idComprador) {
+        await chatwootService.addTimelineNote(idComprador, `Bonus earned: R$ ${amount.toFixed(2)} from ${sourceType}. Transaction: #${transactionId}`);
       }
 
       // Additional logic:
@@ -182,11 +182,11 @@ export class PaymentEventHandlers {
     logger.info('Bonus used event', 'payment-handlers', { data: event.data });
 
     try {
-      const { customerId, amount, referenceId, transactionId } = event.data;
+      const { idComprador, amount, referenceId, transactionId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId) {
-        await chatwootService.addTimelineNote(customerId, `Bonus used: R$ ${amount.toFixed(2)} for payment #${referenceId}. Transaction: #${transactionId}`);
+      if (idComprador) {
+        await chatwootService.addTimelineNote(idComprador, `Bonus used: R$ ${amount.toFixed(2)} for payment #${referenceId}. Transaction: #${transactionId}`);
       }
 
       // Additional logic:
@@ -200,11 +200,11 @@ export class PaymentEventHandlers {
     logger.info('Points earned event', 'payment-handlers', { data: event.data });
 
     try {
-      const { customerId, amount, sourceType, transactionId } = event.data;
+      const { idComprador, amount, sourceType, transactionId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId) {
-        await chatwootService.addTimelineNote(customerId, `Points earned: ${amount} from ${sourceType}. Transaction: #${transactionId}`);
+      if (idComprador) {
+        await chatwootService.addTimelineNote(idComprador, `Points earned: ${amount} from ${sourceType}. Transaction: #${transactionId}`);
       }
 
       // Additional logic:
@@ -219,11 +219,11 @@ export class PaymentEventHandlers {
     logger.info('Points redeemed event', 'payment-handlers', { data: event.data });
 
     try {
-      const { customerId, amount, referenceId, transactionId } = event.data;
+      const { idComprador, amount, referenceId, transactionId } = event.data;
 
       // Add timeline note to Chatwoot
-      if (customerId) {
-        await chatwootService.addTimelineNote(customerId, `Points redeemed: ${amount} for payment #${referenceId}. Transaction: #${transactionId}`);
+      if (idComprador) {
+        await chatwootService.addTimelineNote(idComprador, `Points redeemed: ${amount} for payment #${referenceId}. Transaction: #${transactionId}`);
       }
 
       // Additional logic:

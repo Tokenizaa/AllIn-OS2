@@ -32,31 +32,23 @@ export function useWalletTransactions({
     }
 
     const change = txType === "credit" ? amt : -amt;
-    const balanceBefore = wallet.balance || 0;
-    const balanceAfter = balanceBefore + change;
+    const balanceAfter = (wallet.balance || 0) + change;
 
-    updateWalletBalance.mutate(
-      { walletId: wallet.id, balance: balanceAfter },
+    // O trigger atualizará o saldo automaticamente, então não precisamos chamar updateWalletBalance
+    createWalletTransaction.mutate(
+      {
+        walletId: wallet.id,
+        transaction_type: txType,
+        amount: amt,
+        description: txDesc || "Lançamento de ajuste administrativo",
+        reference_type: "adjustment",
+      },
       {
         onSuccess: () => {
-          createWalletTransaction.mutate(
-            {
-              walletId: wallet.id,
-              transaction_type: txType,
-              amount: amt,
-              balance_before: balanceBefore,
-              balance_after: balanceAfter,
-              description: txDesc || "Lançamento de ajuste administrativo",
-            },
-            {
-              onSuccess: () => {
-                refetch();
-                setTxAmount("");
-                setTxDesc("");
-                setShowAddTx(false);
-              },
-            }
-          );
+          refetch();
+          setTxAmount("");
+          setTxDesc("");
+          setShowAddTx(false);
         },
       }
     );

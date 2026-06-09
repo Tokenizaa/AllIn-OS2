@@ -4,18 +4,18 @@ export const OrderService = {
   async fetchOrdersForDashboard() {
     const { data, error } = await supabase
       .from("orders")
-      .select("id, numero_pedido, valor_total_pedido, valor_total, created_at, status, status_pedido")
+      .select("id, numero_pedido, valor_total_pedido, status_pedido, created_at")
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) throw error;
     return data || [];
   },
 
-  async fetchOrdersByCustomerId(customerId: string) {
+  async fetchOrdersByidComprador(idComprador: string) {
     const { data, error } = await supabase
       .from("orders")
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
     if (error) throw error;
     return data || [];
@@ -68,18 +68,18 @@ export const OrderService = {
     };
   },
 
-  async fetchRecentOrders(options: { page?: number; limit?: number; customer_id?: string; status?: string } = {}) {
+  async fetchRecentOrders(options: { page?: number; limit?: number; id_comprador?: string; status?: string } = {}) {
     const page = options.page || 1;
     const limit = options.limit || 20;
     const offset = (page - 1) * limit;
 
     let query = supabase.from("orders").select("*", { count: "exact" });
 
-    if (options.customer_id) {
-      query = query.or(`user_id.eq.${options.customer_id},comprador.eq.${options.customer_id}`);
+    if (options.id_comprador) {
+      query = query.or(`user_id.eq.${options.id_comprador},comprador.eq.${options.id_comprador}`);
     }
     if (options.status) {
-      query = query.eq("status", options.status);
+      query = query.eq("status_pedido", options.status);
     }
 
     const { data, count, error } = await query
@@ -103,7 +103,7 @@ export const OrderService = {
       const { count, error } = await supabase
         .from("orders")
         .select("*", { count: "exact", head: true })
-        .eq("status", status);
+        .eq("status_pedido", status);
       if (error) throw error;
       return count || 0;
     };
@@ -119,9 +119,9 @@ export const OrderService = {
     const calculateTotalRevenue = async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("valor_total");
+        .select("valor_total_pedido");
       if (error) throw error;
-      return data?.reduce((sum: number, order: any) => sum + Number(order.valor_total || 0), 0) || 0;
+      return data?.reduce((sum: number, order: any) => sum + Number(order.valor_total_pedido || 0), 0) || 0;
     };
 
     const [

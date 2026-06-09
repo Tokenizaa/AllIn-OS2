@@ -4,7 +4,7 @@ import { eventEmitter } from '../../../shared/events/event-emitter';
 export interface PaymentStatusUpdate {
   paymentId: string;
   status: string;
-  customerId: string;
+  idComprador: string;
   timestamp: string;
   metadata?: Record<string, unknown>;
 }
@@ -30,7 +30,7 @@ export class RealtimePaymentService {
       await this.broadcastStatusUpdate({
         paymentId: event.data.paymentId,
         status: 'approved',
-        customerId: event.data.customerId,
+        idComprador: event.data.idComprador,
         timestamp: new Date().toISOString(),
         metadata: event.data,
       });
@@ -40,7 +40,7 @@ export class RealtimePaymentService {
       await this.broadcastStatusUpdate({
         paymentId: event.data.paymentId,
         status: 'rejected',
-        customerId: event.data.customerId,
+        idComprador: event.data.idComprador,
         timestamp: new Date().toISOString(),
         metadata: event.data,
       });
@@ -50,7 +50,7 @@ export class RealtimePaymentService {
       await this.broadcastStatusUpdate({
         paymentId: event.data.paymentId,
         status: 'refunded',
-        customerId: event.data.customerId,
+        idComprador: event.data.idComprador,
         timestamp: new Date().toISOString(),
         metadata: event.data,
       });
@@ -60,7 +60,7 @@ export class RealtimePaymentService {
       await this.broadcastStatusUpdate({
         paymentId: event.data.paymentId,
         status: 'cancelled',
-        customerId: event.data.customerId,
+        idComprador: event.data.idComprador,
         timestamp: new Date().toISOString(),
         metadata: event.data,
       });
@@ -70,7 +70,7 @@ export class RealtimePaymentService {
       await this.broadcastStatusUpdate({
         paymentId: event.data.paymentId,
         status: 'pending',
-        customerId: event.data.customerId,
+        idComprador: event.data.idComprador,
         timestamp: new Date().toISOString(),
         metadata: event.data,
       });
@@ -78,36 +78,36 @@ export class RealtimePaymentService {
   }
 
   subscribeToPaymentUpdates(
-    customerId: string,
+    idComprador: string,
     callback: (update: PaymentStatusUpdate) => void
   ): () => void {
-    logger.info('Subscribing to payment updates', 'realtime-payment-service', { customerId });
+    logger.info('Subscribing to payment updates', 'realtime-payment-service', { idComprador });
 
-    if (!this.activeSubscriptions.has(customerId)) {
-      this.activeSubscriptions.set(customerId, new Set());
+    if (!this.activeSubscriptions.has(idComprador)) {
+      this.activeSubscriptions.set(idComprador, new Set());
     }
 
-    this.activeSubscriptions.get(customerId)!.add(callback);
+    this.activeSubscriptions.get(idComprador)!.add(callback);
 
     // Return unsubscribe function
     return () => {
-      const subscriptions = this.activeSubscriptions.get(customerId);
+      const subscriptions = this.activeSubscriptions.get(idComprador);
       if (subscriptions) {
         subscriptions.delete(callback);
         if (subscriptions.size === 0) {
-          this.activeSubscriptions.delete(customerId);
+          this.activeSubscriptions.delete(idComprador);
         }
       }
-      logger.info('Unsubscribed from payment updates', 'realtime-payment-service', { customerId });
+      logger.info('Unsubscribed from payment updates', 'realtime-payment-service', { idComprador });
     };
   }
 
   subscribeToPayment(
     paymentId: string,
-    customerId: string,
+    idComprador: string,
     callback: (update: PaymentStatusUpdate) => void
   ): () => void {
-    logger.info('Subscribing to specific payment updates', 'realtime-payment-service', { paymentId, customerId });
+    logger.info('Subscribing to specific payment updates', 'realtime-payment-service', { paymentId, idComprador });
 
     const wrappedCallback = (update: PaymentStatusUpdate) => {
       if (update.paymentId === paymentId) {
@@ -115,17 +115,17 @@ export class RealtimePaymentService {
       }
     };
 
-    return this.subscribeToPaymentUpdates(customerId, wrappedCallback);
+    return this.subscribeToPaymentUpdates(idComprador, wrappedCallback);
   }
 
   private async broadcastStatusUpdate(update: PaymentStatusUpdate): Promise<void> {
     logger.info('Broadcasting payment status update', 'realtime-payment-service', { 
       paymentId: update.paymentId, 
       status: update.status,
-      customerId: update.customerId 
+      idComprador: update.idComprador 
     });
 
-    const subscriptions = this.activeSubscriptions.get(update.customerId);
+    const subscriptions = this.activeSubscriptions.get(update.idComprador);
     if (subscriptions) {
       const promises = Array.from(subscriptions).map(async (callback) => {
         try {
@@ -146,17 +146,17 @@ export class RealtimePaymentService {
     // });
   }
 
-  async notifyPaymentCreated(paymentId: string, customerId: string): Promise<void> {
+  async notifyPaymentCreated(paymentId: string, idComprador: string): Promise<void> {
     await this.broadcastStatusUpdate({
       paymentId,
       status: 'pending',
-      customerId,
+      idComprador,
       timestamp: new Date().toISOString(),
     });
   }
 
-  getActiveSubscriptionCount(customerId: string): number {
-    return this.activeSubscriptions.get(customerId)?.size || 0;
+  getActiveSubscriptionCount(idComprador: string): number {
+    return this.activeSubscriptions.get(idComprador)?.size || 0;
   }
 
   getTotalActiveSubscriptions(): number {

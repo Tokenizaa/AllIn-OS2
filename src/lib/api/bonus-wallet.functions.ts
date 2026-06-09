@@ -3,7 +3,7 @@ import { bonusWalletService } from '../../backend/modules/payments/services/bonu
 
 // Validation schemas
 const earnBonusSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   sourceType: z.enum(['purchase', 'referral', 'promotion', 'manual', 'rollback']),
   referenceId: z.string().optional(),
@@ -12,7 +12,7 @@ const earnBonusSchema = z.object({
 });
 
 const useBonusSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   amount: z.number().positive(),
   referenceId: z.string().optional(),
   referenceType: z.enum(['order', 'manual']).optional(),
@@ -20,10 +20,10 @@ const useBonusSchema = z.object({
 });
 
 // Get bonus wallet by customer
-export const getBonusWallet = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const getBonusWallet = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await bonusWalletService.getBonusWalletByCustomerId(parsed.customerId);
+    const result = await bonusWalletService.getBonusWalletByidComprador(parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get bonus wallet' };
@@ -31,10 +31,10 @@ export const getBonusWallet = async (data: { customerId: string }) => {
 };
 
 // Ensure bonus wallet exists
-export const ensureBonusWallet = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const ensureBonusWallet = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await (bonusWalletService as any).ensureBonusWallet(parsed.customerId);
+    const result = await bonusWalletService.ensureBonusWalletExists(parsed.idComprador);
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure bonus wallet' };
@@ -45,8 +45,8 @@ export const ensureBonusWallet = async (data: { customerId: string }) => {
 export const earnBonus = async (data: any) => {
   const parsed = earnBonusSchema.parse(data);
   try {
-    const result = await (bonusWalletService as any).earnBonus(
-      parsed.customerId,
+    const result = await bonusWalletService.earnBonus(
+      parsed.idComprador,
       parsed.amount,
       parsed.sourceType,
       parsed.referenceId,
@@ -64,7 +64,7 @@ export const useBonus = async (data: any) => {
   const parsed = useBonusSchema.parse(data);
   try {
     const result = await bonusWalletService.useBonus(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.amount,
       parsed.referenceId,
       parsed.referenceType,
@@ -77,15 +77,15 @@ export const useBonus = async (data: any) => {
 };
 
 // Get available bonus for payment
-export const getAvailableBonusForPayment = async (data: { customerId: string; productId?: string }) => {
+export const getAvailableBonusForPayment = async (data: { idComprador: string; productId?: string }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     productId: z.string().optional(),
   }).parse(data);
 
   try {
     const result = await bonusWalletService.getAvailableBonusForPayment(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.productId
     );
     return { success: true, data: result };
@@ -96,24 +96,22 @@ export const getAvailableBonusForPayment = async (data: { customerId: string; pr
 
 // Get bonus wallet transactions
 export const getBonusTransactions = async (data: {
-  customerId: string;
+  idComprador: string;
   page?: number;
   limit?: number;
   transactionType?: 'earned' | 'used';
 }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     page: z.number().default(1),
     limit: z.number().default(20),
-    transactionType: z.enum(['earned', 'used']).optional(),
   }).parse(data);
 
   try {
-    const result = await (bonusWalletService as any).getTransactions(
-      parsed.customerId,
-      parsed.page,
+    const result = await bonusWalletService.getBonusTransactions(
+      parsed.idComprador,
       parsed.limit,
-      parsed.transactionType
+      0
     );
     return { success: true, data: result };
   } catch (error) {
@@ -122,10 +120,10 @@ export const getBonusTransactions = async (data: {
 };
 
 // Get bonus wallet balance
-export const getBonusWalletBalance = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+export const getBonusWalletBalance = async (data: { idComprador: string }) => {
+  const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const wallet = await bonusWalletService.getBonusWalletByCustomerId(parsed.customerId);
+    const wallet = await bonusWalletService.getBonusWalletByidComprador(parsed.idComprador);
     if (!wallet) {
       return { success: false, error: 'Bonus wallet not found' };
     }

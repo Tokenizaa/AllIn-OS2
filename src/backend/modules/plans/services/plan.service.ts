@@ -107,7 +107,7 @@ export class PlanService {
 
   async activateCustomerPlan(dto: ActivateCustomerPlanDto): Promise<CustomerPlan> {
     // Check if customer already has an active plan
-    const existingActive = await this.customerPlanRepository.findActiveByCustomerId(dto.customer_id);
+    const existingActive = await this.customerPlanRepository.findActiveByidComprador(dto.id_comprador);
     if (existingActive) {
       throw new Error("Customer already has an active plan");
     }
@@ -124,16 +124,16 @@ export class PlanService {
     return this.customerPlanRepository.activatePlan(dto);
   }
 
-  async deactivateCustomerPlan(customerId: string): Promise<void> {
-    await this.customerPlanRepository.deactivatePlan(customerId);
+  async deactivateCustomerPlan(idComprador: string): Promise<void> {
+    await this.customerPlanRepository.deactivatePlan(idComprador);
   }
 
-  async getCustomerPlans(customerId: string): Promise<CustomerPlan[]> {
-    return this.customerPlanRepository.findByCustomerId(customerId);
+  async getCustomerPlans(idComprador: string): Promise<CustomerPlan[]> {
+    return this.customerPlanRepository.findByidComprador(idComprador);
   }
 
-  async getActiveCustomerPlan(customerId: string): Promise<CustomerPlan | null> {
-    return this.customerPlanRepository.findActiveByCustomerId(customerId);
+  async getActiveCustomerPlan(idComprador: string): Promise<CustomerPlan | null> {
+    return this.customerPlanRepository.findActiveByidComprador(idComprador);
   }
 
   async getPlanStats(planId: string): Promise<{

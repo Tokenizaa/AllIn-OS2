@@ -8,7 +8,7 @@ import { GatewayType } from '../adapters/gateway-adapter.factory';
 import { paymentService } from './payment.service';
 
 export interface HybridPaymentRequest {
-  customerId: string;
+  idComprador: string;
   orderId?: string;
   originalAmount: number;
   currency: string;
@@ -66,7 +66,7 @@ export class HybridPaymentService {
   }
 
   async processHybridPayment(request: HybridPaymentRequest): Promise<HybridPaymentResult> {
-    logger.info('Processing hybrid payment', 'hybrid-payment', { customerId: request.customerId, originalAmount: request.originalAmount });
+    logger.info('Processing hybrid payment', 'hybrid-payment', { idComprador: request.idComprador, originalAmount: request.originalAmount });
 
     try {
       const breakdown: HybridPaymentResult['breakdown'] = { discount: null };
@@ -76,7 +76,7 @@ export class HybridPaymentService {
       // Step 1: Calculate and apply discounts
       const discountCalculation = await discountEngineService.calculateDiscount(
         request.originalAmount,
-        request.customerId,
+        request.idComprador,
         request.productId,
         request.categoryId,
         request.couponCode
@@ -90,12 +90,12 @@ export class HybridPaymentService {
       // Step 2: Apply wallet balance if requested
       let walletAmount = 0;
       if (request.useWallet) {
-        const wallet = await walletService.getWalletByCustomerId(request.customerId);
+        const wallet = await walletService.getWalletByidComprador(request.idComprador);
         if (wallet) {
           walletAmount = Math.min(wallet.available_balance, remainingAmount);
           if (walletAmount > 0) {
             await walletService.debitWallet(
-              request.customerId,
+              request.idComprador,
               walletAmount,
               'Hybrid payment',
               request.orderId,
@@ -112,7 +112,7 @@ export class HybridPaymentService {
       let bonusAmount = 0;
       if (request.useBonus && remainingAmount > 0) {
         const { available: bonusAvailable, maxUsagePercentage } = await bonusWalletService.getAvailableBonusForPayment(
-          request.customerId,
+          request.idComprador,
           request.productId
         );
         const maxBonusUsage = Math.min(bonusAvailable, (remainingAmount * maxUsagePercentage) / 100);
@@ -120,7 +120,7 @@ export class HybridPaymentService {
 
         if (bonusAmount > 0) {
           await bonusWalletService.useBonus(
-            request.customerId,
+            request.idComprador,
             bonusAmount,
             request.orderId,
             'order',
@@ -136,7 +136,7 @@ export class HybridPaymentService {
       let pointsAmount = 0;
       if (request.usePoints && remainingAmount > 0) {
         const { maxUsagePercentage, available: pointsAvailable } = await pointsWalletService.getAvailablePointsForPayment(
-          request.customerId,
+          request.idComprador,
           request.productId
         );
         const maxPointsUsage = Math.min(pointsAvailable, (remainingAmount * maxUsagePercentage) / 100);
@@ -145,7 +145,7 @@ export class HybridPaymentService {
         if (pointsAmount > 0) {
           const pointsToRedeem = await pointsWalletService.convertCurrencyToPoints(pointsAmount);
           await pointsWalletService.redeemPoints(
-            request.customerId,
+            request.idComprador,
             pointsToRedeem,
             request.orderId,
             'order',
@@ -165,7 +165,7 @@ export class HybridPaymentService {
         const paymentRequest: PaymentRequest = {
           amount: gatewayAmount,
           currency: request.currency,
-          customerId: request.customerId,
+          idComprador: request.idComprador,
           orderId: request.orderId,
           paymentMethod: request.paymentMethod,
           customer: request.customer,
@@ -187,7 +187,7 @@ export class HybridPaymentService {
 
         if (!gatewayPaymentData.success) {
           // Rollback wallet, bonus, and points if gateway fails
-          await this.rollbackPayment(request.customerId, walletAmount, bonusAmount, pointsAmount, request.orderId);
+          await this.rollbackPayment(request.idComprador, walletAmount, bonusAmount, pointsAmount, request.orderId);
           return {
             success: false,
             originalAmount: request.originalAmount,
@@ -249,19 +249,19 @@ export class HybridPaymentService {
   }
 
   private async rollbackPayment(
-    customerId: string,
+    idComprador: string,
     walletAmount: number,
     bonusAmount: number,
     pointsAmount: number,
     orderId?: string
   ): Promise<void> {
-    logger.info('Rolling back payment', 'hybrid-payment', { customerId, walletAmount, bonusAmount, pointsAmount });
+    logger.info('Rolling back payment', 'hybrid-payment', { idComprador, walletAmount, bonusAmount, pointsAmount });
 
     try {
       // Rollback wallet
       if (walletAmount > 0) {
         await walletService.creditWallet(
-          customerId,
+          idComprador,
           walletAmount,
           'Payment rollback',
           orderId,
@@ -272,7 +272,7 @@ export class HybridPaymentService {
       // Rollback bonus
       if (bonusAmount > 0) {
         await bonusWalletService.earnBonus(
-          customerId,
+          idComprador,
           bonusAmount,
           'rollback',
           orderId,
@@ -284,7 +284,7 @@ export class HybridPaymentService {
       if (pointsAmount > 0) {
         const pointsToEarn = await pointsWalletService.convertCurrencyToPoints(pointsAmount);
         await pointsWalletService.earnPoints(
-          customerId,
+          idComprador,
           pointsToEarn,
           'rollback',
           orderId,
@@ -299,7 +299,7 @@ export class HybridPaymentService {
   }
 
   async calculateHybridPaymentPreview(
-    customerId: string,
+    idComprador: string,
     originalAmount: number,
     useWallet: boolean = false,
     useBonus: boolean = false,
@@ -323,7 +323,7 @@ export class HybridPaymentService {
       // Calculate discount
       const discountCalculation = await discountEngineService.calculateDiscount(
         originalAmount,
-        customerId,
+        idComprador,
         productId,
         categoryId,
         couponCode
@@ -331,14 +331,14 @@ export class HybridPaymentService {
       remainingAmount -= discountCalculation.discountAmount;
 
       // Get wallet balance
-      const wallet = await walletService.getWalletByCustomerId(customerId);
+      const wallet = await walletService.getWalletByidComprador(idComprador);
       const walletAvailable = wallet?.available_balance || 0;
       const walletAmount = useWallet ? Math.min(walletAvailable, remainingAmount) : 0;
       remainingAmount -= walletAmount;
 
       // Get bonus available
       const { available: bonusAvailable } = await bonusWalletService.getAvailableBonusForPayment(
-        customerId,
+        idComprador,
         productId
       );
       const bonusAmount = useBonus ? Math.min(bonusAvailable, remainingAmount) : 0;
@@ -346,7 +346,7 @@ export class HybridPaymentService {
 
       // Get points available
       const { available: pointsAvailable, currencyValue: pointsCurrencyValue } = await pointsWalletService.getAvailablePointsForPayment(
-        customerId,
+        idComprador,
         productId
       );
       const pointsAmount = usePoints ? Math.min(pointsCurrencyValue, remainingAmount) : 0;

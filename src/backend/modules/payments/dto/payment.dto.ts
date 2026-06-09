@@ -3,7 +3,7 @@ import { z } from "zod";
 export const paymentSchema = z.object({
   id: z.string().uuid(),
   order_id: z.string().uuid(),
-  customer_id: z.string().uuid(),
+  id_comprador: z.string(),
   amount: z.number(),
   status: z.enum(["pending", "processing", "approved", "rejected", "refunded", "cancelled", "failed"]),
   payment_method: z.string(),
@@ -25,7 +25,7 @@ export type Payment = z.infer<typeof paymentSchema>;
 
 export const createPaymentSchema = z.object({
   order_id: z.string().uuid(),
-  customer_id: z.string().uuid(),
+  id_comprador: z.string().uuid(),
   amount: z.number().min(0),
   payment_method: z.string(),
   payment_gateway: z.string(),

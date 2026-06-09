@@ -143,12 +143,12 @@ export const deletePlanBonus = async (data: { id: string }) => {
 
 // Activate customer plan
 export const activateCustomerPlan = async (data: {
-  customer_id: string;
+  id_comprador: string;
   plan_id: string;
   expires_at?: string;
 }) => {
   const parsed = z.object({
-    customer_id: z.string().uuid(),
+    id_comprador: z.string(),
     plan_id: z.string().uuid(),
     expires_at: z.string().optional(),
   }).parse(data);
@@ -161,9 +161,9 @@ export const activateCustomerPlan = async (data: {
 };
 
 // Deactivate customer plan
-export const deactivateCustomerPlan = async (data: { customer_id: string }) => {
-  const parsed = z.object({ customer_id: z.string().uuid() }).parse(data);
-  const result = await deactivateCustomerPlanApi({ customerId: parsed.customer_id });
+export const deactivateCustomerPlan = async (data: { id_comprador: string }) => {
+  const parsed = z.object({ id_comprador: z.string() }).parse(data);
+  const result = await deactivateCustomerPlanApi({ id_comprador: parsed.id_comprador });
   if (!result.success) {
     throw new Error(result.error || "Failed to deactivate customer plan");
   }
@@ -171,9 +171,9 @@ export const deactivateCustomerPlan = async (data: { customer_id: string }) => {
 };
 
 // Get customer plan history
-export const getCustomerPlanHistory = async (data: { customerId: string }) => {
-  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
-  const result = await getCustomerPlansApi({ customerId: parsed.customerId });
+export const getCustomerPlanHistory = async (data: { id_comprador: string }) => {
+  const parsed = z.object({ id_comprador: z.string() }).parse(data);
+  const result = await getCustomerPlansApi({ id_comprador: parsed.id_comprador });
   if (!result.success) {
     throw new Error(result.error || "Failed to fetch customer plan history");
   }

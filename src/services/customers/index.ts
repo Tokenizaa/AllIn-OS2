@@ -45,36 +45,27 @@ export const CustomerService = {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const [{ data: customerData, error: customerError, count: customerCount }, { data: allOrders, error: orderError }] = await Promise.all([
+    const [{ data: customerData, error: customerError, count: customerCount }, { data: orderStats, error: statsError }] = await Promise.all([
       supabase
         .from("customers")
         .select("id, user_id, usuario, id_comprador, status, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to),
       supabase
-        .from("orders")
-        .select("id, customer_id, valor_total_pedido, valor_total, status_pedido, status"),
+        .from("customer_order_stats")
+        .select("id_comprador, order_count, ltv"),
     ]);
 
     if (customerError) throw customerError;
-    if (orderError) throw orderError;
+    if (statsError) throw statsError;
 
     const statsMap: Record<string, { count: number; ltv: number }> = {};
-    if (allOrders) {
-      allOrders.forEach((o: any) => {
-        const cid = o.customer_id;
-        if (!cid) return;
-        if (!statsMap[cid]) {
-          statsMap[cid] = { count: 0, ltv: 0 };
-        }
-        statsMap[cid].count += 1;
-
-        const isPaid = ["pago", "entregue", "enviado"].includes(
-          (o.status_pedido || o.status || "").toLowerCase()
-        );
-        if (isPaid) {
-          statsMap[cid].ltv += Number(o.valor_total_pedido || o.valor_total || 0);
-        }
+    if (orderStats) {
+      orderStats.forEach((stat: any) => {
+        statsMap[stat.id_comprador] = {
+          count: stat.order_count || 0,
+          ltv: Number(stat.ltv || 0),
+        };
       });
     }
 
@@ -112,5 +103,25 @@ export const CustomerService = {
       .select("id, usuario, id_comprador, user_id, nome_completo");
     if (error) throw error;
     return data || [];
+  },
+
+  async fetchCustomerBonus(compradorId: string) {
+    const { data, error } = await supabase
+      .from("customer_bonus_view")
+      .select("*")
+      .eq("id_comprador", compradorId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async fetchCustomerPlan(compradorId: string) {
+    const { data, error } = await supabase
+      .from("customer_plans")
+      .select("*, plans(*)")
+      .eq("id_comprador", compradorId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
   }
 };

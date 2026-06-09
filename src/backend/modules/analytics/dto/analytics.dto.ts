@@ -38,7 +38,7 @@ export const networkAnalyticsSchema = z.object({
   activeDistributors: z.number(),
   averageDownlines: z.number(),
   topPerformers: z.array(z.object({
-    customerId: z.string(),
+    idComprador: z.string(),
     customerName: z.string(),
     totalDownlines: z.number(),
     totalRevenue: z.number(),

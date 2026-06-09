@@ -16,19 +16,19 @@ export class AnalyticsUpdateService {
    * Atualiza customer_metrics para um customer específico
    * Calcula: total_gasto, ticket_medio, ltv, numero_pedidos, ultimo_pedido
    */
-  async updateCustomerMetrics(customerId: string): Promise<void> {
+  async updateCustomerMetrics(idComprador: string): Promise<void> {
     try {
       // Calcular métricas baseadas em orders e payments
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('id, valor_total, created_at')
-        .eq('customer_id', customerId)
+        .select('id, valor_total_pedido, created_at')
+        .eq('id_comprador', idComprador)
         .eq('status_pedido', 'Concluído');
 
       if (ordersError) throw ordersError;
 
       const totalOrders = orders?.length || 0;
-      const totalSpent = orders?.reduce((sum, order) => sum + (parseFloat(order.valor_total) || 0), 0) || 0;
+      const totalSpent = orders?.reduce((sum, order) => sum + (parseFloat(order.valor_total_pedido) || 0), 0) || 0;
       const averageTicket = totalOrders > 0 ? totalSpent / totalOrders : 0;
       const lastOrder = orders?.length > 0 ? orders[orders.length - 1].created_at : null;
 
@@ -39,7 +39,7 @@ export class AnalyticsUpdateService {
       const { error: upsertError } = await supabase
         .from('customer_metrics')
         .upsert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           total_gasto: totalSpent,
           ticket_medio: averageTicket,
           ltv: ltv,
@@ -47,12 +47,12 @@ export class AnalyticsUpdateService {
           ultimo_pedido: lastOrder,
           updated_at: new Date().toISOString(),
         }, {
-          onConflict: 'customer_id'
+          onConflict: 'id_comprador'
         });
 
       if (upsertError) throw upsertError;
 
-      console.log(`Customer metrics updated for customer ${customerId}`);
+      console.log(`Customer metrics updated for customer ${idComprador}`);
     } catch (error) {
       console.error('Error updating customer metrics:', error);
       throw error;
@@ -63,19 +63,19 @@ export class AnalyticsUpdateService {
    * Atualiza customer_scores para um customer específico
    * Calcula: churn_score, engagement_score, loyalty_score
    */
-  async updateCustomerScores(customerId: string): Promise<void> {
+  async updateCustomerScores(idComprador: string): Promise<void> {
     try {
       // Buscar métricas do customer
       const { data: metrics, error: metricsError } = await supabase
         .from('customer_metrics')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .single();
 
       if (metricsError && metricsError.code !== 'PGRST116') throw metricsError;
 
       if (!metrics) {
-        console.log(`No metrics found for customer ${customerId}, skipping scores update`);
+        console.log(`No metrics found for customer ${idComprador}, skipping scores update`);
         return;
       }
 
@@ -111,18 +111,18 @@ export class AnalyticsUpdateService {
       const { error: upsertError } = await supabase
         .from('customer_scores')
         .upsert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           churn_score: churnScore,
           engagement_score: engagementScore,
           loyalty_score: loyaltyScore,
           updated_at: new Date().toISOString(),
         }, {
-          onConflict: 'customer_id'
+          onConflict: 'id_comprador'
         });
 
       if (upsertError) throw upsertError;
 
-      console.log(`Customer scores updated for customer ${customerId}`);
+      console.log(`Customer scores updated for customer ${idComprador}`);
     } catch (error) {
       console.error('Error updating customer scores:', error);
       throw error;
@@ -164,11 +164,11 @@ export class AnalyticsUpdateService {
   /**
    * Atualiza métricas após um novo pedido
    */
-  async updateAfterOrder(customerId: string): Promise<void> {
+  async updateAfterOrder(idComprador: string): Promise<void> {
     try {
-      await this.updateCustomerMetrics(customerId);
-      await this.updateCustomerScores(customerId);
-      console.log(`Metrics updated after order for customer ${customerId}`);
+      await this.updateCustomerMetrics(idComprador);
+      await this.updateCustomerScores(idComprador);
+      console.log(`Metrics updated after order for customer ${idComprador}`);
     } catch (error) {
       console.error('Error updating metrics after order:', error);
       throw error;
@@ -178,11 +178,11 @@ export class AnalyticsUpdateService {
   /**
    * Atualiza métricas após um novo pagamento
    */
-  async updateAfterPayment(customerId: string): Promise<void> {
+  async updateAfterPayment(idComprador: string): Promise<void> {
     try {
-      await this.updateCustomerMetrics(customerId);
-      await this.updateCustomerScores(customerId);
-      console.log(`Metrics updated after payment for customer ${customerId}`);
+      await this.updateCustomerMetrics(idComprador);
+      await this.updateCustomerScores(idComprador);
+      console.log(`Metrics updated after payment for customer ${idComprador}`);
     } catch (error) {
       console.error('Error updating metrics after payment:', error);
       throw error;

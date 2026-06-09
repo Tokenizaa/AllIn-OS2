@@ -20,8 +20,8 @@ type CustomerRow = {
 };
 
 type NetworkRow = {
-  customer_id: string;
-  sponsor_customer_id: string | null;
+  id_comprador: string;
+  sponsor_id_comprador: string | null;
   level?: number | null;
 };
 
@@ -48,20 +48,20 @@ type PlanMetadata = {
   extraDirects?: Array<{ minDirects: number; percentage: number }>;
 };
 
-async function fetchCustomer(customerId: string) {
-  return (await CustomerService.fetchCustomerById(customerId)) as CustomerRow | null;
+async function fetchCustomer(idComprador: string) {
+  return (await CustomerService.fetchCustomerByCompradorId(idComprador)) as CustomerRow | null;
 }
 
-async function fetchSponsor(customerId: string) {
-  return (await NetworkService.fetchSponsorRelationship(customerId)) as NetworkRow | null;
+async function fetchSponsor(idComprador: string) {
+  return (await NetworkService.fetchSponsorRelationship(idComprador)) as NetworkRow | null;
 }
 
-async function fetchUpline(customerId: string) {
-  return (await NetworkService.fetchUplineRelationships(customerId)) as NetworkRow[];
+async function fetchUpline(idComprador: string) {
+  return (await NetworkService.fetchUplineRelationships(idComprador)) as NetworkRow[];
 }
 
-async function countDirects(customerId: string) {
-  return NetworkService.countDirectRelationships(customerId);
+async function countDirects(idComprador: string) {
+  return NetworkService.countDirectRelationships(idComprador);
 }
 
 function resolvePlanKey(customer: CustomerRow | null): string | null {
@@ -76,8 +76,8 @@ function resolvePlanKey(customer: CustomerRow | null): string | null {
   return rule?.key || null;
 }
 
-async function resolvePlanConfig(customerId: string) {
-  const activePlanResult = await getActiveCustomerPlanApi({ customerId });
+async function resolvePlanConfig(idComprador: string) {
+  const activePlanResult = await getActiveCustomerPlanApi({ id_comprador: idComprador });
   if (!activePlanResult.success || !activePlanResult.data?.plan_id) {
     return { planKey: null as string | null, directPct: 0, sponsorPct: 0, generationBonuses: [] as Array<{ generation: number; percentage: number }>, extraDirectsBonuses: [] as Array<{ minDirects: number; percentage: number }>, planName: null as string | null };
   }
@@ -145,7 +145,7 @@ export const calculateCommission = async (data: {
 }) => {
   const parsed = z.object({
     order_id: z.string().uuid(),
-    seller_id: z.string().uuid(),
+    seller_id: z.string(),
     order_amount: z.number().min(0),
   }).parse(data);
 
@@ -163,25 +163,25 @@ export const calculateCommission = async (data: {
   const sponsor = await fetchSponsor(parsed.seller_id);
   const mlm_commissions: Array<any> = [];
 
-  if (sponsor?.sponsor_customer_id && planConfig.sponsorPct > 0) {
-    const sponsorCustomer = await fetchCustomer(sponsor.sponsor_customer_id);
+  if (sponsor?.sponsor_id_comprador && planConfig.sponsorPct > 0) {
+    const sponsorCustomer = await fetchCustomer(sponsor.sponsor_id_comprador);
     mlm_commissions.push({
-      recipient_id: sponsor.sponsor_customer_id,
+      recipient_id: sponsor.sponsor_id_comprador,
       recipient_name: getCustomerLabel(sponsorCustomer),
       generation: 0,
       percentage: planConfig.sponsorPct,
       amount: parsed.order_amount * (planConfig.sponsorPct / 100),
       bonus_type: "sponsor",
     });
-  } else if (sponsor?.sponsor_customer_id && generationBonuses.length) {
-    const sponsorCustomer = await fetchCustomer(sponsor.sponsor_customer_id);
+  } else if (sponsor?.sponsor_id_comprador && generationBonuses.length) {
+    const sponsorCustomer = await fetchCustomer(sponsor.sponsor_id_comprador);
     const sponsorPlanKey = resolvePlanKey(sponsorCustomer);
     if (sponsorPlanKey) {
       const generationBonus = computeGenerationBonus(planConfig.planKey || fallbackRule?.key || null, parsed.order_amount, 0);
       const firstGen = generationBonus.generations.find((g) => g.generation === 1);
       if (firstGen) {
         mlm_commissions.push({
-          recipient_id: sponsor.sponsor_customer_id,
+          recipient_id: sponsor.sponsor_id_comprador,
           recipient_name: getCustomerLabel(sponsorCustomer),
           generation: 1,
           percentage: firstGen.percentage,
@@ -215,7 +215,7 @@ export const calculateMLMCommission = async (data: {
 }) => {
   const parsed = z.object({
     order_id: z.string().uuid(),
-    seller_id: z.string().uuid(),
+    seller_id: z.string(),
     order_amount: z.number().min(0),
   }).parse(data);
 
@@ -245,11 +245,11 @@ export const calculateMLMCommission = async (data: {
   for (const levelRow of upline) {
     const gen = Number(levelRow.level || 0);
     const bonus = (planConfig.generationBonuses.length ? planConfig.generationBonuses : (rule.generationBonuses || [])).find((b) => b.generation === gen);
-    if (!bonus || !levelRow.sponsor_customer_id) continue;
+    if (!bonus || !levelRow.sponsor_id_comprador) continue;
 
-    const sponsorCustomer = await fetchCustomer(levelRow.sponsor_customer_id);
+    const sponsorCustomer = await fetchCustomer(levelRow.sponsor_id_comprador);
     distribution.push({
-      recipient_id: levelRow.sponsor_customer_id,
+      recipient_id: levelRow.sponsor_id_comprador,
       recipient_name: getCustomerLabel(sponsorCustomer),
       generation: gen,
       type: "generation",
@@ -289,7 +289,7 @@ export const simulateCommission = async (data: {
   order_amount: number;
 }) => {
   const parsed = z.object({
-    seller_id: z.string().uuid(),
+    seller_id: z.string(),
     order_amount: z.number().min(0),
   }).parse(data);
 

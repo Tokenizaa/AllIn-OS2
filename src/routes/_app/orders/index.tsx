@@ -36,7 +36,7 @@ function OrdersPage() {
       const matchesStatus = statusFilter === "all" || status === statusFilter;
       const matchesSearch = searchQuery === "" || 
         (o.numero_pedido || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (o.customer_id || "").toLowerCase().includes(searchQuery.toLowerCase());
+        (o.id_comprador || "").toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });
   }, [orders, statusFilter, searchQuery]);
@@ -119,8 +119,8 @@ function OrdersPage() {
               </tr>
             ) : (
               filteredOrders.map((o) => {
-                const customer = customers.find((x) => x.id === o.customer_id);
-                const customerLabel = (customer as any)?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.customer_id;
+                const customer = customers.find((x) => x.id === o.id_comprador);
+                const customerLabel = (customer as any)?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.id_comprador;
                 return (
                   <tr key={o.id} className="hover:bg-accent/30">
                     <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>
@@ -130,7 +130,7 @@ function OrdersPage() {
                           {customerLabel}
                         </Link>
                       ) : (
-                        o.customer_id || "-"
+                        o.id_comprador || "-"
                       )}
                     </td>
                     <td className="px-4 py-3">

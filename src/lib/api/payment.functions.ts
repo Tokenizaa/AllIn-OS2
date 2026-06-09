@@ -6,7 +6,7 @@ import { financialAuditService } from '../../backend/modules/payments/services/f
 
 // Validation schemas
 const createPaymentSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   orderId: z.string().uuid().optional(),
   amount: z.number().positive(),
   currency: z.string().default('BRL'),
@@ -24,7 +24,7 @@ const createPaymentSchema = z.object({
 });
 
 const hybridPaymentSchema = z.object({
-  customerId: z.string().uuid(),
+  idComprador: z.string(),
   orderId: z.string().uuid().optional(),
   originalAmount: z.number().positive(),
   currency: z.string().default('BRL'),
@@ -84,7 +84,7 @@ export const createHybridPayment = async (data: any) => {
 
 // Get hybrid payment preview
 export const getHybridPaymentPreview = async (data: {
-  customerId: string;
+  idComprador: string;
   originalAmount: number;
   useWallet?: boolean;
   useBonus?: boolean;
@@ -94,7 +94,7 @@ export const getHybridPaymentPreview = async (data: {
   categoryId?: string;
 }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     originalAmount: z.number().positive(),
     useWallet: z.boolean().default(false),
     useBonus: z.boolean().default(false),
@@ -106,7 +106,7 @@ export const getHybridPaymentPreview = async (data: {
 
   try {
     const result = await hybridPaymentService.calculateHybridPaymentPreview(
-      parsed.customerId,
+      parsed.idComprador,
       parsed.originalAmount,
       parsed.useWallet,
       parsed.useBonus,
@@ -134,13 +134,13 @@ export const getPayment = async (data: { id: string }) => {
 
 // Get payments by customer
 export const getCustomerPayments = async (data: {
-  customerId: string;
+  idComprador: string;
   page?: number;
   limit?: number;
   status?: string;
 }) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string(),
     page: z.number().default(1),
     limit: z.number().default(20),
     status: z.string().optional(),
@@ -148,7 +148,7 @@ export const getCustomerPayments = async (data: {
 
   try {
     const result = await paymentService.findAll({
-      customer_id: parsed.customerId,
+      id_comprador: parsed.idComprador,
       status: parsed.status,
       page: parsed.page,
       limit: parsed.limit,

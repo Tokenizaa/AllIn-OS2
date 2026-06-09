@@ -4,23 +4,23 @@ import { getWalletBalance, getWalletTransactions, ensureWallet, creditWallet, de
 import { getBonusWalletBalance, getBonusTransactions, ensureBonusWallet } from "@/lib/api/bonus-wallet.functions";
 import { getPointsWalletBalance, getPointsTransactions, ensurePointsWallet } from "@/lib/api/points-wallet.functions";
 
-export function useWalletData(customerId?: string | null) {
+export function useWalletData(idComprador?: string | null) {
   return useQuery({
-    queryKey: customerId ? queryKeys.walletData(customerId) : queryKeys.wallets,
+    queryKey: idComprador ? queryKeys.walletData(idComprador) : queryKeys.wallets,
     queryFn: async () => {
-      if (!customerId) return null;
+      if (!idComprador) return null;
       try {
-        await Promise.all([ensureWallet({ customerId }), ensureBonusWallet({ customerId }), ensurePointsWallet({ customerId })]);
+        await Promise.all([ensureWallet({ idComprador }), ensureBonusWallet({ idComprador }), ensurePointsWallet({ idComprador })]);
       } catch {
         // Silently ignore wallet creation errors
       }
       const [walletRes, bonusRes, pointsRes, txsRes, bonusTxsRes, pointsTxsRes] = await Promise.all([
-        getWalletBalance({ customerId }),
-        getBonusWalletBalance({ customerId }),
-        getPointsWalletBalance({ customerId }),
-        getWalletTransactions({ customerId, limit: 10 }),
-        getBonusTransactions({ customerId, limit: 10 }),
-        getPointsTransactions({ customerId, limit: 10 }),
+        getWalletBalance({ idComprador }),
+        getBonusWalletBalance({ idComprador }),
+        getPointsWalletBalance({ idComprador }),
+        getWalletTransactions({ idComprador, limit: 10 }),
+        getBonusTransactions({ idComprador, limit: 10 }),
+        getPointsTransactions({ idComprador, limit: 10 }),
       ]);
       const balanceInfo = walletRes.success ? walletRes.data : { balance: 0, availableBalance: 0, frozenBalance: 0 };
       const bonusInfo = bonusRes.success ? bonusRes.data : { balance: 0, availableBalance: 0 };
@@ -37,6 +37,6 @@ export function useWalletData(customerId?: string | null) {
         pointsTransactions: pointsTxsRes.success && (pointsTxsRes.data as any)?.data ? (pointsTxsRes.data as any).data : [],
       };
     },
-    enabled: !!customerId,
+    enabled: !!idComprador,
   });
 }

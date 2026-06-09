@@ -24,7 +24,7 @@ export interface Coupon {
   id: string;
   code: string;
   discount_rule_id: string;
-  customer_id?: string;
+  id_comprador?: string;
   is_active: boolean;
   expires_at?: string;
   usage_limit?: number;
@@ -64,7 +64,7 @@ export class DiscountEngineService {
 
   async calculateDiscount(
     originalAmount: number,
-    customerId?: string,
+    idComprador?: string,
     productId?: string,
     categoryId?: string,
     couponCode?: string
@@ -94,7 +94,7 @@ export class DiscountEngineService {
 
       // Apply coupon if provided
       if (couponCode) {
-        const couponDiscount = await this.applyCoupon(couponCode, customerId, originalAmount - totalDiscount);
+        const couponDiscount = await this.applyCoupon(couponCode, idComprador, originalAmount - totalDiscount);
         if (couponDiscount) {
           totalDiscount += couponDiscount.discountAmount;
           appliedCoupon = couponDiscount;
@@ -208,7 +208,7 @@ export class DiscountEngineService {
 
   private async applyCoupon(
     couponCode: string,
-    customerId?: string,
+    idComprador?: string,
     amount: number = 0
   ): Promise<{ couponId: string; code: string; discountAmount: number } | null> {
     try {
@@ -234,7 +234,7 @@ export class DiscountEngineService {
       }
 
       // Check customer-specific coupon
-      if (coupon.customer_id && coupon.customer_id !== customerId) {
+      if (coupon.id_comprador && coupon.id_comprador !== idComprador) {
         logger.error('Coupon not applicable to this customer', 'discount-engine', { couponCode });
         return null;
       }
@@ -298,7 +298,7 @@ export class DiscountEngineService {
   async createCoupon(
     code: string,
     discountRuleId: string,
-    customerId?: string,
+    idComprador?: string,
     expiresAt?: Date,
     usageLimit?: number
   ): Promise<Coupon> {
@@ -310,7 +310,7 @@ export class DiscountEngineService {
         .insert({
           code: code.toUpperCase(),
           discount_rule_id: discountRuleId,
-          customer_id: customerId,
+          id_comprador: idComprador,
           is_active: true,
           expires_at: expiresAt ? expiresAt.toISOString() : null,
           usage_limit: usageLimit,
@@ -358,7 +358,7 @@ export class DiscountEngineService {
     }
   }
 
-  async validateCoupon(couponCode: string, customerId?: string): Promise<{ valid: boolean; reason?: string }> {
+  async validateCoupon(couponCode: string, idComprador?: string): Promise<{ valid: boolean; reason?: string }> {
     try {
       const now = new Date().toISOString();
 
@@ -380,7 +380,7 @@ export class DiscountEngineService {
         return { valid: false, reason: 'Coupon has expired' };
       }
 
-      if (coupon.customer_id && coupon.customer_id !== customerId) {
+      if (coupon.id_comprador && coupon.id_comprador !== idComprador) {
         return { valid: false, reason: 'Coupon is not applicable to this customer' };
       }
 

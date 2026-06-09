@@ -12,8 +12,8 @@ export const registerPlanEventHandlers = () => {
     // TODO: Update customer permissions
     // TODO: Trigger welcome automation
     try {
-      const { customerId, planId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, planId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Plan activated: ${planId}`);
         logger.info(`Updated Chatwoot timeline for plan ${planId}`, "plan-handler");
@@ -30,8 +30,8 @@ export const registerPlanEventHandlers = () => {
     // TODO: Update customer permissions
     // TODO: Prorate billing if applicable
     try {
-      const { customerId, planId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, planId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Plan upgraded to: ${planId}`);
         logger.info(`Updated Chatwoot timeline for plan ${planId}`, "plan-handler");
@@ -48,8 +48,8 @@ export const registerPlanEventHandlers = () => {
     // TODO: Update customer permissions
     // TODO: Prorate billing if applicable
     try {
-      const { customerId, planId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, planId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Plan downgraded to: ${planId}`);
         logger.info(`Updated Chatwoot timeline for plan ${planId}`, "plan-handler");

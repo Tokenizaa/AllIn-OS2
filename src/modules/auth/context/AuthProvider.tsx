@@ -73,38 +73,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     (async () => {
       try {
+        // Always load public sponsor first
+        loadPublicSponsor();
+
         if (skipHeavyBootstrap) {
-          loadPublicSponsor();
+          setLoading(false);
           return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        const currentUser = session?.user ? await SupabaseService.fetchUserProfile(session.user.id) : null;
+        // Check for existing session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("[AuthProvider] Session error:", sessionError);
+        }
 
-        if (!isMounted) return;
+        if (!session?.user) {
+          setLoading(false);
+          return;
+        }
 
-        if (currentUser) {
-          setUser(currentUser);
+        // Fetch user profile with timeout protection
+        const profilePromise = SupabaseService.fetchUserProfile(session.user.id);
+        const timeoutPromise = new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error("Profile fetch timeout")), 20000)
+        );
+        
+        const currentUser = await Promise.race([profilePromise, timeoutPromise]) as User | null;
 
-          if (currentUser.role === UserRole.DISTRIBUIDOR) {
-            const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);
-            if (isMounted) {
-              setDistributorProfile(dProf);
-            }
-          }
+        if (!isMounted || !currentUser) {
+          setLoading(false);
+          return;
+        }
 
-          try {
-            const tracking = await referralTrackingService.getReferralTracking(currentUser.id);
-            if (isMounted && tracking) {
-              setActiveSponsor(tracking.distributor_slug);
-              setActiveReferralMetadata(tracking.metadata);
-            }
-          } catch (error) {
-            console.error("[AuthProvider] Error loading referral tracking:", error);
+        setUser(currentUser);
+
+        if (currentUser.role === UserRole.DISTRIBUIDOR) {
+          const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);
+          if (isMounted) {
+            setDistributorProfile(dProf);
           }
         }
 
-        loadPublicSponsor();
+        try {
+          const tracking = await referralTrackingService.getReferralTracking(currentUser.id);
+          if (isMounted && tracking) {
+            setActiveSponsor(tracking.distributor_slug);
+            setActiveReferralMetadata(tracking.metadata);
+          }
+        } catch (error) {
+          console.error("[AuthProvider] Error loading referral tracking:", error);
+        }
       } catch (error) {
         console.error("[AuthProvider] Fatal error during initialization:", error);
       } finally {
@@ -116,13 +135,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
+      
+      // Verificar se estamos em rota pública para evitar loops
+      if (isPublicAuthRoute()) {
+        return;
+      }
+
       if (!session?.user) {
         setUser(null);
         setDistributorProfile(null);
         return;
       }
 
-      if (skipHeavyBootstrap) {
+      // Evitar recarregar perfil se o usuário já estiver carregado e for o mesmo
+      if (user?.id === session.user.id) {
         return;
       }
 

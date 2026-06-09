@@ -5,7 +5,7 @@ import { EventType } from '../../../shared/events/event-types';
 
 export interface PointsWallet {
   id: string;
-  customer_id: string;
+  id_comprador: string;
   balance: number;
   available_balance: number;
   frozen_balance: number;
@@ -46,34 +46,34 @@ export class PointsWalletService {
     return PointsWalletService.instance;
   }
 
-  async getPointsWalletByCustomerId(customerId: string): Promise<PointsWallet | null> {
+  async getPointsWalletByidComprador(idComprador: string): Promise<PointsWallet | null> {
     try {
       const { data, error } = await supabase
         .from('points_wallets')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .single();
 
       if (error) {
-        logger.error('Failed to get points wallet', 'points-wallet-service', { error, customerId });
+        logger.error('Failed to get points wallet', 'points-wallet-service', { error, idComprador });
         return null;
       }
 
       return data;
     } catch (error) {
-      logger.error('Error getting points wallet', 'points-wallet-service', { error, customerId });
+      logger.error('Error getting points wallet', 'points-wallet-service', { error, idComprador });
       return null;
     }
   }
 
-  async createPointsWallet(customerId: string): Promise<PointsWallet> {
-    logger.info('Creating points wallet', 'points-wallet-service', { customerId });
+  async createPointsWallet(idComprador: string): Promise<PointsWallet> {
+    logger.info('Creating points wallet', 'points-wallet-service', { idComprador });
 
     try {
       const { data, error } = await supabase
         .from('points_wallets')
         .insert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           balance: 0,
           available_balance: 0,
           frozen_balance: 0,
@@ -86,28 +86,28 @@ export class PointsWalletService {
         .single();
 
       if (error) {
-        logger.error('Failed to create points wallet', 'points-wallet-service', { error, customerId });
+        logger.error('Failed to create points wallet', 'points-wallet-service', { error, idComprador });
         throw error;
       }
 
-      logger.info('Points wallet created successfully', 'points-wallet-service', { walletId: data.id, customerId });
+      logger.info('Points wallet created successfully', 'points-wallet-service', { walletId: data.id, idComprador });
       return data;
     } catch (error) {
-      logger.error('Error creating points wallet', 'points-wallet-service', { error, customerId });
+      logger.error('Error creating points wallet', 'points-wallet-service', { error, idComprador });
       throw error;
     }
   }
 
-  async ensurePointsWalletExists(customerId: string): Promise<PointsWallet> {
-    let wallet = await this.getPointsWalletByCustomerId(customerId);
+  async ensurePointsWalletExists(idComprador: string): Promise<PointsWallet> {
+    let wallet = await this.getPointsWalletByidComprador(idComprador);
     if (!wallet) {
-      wallet = await this.createPointsWallet(customerId);
+      wallet = await this.createPointsWallet(idComprador);
     }
     return wallet;
   }
 
   async earnPoints(
-    customerId: string,
+    idComprador: string,
     amount: number,
     sourceType: string,
     sourceId?: string,
@@ -115,10 +115,10 @@ export class PointsWalletService {
     expiresAt?: Date,
     metadata?: Record<string, any>
   ): Promise<PointsTransaction> {
-    logger.info('Earning points', 'points-wallet-service', { customerId, amount, sourceType });
+    logger.info('Earning points', 'points-wallet-service', { idComprador, amount, sourceType });
 
     try {
-      const wallet = await this.ensurePointsWalletExists(customerId);
+      const wallet = await this.ensurePointsWalletExists(idComprador);
 
       const balanceBefore = wallet.available_balance;
       const balanceAfter = balanceBefore + amount;
@@ -170,7 +170,7 @@ export class PointsWalletService {
         timestamp: new Date().toISOString(),
         data: {
           walletId: wallet.id,
-          customerId,
+          idComprador,
           amount,
           sourceType,
           transactionId: transaction.id,
@@ -179,23 +179,23 @@ export class PointsWalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error earning points', 'points-wallet-service', { error, customerId, amount });
+      logger.error('Error earning points', 'points-wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
   async redeemPoints(
-    customerId: string,
+    idComprador: string,
     amount: number,
     referenceId?: string,
     referenceType?: string,
     description?: string,
     metadata?: Record<string, any>
   ): Promise<PointsTransaction> {
-    logger.info('Redeeming points', 'points-wallet-service', { customerId, amount });
+    logger.info('Redeeming points', 'points-wallet-service', { idComprador, amount });
 
     try {
-      const wallet = await this.ensurePointsWalletExists(customerId);
+      const wallet = await this.ensurePointsWalletExists(idComprador);
 
       if (wallet.available_balance < amount) {
         throw new Error('Insufficient points balance');
@@ -250,7 +250,7 @@ export class PointsWalletService {
         timestamp: new Date().toISOString(),
         data: {
           walletId: wallet.id,
-          customerId,
+          idComprador,
           amount,
           referenceId,
           transactionId: transaction.id,
@@ -259,7 +259,7 @@ export class PointsWalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error redeeming points', 'points-wallet-service', { error, customerId, amount });
+      logger.error('Error redeeming points', 'points-wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
@@ -272,9 +272,9 @@ export class PointsWalletService {
     return currency / conversionRate;
   }
 
-  async getAvailablePointsForPayment(customerId: string, productId?: string): Promise<{ available: number; maxUsagePercentage: number; currencyValue: number }> {
+  async getAvailablePointsForPayment(idComprador: string, productId?: string): Promise<{ available: number; maxUsagePercentage: number; currencyValue: number }> {
     try {
-      const wallet = await this.getPointsWalletByCustomerId(customerId);
+      const wallet = await this.getPointsWalletByidComprador(idComprador);
       if (!wallet) {
         return { available: 0, maxUsagePercentage: 50, currencyValue: 0 };
       }
@@ -309,18 +309,18 @@ export class PointsWalletService {
 
       return { available, maxUsagePercentage, currencyValue };
     } catch (error) {
-      logger.error('Error getting available points', 'points-wallet-service', { error, customerId });
+      logger.error('Error getting available points', 'points-wallet-service', { error, idComprador });
       return { available: 0, maxUsagePercentage: 50, currencyValue: 0 };
     }
   }
 
   async getPointsTransactions(
-    customerId: string,
+    idComprador: string,
     limit: number = 50,
     offset: number = 0
   ): Promise<PointsTransaction[]> {
     try {
-      const wallet = await this.getPointsWalletByCustomerId(customerId);
+      const wallet = await this.getPointsWalletByidComprador(idComprador);
       if (!wallet) {
         return [];
       }
@@ -333,13 +333,13 @@ export class PointsWalletService {
         .range(offset, offset + limit - 1);
 
       if (error) {
-        logger.error('Failed to get points transactions', 'points-wallet-service', { error, customerId });
+        logger.error('Failed to get points transactions', 'points-wallet-service', { error, idComprador });
         return [];
       }
 
       return data || [];
     } catch (error) {
-      logger.error('Error getting points transactions', 'points-wallet-service', { error, customerId });
+      logger.error('Error getting points transactions', 'points-wallet-service', { error, idComprador });
       return [];
     }
   }
@@ -364,7 +364,7 @@ export class PointsWalletService {
       }
 
       for (const transaction of expiredTransactions || []) {
-        const wallet = await this.getPointsWalletByCustomerId(transaction.points_wallet_id);
+        const wallet = await this.getPointsWalletByidComprador(transaction.points_wallet_id);
         if (!wallet) continue;
 
         const balanceBefore = wallet.available_balance;

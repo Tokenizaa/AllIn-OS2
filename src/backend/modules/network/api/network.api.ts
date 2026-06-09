@@ -6,11 +6,11 @@ const networkService = new NetworkService();
 
 export const getNetworkTree = async (data: unknown) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string().uuid(),
     maxDepth: z.coerce.number().min(1).max(10).default(5),
   }).parse(data);
   try {
-    const tree = await networkService.getNetworkTree(parsed.customerId, parsed.maxDepth);
+    const tree = await networkService.getNetworkTree(parsed.idComprador, parsed.maxDepth);
     if (!tree) {
       return {
         success: false,
@@ -32,12 +32,12 @@ export const getNetworkTree = async (data: unknown) => {
 export const getDownlines = async (data: unknown) => {
   const parsed = paginationSchema.merge(
     z.object({
-      customerId: z.string().uuid(),
+      idComprador: z.string().uuid(),
       maxDepth: z.coerce.number().min(1).max(10).optional(),
     })
   ).parse(data);
   try {
-    const result = await networkService.getDownlines(parsed.customerId, parsed);
+    const result = await networkService.getDownlines(parsed.idComprador, parsed);
     return {
       success: true,
       data: result,
@@ -52,11 +52,11 @@ export const getDownlines = async (data: unknown) => {
 
 export const getUpline = async (data: unknown) => {
   const parsed = z.object({
-    customerId: z.string().uuid(),
+    idComprador: z.string().uuid(),
     maxLevels: z.coerce.number().min(1).max(20).default(10),
   }).parse(data);
   try {
-    const upline = await networkService.getUpline(parsed.customerId, parsed.maxLevels);
+    const upline = await networkService.getUpline(parsed.idComprador, parsed.maxLevels);
     return {
       success: true,
       data: upline,
@@ -71,10 +71,10 @@ export const getUpline = async (data: unknown) => {
 
 export const getNetworkStats = async (data: unknown) => {
   const parsed = z.object({
-    customerId: z.string().uuid().optional(),
+    idComprador: z.string().uuid().optional(),
   }).parse(data);
   try {
-    const stats = await networkService.getNetworkStats(parsed.customerId);
+    const stats = await networkService.getNetworkStats(parsed.idComprador);
     return {
       success: true,
       data: stats,

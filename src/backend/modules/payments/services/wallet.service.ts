@@ -5,7 +5,7 @@ import { EventType } from '../../../shared/events/event.types';
 
 export interface Wallet {
   id: string;
-  customer_id: string;
+  id_comprador: string;
   balance: number;
   available_balance: number;
   frozen_balance: number;
@@ -41,34 +41,34 @@ export class WalletService {
     return WalletService.instance;
   }
 
-  async getWalletByCustomerId(customerId: string): Promise<Wallet | null> {
+  async getWalletByidComprador(idComprador: string): Promise<Wallet | null> {
     try {
       const { data, error } = await supabase
         .from('wallets')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .single();
 
       if (error) {
-        logger.error('Failed to get wallet', 'wallet-service', { error, customerId });
+        logger.error('Failed to get wallet', 'wallet-service', { error, idComprador });
         return null;
       }
 
       return data;
     } catch (error) {
-      logger.error('Error getting wallet', 'wallet-service', { error, customerId });
+      logger.error('Error getting wallet', 'wallet-service', { error, idComprador });
       return null;
     }
   }
 
-  async createWallet(customerId: string): Promise<Wallet> {
-    logger.info('Creating wallet', 'wallet-service', { customerId });
+  async createWallet(idComprador: string): Promise<Wallet> {
+    logger.info('Creating wallet', 'wallet-service', { idComprador });
 
     try {
       const { data, error } = await supabase
         .from('wallets')
         .insert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           balance: 0,
           available_balance: 0,
           frozen_balance: 0,
@@ -79,38 +79,38 @@ export class WalletService {
         .single();
 
       if (error) {
-        logger.error('Failed to create wallet', 'wallet-service', { error, customerId });
+        logger.error('Failed to create wallet', 'wallet-service', { error, idComprador });
         throw error;
       }
 
-      logger.info('Wallet created successfully', 'wallet-service', { walletId: data.id, customerId });
+      logger.info('Wallet created successfully', 'wallet-service', { walletId: data.id, idComprador });
       return data;
     } catch (error) {
-      logger.error('Error creating wallet', 'wallet-service', { error, customerId });
+      logger.error('Error creating wallet', 'wallet-service', { error, idComprador });
       throw error;
     }
   }
 
-  async ensureWalletExists(customerId: string): Promise<Wallet> {
-    let wallet = await this.getWalletByCustomerId(customerId);
+  async ensureWalletExists(idComprador: string): Promise<Wallet> {
+    let wallet = await this.getWalletByidComprador(idComprador);
     if (!wallet) {
-      wallet = await this.createWallet(customerId);
+      wallet = await this.createWallet(idComprador);
     }
     return wallet;
   }
 
   async creditWallet(
-    customerId: string,
+    idComprador: string,
     amount: number,
     description?: string,
     referenceId?: string,
     referenceType?: string,
     metadata?: Record<string, any>
   ): Promise<WalletTransaction> {
-    logger.info('Crediting wallet', 'wallet-service', { customerId, amount });
+    logger.info('Crediting wallet', 'wallet-service', { idComprador, amount });
 
     try {
-      const wallet = await this.ensureWalletExists(customerId);
+      const wallet = await this.ensureWalletExists(idComprador);
 
       const balanceBefore = wallet.available_balance;
       const balanceAfter = balanceBefore + amount;
@@ -160,7 +160,7 @@ export class WalletService {
         timestamp: new Date().toISOString(),
         data: {
           walletId: wallet.id,
-          customerId,
+          idComprador,
           amount,
           transactionId: transaction.id,
         },
@@ -168,23 +168,23 @@ export class WalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error crediting wallet', 'wallet-service', { error, customerId, amount });
+      logger.error('Error crediting wallet', 'wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
   async debitWallet(
-    customerId: string,
+    idComprador: string,
     amount: number,
     description?: string,
     referenceId?: string,
     referenceType?: string,
     metadata?: Record<string, any>
   ): Promise<WalletTransaction> {
-    logger.info('Debiting wallet', 'wallet-service', { customerId, amount });
+    logger.info('Debiting wallet', 'wallet-service', { idComprador, amount });
 
     try {
-      const wallet = await this.ensureWalletExists(customerId);
+      const wallet = await this.ensureWalletExists(idComprador);
 
       if (wallet.available_balance < amount) {
         throw new Error('Insufficient balance');
@@ -238,7 +238,7 @@ export class WalletService {
         timestamp: new Date().toISOString(),
         data: {
           walletId: wallet.id,
-          customerId,
+          idComprador,
           amount,
           transactionId: transaction.id,
         },
@@ -246,21 +246,21 @@ export class WalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error debiting wallet', 'wallet-service', { error, customerId, amount });
+      logger.error('Error debiting wallet', 'wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
   async freezeBalance(
-    customerId: string,
+    idComprador: string,
     amount: number,
     referenceId?: string,
     referenceType?: string
   ): Promise<WalletTransaction> {
-    logger.info('Freezing wallet balance', 'wallet-service', { customerId, amount });
+    logger.info('Freezing wallet balance', 'wallet-service', { idComprador, amount });
 
     try {
-      const wallet = await this.ensureWalletExists(customerId);
+      const wallet = await this.ensureWalletExists(idComprador);
 
       if (wallet.available_balance < amount) {
         throw new Error('Insufficient available balance to freeze');
@@ -309,21 +309,21 @@ export class WalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error freezing wallet balance', 'wallet-service', { error, customerId, amount });
+      logger.error('Error freezing wallet balance', 'wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
   async unfreezeBalance(
-    customerId: string,
+    idComprador: string,
     amount: number,
     referenceId?: string,
     referenceType?: string
   ): Promise<WalletTransaction> {
-    logger.info('Unfreezing wallet balance', 'wallet-service', { customerId, amount });
+    logger.info('Unfreezing wallet balance', 'wallet-service', { idComprador, amount });
 
     try {
-      const wallet = await this.ensureWalletExists(customerId);
+      const wallet = await this.ensureWalletExists(idComprador);
 
       if (wallet.frozen_balance < amount) {
         throw new Error('Insufficient frozen balance to unfreeze');
@@ -372,18 +372,18 @@ export class WalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error unfreezing wallet balance', 'wallet-service', { error, customerId, amount });
+      logger.error('Error unfreezing wallet balance', 'wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
   async getTransactions(
-    customerId: string,
+    idComprador: string,
     limit: number = 50,
     offset: number = 0
   ): Promise<WalletTransaction[]> {
     try {
-      const wallet = await this.getWalletByCustomerId(customerId);
+      const wallet = await this.getWalletByidComprador(idComprador);
       if (!wallet) {
         return [];
       }
@@ -396,13 +396,13 @@ export class WalletService {
         .range(offset, offset + limit - 1);
 
       if (error) {
-        logger.error('Failed to get wallet transactions', 'wallet-service', { error, customerId });
+        logger.error('Failed to get wallet transactions', 'wallet-service', { error, idComprador });
         return [];
       }
 
       return data || [];
     } catch (error) {
-      logger.error('Error getting wallet transactions', 'wallet-service', { error, customerId });
+      logger.error('Error getting wallet transactions', 'wallet-service', { error, idComprador });
       return [];
     }
   }

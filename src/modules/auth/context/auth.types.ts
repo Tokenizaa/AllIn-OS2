@@ -25,7 +25,7 @@ export interface User {
  */
 export interface DistributorProfile {
   id: string;
-  customer_id: string;
+  id_comprador: string;
   sponsor_id: string;
   referral_code: string;
   referral_link: string;
@@ -42,7 +42,7 @@ export interface DistributorProfile {
 export interface CustomerReferral {
   id: string;
   distributor_id: string;
-  customer_id: string;
+  id_comprador: string;
   source: string;
   tracking_metadata: {
     clicked_at?: string;

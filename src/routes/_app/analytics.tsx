@@ -47,7 +47,7 @@ function AnalyticsPage() {
     const found = customersData.find(
       (c: any) =>
         (order.user_id && c.user_id === order.user_id) ||
-        (order.customer_id && c.id === order.customer_id) ||
+        (order.id_comprador && c.id === order.id_comprador) ||
         (order.comprador && c.id_comprador === order.comprador) ||
         (order.usuario && c.usuario === order.usuario)
     );

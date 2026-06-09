@@ -67,7 +67,7 @@ export type OrderItem = z.infer<typeof orderItemSchema>;
 
 export const orderSummarySchema = z.object({
   id: z.string().uuid(),
-  customer_id: z.string().nullable().optional(),
+  id_comprador: z.string().nullable().optional(),
   customer_name: z.string(),
   status: z.string(),
   total_amount: z.number(),

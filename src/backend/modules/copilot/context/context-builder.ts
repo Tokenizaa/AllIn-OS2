@@ -98,12 +98,12 @@ export class ContextBuilder {
     // Financial Context
     if (PermissionGuard.hasAnyPermission(permissions, ['PAYMENTS_READ'])) {
       try {
-        const wallet = await this.walletService.getWalletByCustomerId(userId);
+        const wallet = await this.walletService.getWalletByidComprador(userId);
         if (wallet) {
           context.kpis.wallet_balance = wallet.available_balance;
         }
 
-        const bonusWallet = await this.bonusWalletService.getBonusWalletByCustomerId(userId);
+        const bonusWallet = await this.bonusWalletService.getBonusWalletByidComprador(userId);
         if (bonusWallet) {
           context.kpis.wallet_balance = (context.kpis.wallet_balance || 0) + bonusWallet.available_balance;
         }
@@ -147,7 +147,7 @@ export class ContextBuilder {
       case "/office/orders":
         if (PermissionGuard.hasPermission(permissions, 'ORDERS_READ')) {
           try {
-            const orders = await this.orderRepository.findByCustomerId(userId, { limit: 10 });
+            const orders = await this.orderRepository.findByidComprador(userId, { limit: 10 });
             context.recent_activity = {
               ...context.recent_activity,
               recent_orders: orders.length,
@@ -161,7 +161,7 @@ export class ContextBuilder {
       case "/office/payments":
         if (PermissionGuard.hasPermission(permissions, 'PAYMENTS_READ')) {
           try {
-            const payments = await this.paymentRepository.findByCustomerId(userId, { limit: 10 });
+            const payments = await this.paymentRepository.findByidComprador(userId, { limit: 10 });
             context.recent_activity = {
               ...context.recent_activity,
               recent_payments: payments.length,

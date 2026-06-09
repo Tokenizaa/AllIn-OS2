@@ -25,7 +25,7 @@ export interface CashbackCalculation {
 export interface CashbackTransaction {
   id: string;
   paymentId: string;
-  customerId: string;
+  idComprador: string;
   amount: number;
   cashbackAmount: number;
   percentage: number;
@@ -84,7 +84,7 @@ export class CashbackService {
 
   async calculateCashback(
     paymentId: string,
-    customerId: string,
+    idComprador: string,
     amount: number,
     paymentMethod: string,
     customerTier: string = 'standard',
@@ -92,7 +92,7 @@ export class CashbackService {
   ): Promise<CashbackCalculation> {
     logger.info('Calculating cashback', 'cashback-service', {
       paymentId,
-      customerId,
+      idComprador,
       amount,
       paymentMethod,
     });
@@ -182,7 +182,7 @@ export class CashbackService {
 
   async createCashbackTransaction(
     paymentId: string,
-    customerId: string,
+    idComprador: string,
     amount: number,
     cashbackAmount: number,
     percentage: number,
@@ -190,14 +190,14 @@ export class CashbackService {
   ): Promise<CashbackTransaction> {
     logger.info('Creating cashback transaction', 'cashback-service', {
       paymentId,
-      customerId,
+      idComprador,
       cashbackAmount,
     });
 
     const transaction: CashbackTransaction = {
       id: this.generateTransactionId(),
       paymentId,
-      customerId,
+      idComprador,
       amount,
       cashbackAmount,
       percentage,
@@ -264,19 +264,19 @@ export class CashbackService {
     return `cb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  async getCashbackHistory(customerId: string): Promise<CashbackTransaction[]> {
-    void customerId;
+  async getCashbackHistory(idComprador: string): Promise<CashbackTransaction[]> {
+    void idComprador;
     // TODO: Query cashback transactions from database
     return [];
   }
 
-  async getCashbackStats(customerId: string): Promise<{
+  async getCashbackStats(idComprador: string): Promise<{
     totalEarned: number;
     totalPending: number;
     totalPaid: number;
     transactionCount: number;
   }> {
-    void customerId;
+    void idComprador;
     // TODO: Calculate stats from database
     return {
       totalEarned: 0,

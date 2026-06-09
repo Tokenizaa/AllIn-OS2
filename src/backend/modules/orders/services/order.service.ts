@@ -11,7 +11,7 @@ export class OrderService {
     this.orderItemRepository = new OrderItemRepository();
   }
 
-  async findAll(params: PaginationParams & { customer_id?: string; status?: string }): Promise<PaginatedResponse<Order>> {
+  async findAll(params: PaginationParams & { id_comprador?: string; status?: string }): Promise<PaginatedResponse<Order>> {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const offset = (page - 1) * limit;
@@ -19,9 +19,9 @@ export class OrderService {
     let orders: Order[];
     let total: number;
 
-    if (params.customer_id) {
-      orders = await this.orderRepository.findByCustomerId(params.customer_id, { limit, offset, status: params.status });
-      total = await this.orderRepository.countByCustomerId(params.customer_id);
+    if (params.id_comprador) {
+      orders = await this.orderRepository.findByidComprador(params.id_comprador, { limit, offset, status: params.status });
+      total = await this.orderRepository.countByidComprador(params.id_comprador);
     } else if (params.status) {
       orders = await this.orderRepository.findByStatus(params.status, { limit, offset });
       total = await this.orderRepository.countByStatus(params.status);
@@ -45,8 +45,8 @@ export class OrderService {
     return this.orderRepository.findById(id);
   }
 
-  async getOrderSummary(customerId?: string): Promise<OrderSummary[]> {
-    return this.orderRepository.getOrderSummary(customerId);
+  async getOrderSummary(idComprador?: string): Promise<OrderSummary[]> {
+    return this.orderRepository.getOrderSummary(idComprador);
   }
 
   async create(dto: CreateOrderDto): Promise<Order> {

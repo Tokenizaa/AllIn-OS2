@@ -95,6 +95,32 @@ class SupabaseTransformer:
     
     def transform_order(self, pedido: PedidoCompleto):
         """Transformar dados de order para Supabase"""
+        # Mapeamento de status do AllInBrasil para valores permitidos pela constraint
+        status_mapping = {
+            'Pedido enviado para cliente': 'shipped',
+            'Pedido Pago': 'processing',
+            'Impresso': 'processing',
+            'Ajuste de Sistema': 'processing',
+            'Pedido Realizado': 'pending',
+            'Aguardando pagamento': 'pending',
+            'Pedido Cancelado': 'cancelled',
+            'Processando Pedido': 'processing',
+            'TESTE JUNIOR': 'pending',
+            'Pedido em Feira': 'processing',
+            'Pendente': 'pending',
+            'cancelado': 'cancelled',
+            'pending': 'pending',
+            'processing': 'processing',
+            'shipped': 'shipped',
+            'delivered': 'delivered',
+            'cancelled': 'cancelled',
+            'refunded': 'refunded'
+        }
+        
+        # Mapear o status
+        status_original = pedido.pedido.situacao
+        status_mapeado = status_mapping.get(status_original, 'pending')  # Default para pending se não encontrado
+        
         # Converter pagamentos para formato serializável
         pagamentos_serializaveis = []
         for p in pedido.pagamento.pagamentos:
@@ -145,31 +171,17 @@ class SupabaseTransformer:
             gateway_transaction_id = str(pedido.pagamento.pagamentos[0].id) if pedido.pagamento.pagamentos[0].id else None
         
         # Extrair dados de envio com verificação de None
-        envio_estado = pedido.envio.estado if pedido.envio and hasattr(pedido.envio, 'estado') else None
-        envio_cidade = pedido.envio.cidade if pedido.envio and hasattr(pedido.envio, 'cidade') else None
-        envio_endereco = pedido.envio.endereco if pedido.envio and hasattr(pedido.envio, 'endereco') else None
-        envio_bairro = pedido.envio.bairro if pedido.envio and hasattr(pedido.envio, 'bairro') else None
-        envio_numero = pedido.envio.numero if pedido.envio and hasattr(pedido.envio, 'numero') else None
-        envio_complemento = pedido.envio.complemento if pedido.envio and hasattr(pedido.envio, 'complemento') else None
-        envio_cep = pedido.envio.cep if pedido.envio and hasattr(pedido.envio, 'cep') else None
+        # Nota: Campos de endereço foram movidos para tabela customers para evitar duplicação
         envio_frete = pedido.envio.frete if pedido.envio and hasattr(pedido.envio, 'frete') else None
         
         return {
             'numero_pedido': pedido.pedido.id,
-            'status_pedido': pedido.pedido.situacao,
+            'status_pedido': status_mapeado,
             'id_comprador': pedido.pedido.cliente_id,
             'comprador': pedido.pedido.cliente,
             'usuario': pedido.pedido.cliente,
             'patrocinador_comprador': pedido.pedido.patrocinador_usuario,
-            'telefone': pedido.pedido.telefone,
             'forma_pagamento': pedido.pagamento.pagamentos[0].forma if pedido.pagamento.pagamentos else None,
-            'estado': envio_estado,
-            'cidade': envio_cidade,
-            'endereco': envio_endereco,
-            'bairro': envio_bairro,
-            'numero': envio_numero,
-            'complemento': envio_complemento,
-            'cep': envio_cep,
             'forma_entrega': envio_frete,
             'cancelado': pedido.pedido.situacao == 'cancelado',
             'pago': pedido.pagamento.pagamentos[0].confirmado if pedido.pagamento.pagamentos else False,
@@ -188,7 +200,7 @@ class SupabaseTransformer:
             'payment_status': payment_status,
             'custo_frete': custo_frete,
             'valor_total': pedido.pedido.total,
-            'status': pedido.pedido.situacao,
+            'status': status_mapeado,
             'order_number': pedido.pedido.id,
             'order_type': pedido.pedido.tipo_cliente if hasattr(pedido.pedido, 'tipo_cliente') else None,
             'data_criacao_pedido': data_criacao_str,

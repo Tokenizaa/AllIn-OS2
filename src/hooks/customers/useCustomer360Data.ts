@@ -6,11 +6,10 @@ import { useCreateWalletTransaction } from "@/hooks/mutations/wallets/useCreateW
 
 const EMPTY_LIST: any[] = [];
 
-export function useCustomer360Data(customerId?: string, sponsorId?: string, compradorId?: string) {
+export function useCustomer360Data(idComprador?: string, sponsorId?: string) {
   const { data: queryData, isLoading, isError, error, refetch } = useCustomer360(
-    customerId,
-    sponsorId,
-    compradorId
+    idComprador,
+    sponsorId
   );
 
   const createWallet = useCreateWallet();

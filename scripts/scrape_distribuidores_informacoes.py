@@ -206,9 +206,6 @@ def scrape_distribuidores_informacoes():
         per_page = 20
         total_pages = (total_registros + per_page - 1) // per_page
         
-        # Limite para teste (10 registros)
-        max_registros = 10
-        
         batch_distribuidores = []
         batch_size = 100
         
@@ -271,11 +268,6 @@ def scrape_distribuidores_informacoes():
                         batch_distribuidores.append(transformed_data)
                         processed_count += 1
                         
-                        # Parar se atingir o limite de teste
-                        if processed_count >= max_registros:
-                            print(f"✅ Limite de teste atingido: {max_registros} distribuidores")
-                            break
-                        
                         # Salvar batch quando atingir o tamanho limite
                         if len(batch_distribuidores) >= batch_size:
                             print(f"💾 Salvando batch de {len(batch_distribuidores)} distribuidores no banco...")
@@ -310,10 +302,6 @@ def scrape_distribuidores_informacoes():
                 except Exception as e:
                     print(f"❌ Erro ao processar linha: {e}")
                     continue
-            
-            # Sair do loop se atingir o limite de teste
-            if processed_count >= max_registros:
-                break
             
             # Pausa entre páginas
             time.sleep(1)

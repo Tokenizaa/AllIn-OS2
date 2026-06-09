@@ -35,6 +35,23 @@ export function getFrontendClient(): SupabaseClient {
         persistSession: true,
         detectSessionInUrl: true,
       },
+      global: {
+        headers: {
+          'X-Client-Info': 'allin-os-frontend',
+        },
+        fetch: (url, options) => {
+          return fetch(url, { ...options, signal: AbortSignal.timeout(60000) });
+        },
+      },
+      db: {
+        schema: 'public',
+      },
+      // Add network resilience settings
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
     });
   }
 

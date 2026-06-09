@@ -84,22 +84,22 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
     super("customer_plans");
   }
 
-  async findByCustomerId(customerId: string): Promise<CustomerPlan[]> {
+  async findByidComprador(idComprador: string): Promise<CustomerPlan[]> {
     const { data, error } = await this.getClient()
       .from(this.tableName)
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
     return data || [];
   }
 
-  async findActiveByCustomerId(customerId: string): Promise<CustomerPlan | null> {
+  async findActiveByidComprador(idComprador: string): Promise<CustomerPlan | null> {
     const { data, error } = await this.getClient()
       .from(this.tableName)
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .eq("status", "active")
       .single();
 
@@ -134,7 +134,7 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
     const { data, error } = await this.getClient()
       .from(this.tableName)
       .insert({
-        customer_id: dto.customer_id,
+        id_comprador: dto.id_comprador,
         plan_id: dto.plan_id,
         status: "active",
         activated_at: new Date().toISOString(),
@@ -147,11 +147,11 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
     return data;
   }
 
-  async deactivatePlan(customerId: string): Promise<void> {
+  async deactivatePlan(idComprador: string): Promise<void> {
     const { error } = await this.getClient()
       .from(this.tableName)
       .update({ status: "inactive" })
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .eq("status", "active");
 
     if (error) throw error;

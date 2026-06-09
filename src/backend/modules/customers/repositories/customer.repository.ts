@@ -51,11 +51,11 @@ export class CustomerRepository extends BaseRepository<Customer> {
     return data || [];
   }
 
-  async getCustomer360(customerId: string): Promise<Customer360 | null> {
+  async getCustomer360(idComprador: string): Promise<Customer360 | null> {
     const { data, error } = await this.getClient()
       .from("customer_360_view")
       .select("*")
-      .eq("id", customerId)
+      .eq("id", idComprador)
       .single();
 
     if (error) throw error;

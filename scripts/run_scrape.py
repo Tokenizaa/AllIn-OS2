@@ -80,9 +80,17 @@ def load_checkpoint():
     return None
 
 
-def save_checkpoint(data):
-    """Salvar checkpoint"""
+def save_checkpoint(data, db_state=None):
+    """Salvar checkpoint com estado do banco para sincronização"""
     os.makedirs(os.path.dirname(CHECKPOINT_FILE), exist_ok=True)
+    
+    # Adicionar estado do banco se fornecido
+    if db_state:
+        data['db_state'] = db_state
+    
+    # Adicionar timestamp
+    data['timestamp'] = datetime.now().isoformat()
+    
     with open(CHECKPOINT_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
@@ -284,13 +292,119 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
     
     # Verificar checkpoint
     checkpoint = load_checkpoint()
+    
+    # Consultar estado atual do banco de dados
+    try:
+        from supabase import create_client
+        supabase_client = create_client(supabase_url, supabase_key)
+        
+        # Contar registros atuais no banco (usando abordagem alternativa)
+        try:
+            orders_result = supabase_client.table('orders').select('id').execute()
+            current_orders = len(orders_result.data) if orders_result.data else 0
+        except Exception as e:
+            print(f"⚠️ Erro ao contar orders: {e}")
+            current_orders = 0
+        
+        try:
+            customers_result = supabase_client.table('customers').select('id').execute()
+            current_customers = len(customers_result.data) if customers_result.data else 0
+        except Exception as e:
+            print(f"⚠️ Erro ao contar customers: {e}")
+            current_customers = 0
+        
+        try:
+            order_items_result = supabase_client.table('order_items').select('id').execute()
+            current_order_items = len(order_items_result.data) if order_items_result.data else 0
+        except Exception as e:
+            print(f"⚠️ Erro ao contar order_items: {e}")
+            current_order_items = 0
+        
+        # Consultar o último pedido salvo no banco
+        last_order_in_db = None
+        if current_orders > 0:
+            try:
+                last_order_result = supabase_client.table('orders').select('numero_pedido, data_criacao').order('data_criacao', desc=True).limit(1).execute()
+                if last_order_result.data:
+                    last_order_in_db = last_order_result.data[0]
+            except Exception as e:
+                print(f"⚠️ Erro ao consultar último pedido: {e}")
+        
+        print(f"\n{'='*60}")
+        print(f"📊 ESTADO ATUAL DO BANCO DE DADOS")
+        print(f"{'='*60}")
+        print(f"📦 Orders no banco: {current_orders}")
+        print(f"👥 Customers no banco: {current_customers}")
+        print(f"📦 Order items no banco: {current_order_items}")
+        if last_order_in_db:
+            print(f"🆔 Último pedido no banco: {last_order_in_db['numero_pedido']}")
+            print(f"📅 Data do último pedido: {last_order_in_db.get('data_criacao', 'N/A')}")
+        print(f"{'='*60}\n")
+    except Exception as e:
+        print(f"⚠️ Não foi possível consultar o estado atual do banco: {e}")
+        import traceback
+        traceback.print_exc()
+        current_orders = 0
+        current_customers = 0
+        current_order_items = 0
+        last_order_in_db = None
+    
+    # Determinar ponto de retomada baseado no banco de dados
+    last_order_to_resume = None
+    if last_order_in_db:
+        last_order_to_resume = last_order_in_db['numero_pedido']
+        print(f"\n📊 Ponto de retomada baseado no banco: último pedido {last_order_to_resume}")
+        print(f"🔄 O scrape continuará a partir deste pedido")
+        checkpoint = None  # Ignorar checkpoint, usar banco como fonte de verdade
+    
     if checkpoint:
-        print(f"🔄 Checkpoint encontrado: {checkpoint['processed_orders']} pedidos processados")
-        print(f"🔄 Último pedido processado: {checkpoint['last_order_id']}")
+        print(f"\n{'='*60}")
+        print(f"🔄 CHECKPOINT ENCONTRADO - RETOMANDO SCRAPE")
+        print(f"{'='*60}")
+        print(f"📊 Pedidos processados no checkpoint: {checkpoint['processed_orders']}")
+        print(f"🆔 Último pedido processado: {checkpoint['last_order_id']}")
+        print(f"⏰ Timestamp do checkpoint: {checkpoint.get('timestamp', 'N/A')}")
+        
+        # Validar sincronização do checkpoint com o banco
+        checkpoint_valid = True
+        if 'db_state' in checkpoint:
+            db_state = checkpoint['db_state']
+            checkpoint_orders = db_state.get('orders_in_db', 0)
+            print(f"📊 Orders no checkpoint: {checkpoint_orders}")
+            print(f"📊 Orders no banco atual: {current_orders}")
+            
+            # Verificar se há discrepância significativa (mais de 10% de diferença)
+            if current_orders > 0:
+                diff = abs(current_orders - checkpoint_orders)
+                if diff > (checkpoint_orders * 0.1):
+                    print(f"\n⚠️ ATENÇÃO: Discrepância significativa entre checkpoint e banco!")
+                    print(f"⚠️ Checkpoint indica {checkpoint_orders} orders, banco tem {current_orders}")
+                    print(f"⚠️ Diferença: {diff} orders ({diff/checkpoint_orders*100:.1f}%)")
+                    print(f"⚠️ O checkpoint será ignorado e o scrape usará o banco como fonte de verdade.")
+                    checkpoint_valid = False
+        
+        # Verificar se o checkpoint é válido (banco não está vazio)
+        if current_orders == 0 and checkpoint['processed_orders'] > 0:
+            print(f"\n⚠️ ATENÇÃO: O banco de dados está vazio mas o checkpoint indica {checkpoint['processed_orders']} pedidos processados!")
+            print(f"⚠️ Isso sugere que o banco foi limpo ou resetado.")
+            print(f"⚠️ O checkpoint será ignorado e o scrape começará do zero.")
+            print(f"� Para usar o checkpoint, delete o arquivo: {CHECKPOINT_FILE}")
+            print(f"{'='*60}\n")
+            checkpoint = None  # Ignorar checkpoint inválido
+        else:
+            print(f"� O scrape continuará a partir deste ponto")
+            print(f"{'='*60}\n")
+    else:
+        print(f"\n🆕 Iniciando scrape do zero (nenhum checkpoint encontrado)")
     
     extractor = OrdersExtractor(session, loja_base_url, token)
     transformer = SupabaseTransformer(supabase_url, supabase_key)
     loader = SupabaseLoader(supabase_url, supabase_key)
+    
+    # Armazenar contagem inicial para cálculo de progresso
+    initial_orders = current_orders
+    initial_customers = current_customers
+    initial_order_items = current_order_items
     
     complete_orders = []
     customers_dict = {}  # Dicionário para evitar duplicatas de customers
@@ -308,17 +422,26 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
     per_page = 15
     total_processed = 0
     
-    # Se retomando de checkpoint, começar do offset correto
+    # Se retomando do último pedido do banco ou checkpoint, começar do offset correto
     start_offset = 0
-    if checkpoint and checkpoint.get('last_order_id'):
-        # Tentar encontrar o offset do último pedido
+    if last_order_to_resume:
+        # Usar o último pedido do banco como ponto de retomada
+        print(f"🔄 Retomando a partir do último pedido no banco: {last_order_to_resume}")
+        # Começar do offset 0 e pular até encontrar o pedido
+        per_page = 0
+    elif checkpoint and checkpoint.get('last_order_id'):
+        # Fallback para checkpoint se não tiver último pedido no banco
         start_offset = checkpoint.get('processed_orders', 0)
         per_page = start_offset + 15
-        print(f"🔄 Retomando do offset: {per_page}")
+        print(f"🔄 Retomando do offset: {per_page} (baseado no checkpoint)")
     
     while True:
-        print(f"📄 Extraindo pedidos (offset: {per_page})...")
+        print(f"\n📄 Extraindo página #{(per_page // 15) + 1} de pedidos (offset: {per_page})...")
+        print(f"   📊 Total processado até agora: {total_processed} pedidos")
+        print(f"   📊 Total real no banco: {initial_orders + total_processed} pedidos")
+        print(f"   🔄 Buscando próximos 15 pedidos da API...")
         
+        # Construir URL da página
         url = f"{loja_base_url}/sale/order?token={token}&per_page={per_page}"
         
         try:
@@ -346,17 +469,31 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
             
             # Se não encontrou novos pedidos, fim da paginação
             if not page_orders:
-                print(f"✅ Fim da paginação (offset: {per_page})")
+                print(f"✅ Fim da paginação (offset: {per_page}) - nenhum pedido encontrado")
                 break
             
+            print(f"   📋 {len(page_orders)} pedidos encontrados nesta página: {', '.join(page_orders[:5])}{'...' if len(page_orders) > 5 else ''}")
+            
             # Processar cada pedido imediatamente
-            for order_id in page_orders:
-                # Pular se já foi processado (checkpoint)
-                if checkpoint and checkpoint.get('last_order_id'):
+            for idx, order_id in enumerate(page_orders, 1):
+                # Pular se já foi processado (último pedido do banco ou checkpoint)
+                if last_order_to_resume:
+                    if order_id == last_order_to_resume:
+                        print(f"   ✅ Último pedido do banco encontrado: {order_id}")
+                        print(f"   🔄 Continuando processamento normal a partir do próximo pedido...")
+                        last_order_to_resume = None  # Último pedido encontrado, continuar
+                        continue
+                    if last_order_to_resume:
+                        print(f"   ⏭️  Pulando pedido {order_id} (já está no banco)")
+                        continue  # Ainda não chegou ao último pedido
+                elif checkpoint and checkpoint.get('last_order_id'):
                     if order_id == checkpoint['last_order_id']:
+                        print(f"   ✅ Último pedido do checkpoint encontrado: {order_id}")
+                        print(f"   🔄 Continuando processamento normal...")
                         checkpoint = None  # Último pedido encontrado, continuar
                         continue
                     if checkpoint:
+                        print(f"   ⏭️  Pulando pedido {order_id} (já processado no checkpoint)")
                         continue  # Ainda não chegou ao último pedido
                 
                 # Verificar limite
@@ -426,7 +563,14 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                     return
                 
                 total_processed += 1
-                print(f"\n[{total_processed}] Extraindo pedido {order_id}...")
+                batch_progress = len(batch_orders_data)
+                remaining_to_save = BATCH_SIZE - batch_progress
+                total_real = initial_orders + total_processed
+                print(f"\n📦 [{total_processed}] Extraindo pedido {order_id}...")
+                print(f"   📊 Batch atual: {batch_progress}/{BATCH_SIZE} | Faltam {remaining_to_save} para salvar")
+                print(f"   📊 Total processado nesta sessão: {total_processed} pedidos")
+                print(f"   📊 Total real no banco (após este): {total_real} pedidos")
+                print(f"   💾 Checkpoint ativo: {'Sim' if checkpoint else 'Não'}")
                 complete_order = extractor.extract_order_details(order_id)
                 
                 if complete_order:
@@ -451,7 +595,19 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                 
                 # Salvar no banco a cada BATCH_SIZE pedidos
                 if len(batch_orders_data) >= BATCH_SIZE:
-                    print(f"\n💾 Salvando batch de {len(batch_orders_data)} pedidos no banco...")
+                    total_real_orders = initial_orders + total_processed
+                    total_real_customers = initial_customers + len(customers_dict)
+                    total_real_items = initial_order_items + len(batch_order_items)
+                    
+                    print(f"\n{'='*60}")
+                    print(f"💾 BATCH COMPLETO: Salvando {len(batch_orders_data)} pedidos no banco...")
+                    print(f"{'='*60}")
+                    print(f"📊 Total processado nesta sessão: {total_processed} pedidos")
+                    print(f"📊 Total real no banco (após salvar): {total_real_orders} pedidos")
+                    print(f"👥 Customers únicos nesta sessão: {len(customers_dict)}")
+                    print(f"👥 Total real no banco (após salvar): {total_real_customers} customers")
+                    print(f"📦 Itens de pedido neste batch: {len(batch_order_items)}")
+                    print(f"📦 Total real no banco (após salvar): {total_real_items} items")
                     
                     # Salvar customers do batch
                     if batch_customers_dict:
@@ -538,14 +694,26 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                         
                         batch_order_items = []
                     
-                    # Salvar checkpoint
+                    # Salvar checkpoint com estado do banco
                     checkpoint_data = {
                         'processed_orders': total_processed,
-                        'last_order_id': order_id,
-                        'timestamp': datetime.now().isoformat()
+                        'last_order_id': order_id
                     }
-                    save_checkpoint(checkpoint_data)
-                    print(f"✅ Checkpoint salvo: {total_processed} pedidos processados")
+                    # Incluir estado atual do banco para sincronização
+                    db_state = {
+                        'orders_in_db': initial_orders + total_processed,
+                        'customers_in_db': initial_customers + len(customers_dict),
+                        'order_items_in_db': initial_order_items + len(batch_order_items)
+                    }
+                    save_checkpoint(checkpoint_data, db_state)
+                    print(f"\n{'='*60}")
+                    print(f"✅ BATCH SALVO COM SUCESSO!")
+                    print(f"{'='*60}")
+                    print(f"💾 Checkpoint atualizado: {total_processed} pedidos processados")
+                    print(f"🆔 Último pedido: {order_id}")
+                    print(f"⏰ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    print(f"🔄 O scrape pode ser retomado deste ponto se interrompido")
+                    print(f"{'='*60}\n")
                     
                     # Limpar batch
                     batch_orders_data = []
@@ -638,10 +806,24 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
     
     # Manter checkpoint para permitir retomada futura
     # Se quiser começar do zero, delete manualmente o arquivo data/checkpoint.json
-    print(f"✅ Checkpoint mantido - scrape finalizado (para retomar do último ponto)")
-    print(f"✅ {total_processed} pedidos processados")
-    print(f"✅ {len(customers_dict)} customers únicos extraídos")
+    total_real_orders = initial_orders + total_processed
+    total_real_customers = initial_customers + len(customers_dict)
+    total_real_items = initial_order_items + len(batch_order_items)
+    
+    print(f"\n{'='*60}")
+    print(f"🎉 SCRAPE FINALIZADO!")
+    print(f"{'='*60}")
+    print(f"📊 Total processado nesta sessão: {total_processed} pedidos")
+    print(f"📊 Total real no banco: {total_real_orders} pedidos")
+    print(f"👥 Customers únicos nesta sessão: {len(customers_dict)}")
+    print(f"👥 Total real no banco: {total_real_customers} customers")
+    print(f"📦 Orders no batch final: {len(batch_orders_data)}")
+    print(f"📦 Order items no batch final: {len(batch_order_items)}")
+    print(f"📦 Total real no banco: {total_real_items} items")
+    print(f"💾 Checkpoint mantido em: {CHECKPOINT_FILE}")
+    print(f"🔄 O scrape pode ser retomado deste ponto")
     print(f"💡 Para começar do zero, delete o arquivo: {CHECKPOINT_FILE}")
+    print(f"{'='*60}\n")
 
 
 def scrape_complete(session, loja_base_url, token, supabase_url, supabase_key, limit_orders=None, limit_customers=None):

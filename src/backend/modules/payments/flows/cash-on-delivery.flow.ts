@@ -3,7 +3,7 @@ import { PaymentService } from '../services/payment.service';
 import { PaymentRequest } from '../interfaces/payment-provider.interface';
 
 export interface CashOnDeliveryRequest {
-  customerId: string;
+  idComprador: string;
   orderId?: string;
   amount: number;
   currency: string;
@@ -45,14 +45,14 @@ export class CashOnDeliveryFlow {
   }
 
   async createCashOnDeliveryPayment(request: CashOnDeliveryRequest): Promise<CashOnDeliveryResult> {
-    logger.info('Creating Cash on Delivery payment', 'cod-payment-flow', { customerId: request.customerId, amount: request.amount });
+    logger.info('Creating Cash on Delivery payment', 'cod-payment-flow', { idComprador: request.idComprador, amount: request.amount });
 
     try {
       const paymentService = new PaymentService();
       const paymentRequest: PaymentRequest = {
         amount: request.amount,
         currency: request.currency,
-        customerId: request.customerId,
+        idComprador: request.idComprador,
         orderId: request.orderId,
         paymentMethod: 'cash',
         customer: request.customer,

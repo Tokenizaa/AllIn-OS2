@@ -9,9 +9,9 @@ import { useWalletActions } from '@/hooks/wallets/useWalletActions';
 
 export function WalletDashboard() {
   const { user, distributorProfile } = useAuth();
-  const customerId = distributorProfile?.id || user?.id;
-  const { data: walletData, isLoading, refetch } = useWalletData(customerId);
-  const { credit, debit } = useWalletActions(customerId, () => { void refetch(); });
+  const idComprador = distributorProfile?.id || user?.id;
+  const { data: walletData, isLoading, refetch } = useWalletData(idComprador);
+  const { credit, debit } = useWalletActions(idComprador, () => { void refetch(); });
 
   const handleAddFunds = () => {
     credit.mutate(100.0);
@@ -31,7 +31,7 @@ export function WalletDashboard() {
     toast.info('Transferências interbancárias em manutenção pelo Gateway PagSeguro.');
   };
 
-  if (!customerId) {
+  if (!idComprador) {
     return <div className="p-6 text-center text-muted-foreground text-sm">Entre em uma conta ativa de distribuidor para acessar o painel financeiro de carteiras.</div>;
   }
 

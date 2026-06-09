@@ -1,11 +1,11 @@
 import { supabase } from "@/lib/supabase-client";
 
 export const WalletService = {
-  async fetchWalletByCustomerId(customerId: string) {
+  async fetchWalletByidComprador(idComprador: string) {
     const { data, error } = await supabase
       .from("wallets")
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .maybeSingle();
     if (error) throw error;
     return data;
@@ -21,21 +21,21 @@ export const WalletService = {
     return data || [];
   },
 
-  async fetchPointsWalletByCustomerId(customerId: string) {
+  async fetchPointsWalletByidComprador(idComprador: string) {
     const { data, error } = await supabase
       .from("points_wallets")
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .maybeSingle();
     if (error) throw error;
     return data;
   },
 
-  async createWallet(customerId: string) {
+  async createWallet(idComprador: string) {
     const { data, error } = await supabase
       .from("wallets")
       .insert({
-        customer_id: customerId,
+        id_comprador: idComprador,
         balance: 0,
         available_balance: 0,
         frozen_balance: 0,
@@ -48,11 +48,11 @@ export const WalletService = {
     return data;
   },
 
-  async createPointsWallet(customerId: string) {
+  async createPointsWallet(idComprador: string) {
     const { data, error } = await supabase
       .from("points_wallets")
       .insert({
-        customer_id: customerId,
+        id_comprador: idComprador,
         balance: 0,
         available_balance: 0,
         frozen_balance: 0,
@@ -71,9 +71,8 @@ export const WalletService = {
     walletId: string,
     transaction_type: string,
     amount: number,
-    balance_before: number,
-    balance_after: number,
-    description: string
+    description: string,
+    reference_type: string = "adjustment"
   ) {
     const { data, error } = await supabase
       .from("wallet_transactions")
@@ -81,10 +80,8 @@ export const WalletService = {
         wallet_id: walletId,
         transaction_type,
         amount,
-        balance_before,
-        balance_after,
         description,
-        reference_type: "adjustment",
+        reference_type,
         reference_id: "manual-" + Date.now().toString().slice(-6),
       })
       .select()

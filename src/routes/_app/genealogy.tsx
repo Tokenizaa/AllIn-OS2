@@ -34,17 +34,17 @@ function GenealogyPage() {
         const relationships = await NetworkService.fetchNetworkRelationships(100);
         
         // Buscar dados dos clientes
-        const customerIds = [...new Set(relationships.map(r => r.customer_id))];
+        const idCompradores = [...new Set(relationships.map(r => r.id_comprador))];
         const customers = await Promise.all(
-          customerIds.map(id => CustomerService.fetchCustomerById(id))
+          idCompradores.map(id => CustomerService.fetchCustomerByCompradorId(id))
         );
 
         // Construir árvore genealógica
-        const customerMap = new Map(customers.map(c => [c?.id, c]));
+        const customerMap = new Map(customers.map(c => [c?.id_comprador, c]));
         
         // Encontrar nó raiz (sem sponsor ou sponsor é null)
-        const rootRelationship = relationships.find(r => !r.sponsor_customer_id);
-        const rootCustomer = rootRelationship ? customerMap.get(rootRelationship.customer_id) : customers[0];
+        const rootRelationship = relationships.find(r => !r.sponsor_id_comprador);
+        const rootCustomer = rootRelationship ? customerMap.get(rootRelationship.id_comprador) : customers[0];
         
         if (!rootCustomer) {
           setTreeData(null);
@@ -52,29 +52,29 @@ function GenealogyPage() {
         }
 
         // Função recursiva para construir árvore
-        const buildTree = (customerId: string, visited = new Set<string>()): TreeNode | null => {
-          if (visited.has(customerId)) return null; // Evitar ciclos
-          visited.add(customerId);
+        const buildTree = (idComprador: string, visited = new Set<string>()): TreeNode | null => {
+          if (visited.has(idComprador)) return null; // Evitar ciclos
+          visited.add(idComprador);
 
-          const customer = customerMap.get(customerId);
+          const customer = customerMap.get(idComprador);
           if (!customer) return null;
 
           // Buscar filhos diretos (onde este customer é sponsor)
           const children = relationships
-            .filter(r => r.sponsor_customer_id === customerId)
-            .map(r => buildTree(r.customer_id, new Set(visited)))
+            .filter(r => r.sponsor_id_comprador === idComprador)
+            .map(r => buildTree(r.id_comprador, new Set(visited)))
             .filter(Boolean) as TreeNode[];
 
           return {
-            id: customer.id,
-            name: customer.name || customer.full_name || "Cliente",
+            id: customer.id_comprador || customer.id,
+            name: customer.nome_completo || customer.name || customer.full_name || "Cliente",
             qualification: customer.qualification || "Bronze",
             status: customer.status || "active",
             children: children.length > 0 ? children : undefined,
           };
         };
 
-        const tree = buildTree(rootCustomer.id);
+        const tree = buildTree(rootCustomer.id_comprador || rootCustomer.id);
         setTreeData(tree);
       } catch (err) {
         console.error("Error loading genealogy data:", err);

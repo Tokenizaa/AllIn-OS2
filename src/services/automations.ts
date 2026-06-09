@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase-client";
 
 export interface Automation {
   id: string;
-  customer_id: string;
+  id_comprador: string;
   name: string;
   description: string;
   type: string;
@@ -13,11 +13,11 @@ export interface Automation {
 }
 
 export const AutomationService = {
-  async fetchCustomerAutomations(customerId: string): Promise<Automation[]> {
+  async fetchCustomerAutomations(idComprador: string): Promise<Automation[]> {
     const { data, error } = await supabase
       .from("customer_automations")
       .select("*")
-      .eq("customer_id", customerId)
+      .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
     
     if (error) {

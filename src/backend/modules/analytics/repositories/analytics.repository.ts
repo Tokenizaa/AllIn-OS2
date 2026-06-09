@@ -8,12 +8,12 @@ export class AnalyticsRepository extends BaseRepository<any> {
   async getExecutiveAnalytics(): Promise<any> {
     const { data: orders, error: ordersError } = await this.getClient()
       .from("orders")
-      .select("valor_total_pedido, valor_total, created_at");
+      .select("valor_total_pedido, created_at");
 
     if (ordersError) throw ordersError;
 
     const revenueRows = orders || [];
-    const totalRevenue = revenueRows.reduce((sum, row: any) => sum + Number(row.valor_total_pedido || row.valor_total || 0), 0);
+    const totalRevenue = revenueRows.reduce((sum, row: any) => sum + Number(row.valor_total_pedido || 0), 0);
     const totalOrders = revenueRows.length;
     const averageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
 
@@ -41,13 +41,13 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
     const { data, error } = await this.getClient()
       .from("orders")
-      .select("valor_total_pedido, valor_total, created_at")
+      .select("valor_total_pedido, created_at")
       .gte("created_at", startDate.toISOString());
 
     if (error) throw error;
 
     const rows = data || [];
-    const totalRevenue = rows.reduce((sum: number, row: any) => sum + Number(row.valor_total_pedido || row.valor_total || 0), 0);
+    const totalRevenue = rows.reduce((sum: number, row: any) => sum + Number(row.valor_total_pedido || 0), 0);
     const totalOrders = rows.length;
 
     return {

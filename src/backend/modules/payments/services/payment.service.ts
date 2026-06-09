@@ -15,7 +15,7 @@ export class PaymentService {
     this.repository = new PaymentRepository();
   }
 
-  async findAll(params: PaginationParams & { customer_id?: string; status?: string }): Promise<PaginatedResponse<Payment>> {
+  async findAll(params: PaginationParams & { id_comprador?: string; status?: string }): Promise<PaginatedResponse<Payment>> {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const offset = (page - 1) * limit;
@@ -23,8 +23,8 @@ export class PaymentService {
     let payments: Payment[];
     let total: number;
 
-    if (params.customer_id) {
-      payments = await this.repository.findByCustomerId(params.customer_id, { limit, offset });
+    if (params.id_comprador) {
+      payments = await this.repository.findByidComprador(params.id_comprador, { limit, offset });
       total = await this.repository.count();
     } else if (params.status) {
       payments = await this.repository.findByStatus(params.status, { limit, offset });
@@ -73,7 +73,7 @@ export class PaymentService {
 
       // Create payment record
       const payment = await this.repository.create({
-        customer_id: request.customerId,
+        id_comprador: request.idComprador,
         order_id: request.orderId,
         amount: request.amount,
         amount_paid: 0,
@@ -106,7 +106,7 @@ export class PaymentService {
           timestamp: new Date().toISOString(),
           data: {
             paymentId: payment.id,
-            customerId: request.customerId,
+            idComprador: request.idComprador,
             orderId: request.orderId,
             amount: request.amount,
             status: gatewayResponse.status,
@@ -160,7 +160,7 @@ export class PaymentService {
       const request: PaymentRequest = {
         amount: payment.amount,
         currency: payment.currency || "BRL",
-        customerId: payment.customer_id,
+        idComprador: payment.id_comprador,
         orderId: payment.order_id,
         paymentMethod: (payment.payment_method_type || payment.payment_method) as any,
         metadata: payment.metadata || undefined,
@@ -239,7 +239,7 @@ export class PaymentService {
             timestamp: new Date().toISOString(),
             data: {
               paymentId: payment.id,
-              customerId: payment.customer_id,
+              idComprador: payment.id_comprador,
               orderId: payment.order_id,
               amount: payment.amount,
             },
@@ -262,7 +262,7 @@ export class PaymentService {
             timestamp: new Date().toISOString(),
             data: {
               paymentId: payment.id,
-              customerId: payment.customer_id,
+              idComprador: payment.id_comprador,
               orderId: payment.order_id,
               amount: payment.amount,
             },
@@ -286,7 +286,7 @@ export class PaymentService {
             timestamp: new Date().toISOString(),
             data: {
               paymentId: payment.id,
-              customerId: payment.customer_id,
+              idComprador: payment.id_comprador,
               orderId: payment.order_id,
               amount: payment.amount,
             },

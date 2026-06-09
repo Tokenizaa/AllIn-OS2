@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Timeline } from "@/components/widgets/timeline";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { CustomerNotesService } from "@/services/customer-notes";
 
 interface CustomerTimelineTabProps {
   customer: any;
@@ -11,25 +12,63 @@ interface CustomerTimelineTabProps {
 export function CustomerTimelineTab({ customer, orders }: CustomerTimelineTabProps) {
   const [customNotes, setCustomNotes] = useState<any[]>([]);
   const [noteText, setNoteText] = useState("");
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
 
-  const handleAddNote = (e: React.FormEvent) => {
+  // Carregar notas do banco ao montar o componente
+  useEffect(() => {
+    const loadNotes = async () => {
+      if (!customer?.id && !customer?.id_comprador) return;
+      
+      setIsLoadingNotes(true);
+      try {
+        const notes = await CustomerNotesService.fetchCustomerNotes(
+          customer?.id,
+          customer?.id_comprador
+        );
+        setCustomNotes(notes);
+      } catch (error) {
+        console.error("Error loading notes:", error);
+      } finally {
+        setIsLoadingNotes(false);
+      }
+    };
+
+    loadNotes();
+  }, [customer?.id, customer?.id_comprador]);
+
+  const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteText.trim()) return;
-    const newNote = {
-      id: "note-" + Date.now().toString(),
-      type: "note" as const,
-      title: "Observação CRM",
-      description: noteText,
-      at: new Date().toISOString()
-    };
-    setCustomNotes([newNote, ...customNotes]);
-    setNoteText("");
-    toast.success("Nota salva com sucesso na linha do tempo!");
+    
+    try {
+      const newNote = await CustomerNotesService.createNote({
+        customer_id: customer?.id,
+        id_comprador: customer?.id_comprador,
+        note: noteText,
+        note_type: "general",
+        created_by: customer?.user_id || "system",
+        is_private: false,
+        metadata: {}
+      });
+      
+      setCustomNotes([newNote, ...customNotes]);
+      setNoteText("");
+      toast.success("Nota salva com sucesso na linha do tempo!");
+    } catch (error) {
+      console.error("Error creating note:", error);
+      toast.error("Erro ao salvar nota");
+    }
   };
 
   const tl = useMemo(() => {
     return [
-      ...customNotes,
+      ...customNotes.map((note) => ({
+        id: note.id,
+        type: "note" as const,
+        title: note.note_type === 'general' ? 'Observação CRM' : `Nota: ${note.note_type}`,
+        description: note.note,
+        at: note.created_at,
+      })),
       { id: "1", type: "note" as const, title: "Ficha Operacional", description: "Distribuidor sincronizado com os dados do Supabase.", at: customer?.created_at || new Date().toISOString() },
       ...orders.slice(0, 4).map((o, index) => ({
         id: `order-tl-${index}`,

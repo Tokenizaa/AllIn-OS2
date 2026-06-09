@@ -22,7 +22,7 @@ interface Payment {
 
 export function PaymentHistory() {
   const { user, distributorProfile } = useAuth();
-  const customerId = distributorProfile?.id || user?.id;
+  const idComprador = distributorProfile?.id || user?.id;
 
   const { data: paymentsData, isLoading, refetch } = usePayments(50);
 
@@ -43,7 +43,7 @@ export function PaymentHistory() {
     handleRefresh,
   } = usePaymentHistoryFilters({ payments, refetch });
 
-  if (!customerId) {
+  if (!idComprador) {
     return (
       <div className="p-6 text-center text-muted-foreground text-sm">
         Entre em uma conta ativa de distribuidor para acessar o histórico de transações.

@@ -2,6 +2,7 @@ import { UserRole } from "@/shared/types/roles";
 import { User } from "../context/auth.types";
 import { supabase } from "@/lib/supabase-client";
 import { SupabaseService } from "./supabase.service";
+import { withRetry, withTimeout, getNetworkErrorMessage } from "@/lib/network-resilience";
 
 /**
  * Authentication service for handling user login, registration, and logout
@@ -16,32 +17,59 @@ export class AuthService {
     email: string,
     password: string
   ): Promise<User> {
-    // Login with Supabase
-    const { data: { user }, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Login with Supabase with retry and timeout protection
+      const signInResult = await withRetry(
+        () => withTimeout(
+          () => supabase.auth.signInWithPassword({ email, password }),
+          12000,
+          "Tempo esgotado ao conectar com o servidor. Verifique sua conexão."
+        ),
+        { maxRetries: 2, delayMs: 1000 }
+      );
 
-    if (error) {
-      throw new Error(error.message || "Credenciais inválidas.");
+      const { data: { user }, error } = signInResult;
+
+      if (error) {
+        throw new Error(error.message || "Credenciais inválidas.");
+      }
+
+      if (!user) {
+        throw new Error("Credenciais inválidas: usuário não encontrado.");
+      }
+
+      // Fetch user profile from database with retry and timeout protection
+      const userProfile = await withRetry(
+        () => withTimeout(
+          () => SupabaseService.fetchUserProfile(user.id),
+          60000,
+          "Tempo esgotado ao carregar perfil. Tente novamente."
+        ),
+        { maxRetries: 2, delayMs: 2000 }
+      );
+      
+      if (!userProfile) {
+        throw new Error("Perfil de usuário não encontrado.");
+      }
+
+      if (userProfile.status === "suspended") {
+        throw new Error("Conta bloqueada por políticas de conformidade interna.");
+      }
+
+      return userProfile;
+    } catch (error: any) {
+      console.error("[AuthService] Login error:", error);
+      
+      // Provide user-friendly error message for network errors
+      if (error.message?.includes('timeout') || 
+          error.message?.includes('network') ||
+          error.message?.includes('ERR_NAME_NOT_RESOLVED') ||
+          error.message?.includes('ERR_QUIC')) {
+        throw new Error(getNetworkErrorMessage(error));
+      }
+      
+      throw error;
     }
-
-    if (!user) {
-      throw new Error("Credenciais inválidas: usuário não encontrado.");
-    }
-
-    // Fetch user profile from database
-    const userProfile = await SupabaseService.fetchUserProfile(user.id);
-    
-    if (!userProfile) {
-      throw new Error("Perfil de usuário não encontrado.");
-    }
-
-    if (userProfile.status === "suspended") {
-      throw new Error("Conta bloqueada por políticas de conformidade interna.");
-    }
-
-    return userProfile;
   }
 
   /**

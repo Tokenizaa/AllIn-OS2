@@ -1,7 +1,7 @@
 export interface PaymentRequest {
   amount: number;
   currency: string;
-  customerId: string;
+  idComprador: string;
   orderId?: string;
   paymentMethod: 'pix' | 'boleto' | 'card' | 'cash';
   metadata?: Record<string, any>;

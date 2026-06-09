@@ -12,8 +12,8 @@ export const registerOrderEventHandlers = () => {
     // TODO: Update inventory
     // TODO: Trigger payment processing
     try {
-      const { customerId, orderId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, orderId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `New order created: ${orderId}`);
         logger.info(`Updated Chatwoot timeline for order ${orderId}`, "order-handler");
@@ -30,8 +30,8 @@ export const registerOrderEventHandlers = () => {
     // TODO: Restore inventory
     // TODO: Process refund if applicable
     try {
-      const { customerId, orderId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, orderId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Order cancelled: ${orderId}`);
         logger.info(`Updated Chatwoot timeline for order ${orderId}`, "order-handler");
@@ -47,8 +47,8 @@ export const registerOrderEventHandlers = () => {
     // TODO: Send shipping notification
     // TODO: Update tracking information
     try {
-      const { customerId, orderId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, orderId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Order shipped: ${orderId}`);
         logger.info(`Updated Chatwoot timeline for order ${orderId}`, "order-handler");
@@ -64,8 +64,8 @@ export const registerOrderEventHandlers = () => {
     // TODO: Send delivery confirmation
     // TODO: Request review
     try {
-      const { customerId, orderId } = event.data;
-      const conversations = await chatwootService.searchConversations(customerId);
+      const { idComprador, orderId } = event.data;
+      const conversations = await chatwootService.searchConversations(idComprador);
       if (conversations.length > 0) {
         await chatwootService.addNote(conversations[0].id, `Order delivered: ${orderId}`);
         logger.info(`Updated Chatwoot timeline for order ${orderId}`, "order-handler");

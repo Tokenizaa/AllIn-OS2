@@ -12,6 +12,8 @@ import { CustomerWalletTab } from "@/components/customers/CustomerWalletTab";
 import { CustomerNetworkTab } from "@/components/customers/CustomerNetworkTab";
 import { CustomerDocumentsTab } from "@/components/customers/CustomerDocumentsTab";
 import { CustomerAutomationsTab } from "@/components/customers/CustomerAutomationsTab";
+import { CustomerService } from "@/services/customers";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_app/customers/$id")({
   component: Customer360,
@@ -24,6 +26,15 @@ export const Route = createFileRoute("/_app/customers/$id")({
 
 function Customer360() {
   const { id } = Route.useParams();
+
+  // First, fetch the customer by UUID to get the id_comprador
+  const { data: customerBasic, isLoading: isLoadingBasic, isError: isErrorBasic } = useQuery({
+    queryKey: ["customer-basic", id],
+    queryFn: () => CustomerService.fetchCustomerById(id),
+  });
+
+  const idComprador = customerBasic?.id_comprador;
+  const sponsorId = customerBasic?.patrocinador_comprador;
 
   const {
     customer,
@@ -41,7 +52,7 @@ function Customer360() {
     handleCreatePointsWallet,
     updateWalletBalance,
     createWalletTransaction,
-  } = useCustomer360Data(id);
+  } = useCustomer360Data(idComprador, sponsorId);
 
   if (isError) {
     return (

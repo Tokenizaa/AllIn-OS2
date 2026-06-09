@@ -150,7 +150,7 @@ class RLSAuditor {
     });
 
     // 4. Checking details of the actual distributor definition for cross-branch leak prevention
-    const hasLeakPrevention = (/sponsor_customer_id\s*=\s*auth\.uid\(\)/i.test(this.sqlContent) && /network_relationships/i.test(this.sqlContent)) ||
+    const hasLeakPrevention = (/sponsor_id_comprador\s*=\s*auth\.uid\(\)/i.test(this.sqlContent) && /network_relationships/i.test(this.sqlContent)) ||
                               /auth\.uid\(\)\s*=\s*ANY\(path\)/i.test(this.sqlContent);
     checks.push({
       id: "CUSTOMERS_CROSS_BRANCH_LEAK_PREVENTION",

@@ -5,7 +5,7 @@ import { EventType } from '../../../shared/events/event.types';
 
 export interface BonusWallet {
   id: string;
-  customer_id: string;
+  id_comprador: string;
   balance: number;
   available_balance: number;
   frozen_balance: number;
@@ -46,34 +46,34 @@ export class BonusWalletService {
     return BonusWalletService.instance;
   }
 
-  async getBonusWalletByCustomerId(customerId: string): Promise<BonusWallet | null> {
+  async getBonusWalletByidComprador(idComprador: string): Promise<BonusWallet | null> {
     try {
       const { data, error } = await supabase
         .from('bonus_wallets')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('id_comprador', idComprador)
         .single();
 
       if (error) {
-        logger.error('Failed to get bonus wallet', 'bonus-wallet-service', { error, customerId });
+        logger.error('Failed to get bonus wallet', 'bonus-wallet-service', { error, idComprador });
         return null;
       }
 
       return data;
     } catch (error) {
-      logger.error('Error getting bonus wallet', 'bonus-wallet-service', { error, customerId });
+      logger.error('Error getting bonus wallet', 'bonus-wallet-service', { error, idComprador });
       return null;
     }
   }
 
-  async createBonusWallet(customerId: string): Promise<BonusWallet> {
-    logger.info('Creating bonus wallet', 'bonus-wallet-service', { customerId });
+  async createBonusWallet(idComprador: string): Promise<BonusWallet> {
+    logger.info('Creating bonus wallet', 'bonus-wallet-service', { idComprador });
 
     try {
       const { data, error } = await supabase
         .from('bonus_wallets')
         .insert({
-          customer_id: customerId,
+          id_comprador: idComprador,
           balance: 0,
           available_balance: 0,
           frozen_balance: 0,
@@ -86,28 +86,28 @@ export class BonusWalletService {
         .single();
 
       if (error) {
-        logger.error('Failed to create bonus wallet', 'bonus-wallet-service', { error, customerId });
+        logger.error('Failed to create bonus wallet', 'bonus-wallet-service', { error, idComprador });
         throw error;
       }
 
-      logger.info('Bonus wallet created successfully', 'bonus-wallet-service', { walletId: data.id, customerId });
+      logger.info('Bonus wallet created successfully', 'bonus-wallet-service', { walletId: data.id, idComprador });
       return data;
     } catch (error) {
-      logger.error('Error creating bonus wallet', 'bonus-wallet-service', { error, customerId });
+      logger.error('Error creating bonus wallet', 'bonus-wallet-service', { error, idComprador });
       throw error;
     }
   }
 
-  async ensureBonusWalletExists(customerId: string): Promise<BonusWallet> {
-    let wallet = await this.getBonusWalletByCustomerId(customerId);
+  async ensureBonusWalletExists(idComprador: string): Promise<BonusWallet> {
+    let wallet = await this.getBonusWalletByidComprador(idComprador);
     if (!wallet) {
-      wallet = await this.createBonusWallet(customerId);
+      wallet = await this.createBonusWallet(idComprador);
     }
     return wallet;
   }
 
   async earnBonus(
-    customerId: string,
+    idComprador: string,
     amount: number,
     sourceType: string,
     sourceId?: string,
@@ -115,10 +115,10 @@ export class BonusWalletService {
     expiresAt?: Date,
     metadata?: Record<string, any>
   ): Promise<BonusTransaction> {
-    logger.info('Earning bonus', 'bonus-wallet-service', { customerId, amount, sourceType });
+    logger.info('Earning bonus', 'bonus-wallet-service', { idComprador, amount, sourceType });
 
     try {
-      const wallet = await this.ensureBonusWalletExists(customerId);
+      const wallet = await this.ensureBonusWalletExists(idComprador);
 
       const balanceBefore = wallet.available_balance;
       const balanceAfter = balanceBefore + amount;
@@ -170,7 +170,7 @@ export class BonusWalletService {
         timestamp: new Date().toISOString(),
         data: {
           walletId: wallet.id,
-          customerId,
+          idComprador,
           amount,
           sourceType,
           transactionId: transaction.id,
@@ -179,23 +179,23 @@ export class BonusWalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error earning bonus', 'bonus-wallet-service', { error, customerId, amount });
+      logger.error('Error earning bonus', 'bonus-wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
   async useBonus(
-    customerId: string,
+    idComprador: string,
     amount: number,
     referenceId?: string,
     referenceType?: string,
     description?: string,
     metadata?: Record<string, any>
   ): Promise<BonusTransaction> {
-    logger.info('Using bonus', 'bonus-wallet-service', { customerId, amount });
+    logger.info('Using bonus', 'bonus-wallet-service', { idComprador, amount });
 
     try {
-      const wallet = await this.ensureBonusWalletExists(customerId);
+      const wallet = await this.ensureBonusWalletExists(idComprador);
 
       if (wallet.available_balance < amount) {
         throw new Error('Insufficient bonus balance');
@@ -250,7 +250,7 @@ export class BonusWalletService {
         timestamp: new Date().toISOString(),
         data: {
           walletId: wallet.id,
-          customerId,
+          idComprador,
           amount,
           referenceId,
           transactionId: transaction.id,
@@ -259,14 +259,14 @@ export class BonusWalletService {
 
       return transaction;
     } catch (error) {
-      logger.error('Error using bonus', 'bonus-wallet-service', { error, customerId, amount });
+      logger.error('Error using bonus', 'bonus-wallet-service', { error, idComprador, amount });
       throw error;
     }
   }
 
-  async getAvailableBonusForPayment(customerId: string, productId?: string): Promise<{ available: number; maxUsagePercentage: number }> {
+  async getAvailableBonusForPayment(idComprador: string, productId?: string): Promise<{ available: number; maxUsagePercentage: number }> {
     try {
-      const wallet = await this.getBonusWalletByCustomerId(customerId);
+      const wallet = await this.getBonusWalletByidComprador(idComprador);
       if (!wallet) {
         return { available: 0, maxUsagePercentage: 50 };
       }
@@ -300,18 +300,18 @@ export class BonusWalletService {
 
       return { available, maxUsagePercentage };
     } catch (error) {
-      logger.error('Error getting available bonus', 'bonus-wallet-service', { error, customerId });
+      logger.error('Error getting available bonus', 'bonus-wallet-service', { error, idComprador });
       return { available: 0, maxUsagePercentage: 50 };
     }
   }
 
   async getBonusTransactions(
-    customerId: string,
+    idComprador: string,
     limit: number = 50,
     offset: number = 0
   ): Promise<BonusTransaction[]> {
     try {
-      const wallet = await this.getBonusWalletByCustomerId(customerId);
+      const wallet = await this.getBonusWalletByidComprador(idComprador);
       if (!wallet) {
         return [];
       }
@@ -324,13 +324,13 @@ export class BonusWalletService {
         .range(offset, offset + limit - 1);
 
       if (error) {
-        logger.error('Failed to get bonus transactions', 'bonus-wallet-service', { error, customerId });
+        logger.error('Failed to get bonus transactions', 'bonus-wallet-service', { error, idComprador });
         return [];
       }
 
       return data || [];
     } catch (error) {
-      logger.error('Error getting bonus transactions', 'bonus-wallet-service', { error, customerId });
+      logger.error('Error getting bonus transactions', 'bonus-wallet-service', { error, idComprador });
       return [];
     }
   }
@@ -355,7 +355,7 @@ export class BonusWalletService {
       }
 
       for (const transaction of expiredTransactions || []) {
-        const wallet = await this.getBonusWalletByCustomerId(transaction.bonus_wallet_id);
+        const wallet = await this.getBonusWalletByidComprador(transaction.bonus_wallet_id);
         if (!wallet) continue;
 
         const balanceBefore = wallet.available_balance;

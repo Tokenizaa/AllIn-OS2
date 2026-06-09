@@ -17,14 +17,14 @@ export class PaymentRepository extends BaseRepository<Payment> {
     return data || [];
   }
 
-  async findByCustomerId(customerId: string, options?: {
+  async findByidComprador(idComprador: string, options?: {
     limit?: number;
     offset?: number;
   }): Promise<Payment[]> {
     let query = this.getClient()
       .from(this.tableName)
       .select("*")
-      .eq("customer_id", customerId);
+      .eq("id_comprador", idComprador);
 
     if (options?.limit) {
       query = query.limit(options.limit);

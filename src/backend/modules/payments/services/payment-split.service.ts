@@ -229,7 +229,7 @@ export class PaymentSplitService {
       const { data: existingWallet, error: existingWalletError } = await supabase
         .from('wallets')
         .select('*')
-        .eq('customer_id', recipientId)
+        .eq('id_comprador', recipientId)
         .single();
 
       if (existingWalletError && existingWalletError.code !== 'PGRST116') {
@@ -245,7 +245,7 @@ export class PaymentSplitService {
       const { data: newWallet, error: createError } = await supabase
         .from('wallets')
         .insert({
-          customer_id: recipientId,
+          id_comprador: recipientId,
           balance: 0,
           available_balance: 0,
           frozen_balance: 0,
