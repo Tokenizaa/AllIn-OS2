@@ -18,13 +18,13 @@ export function StorePage() {
   const { data: products = [], isLoading } = useProducts(12);
 
   const storeAnalytics = useMemo(() => ({
-    visitas_mes: products.length * 120,
+    visitas_mes: products.length > 0 ? products.length * 120 : 0,
     visitas_var: 0,
-    conversao: products.length ? 8 : 0,
+    conversao: products.length > 0 ? 8 : 0,
     conversao_var: 0,
     vendas_link: products.length,
     vendas_var: 0,
-    ticket_medio: products.reduce((sum, item) => sum + Number(item.price || 0), 0) / Math.max(1, products.length),
+    ticket_medio: products.length > 0 ? products.reduce((sum, item) => sum + Number(item.price || 0), 0) / products.length : 0,
     share_chart: [
       { name: "Orgânico", value: 42 },
       { name: "Campanhas", value: 33 },

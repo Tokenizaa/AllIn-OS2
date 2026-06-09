@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { BarChart3, TrendingUp, ArrowUpRight, FileSpreadsheet, FileText, Activity, ShoppingCart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePayments } from "@/hooks/payments/usePayments";
+import { CustomerService } from "@/services/customers";
 import { toast } from "sonner";
 import { formatCurrency } from "@/utils/priceFormatter";
 
@@ -13,8 +14,25 @@ export function ReportsPage() {
   const [timeframe, setTimeframe] = useState("30");
   const [isExporting, setIsExporting] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<"vendas" | "comissoes" | "retencao">("vendas");
+  const [customerBonus, setCustomerBonus] = useState<any>(null);
 
   const { data: payments = [], isLoading } = usePayments(500);
+
+  useEffect(() => {
+    const fetchCustomerBonus = async () => {
+      try {
+        const customers = await CustomerService.fetchAnalyticsCustomers();
+        const currentCustomer = customers[0];
+        if (currentCustomer?.id_comprador) {
+          const bonus = await CustomerService.fetchCustomerBonus(currentCustomer.id_comprador);
+          setCustomerBonus(bonus);
+        }
+      } catch (error) {
+        console.error("Error fetching customer bonus for reports:", error);
+      }
+    };
+    fetchCustomerBonus();
+  }, []);
 
   const points = useMemo<ReportPoint[]>(() => {
     const monthMap = new Map<string, { vendas: number; comissoes: number; count: number }>();
@@ -23,10 +41,20 @@ export function ReportsPage() {
       const entry = monthMap.get(month) || { vendas: 0, comissoes: 0, count: 0 };
       const amount = Number(row.amount || 0);
       entry.vendas += amount;
-      entry.comissoes += amount * 0.18;
       entry.count += 1;
       monthMap.set(month, entry);
     });
+    
+    // Calculate real commissions from customer bonus
+    const totalBonus = Number(customerBonus?.total_bonus || 0);
+    const totalSales = Array.from(monthMap.values()).reduce((sum, v) => sum + v.vendas, 0);
+    
+    if (totalSales > 0 && totalBonus > 0) {
+      Array.from(monthMap.entries()).forEach(([_, value]) => {
+        value.comissoes = (value.vendas / totalSales) * totalBonus;
+      });
+    }
+    
     return Array.from(monthMap.entries()).map(([month, value]) => ({
       month,
       vendas: value.vendas,
@@ -34,7 +62,7 @@ export function ReportsPage() {
       retencao: 90 + Math.min(9, value.count % 10),
       conversao: 4 + Math.min(4, value.count % 5),
     }));
-  }, [payments]);
+  }, [payments, customerBonus]);
 
   const summary = useMemo(() => {
     const totalSales = points.reduce((sum, item) => sum + item.vendas, 0);

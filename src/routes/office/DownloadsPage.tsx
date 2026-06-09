@@ -18,6 +18,10 @@ export function DownloadsPage() {
     { id: "p3", title: "Estratégia de Vendas", category: "estratégia" },
   ], []);
 
+  // NOTE: This page currently uses hardcoded items as a placeholder.
+  // To integrate with real data, create a downloads table in Supabase
+  // and fetch data using a service similar to CustomerService.
+
   const filteredLibrary = items.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) || item.category.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = activeCategory === "all" || item.category === activeCategory || (activeCategory === "favorites" && favorites.includes(item.id));

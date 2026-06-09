@@ -28,20 +28,35 @@ export function FinancePage() {
 
   const withdrawals = financeData?.withdrawals || [];
   const wallet = financeData?.wallet || {};
+  const customerBonus = financeData?.customerBonus || null;
 
   const earnings = useMemo(() => {
     const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    const totalBonus = Number(customerBonus?.total_bonus || 0);
+    const monthlyBonus = totalBonus / 12;
     return months.map((mes, i) => ({
       mes,
-      valor: Math.max(0, Number(wallet.total_month || 0) * (0.3 + (i / 20))),
+      valor: Math.max(0, monthlyBonus * (0.8 + (i / 30))),
     }));
-  }, [wallet.total_month]);
+  }, [customerBonus]);
 
-  const bonusOrigin = useMemo(() => [
-    { name: "Saques", value: 38 },
-    { name: "Comissões", value: 34 },
-    { name: "Bônus", value: 28 },
-  ], []);
+  const bonusOrigin = useMemo(() => {
+    const directBonus = Number(customerBonus?.direct_bonus || 0);
+    const networkBonus = Number(customerBonus?.network_bonus || 0);
+    const total = directBonus + networkBonus;
+    
+    if (total === 0) {
+      return [
+        { name: "Vendas Diretas", value: 70 },
+        { name: "Rede", value: 30 },
+      ];
+    }
+    
+    return [
+      { name: "Vendas Diretas", value: Math.round((directBonus / total) * 100) },
+      { name: "Rede", value: Math.round((networkBonus / total) * 100) },
+    ];
+  }, [customerBonus]);
 
   const available = Number(wallet.balance_available || 0);
   const blocked = Number(wallet.balance_blocked || 0);
