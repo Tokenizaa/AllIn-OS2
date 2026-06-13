@@ -1,3 +1,16 @@
+/**
+ * CustomerService
+ * 
+ * IDENTIFIER STRATEGY:
+ * This service uses `id_comprador` (text) as the canonical identifier for customer operations.
+ * The `customers.id` (UUID) is only used as a technical primary key in the database.
+ * 
+ * Rationale: The entire application is built around id_comprador (247 occurrences across 54 files).
+ * Using it consistently avoids confusion and maintains compatibility with the existing system.
+ * 
+ * For migration planning, see: docs/IDENTITY_MIGRATION_MASTER_PLAN.md
+ */
+
 import { supabase } from "@/lib/supabase-client";
 
 export const CustomerService = {
@@ -24,7 +37,7 @@ export const CustomerService = {
   async fetchDownlines(compradorId: string) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, usuario, id_comprador, status, telefone, created_at, cidade, estado, nome_completo")
+      .select("id, usuario, id_comprador, telefone, created_at, cidade, estado, nome_completo")
       .eq("patrocinador_comprador", compradorId)
       .order("created_at", { ascending: false });
     if (error) throw error;
@@ -34,7 +47,7 @@ export const CustomerService = {
   async fetchCustomersList(limit = 100) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, nome_completo, email, status, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone, plano_comprador")
+      .select("id, nome_completo, email, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone, plano_comprador")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -48,7 +61,7 @@ export const CustomerService = {
     const [{ data: customerData, error: customerError, count: customerCount }, { data: orderStats, error: statsError }] = await Promise.all([
       supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, status, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
+        .select("id, user_id, usuario, id_comprador, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to),
       supabase
@@ -81,7 +94,7 @@ export const CustomerService = {
   async fetchRecentCustomers(limit = 20) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, usuario, id_comprador, status, cidade, estado, user_id, nome_completo")
+      .select("id, usuario, id_comprador, cidade, estado, user_id, nome_completo")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -91,7 +104,7 @@ export const CustomerService = {
   async fetchNetworkMembers(limit = 500) {
     const { data, error } = await supabase
       .from("customers")
-      .select("id, usuario, id_comprador, user_id, status, cidade, estado, nome_completo")
+      .select("id, usuario, id_comprador, user_id, cidade, estado, nome_completo")
       .limit(limit);
     if (error) throw error;
     return data || [];

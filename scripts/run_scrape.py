@@ -25,8 +25,8 @@ from scrape.transformers import SupabaseTransformer
 from scrape.loaders import SupabaseLoader
 
 # Configurações
-SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://isjsydhuqurneswstlyx.supabase.co')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...')
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://kynbbidsjzfccelqpohu.supabase.co')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5bmJiaWRzanpmY2NlbHFwb2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTM5OTUsImV4cCI6MjA5NjYyOTk5NX0.M5hew-WBZVBoikt-hKBdlJZpWy4M8hnBekFOaNrbueg')
 LOJA_VIRTUAL_BASE_URL = "https://allinbrasil.com.br/loja/admin"
 BATCH_SIZE = 100  # Salvar no banco a cada 100 pedidos
 CHECKPOINT_FILE = "data/checkpoint.json"
@@ -127,7 +127,7 @@ def main():
     try:
         # 2. Executar scrape completo automático (alinhamento de dados)
         print("\n🎯 Iniciando scrape completo para alinhamento de dados...")
-        # Scrape completo sem limites - usando função corrigida com batch processing
+        # Scrape completo sem limites
         scrape_orders_with_customers(session, loja_base_url, token, SUPABASE_URL, SUPABASE_KEY, limit_orders=None)
         
         print("\n🎉 Scrape finalizado!")
@@ -320,25 +320,12 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
             print(f"⚠️ Erro ao contar order_items: {e}")
             current_order_items = 0
         
-        # Consultar o último pedido salvo no banco
-        last_order_in_db = None
-        if current_orders > 0:
-            try:
-                last_order_result = supabase_client.table('orders').select('numero_pedido, data_criacao').order('data_criacao', desc=True).limit(1).execute()
-                if last_order_result.data:
-                    last_order_in_db = last_order_result.data[0]
-            except Exception as e:
-                print(f"⚠️ Erro ao consultar último pedido: {e}")
-        
         print(f"\n{'='*60}")
         print(f"📊 ESTADO ATUAL DO BANCO DE DADOS")
         print(f"{'='*60}")
         print(f"📦 Orders no banco: {current_orders}")
         print(f"👥 Customers no banco: {current_customers}")
         print(f"📦 Order items no banco: {current_order_items}")
-        if last_order_in_db:
-            print(f"🆔 Último pedido no banco: {last_order_in_db['numero_pedido']}")
-            print(f"📅 Data do último pedido: {last_order_in_db.get('data_criacao', 'N/A')}")
         print(f"{'='*60}\n")
     except Exception as e:
         print(f"⚠️ Não foi possível consultar o estado atual do banco: {e}")
@@ -347,53 +334,17 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
         current_orders = 0
         current_customers = 0
         current_order_items = 0
-        last_order_in_db = None
     
-    # Determinar ponto de retomada baseado no banco de dados
-    last_order_to_resume = None
-    if last_order_in_db:
-        last_order_to_resume = last_order_in_db['numero_pedido']
-        print(f"\n📊 Ponto de retomada baseado no banco: último pedido {last_order_to_resume}")
-        print(f"🔄 O scrape continuará a partir deste pedido")
-        checkpoint = None  # Ignorar checkpoint, usar banco como fonte de verdade
-    
+    # Determinar ponto de retomada baseado no checkpoint
     if checkpoint:
         print(f"\n{'='*60}")
         print(f"🔄 CHECKPOINT ENCONTRADO - RETOMANDO SCRAPE")
         print(f"{'='*60}")
         print(f"📊 Pedidos processados no checkpoint: {checkpoint['processed_orders']}")
-        print(f"🆔 Último pedido processado: {checkpoint['last_order_id']}")
+        print(f"🆔 Último pedido processado: {checkpoint.get('last_order_id', 'N/A')}")
+        print(f"� Offset de retomada: {checkpoint.get('per_page', 0)}")
         print(f"⏰ Timestamp do checkpoint: {checkpoint.get('timestamp', 'N/A')}")
-        
-        # Validar sincronização do checkpoint com o banco
-        checkpoint_valid = True
-        if 'db_state' in checkpoint:
-            db_state = checkpoint['db_state']
-            checkpoint_orders = db_state.get('orders_in_db', 0)
-            print(f"📊 Orders no checkpoint: {checkpoint_orders}")
-            print(f"📊 Orders no banco atual: {current_orders}")
-            
-            # Verificar se há discrepância significativa (mais de 10% de diferença)
-            if current_orders > 0:
-                diff = abs(current_orders - checkpoint_orders)
-                if diff > (checkpoint_orders * 0.1):
-                    print(f"\n⚠️ ATENÇÃO: Discrepância significativa entre checkpoint e banco!")
-                    print(f"⚠️ Checkpoint indica {checkpoint_orders} orders, banco tem {current_orders}")
-                    print(f"⚠️ Diferença: {diff} orders ({diff/checkpoint_orders*100:.1f}%)")
-                    print(f"⚠️ O checkpoint será ignorado e o scrape usará o banco como fonte de verdade.")
-                    checkpoint_valid = False
-        
-        # Verificar se o checkpoint é válido (banco não está vazio)
-        if current_orders == 0 and checkpoint['processed_orders'] > 0:
-            print(f"\n⚠️ ATENÇÃO: O banco de dados está vazio mas o checkpoint indica {checkpoint['processed_orders']} pedidos processados!")
-            print(f"⚠️ Isso sugere que o banco foi limpo ou resetado.")
-            print(f"⚠️ O checkpoint será ignorado e o scrape começará do zero.")
-            print(f"� Para usar o checkpoint, delete o arquivo: {CHECKPOINT_FILE}")
-            print(f"{'='*60}\n")
-            checkpoint = None  # Ignorar checkpoint inválido
-        else:
-            print(f"� O scrape continuará a partir deste ponto")
-            print(f"{'='*60}\n")
+        print(f"{'='*60}\n")
     else:
         print(f"\n🆕 Iniciando scrape do zero (nenhum checkpoint encontrado)")
     
@@ -422,18 +373,12 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
     per_page = 15
     total_processed = 0
     
-    # Se retomando do último pedido do banco ou checkpoint, começar do offset correto
-    start_offset = 0
-    if last_order_to_resume:
-        # Usar o último pedido do banco como ponto de retomada
-        print(f"🔄 Retomando a partir do último pedido no banco: {last_order_to_resume}")
-        # Começar do offset 0 e pular até encontrar o pedido
-        per_page = 0
-    elif checkpoint and checkpoint.get('last_order_id'):
-        # Fallback para checkpoint se não tiver último pedido no banco
-        start_offset = checkpoint.get('processed_orders', 0)
-        per_page = start_offset + 15
-        print(f"🔄 Retomando do offset: {per_page} (baseado no checkpoint)")
+    # Se retomando do checkpoint, usar o offset salvo
+    if checkpoint and checkpoint.get('per_page'):
+        per_page = checkpoint['per_page']
+        total_processed = checkpoint.get('processed_orders', 0)
+        print(f"🔄 Retomando do offset: {per_page} (página {(per_page // 15) + 1})")
+        print(f"🔄 Total já processado: {total_processed} pedidos")
     
     while True:
         print(f"\n📄 Extraindo página #{(per_page // 15) + 1} de pedidos (offset: {per_page})...")
@@ -476,25 +421,15 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
             
             # Processar cada pedido imediatamente
             for idx, order_id in enumerate(page_orders, 1):
-                # Pular se já foi processado (último pedido do banco ou checkpoint)
-                if last_order_to_resume:
-                    if order_id == last_order_to_resume:
-                        print(f"   ✅ Último pedido do banco encontrado: {order_id}")
-                        print(f"   🔄 Continuando processamento normal a partir do próximo pedido...")
-                        last_order_to_resume = None  # Último pedido encontrado, continuar
+                # Verificar se o pedido já existe no banco (para evitar reprocessamento)
+                try:
+                    existing_order = supabase_client.table('orders').select('id').eq('numero_pedido', order_id).limit(1).execute()
+                    if existing_order.data:
+                        print(f"   ⏭️  Pedido {order_id} já existe no banco, pulando...")
                         continue
-                    if last_order_to_resume:
-                        print(f"   ⏭️  Pulando pedido {order_id} (já está no banco)")
-                        continue  # Ainda não chegou ao último pedido
-                elif checkpoint and checkpoint.get('last_order_id'):
-                    if order_id == checkpoint['last_order_id']:
-                        print(f"   ✅ Último pedido do checkpoint encontrado: {order_id}")
-                        print(f"   🔄 Continuando processamento normal...")
-                        checkpoint = None  # Último pedido encontrado, continuar
-                        continue
-                    if checkpoint:
-                        print(f"   ⏭️  Pulando pedido {order_id} (já processado no checkpoint)")
-                        continue  # Ainda não chegou ao último pedido
+                except Exception as e:
+                    print(f"   ⚠️ Erro ao verificar existência do pedido {order_id}: {e}")
+                    # Continuar processamento em caso de erro na verificação
                 
                 # Verificar limite
                 if limit_orders and total_processed >= limit_orders:
@@ -694,10 +629,11 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                         
                         batch_order_items = []
                     
-                    # Salvar checkpoint com estado do banco
+                    # Salvar checkpoint com estado do banco e offset
                     checkpoint_data = {
                         'processed_orders': total_processed,
-                        'last_order_id': order_id
+                        'last_order_id': order_id,
+                        'per_page': per_page + 15  # Salvar próximo offset para retomada
                     }
                     # Incluir estado atual do banco para sincronização
                     db_state = {

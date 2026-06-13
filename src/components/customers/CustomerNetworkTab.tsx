@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Users, ArrowUpRight } from "lucide-react";
+import { Users, ArrowUpRight, TrendingUp, Network } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { KpiCard } from "@/components/widgets/kpi-card";
+import { formatBRL } from "@/lib/customer-calculations";
 
 const statusStyles: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
@@ -14,11 +16,41 @@ const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
 interface CustomerNetworkTabProps {
   customer: any;
   downlines: any[];
+  networkMetrics?: any;
 }
 
-export function CustomerNetworkTab({ customer, downlines }: CustomerNetworkTabProps) {
+export function CustomerNetworkTab({ customer, downlines, networkMetrics }: CustomerNetworkTabProps) {
+  const directIndications = networkMetrics?.direct_indications || downlines.length;
+  const totalNetworkSize = networkMetrics?.total_network_size || 0;
+  const estimatedBonus = networkMetrics?.estimated_bonus || 0;
+  const networkLevel = networkMetrics?.network_level || 0;
+
   return (
     <div className="space-y-4">
+      {/* Network Metrics KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KpiCard 
+          label="Indicações Diretas" 
+          value={String(directIndications)} 
+          icon={<Users className="h-4 w-4" />}
+        />
+        <KpiCard 
+          label="Rede Total" 
+          value={String(totalNetworkSize)} 
+          icon={<Network className="h-4 w-4" />}
+        />
+        <KpiCard 
+          label="Bônus Estimado" 
+          value={formatBRL(estimatedBonus)} 
+          icon={<TrendingUp className="h-4 w-4" />}
+        />
+        <KpiCard 
+          label="Nível de Rede" 
+          value={String(networkLevel)} 
+        />
+      </div>
+
+      {/* Downlines Table */}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-white">Parceiros da Rede (Indicações Diretas)</h3>

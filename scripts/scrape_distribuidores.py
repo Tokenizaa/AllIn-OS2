@@ -23,8 +23,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from scrape.auth import LojaVirtualAuth
 
 # Configurações
-SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://isjsydhuqurneswstlyx.supabase.co')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...')
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://kynbbidsjzfccelqpohu.supabase.co')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5bmJiaWRzanpmY2NlbHFwb2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTM5OTUsImV4cCI6MjA5NjYyOTk5NX0.M5hew-WBZVBoikt-hKBdlJZpWy4M8hnBekFOaNrbueg')
 ADMIN_BASE_URL = "https://allinbrasil.com.br/administracao"
 DISTRIBUIDORES_INFO_URL = f"{ADMIN_BASE_URL}/Distribuidor/DistribuidoresInformacoes/principal"
 BATCH_SIZE = 100  # Salvar no banco a cada 100 distribuidores
@@ -135,41 +135,40 @@ def parse_datetime(datetime_str):
 
 
 def transform_distribuidor(row_data):
-    """Transformar dados do distribuidor para formato do Supabase"""
+    """Transformar dados do distribuidor para formato do Supabase (estrutura exata da tabela real)"""
     return {
-        "distribuidor_id": row_data.get('distribuidor_id'),
+        "numero": row_data.get('distribuidor_id'),
         "usuario": row_data.get('usuario'),
         "nome": row_data.get('nome'),
-        "email": row_data.get('email'),
-        "patrocinador": row_data.get('patrocinador'),
-        "tipo": row_data.get('tipo'),
+        "motivo_exclusao": row_data.get('motivo_exclusao'),
+        "indicador": row_data.get('patrocinador'),
+        "qualificacoes_atuais": row_data.get('qualificacoes_atuais'),
         "tipo_pessoa": row_data.get('tipo_pessoa'),
         "cpf_cnpj": row_data.get('cpf_cnpj'),
-        "rg": row_data.get('rg'),
+        "rg_ie": row_data.get('rg'),
         "data_nascimento": parse_date(row_data.get('data_nascimento')),
         "sexo": row_data.get('sexo'),
+        "pis": row_data.get('pis'),
+        "email": row_data.get('email'),
+        "resumo": row_data.get('resumo'),
         "endereco": row_data.get('endereco'),
-        "numero": row_data.get('numero'),
+        "numero_endereco": row_data.get('numero'),
         "complemento": row_data.get('complemento'),
         "cidade": row_data.get('cidade'),
-        "estado": row_data.get('estado'),
+        "uf": row_data.get('estado'),
         "cep": row_data.get('cep'),
-        "telefone": row_data.get('telefone'),
+        "fones": row_data.get('telefone'),
         "data_cadastro": parse_datetime(row_data.get('data_cadastro')),
-        "link_indicacao": row_data.get('link_indicacao'),
-        "plano_codigo": row_data.get('plano_codigo'),
-        "plano_nome": row_data.get('plano_nome'),
-        "plano_data": parse_date(row_data.get('plano_data')),
-        "plano_valor": parse_currency(row_data.get('plano_valor')),
-        "plano_atual_codigo": row_data.get('plano_atual_codigo'),
-        "plano_atual_nome": row_data.get('plano_atual_nome'),
-        "plano_atual_data": parse_date(row_data.get('plano_atual_data')),
-        "plano_atual_valor": parse_currency(row_data.get('plano_atual_valor')),
-        "status": row_data.get('status'),
-        "metadata": {
-            "imagem": row_data.get('imagem'),
-            "doc_aprovado_status": row_data.get('doc_aprovado')
-        }
+        "tipo_cadastro": row_data.get('tipo_cadastro'),
+        "pedido_plano_ini": row_data.get('pedido_plano_ini'),
+        "plano_ini": row_data.get('plano_ini'),
+        "data_plano_ini": parse_date(row_data.get('data_plano_ini')),
+        "val_plano_ini": parse_currency(row_data.get('val_plano_ini')),
+        "pedido_plano_atual": row_data.get('pedido_plano_atual'),
+        "plano_atual": row_data.get('plano_atual'),
+        "data_plano_atual": parse_date(row_data.get('data_plano_atual')),
+        "val_plano_atual": parse_currency(row_data.get('val_plano_atual')),
+        "ativo": row_data.get('status')
     }
 
 
@@ -268,17 +267,17 @@ def scrape_distribuidores(session, base_url, token, supabase_url, supabase_key, 
                         'distribuidor_id': int(cells[0].text.strip()),
                         'usuario': cells[1].text.strip(),
                         'nome': cells[2].text.strip(),
-                        'imagem': cells[3].find('img') is not None,
+                        'motivo_exclusao': cells[3].text.strip(),
                         'patrocinador': cells[4].text.strip(),
-                        'tipo': cells[5].text.strip(),
+                        'qualificacoes_atuais': cells[5].text.strip(),
                         'tipo_pessoa': cells[6].text.strip(),
                         'cpf_cnpj': cells[7].text.strip(),
                         'rg': cells[8].text.strip(),
                         'data_nascimento': cells[9].text.strip(),
                         'sexo': cells[10].text.strip(),
-                        'imagem2': cells[11].find('img') is not None,
+                        'pis': cells[11].text.strip(),
                         'email': cells[12].text.strip(),
-                        'imagem3': cells[13].find('img') is not None,
+                        'resumo': cells[13].text.strip(),
                         'endereco': cells[14].text.strip(),
                         'numero': cells[15].text.strip(),
                         'complemento': cells[16].text.strip(),
@@ -287,15 +286,15 @@ def scrape_distribuidores(session, base_url, token, supabase_url, supabase_key, 
                         'cep': cells[19].text.strip(),
                         'telefone': cells[20].text.strip(),
                         'data_cadastro': cells[21].text.strip(),
-                        'link_indicacao': cells[22].text.strip(),
-                        'plano_codigo': cells[23].text.strip(),
-                        'plano_nome': cells[24].text.strip(),
-                        'plano_data': cells[25].text.strip(),
-                        'plano_valor': cells[26].text.strip(),
-                        'plano_atual_codigo': cells[27].text.strip(),
-                        'plano_atual_nome': cells[28].text.strip(),
-                        'plano_atual_data': cells[29].text.strip(),
-                        'plano_atual_valor': cells[30].text.strip(),
+                        'tipo_cadastro': cells[22].text.strip(),
+                        'pedido_plano_ini': cells[23].text.strip(),
+                        'plano_ini': cells[24].text.strip(),
+                        'data_plano_ini': cells[25].text.strip(),
+                        'val_plano_ini': cells[26].text.strip(),
+                        'pedido_plano_atual': cells[27].text.strip(),
+                        'plano_atual': cells[28].text.strip(),
+                        'data_plano_atual': cells[29].text.strip(),
+                        'val_plano_atual': cells[30].text.strip(),
                         'status': cells[31].text.strip()
                     }
                     
@@ -313,17 +312,21 @@ def scrape_distribuidores(session, base_url, token, supabase_url, supabase_key, 
                     if len(batch_distribuidores) >= BATCH_SIZE:
                         print(f"💾 Salvando batch de {len(batch_distribuidores)} distribuidores no banco...")
                         
-                        # Salvar no Supabase
-                        for dist in batch_distribuidores:
+                        # Salvar no Supabase (estrutura exata da tabela real)
+                        for dist_data in batch_distribuidores:
                             try:
-                                existing = supabase.table('distribuidores').select('id').eq('distribuidor_id', dist['distribuidor_id']).execute()
+                                # Verificar se distribuidor já existe por numero
+                                existing = supabase.table('distribuidores').select('id').eq('numero', dist_data['numero']).execute()
                                 
-                                if existing.data:
-                                    supabase.table('distribuidores').update(dist).eq('distribuidor_id', dist['distribuidor_id']).execute()
+                                if existing and existing.data:
+                                    # Atualizar distribuidor existente
+                                    dist_id = existing.data[0]['id']
+                                    supabase.table('distribuidores').update(dist_data).eq('id', dist_id).execute()
                                 else:
-                                    supabase.table('distribuidores').insert(dist).execute()
+                                    # Criar novo distribuidor
+                                    supabase.table('distribuidores').insert(dist_data).execute()
                             except Exception as e:
-                                print(f"❌ Erro ao salvar distribuidor {dist['distribuidor_id']}: {e}")
+                                print(f"❌ Erro ao salvar distribuidor {dist_data['numero']}: {e}")
                         
                         # Salvar backup JSON
                         save_to_json(batch_distribuidores, "distribuidores.json")
@@ -365,16 +368,20 @@ def scrape_distribuidores(session, base_url, token, supabase_url, supabase_key, 
     if batch_distribuidores:
         print(f"💾 Salvando {len(batch_distribuidores)} distribuidores restantes no banco...")
         
-        for dist in batch_distribuidores:
+        for dist_data in batch_distribuidores:
             try:
-                existing = supabase.table('distribuidores').select('id').eq('distribuidor_id', dist['distribuidor_id']).execute()
+                # Verificar se distribuidor já existe por numero
+                existing = supabase.table('distribuidores').select('id').eq('numero', dist_data['numero']).execute()
                 
-                if existing.data:
-                    supabase.table('distribuidores').update(dist).eq('distribuidor_id', dist['distribuidor_id']).execute()
+                if existing and existing.data:
+                    # Atualizar distribuidor existente
+                    dist_id = existing.data[0]['id']
+                    supabase.table('distribuidores').update(dist_data).eq('id', dist_id).execute()
                 else:
-                    supabase.table('distribuidores').insert(dist).execute()
+                    # Criar novo distribuidor
+                    supabase.table('distribuidores').insert(dist_data).execute()
             except Exception as e:
-                print(f"❌ Erro ao salvar distribuidor {dist['distribuidor_id']}: {e}")
+                print(f"❌ Erro ao salvar distribuidor {dist_data['numero']}: {e}")
         
         save_to_json(batch_distribuidores, "distribuidores.json")
     
@@ -409,7 +416,7 @@ def main():
     
     # 2. Executar scrape de distribuidores
     print("\n🎯 Iniciando scrape de distribuidores...")
-    # Scrape completo sem limite
+    # Scrape completo
     scrape_distribuidores(session, ADMIN_BASE_URL, token, SUPABASE_URL, SUPABASE_KEY, limit_distribuidores=None)
     
     print("\n🎉 Scrape finalizado!")

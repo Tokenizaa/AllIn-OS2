@@ -2,7 +2,7 @@ import { UserRole } from "@/shared/types/roles";
 import { User } from "./context/auth.types";
 
 export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
-  [UserRole.ADMIN_MASTER]: "/analytics",
+  [UserRole.ADMIN_MASTER]: "/customers",
   [UserRole.GESTAO_ADMIN]: "/analytics",
   [UserRole.FINANCEIRO]: "/wallets",
   [UserRole.SUPORTE]: "/customers",

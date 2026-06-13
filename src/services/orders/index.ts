@@ -55,7 +55,7 @@ export const OrderService = {
 
     const [{ data: ordersData, error: ordersError, count: ordersCount }, { data: customersData, error: customersError }] = await Promise.all([
       supabase.from("orders").select("*", { count: "exact" }).order("created_at", { ascending: false }).range(from, to),
-      supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
+      supabase.from("customers").select("id, usuario, id_comprador, user_id, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
     ]);
     if (ordersError) throw ordersError;
     if (customersError) throw customersError;
@@ -117,11 +117,11 @@ export const OrderService = {
     };
 
     const calculateTotalRevenue = async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("valor_total_pedido");
+      // OTIMIZAÇÃO: Usar RPC function para calcular SUM no banco
+      const { data, error } = await supabase.rpc('calculate_total_revenue');
+      
       if (error) throw error;
-      return data?.reduce((sum: number, order: any) => sum + Number(order.valor_total_pedido || 0), 0) || 0;
+      return data || 0;
     };
 
     const [

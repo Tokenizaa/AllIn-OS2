@@ -24,7 +24,7 @@ export const NetworkService = {
   async fetchSponsorRelationship(idComprador: string) {
     const { data, error } = await supabase
       .from("network_relationships")
-      .select("id_comprador,sponsor_id_comprador,level")
+      .select("distributor_id,sponsor_id,level")
       .eq("id_comprador", idComprador)
       .maybeSingle();
     if (error) throw error;
@@ -34,7 +34,7 @@ export const NetworkService = {
   async fetchUplineRelationships(idComprador: string) {
     const { data, error } = await supabase
       .from("network_relationships")
-      .select("id_comprador,sponsor_id_comprador,level")
+      .select("distributor_id,sponsor_id,level")
       .eq("id_comprador", idComprador)
       .order("level", { ascending: true });
     if (error) throw error;
@@ -44,8 +44,8 @@ export const NetworkService = {
   async countDirectRelationships(idComprador: string) {
     const { data, error } = await supabase
       .from("network_relationships")
-      .select("id_comprador")
-      .eq("sponsor_id_comprador", idComprador);
+      .select("distributor_id")
+      .eq("id_comprador", idComprador);
     if (error) throw error;
     return data?.length || 0;
   }

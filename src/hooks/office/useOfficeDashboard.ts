@@ -31,7 +31,7 @@ export function useOfficeDashboard() {
       const saldoDisponivel = Math.max(0, totalPago - withdrawals.reduce((sum, row) => sum + Number(row.amount || 0), 0));
 
       // Get customer bonus and plan data
-      const currentCustomer = customers[0]; // Assuming logged-in customer
+      const currentProfile = lastProfile; // Assuming logged-in profile
       let customerBonus = null;
       let customerPlan = null;
       let totalBonus = 0;
@@ -39,11 +39,12 @@ export function useOfficeDashboard() {
       let networkBonus = 0;
       let planName = "Plano Padrão";
 
-      if (currentCustomer?.id_comprador) {
+      // MIGRAÇÃO EM PROGRESSO: Usando ProfileService em vez de CustomerService
+      if (currentProfile?.id) {
         try {
           const [bonusData, planData] = await Promise.all([
-            CustomerService.fetchCustomerBonus(currentCustomer.id_comprador),
-            CustomerService.fetchCustomerPlan(currentCustomer.id_comprador),
+            ProfileService.fetchProfileBonus(currentProfile.id),
+            ProfileService.fetchProfilePlan(currentProfile.id),
           ]);
           customerBonus = bonusData;
           customerPlan = planData;
@@ -71,11 +72,11 @@ export function useOfficeDashboard() {
         ticketMedio,
         conversaoLoja: conversion,
         crescimentoRedeMes: 0,
-        nome: lastProfile?.name || currentCustomer?.nome_completo || "Usuário",
-        qualificacao: "Ativo",
+        nome: lastProfile?.name || "Usuário",
+        qualification: "Ativo",
         plano: planName,
         progresso: Math.min(100, conversion),
-        proximaQualificacao: "Meta seguinte",
+        proximaQualification: "Meta seguinte",
         linkLoja: window.location.origin,
       };
 

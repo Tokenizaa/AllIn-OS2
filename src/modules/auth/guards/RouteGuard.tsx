@@ -51,25 +51,33 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        // Redirect to Login page and preserve return url
-        navigate({
-          to: "/login",
-          search: location.pathname === "/" ? undefined : { redirect: location.pathname }
-        });
+        // Only redirect if not already on login page
+        if (location.pathname !== "/login") {
+          navigate({
+            to: "/login",
+            search: location.pathname === "/" ? undefined : { redirect: location.pathname }
+          });
+        }
         return;
       }
 
       // Check role permissions
       if (allowedRoles && !allowedRoles.includes(user.role)) {
-        // Role mismatch redirect to their respective primary view
-        navigate({ to: getPrimaryPathForRole(user.role) });
+        const targetPath = getPrimaryPathForRole(user.role);
+        // Only redirect if not already on target path
+        if (location.pathname !== targetPath) {
+          navigate({ to: targetPath });
+        }
         return;
       }
 
       // Check specific modular permission
       if (inferredPermission && !hasPermission(inferredPermission.module, inferredPermission.action || "read")) {
-        // No permission error card redirect or similar
-        navigate({ to: getRoleRedirectPath(user) });
+        const targetPath = getRoleRedirectPath(user);
+        // Only redirect if not already on target path
+        if (location.pathname !== targetPath) {
+          navigate({ to: targetPath });
+        }
       }
     }
   }, [user, loading, allowedRoles, inferredPermission, navigate, location.pathname, hasPermission]);

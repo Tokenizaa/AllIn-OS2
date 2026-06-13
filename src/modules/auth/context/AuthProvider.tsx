@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AuthContext } from "./AuthContext";
 import { AuthContextType } from "./auth.types";
 import { User, DistributorProfile, AdminInvite } from "./auth.types";
@@ -23,6 +23,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [distributorProfile, setDistributorProfile] = useState<DistributorProfile | null>(null);
   const [activeSponsor, setActiveSponsor] = useState<string | null>(null);
   const [activeReferralMetadata, setActiveReferralMetadata] = useState<any | null>(null);
+  
+  // Ref to track loaded user ID to prevent unnecessary reloads
+  const loadedUserIdRef = useRef<string | null>(null);
 
   const isPublicAuthRoute = () => {
     if (typeof window === "undefined") return false;
@@ -93,6 +96,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
+        // Set loadedUserIdRef immediately to prevent onAuthStateChange from refetching
+        loadedUserIdRef.current = session.user.id;
+
         // Fetch user profile with timeout protection
         const profilePromise = SupabaseService.fetchUserProfile(session.user.id);
         const timeoutPromise = new Promise<null>((_, reject) => 
@@ -115,14 +121,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        try {
-          const tracking = await referralTrackingService.getReferralTracking(currentUser.id);
-          if (isMounted && tracking) {
-            setActiveSponsor(tracking.distributor_slug);
-            setActiveReferralMetadata(tracking.metadata);
+        // Carregar referral_tracking apenas para distribuidores e afiliados
+        if (currentUser.role === UserRole.DISTRIBUIDOR || currentUser.role === UserRole.AFILIADO) {
+          try {
+            const tracking = await referralTrackingService.getReferralTracking(currentUser.id);
+            if (isMounted && tracking) {
+              setActiveSponsor(tracking.distributor_slug);
+              setActiveReferralMetadata(tracking.metadata);
+            }
+          } catch (error) {
+            console.error("[AuthProvider] Error loading referral tracking:", error);
           }
-        } catch (error) {
-          console.error("[AuthProvider] Error loading referral tracking:", error);
         }
       } catch (error) {
         console.error("[AuthProvider] Fatal error during initialization:", error);
@@ -134,27 +143,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("[AuthProvider] onAuthStateChange - event:", _event, "session exists:", !!session?.user);
+      console.log("[AuthProvider] onAuthStateChange - current user:", user?.id, "session user:", session?.user?.id);
+      console.log("[AuthProvider] onAuthStateChange - loadedUserIdRef:", loadedUserIdRef.current);
+      
       if (!isMounted) return;
+      
+      // Set loadedUserIdRef immediately when session exists to prevent refetch
+      if (session?.user && !loadedUserIdRef.current) {
+        loadedUserIdRef.current = session.user.id;
+        console.log("[AuthProvider] onAuthStateChange - set loadedUserIdRef to prevent refetch");
+      }
       
       // Verificar se estamos em rota pública para evitar loops
       if (isPublicAuthRoute()) {
+        console.log("[AuthProvider] onAuthStateChange - public route, skipping");
         return;
       }
 
       if (!session?.user) {
+        console.log("[AuthProvider] onAuthStateChange - no session, clearing user");
         setUser(null);
         setDistributorProfile(null);
+        loadedUserIdRef.current = null;
         return;
       }
 
-      // Evitar recarregar perfil se o usuário já estiver carregado e for o mesmo
-      if (user?.id === session.user.id) {
+      // Evitar recarregar perfil se o usuário já foi carregado (usando ref para persistência)
+      if (loadedUserIdRef.current === session.user.id) {
+        console.log("[AuthProvider] onAuthStateChange - user already loaded (ref check), skipping");
         return;
       }
 
-      const currentUser = await SupabaseService.fetchUserProfile(session.user.id);
+      console.log("[AuthProvider] onAuthStateChange - loading profile for user:", session.user.id);
+      
+      // Add timeout protection to prevent hanging
+      const profilePromise = SupabaseService.fetchUserProfile(session.user.id);
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error("Profile fetch timeout in listener")), 10000)
+      );
+      
+      let currentUser;
+      try {
+        currentUser = await Promise.race([profilePromise, timeoutPromise]) as User | null;
+      } catch (error) {
+        console.error("[AuthProvider] onAuthStateChange - Profile fetch timeout or error:", error);
+        return;
+      }
+      
       if (!isMounted || !currentUser) return;
 
+      console.log("[AuthProvider] onAuthStateChange - profile loaded:", currentUser.email);
+      loadedUserIdRef.current = currentUser.id;
       setUser(currentUser);
       if (currentUser.role === UserRole.DISTRIBUIDOR) {
         const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);

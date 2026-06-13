@@ -3,7 +3,11 @@ import { PageHeader } from "@/components/widgets/page-header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getCustomerLabel } from "@/lib/customer-label";
-import { useCustomer360Data } from "@/hooks/customers/useCustomer360Data";
+import { useCustomer360ByCustomerId } from "@/hooks/customers/useCustomer360New";
+import { useProfile360ByIdComprador } from "@/hooks/profiles/useProfile360";
+import { useCRM360 } from "@/hooks/crm/useCRM360";
+import { useMLM360 } from "@/hooks/mlm/useMLM360";
+import { useFinance360 } from "@/hooks/finance/useFinance360";
 import { CustomerProfileCard } from "@/components/customers/CustomerProfileCard";
 import { CustomerKPIs } from "@/components/customers/CustomerKPIs";
 import { CustomerTimelineTab } from "@/components/customers/CustomerTimelineTab";
@@ -12,8 +16,10 @@ import { CustomerWalletTab } from "@/components/customers/CustomerWalletTab";
 import { CustomerNetworkTab } from "@/components/customers/CustomerNetworkTab";
 import { CustomerDocumentsTab } from "@/components/customers/CustomerDocumentsTab";
 import { CustomerAutomationsTab } from "@/components/customers/CustomerAutomationsTab";
-import { CustomerService } from "@/services/customers";
-import { useQuery } from "@tanstack/react-query";
+import { useCreateWallet } from "@/hooks/mutations/wallets/useCreateWallet";
+import { useCreatePointsWallet } from "@/hooks/mutations/wallets/useCreatePointsWallet";
+import { useUpdateWalletBalance } from "@/hooks/mutations/wallets/useUpdateWalletBalance";
+import { useCreateWalletTransaction } from "@/hooks/mutations/wallets/useCreateWalletTransaction";
 
 export const Route = createFileRoute("/_app/customers/$id")({
   component: Customer360,
@@ -25,34 +31,76 @@ export const Route = createFileRoute("/_app/customers/$id")({
 });
 
 function Customer360() {
+  // NOTE: Route parameter 'id' represents id_comprador (text), not customers.id (UUID)
+  // This is the canonical identifier used throughout the application
   const { id } = Route.useParams();
 
-  // First, fetch the customer by UUID to get the id_comprador
-  const { data: customerBasic, isLoading: isLoadingBasic, isError: isErrorBasic } = useQuery({
-    queryKey: ["customer-basic", id],
-    queryFn: () => CustomerService.fetchCustomerById(id),
+  // Mutations para wallet
+  const createWallet = useCreateWallet();
+  const createPointsWallet = useCreatePointsWallet();
+  const updateWalletBalance = useUpdateWalletBalance();
+  const createWalletTransaction = useCreateWalletTransaction();
+
+  // MIGRAÇÃO EM PROGRESSO: Usando novos services específicos por domínio
+  // Mantém compatibilidade com Customer360Service para dados não migrados
+  
+  // Busca dados de perfil usando Profile360Service
+  const { data: profile360, isLoading: isLoadingProfile, isError: isErrorProfile, error: errorProfile } = useProfile360ByIdComprador(id);
+  
+  // Busca dados CRM usando CRM360Service
+  const { data: crm360 } = useCRM360(undefined, id);
+  
+  // Busca dados MLM usando MLM360Service
+  const { data: mlm360 } = useMLM360(undefined, id);
+  
+  // Busca dados financeiros usando Finance360Service
+  const { data: finance360 } = useFinance360(undefined, id);
+
+  // Fallback para Customer360Service para dados não migrados (sponsor, orderItems, products)
+  const { data: customer360, refetch } = useCustomer360ByCustomerId(id, {
+    includeOrders: true,
+    includeOrderItems: true,
+    includeProducts: true,
+    includeSponsor: true,
   });
 
-  const idComprador = customerBasic?.id_comprador;
-  const sponsorId = customerBasic?.patrocinador_comprador;
+  const isLoading = isLoadingProfile;
+  const isError = isErrorProfile;
+  const error = errorProfile;
 
-  const {
-    customer,
-    orders,
-    sponsor,
-    wallet,
-    pointsWallet,
-    walletTransactions,
-    downlines,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    handleCreateWallet,
-    handleCreatePointsWallet,
-    updateWalletBalance,
-    createWalletTransaction,
-  } = useCustomer360Data(idComprador, sponsorId);
+  // Combinar dados dos diferentes services
+  const customer = profile360?.profile;
+  const orders = crm360?.orders || [];
+  const orderItems = customer360?.orderItems || [];
+  const products = customer360?.products || [];
+  const sponsor = customer360?.sponsor;
+  const wallet = finance360?.wallet;
+  const pointsWallet = finance360?.pointsWallet;
+  const walletTransactions = finance360?.walletTransactions || [];
+  const downlines = mlm360?.downlines || [];
+  const networkRelationships = mlm360?.networkRelationships || [];
+  const metrics = profile360?.metrics;
+  const networkMetrics = profile360?.networkMetrics;
+  const score = profile360?.score;
+
+  // Handlers para wallet
+  const handleCreateWallet = () => {
+    if (!customer) return;
+    createWallet.mutate(customer.id, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
+  };
+
+  const handleCreatePointsWallet = () => {
+    if (!customer) return;
+    createPointsWallet.mutate(customer.id, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
+  };
 
   if (isError) {
     return (
@@ -93,7 +141,7 @@ function Customer360() {
       <PageHeader
         eyebrow="Customer 360"
         title={getCustomerLabel(customer)}
-        subtitle={`${customer.plano_id || customer.plan_id || "Plano Integral"} · ${customer.qualification || "Bronze"} · Ativo desde ${
+        subtitle={`${customer.plano_comprador || "Plano Integral"} · ${customer.qualification || "Bronze"} · Ativo desde ${
           customer.created_at ? new Date(customer.created_at).toLocaleDateString("pt-BR") : "-"
         }`}
         actions={
@@ -110,7 +158,7 @@ function Customer360() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <CustomerProfileCard customer={customer} sponsor={sponsor} />
-        <CustomerKPIs customer={customer} orders={orders} />
+        <CustomerKPIs customer={customer} orders={orders} metrics={metrics} networkMetrics={networkMetrics} score={score} />
       </div>
 
       <Tabs defaultValue="timeline" className="space-y-4">
@@ -128,7 +176,7 @@ function Customer360() {
         </TabsContent>
 
         <TabsContent value="orders">
-          <CustomerOrdersTab orders={orders} />
+          <CustomerOrdersTab orders={orders} orderItems={customer360?.orderItems || []} products={customer360?.products || []} />
         </TabsContent>
 
         <TabsContent value="wallet">
@@ -145,7 +193,7 @@ function Customer360() {
         </TabsContent>
 
         <TabsContent value="network">
-          <CustomerNetworkTab customer={customer} downlines={downlines} />
+          <CustomerNetworkTab customer={customer} downlines={downlines} networkMetrics={networkMetrics} />
         </TabsContent>
 
         <TabsContent value="docs">

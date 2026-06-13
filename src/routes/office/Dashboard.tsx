@@ -38,7 +38,7 @@ export function Dashboard() {
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/20"><Crown className="h-3 w-3 mr-1" /> {current.qualificacao}</Badge>
+              <Badge className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/20"><Crown className="h-3 w-3 mr-1" /> {current.qualification}</Badge>
               <Badge variant="outline" className="border-border/60">{current.plano}</Badge>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Olá, {current.nome} 👋</h1>

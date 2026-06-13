@@ -11,6 +11,11 @@ interface EnvConfig {
   VITE_SUPABASE_ANON_KEY: string;
   VITE_SUPABASE_PROJECT_ID?: string;
   VITE_API_BASE_URL?: string;
+  // Allin API Configuration
+  ALLIN_API_BASE_URL?: string;
+  ALLIN_CLIENT_ID?: string;
+  ALLIN_CLIENT_SECRET?: string;
+  ALLIN_GRANT_TYPE?: string;
 }
 
 /**
@@ -44,6 +49,11 @@ export function validateEnv(): EnvConfig {
     VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
     VITE_SUPABASE_PROJECT_ID: import.meta.env.VITE_SUPABASE_PROJECT_ID,
     VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    // Allin API Configuration
+    ALLIN_API_BASE_URL: import.meta.env.ALLIN_API_BASE_URL,
+    ALLIN_CLIENT_ID: import.meta.env.ALLIN_CLIENT_ID,
+    ALLIN_CLIENT_SECRET: import.meta.env.ALLIN_CLIENT_SECRET,
+    ALLIN_GRANT_TYPE: import.meta.env.ALLIN_GRANT_TYPE || 'client_credentials',
   };
 }
 

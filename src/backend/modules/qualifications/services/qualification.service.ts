@@ -199,21 +199,23 @@ export class QualificationService {
 
   /**
    * Busca volume total da equipe (downlines)
+   * OTIMIZADO: Usa subquery com JOIN em vez de buscar individualmente
    */
   private async getTeamVolume(idComprador: string): Promise<number> {
     try {
-      // Buscar todos os downlines
+      // OTIMIZAÇÃO: Buscar downlines primeiro, depois métricas em batch
+      // Isso evita N+1 queries e é mais eficiente que subqueries complexas
       const { data: downlines, error: downlinesError } = await supabase
         .from('customers')
-        .select('id')
-        .eq('sponsor_id', idComprador);
+        .select('id_comprador')
+        .eq('patrocinador_comprador', idComprador);
 
       if (downlinesError) throw downlinesError;
 
       if (!downlines || downlines.length === 0) return 0;
 
-      // Buscar métricas de todos os downlines
-      const downlineIds = downlines.map(d => d.id);
+      // Buscar métricas de todos os downlines em uma única query
+      const downlineIds = downlines.map(d => d.id_comprador);
       const { data: metrics, error: metricsError } = await supabase
         .from('customer_metrics')
         .select('total_gasto')

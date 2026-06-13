@@ -11,16 +11,30 @@ export class SupabaseService {
    * Fetch user profile from auth.users + profiles
    */
   static async fetchUserProfile(userId: string): Promise<User | null> {
+    const startTime = Date.now();
+    console.log("[SupabaseService] fetchUserProfile START - userId:", userId);
+    
     try {
       // Get profile data directly by user_id
+      console.log("[SupabaseService] Querying profiles table for user_id:", userId);
+      const queryStartTime = Date.now();
+      
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
         .single();
+      
+      const queryDuration = Date.now() - queryStartTime;
+      console.log("[SupabaseService] Query duration:", queryDuration, "ms");
+      console.log("[SupabaseService] Query result - profile:", profile);
+      console.log("[SupabaseService] Query result - error:", profileError);
 
       if (profileError && profileError.code !== "PGRST116") {
         console.error("[SupabaseService] Error fetching profile:", profileError);
+        console.error("[SupabaseService] Error code:", profileError.code);
+        console.error("[SupabaseService] Error message:", profileError.message);
+        console.error("[SupabaseService] Error details:", profileError.details);
         return null;
       }
 
@@ -29,30 +43,34 @@ export class SupabaseService {
         return null;
       }
 
-      // Get auth user for additional data
-      const { data: authUser, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error("[SupabaseService] Error fetching auth user:", authError);
-      }
-
-      // Combine profile data with auth user data if available
-      return {
+      // Combine profile data - using only profile data, no auth.user call
+      const result = {
         id: profile.user_id,
-        email: profile.email || authUser?.user?.email || "",
-        name: profile.name || authUser?.user?.email?.split("@")[0] || "",
+        email: profile.email || "",
+        name: profile.name || profile.email?.split("@")[0] || "",
         role: (profile.role as UserRole) || UserRole.CLIENTE_FINAL,
         status: profile.status || "active",
         active: profile.status === "active",
         avatar: profile.avatar || null,
         phone: profile.phone || null,
         cpf: profile.cpf || null,
-        created_at: profile.created_at || authUser?.user?.created_at || "",
-        last_login: authUser?.user?.last_sign_in_at || profile.created_at || "",
+        created_at: profile.created_at || "",
+        last_login: profile.created_at || "",
         referral_code: profile.referral_code || null,
         sponsor_id: profile.sponsor_id || null,
       };
+      
+      const totalDuration = Date.now() - startTime;
+      console.log("[SupabaseService] fetchUserProfile END - Total duration:", totalDuration, "ms");
+      console.log("[SupabaseService] fetchUserProfile SUCCESS - user:", result.email, "role:", result.role);
+      
+      return result;
     } catch (error) {
-      console.error("[SupabaseService] Error in fetchUserProfile:", error);
+      const totalDuration = Date.now() - startTime;
+      console.error("[SupabaseService] Error in fetchUserProfile after", totalDuration, "ms:", error);
+      console.error("[SupabaseService] Error name:", error instanceof Error ? error.name : "unknown");
+      console.error("[SupabaseService] Error message:", error instanceof Error ? error.message : String(error));
+      console.error("[SupabaseService] Error stack:", error instanceof Error ? error.stack : "no stack");
       return null;
     }
   }
@@ -80,7 +98,7 @@ export class SupabaseService {
     try {
       const { data, error } = await supabase
         .from("customers")
-        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, qualification, status, plan_id, metadata")
+        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, plan_id, metadata")
         .eq("user_id", userId)
         .maybeSingle();
 

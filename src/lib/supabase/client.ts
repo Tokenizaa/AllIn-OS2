@@ -23,6 +23,10 @@ export function getFrontendClient(): SupabaseClient {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+    // DEBUG: Log environment variables
+    console.log('[Supabase Client] VITE_SUPABASE_URL:', supabaseUrl);
+    console.log('[Supabase Client] VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '***' : 'undefined');
+
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error(
         "Missing required Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY"

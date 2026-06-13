@@ -81,7 +81,7 @@ class SupabaseTransformer:
             'cpf': pedido_info.cnpj,
             'patrocinador_comprador': pedido_info.patrocinador_usuario,
             'nome_completo': distribuidor_info.nome if distribuidor_info else pedido_info.cliente,
-            'data_criacao': data_criacao_str,
+            'data_cadastro': data_criacao_str,
             'plano_comprador': distribuidor_info.nome_fantasia if distribuidor_info else None,
             'endereco': endereco,
             'cidade': cidade,
@@ -185,25 +185,14 @@ class SupabaseTransformer:
             'forma_entrega': envio_frete,
             'cancelado': pedido.pedido.situacao == 'cancelado',
             'pago': pedido.pagamento.pagamentos[0].confirmado if pedido.pagamento.pagamentos else False,
-            'data_criacao': data_criacao_str,
             'data_pagamento': data_pagamento_str,
             'valor_total_pedido': pedido.pedido.total,
             'pagamentos': json.dumps(pagamentos_serializaveis),
             'plano_comprador': pedido.distribuidor.nome_fantasia if pedido.distribuidor and hasattr(pedido.distribuidor, 'nome_fantasia') else None,
-            'customer_id': None,  # Será preenchido posteriormente via integração com customers
-            'distributor_id': None,  # Será preenchido posteriormente via integração com profiles
             # Campos adicionais mapeados
             'loja': pedido.pedido.loja if hasattr(pedido.pedido, 'loja') and pedido.pedido.loja else "All-in life style",
-            'customer_name': pedido.pedido.cliente,
             'tipo_compra': pedido.pedido.tipo_cliente if hasattr(pedido.pedido, 'tipo_cliente') else None,
-            'payment_method': payment_method,
-            'payment_status': payment_status,
             'custo_frete': custo_frete,
-            'valor_total': pedido.pedido.total,
-            'status': status_mapeado,
-            'order_number': pedido.pedido.id,
-            'order_type': pedido.pedido.tipo_cliente if hasattr(pedido.pedido, 'tipo_cliente') else None,
-            'data_criacao_pedido': data_criacao_str,
             'hora_pagamento': hora_pagamento,
             'gateway_transaction_id': gateway_transaction_id
         }

@@ -13,7 +13,7 @@ export const productsService = {
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('is_active', true)
+      .eq('status', 'active')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -31,7 +31,7 @@ export const productsService = {
       sku: product.sku,
       manufacturer: product.manufacturer,
       stock: product.stock || 0,
-      is_active: product.is_active ?? true,
+      is_active: product.status === 'active',
       metadata: product.metadata || {},
       created_at: product.created_at,
       updated_at: product.updated_at,
@@ -56,7 +56,7 @@ export const productsService = {
       .from('products')
       .select('*')
       .eq('category', categoryName)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -74,7 +74,7 @@ export const productsService = {
       sku: product.sku,
       manufacturer: product.manufacturer,
       stock: product.stock || 0,
-      is_active: product.is_active ?? true,
+      is_active: product.status === 'active',
       metadata: product.metadata || {},
       created_at: product.created_at,
       updated_at: product.updated_at,
@@ -143,7 +143,7 @@ export const productsService = {
       .from('products')
       .select('category')
       .not('category', 'is', null)
-      .eq('is_active', true);
+      .eq('status', 'active');
 
     if (error) {
       console.error('[productsService] Error fetching categories:', error);

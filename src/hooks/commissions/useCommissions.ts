@@ -3,6 +3,7 @@ import { queryKeys } from "../queryKeys";
 import { PaymentService } from "@/services/payments";
 import { PlanService } from "@/services/plans";
 import { CustomerService } from "@/services/customers";
+import { ProfileService } from "@/services/profiles";
 
 export function useCommissions() {
   return useQuery({
@@ -10,10 +11,11 @@ export function useCommissions() {
     staleTime: 0,
     refetchOnMount: "always",
     queryFn: async () => {
+      // MIGRAÇÃO EM PROGRESSO: Usando ProfileService em vez de CustomerService
       const [payments, plansData, customersData] = await Promise.all([
         PaymentService.fetchPaymentsForCommissions(18),
         PlanService.fetchActivePlans(),
-        CustomerService.fetchCustomersList(),
+        ProfileService.fetchProfiles(),
       ]);
 
       // Mapear pagamentos para comissões com dados mais realistas

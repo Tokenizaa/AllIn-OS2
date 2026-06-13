@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
 import { WalletService } from "@/services/wallets";
-import { CustomerService } from "@/services/customers";
+import { ProfileService } from "@/services/profiles";
 
 type WalletRow = {
   balance_available?: number | null;
@@ -32,19 +32,21 @@ export function useOfficeFinance() {
     staleTime: 0,
     refetchOnMount: "always",
     queryFn: async () => {
-      const [withdrawalsData, profileData, customersData] = await Promise.all([
+      // MIGRAÇÃO EM PROGRESSO: Usando ProfileService em vez de CustomerService
+      const [withdrawalsData, profileData, profilesData] = await Promise.all([
         WalletService.fetchRecentWithdrawals(50),
         WalletService.fetchWorkspaceSettings(),
-        CustomerService.fetchAnalyticsCustomers(),
+        ProfileService.fetchAnalyticsProfiles(),
       ]);
 
-      const customers = customersData || [];
-      const currentCustomer = customers[0];
+      const profiles = profilesData || [];
+      const currentProfile = profiles[0];
       let customerBonus: CustomerBonus | null = null;
 
-      if (currentCustomer?.id_comprador) {
+      // MIGRAÇÃO EM PROGRESSO: Usando ProfileService em vez de CustomerService
+      if (currentProfile?.id) {
         try {
-          customerBonus = await CustomerService.fetchCustomerBonus(currentCustomer.id_comprador);
+          customerBonus = await ProfileService.fetchProfileBonus(currentProfile.id);
         } catch (error) {
           console.error("Error fetching customer bonus:", error);
         }
