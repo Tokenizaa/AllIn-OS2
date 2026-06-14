@@ -20,8 +20,10 @@ let frontendClient: SupabaseClient | null = null;
 
 export function getFrontendClient(): SupabaseClient {
   if (!frontendClient) {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    // Try both import.meta.env (Vite) and process.env (Node.js)
+    // process.env is only available in Node.js, not browser
+    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_URL : undefined) || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
+    const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_ANON_KEY : undefined) || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined);
 
     // DEBUG: Log environment variables
     console.log('[Supabase Client] VITE_SUPABASE_URL:', supabaseUrl);
@@ -47,9 +49,10 @@ export function getFrontendClient(): SupabaseClient {
           return fetch(url, { ...options, signal: AbortSignal.timeout(60000) });
         },
       },
-      db: {
-        schema: 'public',
-      },
+      // Remove default schema to allow dynamic schema switching
+      // db: {
+      //   schema: 'public',
+      // },
       // Add network resilience settings
       realtime: {
         params: {
@@ -87,8 +90,8 @@ export function getBackendClient(): SupabaseClient {
 
   // In a real server environment, these would come from process.env
   // For now, we'll use a placeholder that needs to be configured
-  const supabaseUrl = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined) || import.meta.env.VITE_SUPABASE_URL;
+  const serviceRoleKey = typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined;
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(

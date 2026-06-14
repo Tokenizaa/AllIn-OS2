@@ -1,7 +1,7 @@
 /**
- * Supabase Client for Backend Infrastructure
+ * Supabase Client for Backend Repository
  * 
- * This module provides a Supabase client for backend infrastructure operations.
+ * This module provides a Supabase client for backend repository operations.
  * Uses environment variables for configuration.
  */
 
@@ -9,12 +9,12 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 let backendClient: SupabaseClient | null = null;
 
-export function getSupabaseAdminClient(): SupabaseClient {
+export function getBackendClient(): SupabaseClient {
   if (!backendClient) {
     // Check if running in browser environment
     if (typeof window !== "undefined") {
       throw new Error(
-        "SECURITY VIOLATION: getSupabaseAdminClient should not be called from browser code. " +
+        "SECURITY VIOLATION: getBackendClient should not be called from browser code. " +
         "Backend operations must be performed server-side."
       );
     }
@@ -43,6 +43,14 @@ export function getSupabaseAdminClient(): SupabaseClient {
   return backendClient;
 }
 
-export function getSupabaseClient() {
-  return getSupabaseAdminClient();
-}
+// Export singleton for convenience - initialize lazily
+let supabaseInstance: SupabaseClient | null = null;
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    if (!supabaseInstance) {
+      supabaseInstance = getBackendClient();
+    }
+    return supabaseInstance[prop as keyof SupabaseClient];
+  },
+});
