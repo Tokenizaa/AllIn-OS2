@@ -1,0 +1,61 @@
+import { z } from 'zod';
+
+export const machineSchema = z.object({
+  id: z.string().uuid(),
+  nome: z.string().min(1),
+  codigo: z.string().min(1),
+  fabricante: z.string().optional(),
+  modelo: z.string().optional(),
+  numero_serie: z.string().optional(),
+  data_aquisicao: z.string().or(z.date()).optional(),
+  valor_aquisicao: z.number().optional(),
+  localizacao_id: z.string().uuid().nullable().optional(),
+  localizacao_detalhe: z.string().optional(),
+  status: z.string().default('active'),
+  capacidade_horaria: z.number().optional(),
+  especificacoes: z.any().optional(),
+  observacoes: z.string().optional(),
+  anexos: z.array(z.any()).optional(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+  deleted_at: z.string().datetime().nullable().optional(),
+});
+
+export const createMachineSchema = z.object({
+  nome: z.string().min(1),
+  codigo: z.string().min(1),
+  fabricante: z.string().optional(),
+  modelo: z.string().optional(),
+  numero_serie: z.string().optional(),
+  data_aquisicao: z.string().or(z.date()).optional(),
+  valor_aquisicao: z.number().optional(),
+  localizacao_id: z.string().uuid().nullable().optional(),
+  localizacao_detalhe: z.string().optional(),
+  status: z.string().default('active'),
+  capacidade_horaria: z.number().optional(),
+  especificacoes: z.any().optional(),
+  observacoes: z.string().optional(),
+  anexos: z.array(z.any()).optional(),
+});
+
+export const updateMachineSchema = z.object({
+  nome: z.string().min(1).optional(),
+  codigo: z.string().min(1).optional(),
+  fabricante: z.string().optional(),
+  modelo: z.string().optional(),
+  numero_serie: z.string().optional(),
+  data_aquisicao: z.string().or(z.date()).optional(),
+  valor_aquisicao: z.number().optional(),
+  localizacao_id: z.string().uuid().nullable().optional(),
+  localizacao_detalhe: z.string().optional(),
+  status: z.string().optional(),
+  capacidade_horaria: z.number().optional(),
+  especificacoes: z.any().optional(),
+  observacoes: z.string().optional(),
+  anexos: z.array(z.any()).optional(),
+});
+
+export type Machine = z.infer<typeof machineSchema>;
+export type CreateMachineDTO = z.infer<typeof createMachineSchema>;
+export type UpdateMachineDTO = z.infer<typeof updateMachineSchema>;
+export type MachineResponseDTO = Machine;

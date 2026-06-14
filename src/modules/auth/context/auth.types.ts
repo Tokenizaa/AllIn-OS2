@@ -73,7 +73,7 @@ export interface AuditLog {
  */
 export interface Permission {
   id: string;
-  module: "dashboard" | "analytics" | "finance" | "support" | "network" | "orders" | "products" | "marketing" | "settings" | "system";
+  module: "dashboard" | "analytics" | "finance" | "support" | "network" | "orders" | "products" | "marketing" | "settings" | "system" | "industrial";
   action: "read" | "write" | "delete" | "manage" | "all";
   description: string;
 }

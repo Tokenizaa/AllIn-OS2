@@ -16,7 +16,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     { id: "p7", module: "products", action: "all", description: "Criar, editar e excluir produtos" },
     { id: "p8", module: "marketing", action: "all", description: "Disparar campanhas e banners corporativos" },
     { id: "p9", module: "settings", action: "all", description: "Modificar regras comissões e gateways" },
-    { id: "p10", module: "system", action: "all", description: "Acesso total a auditoria e banco de dados" }
+    { id: "p10", module: "system", action: "all", description: "Acesso total a auditoria e banco de dados" },
+    { id: "p11", module: "industrial", action: "all", description: "Gestão completa de máquinas, materiais e processos industriais" }
   ],
   gestao_admin: [
     { id: "ga1", module: "dashboard", action: "all", description: "Acesso total ao Dashboard executivo" },
@@ -25,7 +26,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     { id: "ga4", module: "orders", action: "all", description: "Controle operacional de pedidos" },
     { id: "ga5", module: "products", action: "all", description: "Catálogo de produtos" },
     { id: "ga6", module: "marketing", action: "all", description: "Campanhas de Marketing" },
-    { id: "ga7", module: "system", action: "read", description: "Verificação de logs" }
+    { id: "ga7", module: "system", action: "read", description: "Verificação de logs" },
+    { id: "ga8", module: "industrial", action: "manage", description: "Gestão de operações industriais" }
   ],
   financeiro: [
     { id: "fin1", module: "dashboard", action: "read", description: "Resumos de faturamento" },
@@ -41,7 +43,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   logistica: [
     { id: "log1", module: "dashboard", action: "read", description: "Estatísticas de expedição" },
     { id: "log2", module: "orders", action: "manage", description: "Controle completo de remessas e expedição" },
-    { id: "log3", module: "products", action: "read", description: "Consultar estoque e produtos" }
+    { id: "log3", module: "products", action: "read", description: "Consultar estoque e produtos" },
+    { id: "log4", module: "industrial", action: "read", description: "Visualizar estoque de matérias-primas" }
   ],
   marketing: [
     { id: "mkt1", module: "dashboard", action: "read", description: "Visualizar dados básicos" },

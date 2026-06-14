@@ -1,4 +1,4 @@
-import { Bell, Boxes, Layers, LayoutDashboard, Megaphone, Network, Settings2, ShieldCheck, ShoppingBag, Sparkles, Users, Wallet } from "lucide-react";
+import { Bell, Boxes, Factory, Layers, LayoutDashboard, Megaphone, Network, Settings2, ShieldCheck, ShoppingBag, Sparkles, Users, Wallet } from "lucide-react";
 
 export type AppNavModule =
   | "dashboard"
@@ -10,7 +10,8 @@ export type AppNavModule =
   | "products"
   | "marketing"
   | "settings"
-  | "system";
+  | "system"
+  | "industrial";
 
 export type AppNavItem = {
   to: string;
@@ -51,6 +52,15 @@ export const APP_NAV_SECTIONS: AppNavSection[] = [
       { to: "/orders", label: "Pedidos", icon: ShoppingBag, module: "orders" },
       { to: "/products", label: "Produtos", icon: Boxes, module: "products" },
       { to: "/plans", label: "Planos", icon: Layers, module: "products" },
+    ],
+  },
+  {
+    label: "Industrial",
+    items: [
+      { to: "/industrial", label: "Dashboard Industrial", icon: Factory, module: "industrial" },
+      { to: "/industrial/machines", label: "Máquinas", icon: Factory, module: "industrial" },
+      { to: "/industrial/materials", label: "Matérias-Primas", icon: Boxes, module: "industrial" },
+      { to: "/industrial/processes", label: "Processos", icon: Layers, module: "industrial" },
     ],
   },
   {
