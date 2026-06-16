@@ -106,13 +106,14 @@ export class DistributorSyncService {
           }
         } catch (error) {
           result.errors++;
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
           result.errorDetails.push({
             id: allinDist.id,
             error: errorMessage,
           });
           this.log(`Error processing distributor ${allinDist.id}: ${errorMessage}`, 'error');
           // Log full error for debugging
+          this.log(`Error object: ${JSON.stringify(error, null, 2)}`, 'debug');
           if (error instanceof Error) {
             this.log(`Error stack: ${error.stack}`, 'debug');
           }
@@ -182,7 +183,7 @@ export class DistributorSyncService {
   private async createDistributor(allinDist: AllinDistributor): Promise<void> {
     const distributor: Partial<Distribuidor> = {
       allin_id: allinDist.id,
-      usuario: allinDist.usuario,
+      usuario: allinDist.usuario?.substring(0, 20), // Truncate to 20 chars
       nome: allinDist.nome,
       email: allinDist.email,
       cpf: allinDist.cpf,
@@ -202,7 +203,7 @@ export class DistributorSyncService {
    */
   private async updateDistributor(existing: Distribuidor, allinDist: AllinDistributor): Promise<void> {
     const updateData: Partial<Distribuidor> = {
-      usuario: allinDist.usuario,
+      usuario: allinDist.usuario?.substring(0, 20), // Truncate to 20 chars
       nome: allinDist.nome,
       email: allinDist.email,
       cpf: allinDist.cpf,

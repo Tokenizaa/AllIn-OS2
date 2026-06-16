@@ -35,7 +35,7 @@ export class DistribuidorRepository extends BaseRepository<Distribuidor> {
       .from("distribuidores")
       .select("*")
       .eq("allin_id", allinId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;

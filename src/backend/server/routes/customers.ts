@@ -15,45 +15,59 @@ import {
   getCustomerStats,
   getCustomerDownlines,
 } from '../../modules/customers/api/customers.api';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { requirePermission, requireAdmin } from '../middleware/rbac.middleware';
+import { PermissionEnum } from '@shared/types/permissions';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+// Apply authentication to all routes
+router.use(authMiddleware);
+
+// GET /api/customers - List customers (requires read permission)
+router.get('/', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, res) => {
   const result = await getCustomers(req.query);
   res.json(result);
 });
 
-router.get('/:id', async (req, res) => {
+// GET /api/customers/:id - Get customer by ID (requires read permission)
+router.get('/:id', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, res) => {
   const result = await getCustomerById({ id: req.params.id });
   res.json(result);
 });
 
-router.get('/:id/360', async (req, res) => {
+// GET /api/customers/:id/360 - Get customer 360 view (requires read permission)
+router.get('/:id/360', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, res) => {
   const result = await getCustomer360({ id: req.params.id });
   res.json(result);
 });
 
-router.post('/', async (req, res) => {
+// POST /api/customers - Create customer (requires write permission)
+router.post('/', requirePermission(PermissionEnum.CUSTOMERS_WRITE), async (req, res) => {
   const result = await createCustomer(req.body);
   res.json(result);
 });
 
-router.put('/:id', async (req, res) => {
+// PUT /api/customers/:id - Update customer (requires write permission)
+router.put('/:id', requirePermission(PermissionEnum.CUSTOMERS_WRITE), async (req, res) => {
   const result = await updateCustomer({ id: req.params.id, data: req.body });
   res.json(result);
 });
 
-router.delete('/:id', async (req, res) => {
+// DELETE /api/customers/:id - Delete customer (requires admin)
+router.delete('/:id', requireAdmin(), async (req, res) => {
   const result = await deleteCustomer({ id: req.params.id });
   res.json(result);
 });
 
-router.get('/stats/overview', async (req, res) => {
+// GET /api/customers/stats/overview - Get customer stats (requires read permission)
+router.get('/stats/overview', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, res) => {
   const result = await getCustomerStats();
   res.json(result);
 });
 
-router.get('/:sponsorId/downlines', async (req, res) => {
+// GET /api/customers/:sponsorId/downlines - Get customer downlines (requires network read permission)
+router.get('/:sponsorId/downlines', requirePermission(PermissionEnum.NETWORK_READ), async (req, res) => {
   const result = await getCustomerDownlines({ sponsorId: req.params.sponsorId, ...req.query });
   res.json(result);
 });
