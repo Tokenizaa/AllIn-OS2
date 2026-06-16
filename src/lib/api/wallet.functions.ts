@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { walletService } from '../../backend/modules/payments/services/wallet.service';
+import { supabase } from '@/lib/supabase-client';
 
 // Validation schemas
 const creditWalletSchema = z.object({
@@ -38,8 +38,15 @@ const unfreezeWalletSchema = z.object({
 export const getWallet = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await walletService.getWalletByidComprador(parsed.idComprador);
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get wallet' };
   }
@@ -49,8 +56,34 @@ export const getWallet = async (data: { idComprador: string }) => {
 export const ensureWallet = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await walletService.ensureWalletExists(parsed.idComprador);
-    return { success: true, data: result };
+    // Check if wallet exists
+    const { data: existingWallet } = await supabase
+      .schema('commerce')
+      .from('wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (existingWallet) {
+      return { success: true, data: existingWallet };
+    }
+    
+    // Create new wallet
+    const { data: newWallet, error } = await supabase
+      .schema('commerce')
+      .from('wallets')
+      .insert({
+        id_comprador: parsed.idComprador,
+        balance: 0,
+        available_balance: 0,
+        frozen_balance: 0,
+        currency: 'BRL',
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: newWallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure wallet' };
   }
@@ -60,14 +93,16 @@ export const ensureWallet = async (data: { idComprador: string }) => {
 export const creditWallet = async (data: any) => {
   const parsed = creditWalletSchema.parse(data);
   try {
-    const result = await walletService.creditWallet(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.description,
-      parsed.referenceId,
-      parsed.referenceType
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('credit_wallet', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_description: parsed.description,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to credit wallet' };
   }
@@ -77,14 +112,16 @@ export const creditWallet = async (data: any) => {
 export const debitWallet = async (data: any) => {
   const parsed = debitWalletSchema.parse(data);
   try {
-    const result = await walletService.debitWallet(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.description,
-      parsed.referenceId,
-      parsed.referenceType
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('debit_wallet', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_description: parsed.description,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to debit wallet' };
   }
@@ -94,13 +131,15 @@ export const debitWallet = async (data: any) => {
 export const freezeWallet = async (data: any) => {
   const parsed = freezeWalletSchema.parse(data);
   try {
-    const result = await walletService.freezeBalance(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.referenceId,
-      parsed.referenceType
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('freeze_wallet_balance', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to freeze wallet' };
   }
@@ -110,13 +149,15 @@ export const freezeWallet = async (data: any) => {
 export const unfreezeWallet = async (data: any) => {
   const parsed = unfreezeWalletSchema.parse(data);
   try {
-    const result = await walletService.unfreezeBalance(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.referenceId,
-      parsed.referenceType
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('unfreeze_wallet_balance', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to unfreeze wallet' };
   }
@@ -137,12 +178,25 @@ export const getWalletTransactions = async (data: {
   }).parse(data);
 
   try {
-    const result = await walletService.getTransactions(
-      parsed.idComprador,
-      parsed.limit,
-      0
-    );
-    return { success: true, data: result };
+    const from = (parsed.page - 1) * parsed.limit;
+    const to = from + parsed.limit - 1;
+
+    let query = supabase
+      .schema('commerce')
+      .from('wallet_transactions')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador);
+    
+    if (parsed.transactionType) {
+      query = query.eq('transaction_type', parsed.transactionType);
+    }
+    
+    const { data: transactions, error } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    
+    if (error) throw error;
+    return { success: true, data: transactions || [] };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get transactions' };
   }
@@ -152,7 +206,14 @@ export const getWalletTransactions = async (data: {
 export const getWalletBalance = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const wallet = await walletService.getWalletByidComprador(parsed.idComprador);
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
     if (!wallet) {
       return { success: false, error: 'Wallet not found' };
     }

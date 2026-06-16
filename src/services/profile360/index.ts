@@ -12,7 +12,7 @@
  * 
  * Fontes de dados:
  * - customer_360_view (view consolidada - otimizado)
- * - profiles (tabela principal)
+ * - crm.customers (tabela principal)
  */
 
 /**
@@ -234,7 +234,8 @@ export const Profile360Service = {
    */
   async fetchProfileById(profileId: string): Promise<CustomerProfile | null> {
     const { data, error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*")
       .eq("id", profileId)
       .maybeSingle();
@@ -248,6 +249,7 @@ export const Profile360Service = {
    */
   async fetchProfileByIdComprador(idComprador: string): Promise<CustomerProfile | null> {
     const { data, error } = await supabase
+      .schema("crm")
       .from("customers")
       .select("*")
       .eq("id_comprador", idComprador)

@@ -16,7 +16,7 @@ import { supabase } from "@/lib/supabase-client";
 export const CustomerService = {
   async fetchCustomerById(id: string) {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("*")
       .eq("id", id)
       .maybeSingle();
@@ -26,7 +26,7 @@ export const CustomerService = {
 
   async fetchCustomerByCompradorId(compradorId: string) {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("*")
       .eq("id_comprador", compradorId)
       .maybeSingle();
@@ -36,7 +36,7 @@ export const CustomerService = {
 
   async fetchDownlines(compradorId: string) {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("id, usuario, id_comprador, telefone, created_at, cidade, estado, nome_completo")
       .eq("patrocinador_comprador", compradorId)
       .order("created_at", { ascending: false });
@@ -46,7 +46,7 @@ export const CustomerService = {
 
   async fetchCustomersList(limit = 100) {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("id, nome_completo, email, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone, plano_comprador")
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -58,33 +58,18 @@ export const CustomerService = {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const [{ data: customerData, error: customerError, count: customerCount }, { data: orderStats, error: statsError }] = await Promise.all([
-      supabase
-        .from("customers")
-        .select("id, user_id, usuario, id_comprador, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .range(from, to),
-      supabase
-        .from("customer_order_stats")
-        .select("id_comprador, order_count, ltv"),
-    ]);
+    const { data: customerData, error: customerError, count: customerCount } = await supabase
+      .schema("crm").from("customers")
+      .select("id, user_id, usuario, id_comprador, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
     if (customerError) throw customerError;
-    if (statsError) throw statsError;
 
-    const statsMap: Record<string, { count: number; ltv: number }> = {};
-    if (orderStats) {
-      orderStats.forEach((stat: any) => {
-        statsMap[stat.id_comprador] = {
-          count: stat.order_count || 0,
-          ltv: Number(stat.ltv || 0),
-        };
-      });
-    }
-
+    // customer_order_stats table doesn't exist yet, return empty stats
     return {
       customers: customerData || [],
-      orderStats: statsMap,
+      orderStats: {},
       totalCount: customerCount || 0,
       page,
       pageSize,
@@ -93,7 +78,7 @@ export const CustomerService = {
 
   async fetchRecentCustomers(limit = 20) {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("id, usuario, id_comprador, cidade, estado, user_id, nome_completo")
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -103,7 +88,7 @@ export const CustomerService = {
 
   async fetchNetworkMembers(limit = 500) {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("id, usuario, id_comprador, user_id, cidade, estado, nome_completo")
       .limit(limit);
     if (error) throw error;
@@ -112,7 +97,7 @@ export const CustomerService = {
 
   async fetchAnalyticsCustomers() {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("id, usuario, id_comprador, user_id, nome_completo");
     if (error) throw error;
     return data || [];
@@ -130,11 +115,13 @@ export const CustomerService = {
 
   async fetchCustomerPlan(compradorId: string) {
     const { data, error } = await supabase
-      .from("customer_plans")
-      .select("*, plans(*)")
-      .eq("id_comprador", compradorId)
+      .schema("mlm")
+      .from("planos_distribuidores")
+      .select("*, planos(*)")
+      .eq("distribuidor_id", compradorId)
       .maybeSingle();
     if (error) throw error;
     return data;
   }
 };
+

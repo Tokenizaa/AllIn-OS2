@@ -43,6 +43,13 @@ export function getSupabaseAdminClient(): SupabaseClient {
   return backendClient;
 }
 
+/**
+ * @deprecated Use getFrontendClient from @/lib/supabase/client instead
+ * This function is kept for compatibility but should not be used
+ */
 export function getSupabaseClient() {
-  return getSupabaseAdminClient();
+  throw new Error(
+    "SECURITY VIOLATION: getSupabaseClient from backend client should not be called. " +
+    "Use getFrontendClient from @/lib/supabase/client for frontend code."
+  );
 }

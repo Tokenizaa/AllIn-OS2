@@ -3,12 +3,11 @@ import { Plan, PlanBonus, CustomerPlan, ActivateCustomerPlanDto } from "../dto/p
 
 export class PlanRepository extends BaseRepository<Plan> {
   constructor() {
-    super("plans");
+    super("planos", "mlm");
   }
 
   async findBySlug(slug: string): Promise<Plan | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("slug", slug)
       .single();
@@ -18,8 +17,7 @@ export class PlanRepository extends BaseRepository<Plan> {
   }
 
   async findActive(): Promise<Plan[]> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("is_active", true)
       .order("price", { ascending: true });
@@ -29,8 +27,7 @@ export class PlanRepository extends BaseRepository<Plan> {
   }
 
   async findAffiliatePlans(): Promise<Plan[]> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("is_affiliate", true)
       .eq("is_active", true)
@@ -43,12 +40,11 @@ export class PlanRepository extends BaseRepository<Plan> {
 
 export class PlanBonusRepository extends BaseRepository<PlanBonus> {
   constructor() {
-    super("plan_bonuses");
+    super("bonus_regras", "mlm");
   }
 
   async findByPlanId(planId: string): Promise<PlanBonus[]> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("plan_id", planId)
       .order("generation", { ascending: true });
@@ -58,8 +54,7 @@ export class PlanBonusRepository extends BaseRepository<PlanBonus> {
   }
 
   async findByPlanIdAndType(planId: string, bonusType: "generation" | "direct_bonus"): Promise<PlanBonus[]> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("plan_id", planId)
       .eq("bonus_type", bonusType)
@@ -70,8 +65,7 @@ export class PlanBonusRepository extends BaseRepository<PlanBonus> {
   }
 
   async deleteByPlanId(planId: string): Promise<void> {
-    const { error } = await this.getClient()
-      .from(this.tableName)
+    const { error } = await this.getQuery()
       .delete()
       .eq("plan_id", planId);
 
@@ -81,12 +75,11 @@ export class PlanBonusRepository extends BaseRepository<PlanBonus> {
 
 export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
   constructor() {
-    super("customer_plans");
+    super("planos_distribuidores", "mlm");
   }
 
   async findByidComprador(idComprador: string): Promise<CustomerPlan[]> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
@@ -96,8 +89,7 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
   }
 
   async findActiveByidComprador(idComprador: string): Promise<CustomerPlan | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("id_comprador", idComprador)
       .eq("status", "active")
@@ -111,8 +103,7 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
     limit?: number;
     offset?: number;
   }): Promise<CustomerPlan[]> {
-    let query = this.getClient()
-      .from(this.tableName)
+    let query = this.getQuery()
       .select("*")
       .eq("plan_id", planId);
 
@@ -131,8 +122,7 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
   }
 
   async activatePlan(dto: ActivateCustomerPlanDto): Promise<CustomerPlan> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .insert({
         id_comprador: dto.id_comprador,
         plan_id: dto.plan_id,
@@ -148,8 +138,7 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
   }
 
   async deactivatePlan(idComprador: string): Promise<void> {
-    const { error } = await this.getClient()
-      .from(this.tableName)
+    const { error } = await this.getQuery()
       .update({ status: "inactive" })
       .eq("id_comprador", idComprador)
       .eq("status", "active");
@@ -158,8 +147,7 @@ export class CustomerPlanRepository extends BaseRepository<CustomerPlan> {
   }
 
   async countByPlanId(planId: string): Promise<number> {
-    const { count, error } = await this.getClient()
-      .from(this.tableName)
+    const { count, error } = await this.getQuery()
       .select("*", { count: "exact", head: true })
       .eq("plan_id", planId)
       .eq("status", "active");

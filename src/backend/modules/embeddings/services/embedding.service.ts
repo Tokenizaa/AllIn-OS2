@@ -159,28 +159,40 @@ export class EmbeddingService {
    * Generate embedding using Ollama API
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    try {
-      const response = await fetch(`${this.ollamaBaseUrl}/api/embeddings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'nomic-embed-text', // Ollama embedding model
-          prompt: text,
-        }),
-      });
+    const payload = {
+      model: 'nomic-embed-text',
+      prompt: text,
+      input: text,
+    };
 
-      if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.statusText}`);
+    const endpoints = ['/api/embeddings', '/api/embed'];
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(`${this.ollamaBaseUrl}${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          continue;
+        }
+
+        const data = await response.json();
+        const embedding = data.embedding || data.embeddings?.[0];
+
+        if (Array.isArray(embedding)) {
+          return embedding;
+        }
+      } catch (error) {
+        console.error(`Error calling Ollama API on ${endpoint}:`, error);
       }
-
-      const data = await response.json();
-      return data.embedding;
-    } catch (error) {
-      console.error('Error calling Ollama API:', error);
-      throw error;
     }
+
+    throw new Error('Failed to generate embedding from Ollama');
   }
 
   /**

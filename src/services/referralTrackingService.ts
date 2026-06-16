@@ -19,7 +19,7 @@ export interface ReferralTrackingInput {
 
 /**
  * Referral Tracking Service
- * MIGRATED: Now uses Supabase referral_tracking table as single source of truth
+ * MIGRATED: Now uses identity.referral_tracking table as single source of truth
  */
 export const referralTrackingService = {
   /**
@@ -27,6 +27,7 @@ export const referralTrackingService = {
    */
   getReferralTracking: async (userId: string): Promise<ReferralTracking | null> => {
     const { data, error } = await supabase
+      .schema('identity')
       .from('referral_tracking')
       .select('*')
       .eq('user_id', userId)
@@ -50,6 +51,7 @@ export const referralTrackingService = {
     if (existing) {
       // Update existing
       const { data, error } = await supabase
+        .schema('identity')
         .from('referral_tracking')
         .update({
           referrer_id: input.referrer_id,
@@ -70,6 +72,7 @@ export const referralTrackingService = {
 
     // Insert new
     const { data, error } = await supabase
+      .schema('identity')
       .from('referral_tracking')
       .insert({
         user_id: input.user_id,
@@ -93,6 +96,7 @@ export const referralTrackingService = {
    */
   clearReferralTracking: async (userId: string): Promise<void> => {
     const { error } = await supabase
+      .schema('identity')
       .from('referral_tracking')
       .delete()
       .eq('user_id', userId);

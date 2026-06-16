@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Filter, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
@@ -32,7 +31,7 @@ function CustomersPage() {
 
   const { data, isLoading, refetch } = useCustomers(currentPage, pageSize);
 
-  const customers = (data as any)?.customers || [];
+  const customers = useMemo(() => (data as any)?.customers || [], [data]);
   const orderStats = (data as any)?.orderStats || {};
   const totalCount = (data as any)?.totalCount || 0;
 
@@ -190,7 +189,7 @@ function CustomersPage() {
                           {getCustomerInitials(c)}
                         </div>
                         <div>
-                          <Link to="/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
+                          <Link to="/_app/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
                             {getCustomerLabel(c)}
                           </Link>
                           <div className="text-[11px] text-muted-foreground">{c.id_comprador || c.user_id || "-"}</div>
@@ -225,7 +224,7 @@ function CustomersPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        to="/customers/$id"
+                        to="/_app/customers/$id"
                         params={{ id: c.id }}
                         className="inline-flex items-center gap-0.5 text-xs text-primary font-medium hover:underline"
                       >

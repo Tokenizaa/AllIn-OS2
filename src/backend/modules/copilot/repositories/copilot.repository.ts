@@ -42,10 +42,10 @@ export class CopilotConversationRepository extends BaseRepository<CopilotConvers
       .eq("status", "active")
       .order("updated_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data || null;
   }
 
   async archiveConversation(conversationId: string): Promise<void> {

@@ -3,7 +3,7 @@ import { Product } from '../types/products';
 
 /**
  * Products Service
- * MIGRATED: Now uses Supabase products table as single source of truth
+ * MIGRATED: Now uses commerce.produtos table as single source of truth
  */
 export const productsService = {
   /**
@@ -11,7 +11,8 @@ export const productsService = {
    */
   getAllProducts: async (): Promise<Product[]> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('*')
       .eq('status', 'active')
       .order('created_at', { ascending: false });
@@ -23,28 +24,28 @@ export const productsService = {
 
     return (data || []).map(product => ({
       id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price?.toString() || '0',
-      images: product.images || [],
-      description: product.description,
+      name: product.nome,
+      category: product.categoria,
+      price: product.preco?.toString() || '0',
+      images: product.imagens || [],
+      description: product.descricao,
       sku: product.sku,
-      manufacturer: product.manufacturer,
-      stock: product.stock || 0,
+      manufacturer: product.fabricante,
+      stock: product.estoque || 0,
       is_active: product.status === 'active',
       metadata: product.metadata || {},
       created_at: product.created_at,
       updated_at: product.updated_at,
       // Legacy fields for backward compatibility
       linkProduto: product.metadata?.linkProduto,
-      imgSrc: product.images?.[0],
-      imgSrc2: product.images?.[1],
-      caption: product.name,
-      caption2: product.description,
+      imgSrc: product.imagens?.[0],
+      imgSrc2: product.imagens?.[1],
+      caption: product.nome,
+      caption2: product.descricao,
       promotion: product.metadata?.promotion,
       parcelasValor: product.metadata?.parcelasValor,
       produtoTag: product.metadata?.produtoTag,
-      categorias: product.category,
+      categorias: product.categoria,
     }));
   },
 
@@ -53,9 +54,10 @@ export const productsService = {
    */
   getProductsByCategory: async (categoryName: string): Promise<Product[]> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('*')
-      .eq('category', categoryName)
+      .eq('categoria', categoryName)
       .eq('status', 'active')
       .order('created_at', { ascending: false });
 
@@ -66,28 +68,28 @@ export const productsService = {
 
     return (data || []).map(product => ({
       id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price?.toString() || '0',
-      images: product.images || [],
-      description: product.description,
+      name: product.nome,
+      category: product.categoria,
+      price: product.preco?.toString() || '0',
+      images: product.imagens || [],
+      description: product.descricao,
       sku: product.sku,
-      manufacturer: product.manufacturer,
-      stock: product.stock || 0,
+      manufacturer: product.fabricante,
+      stock: product.estoque || 0,
       is_active: product.status === 'active',
       metadata: product.metadata || {},
       created_at: product.created_at,
       updated_at: product.updated_at,
       // Legacy fields for backward compatibility
       linkProduto: product.metadata?.linkProduto,
-      imgSrc: product.images?.[0],
-      imgSrc2: product.images?.[1],
-      caption: product.name,
-      caption2: product.description,
+      imgSrc: product.imagens?.[0],
+      imgSrc2: product.imagens?.[1],
+      caption: product.nome,
+      caption2: product.descricao,
       promotion: product.metadata?.promotion,
       parcelasValor: product.metadata?.parcelasValor,
       produtoTag: product.metadata?.produtoTag,
-      categorias: product.category,
+      categorias: product.categoria,
     }));
   },
 
@@ -96,7 +98,8 @@ export const productsService = {
    */
   getProductById: async (id: string): Promise<Product | undefined> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('*')
       .eq('id', id)
       .single();
@@ -110,28 +113,28 @@ export const productsService = {
 
     return {
       id: data.id,
-      name: data.name,
-      category: data.category,
-      price: data.price?.toString() || '0',
-      images: data.images || [],
-      description: data.description,
+      name: data.nome,
+      category: data.categoria,
+      price: data.preco?.toString() || '0',
+      images: data.imagens || [],
+      description: data.descricao,
       sku: data.sku,
-      manufacturer: data.manufacturer,
-      stock: data.stock || 0,
-      is_active: data.is_active ?? true,
+      manufacturer: data.fabricante,
+      stock: data.estoque || 0,
+      is_active: data.status === 'active',
       metadata: data.metadata || {},
       created_at: data.created_at,
       updated_at: data.updated_at,
       // Legacy fields for backward compatibility
       linkProduto: data.metadata?.linkProduto,
-      imgSrc: data.images?.[0],
-      imgSrc2: data.images?.[1],
-      caption: data.name,
-      caption2: data.description,
+      imgSrc: data.imagens?.[0],
+      imgSrc2: data.imagens?.[1],
+      caption: data.nome,
+      caption2: data.descricao,
       promotion: data.metadata?.promotion,
       parcelasValor: data.metadata?.parcelasValor,
       produtoTag: data.metadata?.produtoTag,
-      categorias: data.category,
+      categorias: data.categoria,
     };
   },
 
@@ -140,9 +143,10 @@ export const productsService = {
    */
   getCategories: async (): Promise<string[]> => {
     const { data, error } = await supabase
-      .from('products')
-      .select('category')
-      .not('category', 'is', null)
+      .schema('commerce')
+      .from('produtos')
+      .select('categoria')
+      .not('categoria', 'is', null)
       .eq('status', 'active');
 
     if (error) {
@@ -150,7 +154,7 @@ export const productsService = {
       return [];
     }
 
-    const categories = [...new Set((data || []).map(p => p.category).filter(Boolean))];
+    const categories = [...new Set((data || []).map(p => p.categoria).filter(Boolean))];
     return categories;
   },
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserRole } from "../../../shared/types/common.types";
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -36,7 +37,7 @@ export const authResponseSchema = z.object({
     id: z.string().uuid(),
     name: z.string(),
     email: z.string(),
-    role: z.enum(["admin", "operator", "distributor"]),
+    role: z.nativeEnum(UserRole),
   }),
   accessToken: z.string(),
   refreshToken: z.string(),

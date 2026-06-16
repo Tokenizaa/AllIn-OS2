@@ -1,7 +1,7 @@
 import { BaseRepository } from "../../../infra/database/base.repository";
 
 export interface Distribuidor {
-  id: string;
+  id?: string;
   usuario: string;
   nome: string;
   email: string;
@@ -18,6 +18,8 @@ export interface Distribuidor {
   status?: string;
   data_cadastro?: string;
   patrocinador_id?: string;
+  perna_esquerda_id?: string;
+  perna_direita_id?: string;
   allin_id?: number;
   allin_synced_at?: string;
   created_at?: string;
@@ -26,39 +28,36 @@ export interface Distribuidor {
 
 export class DistribuidorRepository extends BaseRepository<Distribuidor> {
   constructor() {
-    super("mlm.distribuidores");
+    super("distribuidores", "mlm");
   }
 
   async findByAllinId(allinId: number): Promise<Distribuidor | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("allin_id", allinId)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
   async findByUsuario(usuario: string): Promise<Distribuidor | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("usuario", usuario)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
   async findByEmail(email: string): Promise<Distribuidor | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 }

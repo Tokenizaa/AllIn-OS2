@@ -1,185 +1,195 @@
 import { supabase } from "@/lib/supabase-client";
 
+type CustomerRow = Record<string, any>;
+
+function mapCustomerToProfile(customer: CustomerRow | null) {
+  if (!customer) return null;
+
+  return {
+    id: customer.id,
+    id_comprador: customer.id_comprador || customer.id || null,
+    user_id: customer.auth_user_id || customer.user_id || null,
+    name: customer.name || customer.nome_completo || customer.usuario || null,
+    email: customer.email || null,
+    role: customer.role || customer.customer_type || "cliente_final",
+    status: customer.status || "active",
+    display_name: customer.display_name || customer.nome_completo || customer.name || null,
+    avatar_url: customer.avatar_url || null,
+    phone: customer.phone || customer.telefone || null,
+    cpf: customer.cpf || customer.documento_cpf_cnpj || null,
+    sponsor_id: customer.sponsor_id || customer.patrocinador_comprador || null,
+    created_at: customer.created_at,
+    updated_at: customer.updated_at,
+  };
+}
+
+async function getRoleForAuthUserId(authUserId: string | null | undefined): Promise<string> {
+  if (!authUserId) return "cliente_final";
+
+  const { data: userRole } = await supabase
+    .schema("identity")
+    .from("user_roles")
+    .select("role_id, is_active")
+    .eq("user_id", authUserId)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!userRole?.role_id) return "cliente_final";
+
+  const { data: roleData } = await supabase
+    .schema("identity")
+    .from("roles")
+    .select("name")
+    .eq("id", userRole.role_id)
+    .maybeSingle();
+
+  return roleData?.name || "cliente_final";
+}
+
+async function mapCustomerRow(customer: CustomerRow | null) {
+  const profile = mapCustomerToProfile(customer);
+  if (!profile) return null;
+
+  profile.role = await getRoleForAuthUserId(profile.user_id);
+  return profile;
+}
+
 export const ProfileService = {
   async fetchUserProfile(userId: string) {
     const { data, error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
   async fetchLastProfile() {
     const { data, error } = await supabase
-      .from("profiles")
-      .select("id, name, role, created_at")
+      .schema("crm")
+      .from("customers")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
   async fetchMyProfile() {
     const { data, error } = await supabase
-      .from("profiles")
-      .select("id, name, email, phone, cpf, sponsor_id, city, state, role")
+      .schema("crm")
+      .from("customers")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
-  // ============================================================================
-  // MÉTODOS POR ROLE (NOVO - para migrar de CustomerService)
-  // ============================================================================
-
-  /**
-   * Busca todos os perfis com filtro opcional por role
-   */
   async fetchProfiles(role?: string, limit = 100) {
-    let query = supabase
-      .from("profiles")
+    const { data, error } = await supabase
+      .schema("crm")
+      .from("customers")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (role) {
-      query = query.eq("role", role);
-    }
-
-    const { data, error } = await query;
     if (error) throw error;
-    return data || [];
+
+    const rows = data || [];
+    const mapped = [];
+    for (const row of rows) {
+      const profile = await mapCustomerRow(row);
+      if (!role || profile?.role === role) {
+        mapped.push(profile);
+      }
+    }
+    return mapped;
   },
 
-  /**
-   * Busca perfil por ID
-   */
   async fetchProfileById(id: string) {
     const { data, error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*")
       .eq("id", id)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
-  /**
-   * Busca distribuidores (role = 'distribuidor')
-   */
   async fetchDistributors(limit = 100) {
     return this.fetchProfiles("distribuidor", limit);
   },
 
-  /**
-   * Busca clientes finais (role = 'customer_final')
-   */
   async fetchCustomerFinals(limit = 100) {
-    return this.fetchProfiles("customer_final", limit);
+    return this.fetchProfiles("cliente_final", limit);
   },
 
-  /**
-   * Busca clientes diretos (role = 'cliente_direto')
-   */
   async fetchClienteDiretos(limit = 100) {
     return this.fetchProfiles("cliente_direto", limit);
   },
 
-  /**
-   * Busca admins (role = 'admin')
-   */
   async fetchAdmins(limit = 100) {
     return this.fetchProfiles("admin", limit);
   },
 
-  /**
-   * Busca perfis com paginação (compatível com CustomerService.fetchCustomersWithOrderStats)
-   * NOTA: Este método precisa ser adaptado para incluir stats de pedidos
-   */
   async fetchProfilesWithStats(page = 1, pageSize = 15, role?: string) {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    let query = supabase
-      .from("profiles")
+    const { data, error, count } = await supabase
+      .schema("crm")
+      .from("customers")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    if (role) {
-      query = query.eq("role", role);
-    }
-
-    const { data, error, count } = await query;
     if (error) throw error;
 
-    // TODO: Integrar com customer_order_stats quando a migração para profiles estiver completa
+    const profiles = [];
+    for (const row of data || []) {
+      const profile = await mapCustomerRow(row);
+      if (!role || profile?.role === role) {
+        profiles.push(profile);
+      }
+    }
+
     return {
-      profiles: data || [],
-      orderStats: {}, // Placeholder - precisa ser implementado
+      profiles,
+      orderStats: {},
       totalCount: count || 0,
       page,
       pageSize,
     };
   },
 
-  /**
-   * Busca perfis para analytics (compatível com CustomerService.fetchAnalyticsCustomers)
-   */
   async fetchAnalyticsProfiles(role?: string) {
-    let query = supabase
-      .from("profiles")
-      .select("id, name, email, role, created_at")
-      .order("created_at", { ascending: false })
-      .limit(500);
-
-    if (role) {
-      query = query.eq("role", role);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
+    return this.fetchProfiles(role, 500);
   },
 
-  /**
-   * Busca perfis recentes (compatível com CustomerService.fetchRecentCustomers)
-   */
   async fetchRecentProfiles(limit = 20, role?: string) {
     return this.fetchProfiles(role, limit);
   },
 
-  /**
-   * Busca membros da rede (compatível com CustomerService.fetchNetworkMembers)
-   */
   async fetchNetworkMembers(limit = 500, role?: string) {
     return this.fetchProfiles(role, limit);
   },
 
-  // ============================================================================
-  // MÉTODOS DE BÔNUS E PLANOS (MIGRAÇÃO DE CustomerService)
-  // ============================================================================
-
-  /**
-   * Busca bônus de um perfil por profile_id
-   * Tenta usar profile_id, mas fallback para id_comprador se necessário
-   */
   async fetchProfileBonus(profileId: string) {
-    // Primeiro tenta usar profile_id direto na view
     let { data, error } = await supabase
       .from("customer_bonus_view")
       .select("*")
       .eq("profile_id", profileId)
       .maybeSingle();
 
-    // Se não encontrar ou se a coluna não existir, tenta usar id_comprador
     if (error || !data) {
-      // Busca o profile para obter id_comprador
       const profile = await this.fetchProfileById(profileId);
       if (profile?.id_comprador) {
         const result = await supabase
@@ -196,27 +206,22 @@ export const ProfileService = {
     return data;
   },
 
-  /**
-   * Busca plano de um perfil por profile_id
-   * Tenta usar profile_id, mas fallback para id_comprador se necessário
-   */
   async fetchProfilePlan(profileId: string) {
-    // Primeiro tenta usar profile_id direto
     let { data, error } = await supabase
-      .from("customer_plans")
-      .select("*, plans(*)")
-      .eq("profile_id", profileId)
+      .schema("mlm")
+      .from("planos_distribuidores")
+      .select("*, planos(*)")
+      .eq("distribuidor_id", profileId)
       .maybeSingle();
 
-    // Se não encontrar ou se a coluna não existir, tenta usar id_comprador
     if (error || !data) {
-      // Busca o profile para obter id_comprador
       const profile = await this.fetchProfileById(profileId);
       if (profile?.id_comprador) {
         const result = await supabase
-          .from("customer_plans")
-          .select("*, plans(*)")
-          .eq("id_comprador", profile.id_comprador)
+          .schema("mlm")
+          .from("planos_distribuidores")
+          .select("*, planos(*)")
+          .eq("distribuidor_id", profile.id_comprador)
           .maybeSingle();
         data = result.data;
         error = result.error;

@@ -27,6 +27,32 @@ export interface SimilarEmbedding {
 }
 
 export class EmbeddingsService {
+  private parseEmbedding(value: unknown): number[] {
+    if (Array.isArray(value)) {
+      return value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return [];
+      }
+
+      try {
+        return this.parseEmbedding(JSON.parse(trimmed));
+      } catch {
+        return trimmed
+          .replace(/^\[/, '')
+          .replace(/\]$/, '')
+          .split(',')
+          .map((item) => Number(item.trim()))
+          .filter((item) => Number.isFinite(item));
+      }
+    }
+
+    return [];
+  }
+
   /**
    * Cria ou atualiza embedding
    * 
@@ -121,7 +147,7 @@ export class EmbeddingsService {
 
     return {
       ...data,
-      embedding: data.embedding ? JSON.parse(data.embedding.replace(/[\[\]]/g, '').split(',').map(Number)) : [],
+      embedding: this.parseEmbedding(data.embedding),
     };
   }
 
@@ -174,7 +200,7 @@ export class EmbeddingsService {
     if (error) throw error;
     return (data || []).map(e => ({
       ...e,
-      embedding: e.embedding ? JSON.parse(e.embedding.replace(/[\[\]]/g, '').split(',').map(Number)) : [],
+      embedding: this.parseEmbedding(e.embedding),
     }));
   }
 }

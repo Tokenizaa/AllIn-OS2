@@ -2,10 +2,10 @@ import { UserRole } from "@/shared/types/roles";
 import { User } from "./context/auth.types";
 
 export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
-  [UserRole.ADMIN_MASTER]: "/customers",
-  [UserRole.GESTAO_ADMIN]: "/analytics",
-  [UserRole.FINANCEIRO]: "/wallets",
-  [UserRole.SUPORTE]: "/customers",
+  [UserRole.ADMIN_MASTER]: "/_app/customers",
+  [UserRole.GESTAO_ADMIN]: "/_app/analytics",
+  [UserRole.FINANCEIRO]: "/_app/wallets",
+  [UserRole.SUPORTE]: "/_app/customers",
   [UserRole.LOGISTICA]: "/office",
   [UserRole.MARKETING]: "/office",
   [UserRole.ANALYTICS]: "/office",
@@ -17,14 +17,14 @@ export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
 };
 
 export const ROLE_DEMO_PATHS: Record<UserRole, string> = {
-  [UserRole.ADMIN_MASTER]: "/analytics",
-  [UserRole.GESTAO_ADMIN]: "/analytics",
-  [UserRole.FINANCEIRO]: "/wallets",
-  [UserRole.SUPORTE]: "/customers",
+  [UserRole.ADMIN_MASTER]: "/_app/analytics",
+  [UserRole.GESTAO_ADMIN]: "/_app/analytics",
+  [UserRole.FINANCEIRO]: "/_app/wallets",
+  [UserRole.SUPORTE]: "/_app/customers",
   [UserRole.LOGISTICA]: "/office/orders",
-  [UserRole.MARKETING]: "/marketing",
-  [UserRole.ANALYTICS]: "/analytics",
-  [UserRole.AUDITOR]: "/insights",
+  [UserRole.MARKETING]: "/_app/marketing",
+  [UserRole.ANALYTICS]: "/_app/analytics",
+  [UserRole.AUDITOR]: "/_app/insights",
   [UserRole.OPERADOR]: "/office",
   [UserRole.DISTRIBUIDOR]: "/office/network",
   [UserRole.AFILIADO]: "/office/network",

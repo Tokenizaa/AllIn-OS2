@@ -8,56 +8,67 @@ import { UserRole } from "@/shared/types/roles";
  */
 export class SupabaseService {
   /**
-   * Fetch user profile from auth.users + profiles
+   * Fetch user profile from auth.users + crm.customers
    */
   static async fetchUserProfile(userId: string): Promise<User | null> {
     const startTime = Date.now();
     console.log("[SupabaseService] fetchUserProfile START - userId:", userId);
     
     try {
-      // Get profile data directly by user_id
-      console.log("[SupabaseService] Querying profiles table for user_id:", userId);
+      // Get customer profile data from crm.customers
+      console.log("[SupabaseService] Querying crm.customers table for auth_user_id:", userId);
       const queryStartTime = Date.now();
       
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
+      const { data: customer, error: customerError } = await supabase
+        .schema("crm")
+        .from("customers")
         .select("*")
-        .eq("user_id", userId)
-        .single();
+        .eq("auth_user_id", userId)
+        .maybeSingle();
       
       const queryDuration = Date.now() - queryStartTime;
       console.log("[SupabaseService] Query duration:", queryDuration, "ms");
-      console.log("[SupabaseService] Query result - profile:", profile);
-      console.log("[SupabaseService] Query result - error:", profileError);
+      console.log("[SupabaseService] Query result - customer:", customer);
+      console.log("[SupabaseService] Query result - error:", customerError);
 
-      if (profileError && profileError.code !== "PGRST116") {
-        console.error("[SupabaseService] Error fetching profile:", profileError);
-        console.error("[SupabaseService] Error code:", profileError.code);
-        console.error("[SupabaseService] Error message:", profileError.message);
-        console.error("[SupabaseService] Error details:", profileError.details);
+      if (customerError) {
+        console.error("[SupabaseService] Error fetching customer:", customerError);
+        console.error("[SupabaseService] Error code:", customerError.code);
+        console.error("[SupabaseService] Error message:", customerError.message);
+        console.error("[SupabaseService] Error details:", customerError.details);
         return null;
       }
 
-      if (!profile) {
-        console.error("[SupabaseService] Profile not found for user_id:", userId);
+      if (!customer) {
+        console.error("[SupabaseService] Customer profile not found for auth_user_id:", userId);
         return null;
       }
 
-      // Combine profile data - using only profile data, no auth.user call
+      // Map customer tipo_cliente to UserRole
+      let userRole = UserRole.CLIENTE_FINAL;
+      if (customer.tipo_cliente === 'admin') {
+        userRole = UserRole.ADMIN_MASTER;
+      } else if (customer.tipo_cliente === 'distribuidor') {
+        userRole = UserRole.DISTRIBUIDOR;
+      } else if (customer.tipo_cliente === 'afiliado') {
+        userRole = UserRole.AFILIADO;
+      }
+
+      // Combine customer data
       const result = {
-        id: profile.user_id,
-        email: profile.email || "",
-        name: profile.name || profile.email?.split("@")[0] || "",
-        role: (profile.role as UserRole) || UserRole.CLIENTE_FINAL,
-        status: profile.status || "active",
-        active: profile.status === "active",
-        avatar: profile.avatar || null,
-        phone: profile.phone || null,
-        cpf: profile.cpf || null,
-        created_at: profile.created_at || "",
-        last_login: profile.created_at || "",
-        referral_code: profile.referral_code || null,
-        sponsor_id: profile.sponsor_id || null,
+        id: customer.auth_user_id,
+        email: customer.email || "",
+        name: customer.nome || customer.email?.split("@")[0] || "",
+        role: userRole,
+        status: customer.status || "active",
+        active: customer.ativo === true,
+        avatar: null,
+        phone: customer.telefone || null,
+        cpf: customer.cpf || null,
+        created_at: customer.created_at || "",
+        last_login: customer.data_cadastro || "",
+        referral_code: null,
+        sponsor_id: customer.patrocinador_id || null,
       };
       
       const totalDuration = Date.now() - startTime;
@@ -92,14 +103,15 @@ export class SupabaseService {
   }
 
   /**
-   * Fetch distributor profile from customers table
+   * Fetch distributor profile from mlm.distribuidores table
    */
   static async fetchDistributorProfile(userId: string): Promise<DistributorProfile | null> {
     try {
       const { data, error } = await supabase
-        .from("customers")
-        .select("id, user_id, usuario, id_comprador, patrocinador_comprador, plan_id, metadata")
-        .eq("user_id", userId)
+        .schema("mlm")
+        .from("distribuidores")
+        .select("id, usuario, patrocinador_id, plan_id, qualificacao, status, metadata")
+        .eq("auth_user_id", userId)
         .maybeSingle();
 
       if (error) {
@@ -111,15 +123,15 @@ export class SupabaseService {
         return null;
       }
 
-      // Map customer data to DistributorProfile format
+      // Map distributor data to DistributorProfile format
       return {
         id: data.id,
-        id_comprador: data.user_id,
-        sponsor_id: data.patrocinador_comprador || null,
-        referral_code: data.usuario || data.id_comprador || "",
-        referral_link: `/loja/ref/${data.usuario || data.id_comprador}`,
+        id_comprador: userId,
+        sponsor_id: data.patrocinador_id || null,
+        referral_code: data.usuario || userId || "",
+        referral_link: `/loja/ref/${data.usuario || userId}`,
         plan_id: data.plan_id || "none",
-        qualification: data.qualification || "Associado",
+        qualification: data.qualificacao || "Associado",
         wallet_balance: 0, // Would need to fetch from wallets table
         bonus_balance: 0, // Would need to fetch from wallets table
         status: data.status || "active",
@@ -177,17 +189,19 @@ export class SupabaseService {
   static async fetchDistributorBySlug(slug: string) {
     try {
       const normSlug = slug.toLowerCase().trim();
-      
-      // Find by usuario field, including theme fields
+
+      // Find by usuario field in mlm.distribuidores
       const { data, error } = await supabase
-        .from("customers")
+        .schema("mlm")
+        .from("distribuidores")
         .select(`
           id,
-          user_id,
+          auth_user_id,
           usuario,
-          id_comprador,
-          qualification,
-          patrocinador_comprador,
+          qualificacao,
+          patrocinador_id,
+          plan_id,
+          status,
           metadata,
           created_at,
           updated_at
@@ -213,10 +227,11 @@ export class SupabaseService {
   static async fetchPlans() {
     try {
       const { data, error } = await supabase
-        .from("plans")
+        .schema("mlm")
+        .from("planos")
         .select("*")
         .eq("is_active", true)
-        .order("sort_order", { ascending: true });
+        .order("created_at", { ascending: true });
 
       if (error) {
         console.error("[SupabaseService] Error fetching plans:", error);
@@ -236,7 +251,8 @@ export class SupabaseService {
   static async fetchWithdrawals(userId?: string) {
     try {
       let query = supabase
-        .from("withdrawals")
+        .schema("finance")
+        .from("solicitacoes_saque")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -260,16 +276,19 @@ export class SupabaseService {
 
   /**
    * Fetch leads for a user
+   * Note: Leads are stored in crm.customers with tipo_cliente = 'lead'
    */
   static async fetchLeads(userId?: string) {
     try {
       let query = supabase
-        .from("leads")
+        .schema("crm")
+        .from("customers")
         .select("*")
+        .eq("tipo_cliente", "lead")
         .order("created_at", { ascending: false });
 
       if (userId) {
-        query = query.eq("user_id", userId);
+        query = query.eq("auth_user_id", userId);
       }
 
       const { data, error } = await query;
@@ -288,15 +307,17 @@ export class SupabaseService {
 
   /**
    * Fetch distributor theme by distributor_id or default theme
+   * Note: Themes are stored in mlm.distribuidor_temas
    */
   static async fetchDistributorTheme(distributorId?: string) {
     try {
       if (distributorId) {
         // Try to fetch custom theme for distributor
         const { data, error } = await supabase
-          .from("distributor_themes")
+          .schema("mlm")
+          .from("distribuidor_temas")
           .select("*")
-          .eq("distributor_id", distributorId)
+          .eq("distribuidor_id", distributorId)
           .single();
 
         if (!error && data) {
@@ -306,7 +327,8 @@ export class SupabaseService {
 
       // Fetch default theme
       const { data, error } = await supabase
-        .from("distributor_themes")
+        .schema("mlm")
+        .from("distribuidor_temas")
         .select("*")
         .eq("is_default", true)
         .single();

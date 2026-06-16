@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { pointsWalletService } from '../../backend/modules/payments/services/points-wallet.service';
+import { supabase } from '@/lib/supabase-client';
 
 // Validation schemas
 const earnPointsSchema = z.object({
@@ -31,8 +31,15 @@ const convertPointsToCurrencySchema = z.object({
 export const getPointsWallet = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await pointsWalletService.getPointsWalletByidComprador(parsed.idComprador);
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('points_wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get points wallet' };
   }
@@ -42,8 +49,31 @@ export const getPointsWallet = async (data: { idComprador: string }) => {
 export const ensurePointsWallet = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await pointsWalletService.ensurePointsWalletExists(parsed.idComprador);
-    return { success: true, data: result };
+    const { data: existingWallet } = await supabase
+      .schema('commerce')
+      .from('points_wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (existingWallet) {
+      return { success: true, data: existingWallet };
+    }
+    
+    const { data: newWallet, error } = await supabase
+      .schema('commerce')
+      .from('points_wallets')
+      .insert({
+        id_comprador: parsed.idComprador,
+        balance: 0,
+        available_balance: 0,
+        currency: 'BRL',
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: newWallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure points wallet' };
   }
@@ -53,15 +83,17 @@ export const ensurePointsWallet = async (data: { idComprador: string }) => {
 export const earnPoints = async (data: any) => {
   const parsed = earnPointsSchema.parse(data);
   try {
-    const result = await pointsWalletService.earnPoints(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.sourceType,
-      parsed.referenceId,
-      parsed.referenceType,
-      parsed.description as any
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('earn_points', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_source_type: parsed.sourceType,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+      p_description: parsed.description,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to earn points' };
   }
@@ -71,14 +103,16 @@ export const earnPoints = async (data: any) => {
 export const redeemPoints = async (data: any) => {
   const parsed = redeemPointsSchema.parse(data);
   try {
-    const result = await pointsWalletService.redeemPoints(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.referenceId,
-      parsed.referenceType,
-      parsed.description
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('redeem_points', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+      p_description: parsed.description,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to redeem points' };
   }
@@ -92,11 +126,15 @@ export const getAvailablePointsForPayment = async (data: { idComprador: string; 
   }).parse(data);
 
   try {
-    const result = await pointsWalletService.getAvailablePointsForPayment(
-      parsed.idComprador,
-      parsed.productId
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('points_wallets')
+      .select('available_balance')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: { available_points: wallet?.available_balance || 0 } };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get available points' };
   }
@@ -117,13 +155,25 @@ export const getPointsTransactions = async (data: {
   }).parse(data);
 
   try {
-    const result = await pointsWalletService.getTransactions(
-      parsed.idComprador,
-      parsed.limit,
-      0,
-      parsed.transactionType
-    );
-    return { success: true, data: result };
+    const from = (parsed.page - 1) * parsed.limit;
+    const to = from + parsed.limit - 1;
+
+    let query = supabase
+      .schema('commerce')
+      .from('points_transactions')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador);
+    
+    if (parsed.transactionType) {
+      query = query.eq('transaction_type', parsed.transactionType);
+    }
+    
+    const { data: transactions, error } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    
+    if (error) throw error;
+    return { success: true, data: transactions || [] };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get transactions' };
   }
@@ -133,7 +183,14 @@ export const getPointsTransactions = async (data: {
 export const getPointsWalletBalance = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const wallet = await pointsWalletService.getPointsWalletByidComprador(parsed.idComprador);
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('points_wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
     if (!wallet) {
       return { success: false, error: 'Points wallet not found' };
     }
@@ -154,7 +211,11 @@ export const getPointsWalletBalance = async (data: { idComprador: string }) => {
 export const convertCurrencyToPoints = async (data: { amount: number }) => {
   const parsed = convertCurrencyToPointsSchema.parse(data);
   try {
-    const result = await pointsWalletService.convertCurrencyToPoints(parsed.amount);
+    const { data: result, error } = await supabase.rpc('convert_currency_to_points', {
+      p_amount: parsed.amount,
+    });
+    
+    if (error) throw error;
     return { success: true, data: { points: result } };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to convert currency to points' };
@@ -165,7 +226,11 @@ export const convertCurrencyToPoints = async (data: { amount: number }) => {
 export const convertPointsToCurrency = async (data: { points: number }) => {
   const parsed = convertPointsToCurrencySchema.parse(data);
   try {
-    const result = await pointsWalletService.convertPointsToCurrency(parsed.points);
+    const { data: result, error } = await supabase.rpc('convert_points_to_currency', {
+      p_points: parsed.points,
+    });
+    
+    if (error) throw error;
     return { success: true, data: { amount: result } };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to convert points to currency' };
@@ -176,7 +241,11 @@ export const convertPointsToCurrency = async (data: { points: number }) => {
 export const expireOldPoints = async (data: { daysThreshold?: number }) => {
   const parsed = z.object({ daysThreshold: z.number().default(365) }).parse(data);
   try {
-    const result = await (pointsWalletService as any).expireOldPoints(parsed.daysThreshold);
+    const { data: result, error } = await supabase.rpc('expire_old_points', {
+      p_days_threshold: parsed.daysThreshold,
+    });
+    
+    if (error) throw error;
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to expire old points' };

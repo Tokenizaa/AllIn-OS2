@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { discountEngineService } from '../../backend/modules/payments/services/discount-engine.service';
+import { supabase } from '@/lib/supabase-client';
 
 // Validation schemas
 const calculateDiscountSchema = z.object({
@@ -42,13 +42,15 @@ const validateCouponSchema = z.object({
 export const calculateDiscount = async (data: any) => {
   const parsed = calculateDiscountSchema.parse(data);
   try {
-    const result = await discountEngineService.calculateDiscount(
-      parsed.originalAmount,
-      parsed.idComprador,
-      parsed.productId,
-      parsed.categoryId,
-      parsed.couponCode
-    );
+    const { data: result, error } = await supabase.rpc('calculate_discount', {
+      p_original_amount: parsed.originalAmount,
+      p_id_comprador: parsed.idComprador,
+      p_product_id: parsed.productId,
+      p_category_id: parsed.categoryId,
+      p_coupon_code: parsed.couponCode,
+    });
+    
+    if (error) throw error;
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to calculate discount' };
@@ -59,14 +61,23 @@ export const calculateDiscount = async (data: any) => {
 export const createCoupon = async (data: any) => {
   const parsed = createCouponSchema.parse(data);
   try {
-    const result = await discountEngineService.createCoupon(
-      parsed.code,
-      parsed.discountRuleId,
-      parsed.idComprador,
-      parsed.expiresAt ? new Date(parsed.expiresAt) : undefined,
-      parsed.usageLimit
-    );
-    return { success: true, data: result };
+    const { data: coupon, error } = await supabase
+      .schema('commerce')
+      .from('coupons')
+      .insert({
+        code: parsed.code,
+        discount_rule_id: parsed.discountRuleId,
+        id_comprador: parsed.idComprador,
+        expires_at: parsed.expiresAt,
+        usage_limit: parsed.usageLimit,
+        usage_count: 0,
+        is_active: true,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: coupon };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to create coupon' };
   }
@@ -76,21 +87,28 @@ export const createCoupon = async (data: any) => {
 export const createDiscountRule = async (data: any) => {
   const parsed = createDiscountRuleSchema.parse(data);
   try {
-    const result = await discountEngineService.createDiscountRule({
-      name: parsed.name,
-      description: parsed.description,
-      discount_type: parsed.discount_type,
-      discount_value: parsed.discount_value,
-      min_order_amount: parsed.min_order_amount,
-      max_discount_amount: parsed.max_discount_amount,
-      applicable_products: parsed.applicable_products,
-      applicable_categories: parsed.applicable_categories,
-      start_date: parsed.start_date,
-      end_date: parsed.end_date,
-      usage_limit: parsed.usage_limit,
-      is_active: parsed.is_active,
-    });
-    return { success: true, data: result };
+    const { data: rule, error } = await supabase
+      .schema('commerce')
+      .from('discount_rules')
+      .insert({
+        name: parsed.name,
+        description: parsed.description,
+        discount_type: parsed.discount_type,
+        discount_value: parsed.discount_value,
+        min_order_amount: parsed.min_order_amount,
+        max_discount_amount: parsed.max_discount_amount,
+        applicable_products: parsed.applicable_products,
+        applicable_categories: parsed.applicable_categories,
+        start_date: parsed.start_date,
+        end_date: parsed.end_date,
+        usage_limit: parsed.usage_limit,
+        is_active: parsed.is_active,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: rule };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to create discount rule' };
   }
@@ -100,7 +118,12 @@ export const createDiscountRule = async (data: any) => {
 export const validateCoupon = async (data: any) => {
   const parsed = validateCouponSchema.parse(data);
   try {
-    const result = await discountEngineService.validateCoupon(parsed.couponCode, parsed.idComprador);
+    const { data: result, error } = await supabase.rpc('validate_coupon', {
+      p_coupon_code: parsed.couponCode,
+      p_id_comprador: parsed.idComprador,
+    });
+    
+    if (error) throw error;
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to validate coupon' };

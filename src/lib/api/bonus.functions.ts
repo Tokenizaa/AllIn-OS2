@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { computeGenerationBonus, getPlanRule } from "@/modules/plans/mlm-rules";
-import { getActiveCustomerPlan as getActiveCustomerPlanApi, getPlanBonuses as getPlanBonusesApi, getPlanById as getPlanByIdApi } from "../../backend/api";
+import { supabase } from "../supabase/client";
 import { getCustomerLabel } from "@/lib/customer-label";
 import { CustomerService } from "@/services/customers";
 import { NetworkService } from "@/services/network";
@@ -77,17 +77,29 @@ function resolvePlanKey(customer: CustomerRow | null): string | null {
 }
 
 async function resolvePlanConfig(idComprador: string) {
-  const activePlanResult = await getActiveCustomerPlanApi({ id_comprador: idComprador });
-  if (!activePlanResult.success || !activePlanResult.data?.plan_id) {
+  const { data: activePlan, error: activePlanError } = await supabase
+    .from('customer_plans')
+    .select('plan_id')
+    .eq('id_comprador', idComprador)
+    .eq('is_active', true)
+    .single();
+  
+  if (activePlanError || !activePlan?.plan_id) {
     return { planKey: null as string | null, directPct: 0, sponsorPct: 0, generationBonuses: [] as Array<{ generation: number; percentage: number }>, extraDirectsBonuses: [] as Array<{ minDirects: number; percentage: number }>, planName: null as string | null };
   }
 
-  const planId = activePlanResult.data.plan_id;
-  const planResult = await getPlanByIdApi({ id: planId });
-  const bonusesResult = await getPlanBonusesApi({ planId });
+  const planId = activePlan.plan_id;
+  const { data: plan, error: planError } = await supabase
+    .from('plans')
+    .select('*')
+    .eq('id', planId)
+    .single();
+  
+  const { data: bonuses, error: bonusesError } = await supabase
+    .from('plan_bonuses')
+    .select('*')
+    .eq('plan_id', planId);
 
-  const plan = planResult.success ? planResult.data : null;
-  const bonuses = bonusesResult.success ? (bonusesResult.data as PlanBonusRow[]) : [];
   const metadata = (plan?.metadata || {}) as PlanMetadata;
 
   const generationBonusesFromMetadata = (metadata.commission?.generations || metadata.generations || []).map((item) => ({
@@ -102,7 +114,7 @@ async function resolvePlanConfig(idComprador: string) {
 
   const generationBonuses = generationBonusesFromMetadata.length
     ? generationBonusesFromMetadata
-    : bonuses
+    : (bonuses || [])
     .filter((bonus) => bonus.bonus_type === "generation")
     .map((bonus) => ({
       generation: Number(bonus.generation || 0),
@@ -111,7 +123,7 @@ async function resolvePlanConfig(idComprador: string) {
 
   const extraDirectsBonuses = extraDirectsFromMetadata.length
     ? extraDirectsFromMetadata
-    : bonuses
+    : (bonuses || [])
     .filter((bonus) => bonus.bonus_type === "direct_bonus")
     .map((bonus) => ({
       minDirects: Number(bonus.required_directs || 0),

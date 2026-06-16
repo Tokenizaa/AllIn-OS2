@@ -3,28 +3,26 @@ import { Customer, Customer360 } from "../dto/customer.dto";
 
 export class CustomerRepository extends BaseRepository<Customer> {
   constructor() {
-    super("customers");
+    super("customers", "crm");
   }
 
   async findByEmail(email: string): Promise<Customer | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
   async findByCpf(cpf: string): Promise<Customer | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("metadata->>cpf", cpf)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
@@ -32,8 +30,7 @@ export class CustomerRepository extends BaseRepository<Customer> {
     limit?: number;
     offset?: number;
   }): Promise<Customer[]> {
-    let query = this.getClient()
-      .from(this.tableName)
+    let query = this.getQuery()
       .select("*")
       .eq("patrocinador_comprador", sponsorId);
 
@@ -53,12 +50,13 @@ export class CustomerRepository extends BaseRepository<Customer> {
 
   async getCustomer360(idComprador: string): Promise<Customer360 | null> {
     const { data, error } = await this.getClient()
+      .schema("crm")
       .from("customer_360_view")
       .select("*")
       .eq("id", idComprador)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
@@ -68,6 +66,7 @@ export class CustomerRepository extends BaseRepository<Customer> {
     status?: string;
   }): Promise<Customer360[]> {
     let query = this.getClient()
+      .schema("crm")
       .from("customer_360_view")
       .select("*");
 
@@ -90,8 +89,7 @@ export class CustomerRepository extends BaseRepository<Customer> {
   }
 
   async countByStatus(status: string): Promise<number> {
-    const { count, error } = await this.getClient()
-      .from(this.tableName)
+    const { count, error } = await this.getQuery()
       .select("*", { count: "exact", head: true })
       .eq("status", status);
 
@@ -100,8 +98,7 @@ export class CustomerRepository extends BaseRepository<Customer> {
   }
 
   async countByPlan(planId: string): Promise<number> {
-    const { count, error } = await this.getClient()
-      .from(this.tableName)
+    const { count, error } = await this.getQuery()
       .select("*", { count: "exact", head: true })
       .eq("plan_id", planId);
 

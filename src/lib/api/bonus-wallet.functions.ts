@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { bonusWalletService } from '../../backend/modules/payments/services/bonus-wallet.service';
+import { supabase } from '@/lib/supabase-client';
 
 // Validation schemas
 const earnBonusSchema = z.object({
@@ -23,8 +23,15 @@ const useBonusSchema = z.object({
 export const getBonusWallet = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await bonusWalletService.getBonusWalletByidComprador(parsed.idComprador);
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('bonus_wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get bonus wallet' };
   }
@@ -34,8 +41,31 @@ export const getBonusWallet = async (data: { idComprador: string }) => {
 export const ensureBonusWallet = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const result = await bonusWalletService.ensureBonusWalletExists(parsed.idComprador);
-    return { success: true, data: result };
+    const { data: existingWallet } = await supabase
+      .schema('commerce')
+      .from('bonus_wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (existingWallet) {
+      return { success: true, data: existingWallet };
+    }
+    
+    const { data: newWallet, error } = await supabase
+      .schema('commerce')
+      .from('bonus_wallets')
+      .insert({
+        id_comprador: parsed.idComprador,
+        balance: 0,
+        available_balance: 0,
+        currency: 'BRL',
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: newWallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to ensure bonus wallet' };
   }
@@ -45,15 +75,17 @@ export const ensureBonusWallet = async (data: { idComprador: string }) => {
 export const earnBonus = async (data: any) => {
   const parsed = earnBonusSchema.parse(data);
   try {
-    const result = await bonusWalletService.earnBonus(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.sourceType,
-      parsed.referenceId,
-      parsed.referenceType,
-      parsed.description as any
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('earn_bonus', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_source_type: parsed.sourceType,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+      p_description: parsed.description,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to earn bonus' };
   }
@@ -63,14 +95,16 @@ export const earnBonus = async (data: any) => {
 export const useBonus = async (data: any) => {
   const parsed = useBonusSchema.parse(data);
   try {
-    const result = await bonusWalletService.useBonus(
-      parsed.idComprador,
-      parsed.amount,
-      parsed.referenceId,
-      parsed.referenceType,
-      parsed.description
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase.rpc('use_bonus', {
+      p_id_comprador: parsed.idComprador,
+      p_amount: parsed.amount,
+      p_reference_id: parsed.referenceId,
+      p_reference_type: parsed.referenceType,
+      p_description: parsed.description,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: wallet };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to use bonus' };
   }
@@ -84,11 +118,15 @@ export const getAvailableBonusForPayment = async (data: { idComprador: string; p
   }).parse(data);
 
   try {
-    const result = await bonusWalletService.getAvailableBonusForPayment(
-      parsed.idComprador,
-      parsed.productId
-    );
-    return { success: true, data: result };
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('bonus_wallets')
+      .select('available_balance')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: { available_bonus: wallet?.available_balance || 0 } };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get available bonus' };
   }
@@ -108,12 +146,25 @@ export const getBonusTransactions = async (data: {
   }).parse(data);
 
   try {
-    const result = await bonusWalletService.getBonusTransactions(
-      parsed.idComprador,
-      parsed.limit,
-      0
-    );
-    return { success: true, data: result };
+    const from = (parsed.page - 1) * parsed.limit;
+    const to = from + parsed.limit - 1;
+
+    let query = supabase
+      .schema('commerce')
+      .from('bonus_transactions')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador);
+    
+    if (parsed.transactionType) {
+      query = query.eq('transaction_type', parsed.transactionType);
+    }
+    
+    const { data: transactions, error } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    
+    if (error) throw error;
+    return { success: true, data: transactions || [] };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get transactions' };
   }
@@ -123,7 +174,14 @@ export const getBonusTransactions = async (data: {
 export const getBonusWalletBalance = async (data: { idComprador: string }) => {
   const parsed = z.object({ idComprador: z.string() }).parse(data);
   try {
-    const wallet = await bonusWalletService.getBonusWalletByidComprador(parsed.idComprador);
+    const { data: wallet, error } = await supabase
+      .schema('commerce')
+      .from('bonus_wallets')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador)
+      .single();
+    
+    if (error) throw error;
     if (!wallet) {
       return { success: false, error: 'Bonus wallet not found' };
     }
@@ -144,7 +202,11 @@ export const getBonusWalletBalance = async (data: { idComprador: string }) => {
 export const expireOldBonuses = async (data: { daysThreshold?: number }) => {
   const parsed = z.object({ daysThreshold: z.number().default(90) }).parse(data);
   try {
-    const result = await (bonusWalletService as any).expireOldBonuses(parsed.daysThreshold);
+    const { data: result, error } = await supabase.rpc('expire_old_bonuses', {
+      p_days_threshold: parsed.daysThreshold,
+    });
+    
+    if (error) throw error;
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to expire old bonuses' };

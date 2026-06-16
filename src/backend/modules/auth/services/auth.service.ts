@@ -1,18 +1,80 @@
 import { LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto, AuthResponse } from "../dto/auth.dto";
 import { CustomerRepository } from "../../customers/repositories/customer.repository";
-import { ProfileRepository } from "../../profiles/repositories/profile.repository";
 import { UserRole } from "../../../shared/types/common.types";
-import { getSupabaseClient } from "../../../infra/supabase/client";
+import { getSupabaseAdminClient } from "../../../infra/supabase/client";
 
-const supabase = getSupabaseClient();
+const supabase = getSupabaseAdminClient();
 
 export class AuthService {
   private customerRepository: CustomerRepository;
-  private profileRepository: ProfileRepository;
 
   constructor() {
     this.customerRepository = new CustomerRepository();
-    this.profileRepository = new ProfileRepository();
+  }
+
+  private mapUserRoleToIdentityRole(role: UserRole): string {
+    switch (role) {
+      case UserRole.ADMIN_MASTER:
+      case UserRole.GESTAO_ADMIN:
+        return "admin";
+      case UserRole.FINANCEIRO:
+      case UserRole.SUPORTE:
+      case UserRole.LOGISTICA:
+      case UserRole.MARKETING:
+      case UserRole.ANALYTICS:
+      case UserRole.AUDITOR:
+      case UserRole.OPERADOR:
+        return "support";
+      case UserRole.DISTRIBUIDOR:
+        return "distributor";
+      case UserRole.AFILIADO:
+      case UserRole.CLIENTE_FINAL:
+      default:
+        return "customer";
+    }
+  }
+
+  private async getRoleForAuthUserId(authUserId: string | null | undefined): Promise<UserRole> {
+    if (!authUserId) return UserRole.CLIENTE_FINAL;
+
+    const { data: userRole, error: userRoleError } = await supabase
+      .schema("identity")
+      .from("user_roles")
+      .select("role_id, is_active, expires_at")
+      .eq("user_id", authUserId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (userRoleError || !userRole?.role_id) {
+      return UserRole.CLIENTE_FINAL;
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .schema("identity")
+      .from("roles")
+      .select("name")
+      .eq("id", userRole.role_id)
+      .maybeSingle();
+
+    if (roleError || !roleData?.name) {
+      return UserRole.CLIENTE_FINAL;
+    }
+
+    switch (roleData.name) {
+      case "admin":
+        return UserRole.ADMIN_MASTER;
+      case "manager":
+        return UserRole.GESTAO_ADMIN;
+      case "distributor":
+        return UserRole.DISTRIBUIDOR;
+      case "support":
+        return UserRole.SUPORTE;
+      case "customer":
+      default:
+        return UserRole.CLIENTE_FINAL;
+    }
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
@@ -29,9 +91,8 @@ export class AuthService {
     //   throw new Error("Invalid credentials");
     // }
 
-    // Get user role from profiles table (NOT from customers)
-    const profile = await this.profileRepository.findByUserId(customer.id);
-    const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
+    // Get user role from identity tables
+    const role = await this.getRoleForAuthUserId(customer.auth_user_id);
 
     // Use Supabase Auth for login
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -85,6 +146,7 @@ export class AuthService {
     const customer = await this.customerRepository.create({
       name: dto.name,
       email: dto.email,
+      auth_user_id: authData.user.id,
       phone: dto.phone,
       cpf: dto.cpf,
       sponsor_id: dto.sponsor_id,
@@ -93,18 +155,26 @@ export class AuthService {
       updated_at: new Date().toISOString(),
     });
 
-    // Create profile with default role (cliente_final)
-    await this.profileRepository.create({
-      user_id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      role: UserRole.CLIENTE_FINAL,
-      status: "active",
-    });
+    // Create role assignment in identity.user_roles
+    const { data: defaultRole, error: defaultRoleError } = await supabase
+      .schema("identity")
+      .from("roles")
+      .select("id")
+      .eq("name", this.mapUserRoleToIdentityRole(UserRole.CLIENTE_FINAL))
+      .maybeSingle();
 
-    // Get user role from profiles table
-    const profile = await this.profileRepository.findByUserId(customer.id);
-    const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
+    if (!defaultRoleError && defaultRole?.id) {
+      await supabase
+        .schema("identity")
+        .from("user_roles")
+        .insert({
+          user_id: authData.user.id,
+          role_id: defaultRole.id,
+          is_active: true,
+        });
+    }
+
+    const role = await this.getRoleForAuthUserId(authData.user.id);
 
     return {
       user: {
@@ -140,9 +210,8 @@ export class AuthService {
       throw new Error("Invalid refresh token");
     }
 
-    // Get user role from profiles table
-    const profile = await this.profileRepository.findByUserId(customer.id);
-    const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
+    // Get user role from identity tables
+    const role = await this.getRoleForAuthUserId(customer.auth_user_id);
 
     return {
       user: {
@@ -193,19 +262,16 @@ export class AuthService {
     }
 
     // Get customer from email
-    return this.customerRepository.findByEmail(user.email).then(customer => {
+      return this.customerRepository.findByEmail(user.email).then(customer => {
       if (!customer) {
         throw new Error("Invalid access token");
       }
 
-      return this.profileRepository.findByUserId(customer.id).then(profile => {
-        const role = (profile?.role || UserRole.CLIENTE_FINAL) as any;
-        return {
-          userId: customer.id,
-          email: customer.email,
-          role: role,
-        };
-      });
+      return this.getRoleForAuthUserId(customer.auth_user_id).then(role => ({
+        userId: customer.id,
+        email: customer.email,
+        role,
+      }));
     });
   }
 }

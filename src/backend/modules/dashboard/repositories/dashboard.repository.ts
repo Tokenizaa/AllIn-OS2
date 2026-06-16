@@ -64,7 +64,8 @@ export class DashboardRepository extends BaseRepository<any> {
    */
   async getSalesTrend(periodStart: Date, periodEnd: Date): Promise<any[]> {
     const { data, error } = await supabase
-      .from('commerce.pedidos')
+      .schema('commerce')
+      .from('pedidos')
       .select('created_at, valor_total_pedido')
       .gte('created_at', periodStart.toISOString())
       .lte('created_at', periodEnd.toISOString())
@@ -91,7 +92,8 @@ export class DashboardRepository extends BaseRepository<any> {
    */
   async getTopDistributors(limit: number = 10): Promise<any[]> {
     const { data, error } = await supabase
-      .from('mlm.distribuidores')
+      .schema('mlm')
+      .from('distribuidores')
       .select('id, nome, email, usuario, total_volume, total_comissoes, rede_tamanho, qualificacao')
       .eq('ativo', true)
       .order('total_volume', { ascending: false })
@@ -115,7 +117,8 @@ export class DashboardRepository extends BaseRepository<any> {
    */
   async getTopProducts(limit: number = 10): Promise<any[]> {
     const { data, error } = await supabase
-      .from('commerce.produtos')
+      .schema('commerce')
+      .from('produtos')
       .select('id, nome, categoria, total_vendido, total_receita, estoque')
       .eq('ativo', true)
       .order('total_vendido', { ascending: false })
@@ -138,7 +141,8 @@ export class DashboardRepository extends BaseRepository<any> {
    */
   async getRecentOrders(limit: number = 10): Promise<any[]> {
     const { data, error } = await supabase
-      .from('commerce.pedidos')
+      .schema('commerce')
+      .from('pedidos')
       .select('id, usuario, email, valor_total_pedido, status_pedido, pedido_pago, created_at')
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -207,7 +211,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getDistributorCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('mlm.distribuidores')
+      .schema('mlm')
+      .from('distribuidores')
       .select('*', { count: 'exact', head: true });
 
     if (error) throw error;
@@ -216,7 +221,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getActiveDistributorCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('mlm.distribuidores')
+      .schema('mlm')
+      .from('distribuidores')
       .select('*', { count: 'exact', head: true })
       .eq('ativo', true);
 
@@ -226,7 +232,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getNewDistributorsCount(start: Date, end: Date): Promise<number> {
     const { count, error } = await supabase
-      .from('mlm.distribuidores')
+      .schema('mlm')
+      .from('distribuidores')
       .select('*', { count: 'exact', head: true })
       .gte('data_cadastro', start.toISOString())
       .lte('data_cadastro', end.toISOString());
@@ -237,7 +244,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getTotalNetworkVolume(start: Date, end: Date): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.distribuidores')
+      .schema('mlm')
+      .from('distribuidores')
       .select('total_volume');
 
     if (error) throw error;
@@ -246,7 +254,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getTotalCommissionsPaid(start: Date, end: Date): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .gte('data_pagamento', start.toISOString())
       .lte('data_pagamento', end.toISOString())
@@ -258,7 +267,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getPendingCommissions(): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .eq('status', 'pendente');
 
@@ -268,7 +278,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getOrderCount(start: Date, end: Date): Promise<number> {
     const { count, error } = await supabase
-      .from('commerce.pedidos')
+      .schema('commerce')
+      .from('pedidos')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', start.toISOString())
       .lte('created_at', end.toISOString());
@@ -279,7 +290,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getTotalRevenue(start: Date, end: Date): Promise<number> {
     const { data, error } = await supabase
-      .from('commerce.pedidos')
+      .schema('commerce')
+      .from('pedidos')
       .select('valor_total_pedido')
       .gte('created_at', start.toISOString())
       .lte('created_at', end.toISOString());
@@ -290,7 +302,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getOrderCountByStatus(status: string): Promise<number> {
     const { count, error } = await supabase
-      .from('commerce.pedidos')
+      .schema('commerce')
+      .from('pedidos')
       .select('*', { count: 'exact', head: true })
       .eq('status_pedido', status);
 
@@ -300,7 +313,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getCustomerCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('crm.customers')
+      .schema('crm')
+      .from('customers')
       .select('*', { count: 'exact', head: true });
 
     if (error) throw error;
@@ -309,7 +323,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getActiveCustomerCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('crm.customers')
+      .schema('crm')
+      .from('customers')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active');
 
@@ -319,7 +334,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getNewCustomersCount(start: Date, end: Date): Promise<number> {
     const { count, error } = await supabase
-      .from('crm.customers')
+      .schema('crm')
+      .from('customers')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', start.toISOString())
       .lte('created_at', end.toISOString());
@@ -330,7 +346,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getProductCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('commerce.produtos')
+      .schema('commerce')
+      .from('produtos')
       .select('*', { count: 'exact', head: true });
 
     if (error) throw error;
@@ -339,7 +356,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getActiveProductCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('commerce.produtos')
+      .schema('commerce')
+      .from('produtos')
       .select('*', { count: 'exact', head: true })
       .eq('ativo', true);
 
@@ -349,7 +367,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getLowStockProductCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('commerce.produtos')
+      .schema('commerce')
+      .from('produtos')
       .select('*', { count: 'exact', head: true })
       .lt('estoque', supabase.raw('estoque_minimo'))
       .eq('ativo', true);
@@ -360,7 +379,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getOutOfStockProductCount(): Promise<number> {
     const { count, error } = await supabase
-      .from('commerce.produtos')
+      .schema('commerce')
+      .from('produtos')
       .select('*', { count: 'exact', head: true })
       .eq('estoque', 0)
       .eq('ativo', true);
@@ -374,7 +394,8 @@ export class DashboardRepository extends BaseRepository<any> {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .gte('data_pagamento', startOfMonth.toISOString())
       .eq('status', 'pago');
@@ -388,7 +409,8 @@ export class DashboardRepository extends BaseRepository<any> {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .gte('created_at', startOfMonth.toISOString())
       .eq('status', 'pendente');
@@ -399,7 +421,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getRecentCommissionPayments(limit: number): Promise<any[]> {
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('id, distribuidor_id, valor, status, data_pagamento')
       .eq('status', 'pago')
       .order('data_pagamento', { ascending: false })
@@ -419,7 +442,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getTotalNetworkNodes(): Promise<number> {
     const { count, error } = await supabase
-      .from('mlm.rede_linear_nos')
+      .schema('mlm')
+      .from('rede_linear_nos')
       .select('*', { count: 'exact', head: true });
 
     if (error) throw error;
@@ -428,7 +452,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getActiveNetworkNodes(): Promise<number> {
     const { count, error } = await supabase
-      .from('mlm.distribuidores')
+      .schema('mlm')
+      .from('distribuidores')
       .select('*', { count: 'exact', head: true })
       .eq('ativo', true);
 
@@ -438,7 +463,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getNetworkDepth(): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.rede_linear_nos')
+      .schema('mlm')
+      .from('rede_linear_nos')
       .select('linha')
       .order('linha', { ascending: false })
       .limit(1);
@@ -449,7 +475,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getNetworkWidth(): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.rede_linear_nos')
+      .schema('mlm')
+      .from('rede_linear_nos')
       .select('linha')
       .order('linha', { ascending: false })
       .limit(1);

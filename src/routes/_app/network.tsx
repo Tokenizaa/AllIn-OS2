@@ -1,16 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { ResponsiveContainer, Treemap, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { useNetworkMembers } from "@/hooks/network/useNetworkMembers";
+import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_app/network")({ component: NetworkPage });
 
 function NetworkPage() {
   const { data: networkData, isError, error, refetch } = useNetworkMembers(12);
 
-  const customers = networkData?.customers || [];
-  const legs = networkData?.legs || [];
+  const customers = useMemo(() => networkData?.customers || [], [networkData]);
+  const legs = useMemo(() => networkData?.legs || [], [networkData]);
+  const relationships = useMemo(() => networkData?.relationships || [], [networkData]);
 
   const data = customers.map((c: any) => {
     const name = ((c as any).name || c.usuario || c.id_comprador || "D").split(" ")[0];
@@ -44,6 +47,7 @@ function NetworkPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <KpiCard label="Total na rede" value={String(customers.length)} accent="primary" />
         <KpiCard label="Pares binários" value={String(legs.length)} accent="success" />
+        <KpiCard label="Relacionamentos" value={String(relationships.length)} accent="warning" />
         <KpiCard label="Equilíbrio binário" value={balanceLabel} />
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -71,6 +75,20 @@ function NetworkPage() {
           </div>
         </div>
       </div>
+      <Card className="border-border/60 bg-card/60 p-5">
+        <h3 className="text-sm font-semibold">Distribuidores recentes</h3>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {customers.slice(0, 6).map((customer: any) => (
+            <div key={customer.id_comprador || customer.id} className="rounded-lg border border-border/60 bg-background/30 p-3">
+              <div className="text-sm font-medium">{customer.nome_completo || customer.name || customer.usuario || "Cliente"}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{customer.id_comprador || customer.id || "-"}</div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                {customer.cidade || "-"} {customer.estado ? `· ${customer.estado}` : ""}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }

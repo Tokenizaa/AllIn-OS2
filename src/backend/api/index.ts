@@ -1,14 +1,15 @@
 // Central API exports for frontend consumption
 // This file provides a single entry point for all API functions
 
-// Auth
-export {
-  login,
-  register,
-  refreshToken,
-  changePassword,
-  logout,
-} from "../modules/auth/api/auth.api";
+// Auth - Server-side only, not exported for frontend
+// Frontend should use AuthService from @/modules/auth/services/auth.service instead
+// export {
+//   login,
+//   register,
+//   refreshToken,
+//   changePassword,
+//   logout,
+// } from "../modules/auth/api/auth.api";
 
 // Customers
 export {
@@ -84,3 +85,10 @@ export {
 // Copilot - Server-side only, not exported for frontend
 // The copilot API uses Express and is meant for server-side use only
 // Frontend should make HTTP requests to the backend endpoints instead
+export {
+  chat as copilotChat,
+  getConversations as copilotGetConversations,
+  getConversationMessages as copilotGetConversationMessages,
+  archiveConversation as copilotArchiveConversation,
+  healthCheck as copilotHealthCheck,
+} from "../modules/copilot/api/copilot.api";

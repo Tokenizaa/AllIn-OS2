@@ -26,7 +26,7 @@ export interface CartItemInput {
 
 /**
  * Cart Service
- * MIGRATED: Now uses Supabase cart_items table as single source of truth
+ * MIGRATED: Now uses commerce.cart_items table as single source of truth
  */
 export const cartService = {
   /**
@@ -34,15 +34,15 @@ export const cartService = {
    */
   getCartItems: async (userId: string): Promise<CartItem[]> => {
     const { data, error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .select(`
         *,
-        products (
+        produtos (
           id,
-          name,
-          price,
-          images,
-          category
+          nome,
+          preco,
+          categoria
         )
       `)
       .eq('user_id', userId)
@@ -61,7 +61,13 @@ export const cartService = {
       metadata: item.metadata || {},
       created_at: item.created_at,
       updated_at: item.updated_at,
-      product: item.products,
+      product: item.produtos ? {
+        id: item.produtos.id,
+        name: item.produtos.nome,
+        price: item.produtos.preco?.toString() || '0',
+        images: item.produtos.imagens || [],
+        category: item.produtos.categoria,
+      } : undefined,
     }));
   },
 
@@ -71,6 +77,7 @@ export const cartService = {
   addItem: async (userId: string, item: CartItemInput): Promise<CartItem> => {
     // Check if item already exists in cart
     const { data: existing } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .select('*')
       .eq('user_id', userId)
@@ -80,6 +87,7 @@ export const cartService = {
     if (existing) {
       // Update quantity if item exists
       const { data, error } = await supabase
+        .schema('commerce')
         .from('cart_items')
         .update({ 
           quantity: existing.quantity + item.quantity,
@@ -88,12 +96,12 @@ export const cartService = {
         .eq('id', existing.id)
         .select(`
           *,
-          products (
+          produtos (
             id,
-            name,
-            price,
-            images,
-            category
+            nome,
+            preco,
+            imagens,
+            categoria
           )
         `)
         .single();
@@ -111,12 +119,19 @@ export const cartService = {
         metadata: data.metadata || {},
         created_at: data.created_at,
         updated_at: data.updated_at,
-        product: data.products,
+        product: data.produtos ? {
+          id: data.produtos.id,
+          name: data.produtos.nome,
+          price: data.produtos.preco?.toString() || '0',
+          images: data.produtos.imagens || [],
+          category: data.produtos.categoria,
+        } : undefined,
       };
     }
 
     // Insert new item
     const { data, error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .insert({
         user_id: userId,
@@ -126,12 +141,11 @@ export const cartService = {
       })
       .select(`
         *,
-        products (
+        produtos (
           id,
-          name,
-          price,
-          images,
-          category
+          nome,
+          preco,
+          categoria
         )
       `)
       .single();
@@ -149,7 +163,13 @@ export const cartService = {
       metadata: data.metadata || {},
       created_at: data.created_at,
       updated_at: data.updated_at,
-      product: data.products,
+      product: data.produtos ? {
+        id: data.produtos.id,
+        name: data.produtos.nome,
+        price: data.produtos.preco?.toString() || '0',
+        images: data.produtos.imagens || [],
+        category: data.produtos.categoria,
+      } : undefined,
     };
   },
 
@@ -163,6 +183,7 @@ export const cartService = {
     }
 
     const { error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .update({ quantity })
       .eq('id', cartItemId);
@@ -178,6 +199,7 @@ export const cartService = {
    */
   removeItem: async (cartItemId: string): Promise<void> => {
     const { error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .delete()
       .eq('id', cartItemId);
@@ -193,6 +215,7 @@ export const cartService = {
    */
   clearCart: async (userId: string): Promise<void> => {
     const { error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .delete()
       .eq('user_id', userId);

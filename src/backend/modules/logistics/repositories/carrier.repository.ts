@@ -34,7 +34,7 @@ export interface Carrier extends BaseEntity {
 
 export class CarrierRepository extends BaseRepository<Carrier> {
   constructor() {
-    super('carriers', 'logistics');
+    super('transportadoras', 'logistics');
   }
 
   /**

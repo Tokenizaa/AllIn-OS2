@@ -32,7 +32,11 @@ const PATH_PERMISSION_MAP: Array<{
 ];
 
 function resolvePathPermission(pathname: string) {
-  return PATH_PERMISSION_MAP.find((entry) => entry.pattern.test(pathname))?.permission || null;
+  const normalizedPath = pathname.startsWith("/_app")
+    ? pathname.slice("/_app".length) || "/"
+    : pathname;
+
+  return PATH_PERMISSION_MAP.find((entry) => entry.pattern.test(normalizedPath))?.permission || null;
 }
 
 /**

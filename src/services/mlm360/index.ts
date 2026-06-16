@@ -39,7 +39,8 @@ export const MLM360Service = {
     let effectiveIdComprador = idComprador;
     if (!effectiveIdComprador) {
       const { data: profile } = await supabase
-        .from("profiles")
+        .schema("crm")
+        .from("customers")
         .select("id_comprador, patrocinador_comprador")
         .eq("id", profileId)
         .maybeSingle();
@@ -77,6 +78,7 @@ export const MLM360Service = {
    */
   async fetchNetworkRelationships(idComprador: string): Promise<NetworkRelationship[]> {
     const { data, error } = await supabase
+      .schema("mlm")
       .from("network_relationships")
       .select("*")
       .eq("id_comprador", idComprador)
@@ -91,6 +93,7 @@ export const MLM360Service = {
    */
   async fetchDownlines(idComprador: string): Promise<Downline[]> {
     const { data, error } = await supabase
+      .schema("crm")
       .from("customers")
       .select("id, id_comprador, usuario, nome_completo, email, telefone, cidade, estado, created_at")
       .eq("patrocinador_comprador", idComprador)
@@ -107,6 +110,7 @@ export const MLM360Service = {
   async fetchSponsor(idComprador: string): Promise<Sponsor | null> {
     // Primeiro busca o customer para obter o patrocinador
     const { data: customer } = await supabase
+      .schema("crm")
       .from("customers")
       .select("patrocinador_comprador")
       .eq("id_comprador", idComprador)
@@ -117,6 +121,7 @@ export const MLM360Service = {
     }
 
     const { data, error } = await supabase
+      .schema("crm")
       .from("customers")
       .select("id, id_comprador, usuario, nome_completo, email")
       .eq("id_comprador", customer.patrocinador_comprador)

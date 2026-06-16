@@ -1,8 +1,11 @@
 import { UserRole } from "@/shared/types/roles";
 import { User } from "../context/auth.types";
-import { supabase } from "@/lib/supabase-client";
+import { getFrontendClient } from "@/lib/supabase/client";
 import { SupabaseService } from "./supabase.service";
 import { withRetry, withTimeout, getNetworkErrorMessage } from "@/lib/network-resilience";
+
+// Get Supabase client for auth operations
+const getSupabaseClient = () => getFrontendClient() as any;
 
 /**
  * Authentication service for handling user login, registration, and logout
@@ -21,14 +24,14 @@ export class AuthService {
       // Login with Supabase with retry and timeout protection
       const signInResult = await withRetry(
         () => withTimeout(
-          () => supabase.auth.signInWithPassword({ email, password }),
+          () => getSupabaseClient().auth.signInWithPassword({ email, password }),
           12000,
           "Tempo esgotado ao conectar com o servidor. Verifique sua conexão."
         ),
         { maxRetries: 2, delayMs: 1000 }
       );
 
-      const { data: { user }, error } = signInResult;
+      const { data: { user }, error } = signInResult as any;
 
       if (error) {
         throw new Error(error.message || "Credenciais inválidas.");
@@ -84,7 +87,7 @@ export class AuthService {
     activeSponsor?: string | null
   ): Promise<User> {
     // Register with Supabase Auth
-    const { data: { user }, error } = await supabase.auth.signUp({
+    const { data: { user }, error } = await getSupabaseClient().auth.signUp({
       email,
       password: extra?.password || (() => { throw new Error("Senha obrigatória para registro."); })(),
       options: {
@@ -96,7 +99,7 @@ export class AuthService {
           sponsor_id: extra?.sponsor_id || activeSponsor,
         },
       },
-    });
+    }) as any;
 
     if (error) {
       throw new Error(error.message || "Erro ao registrar usuário.");
@@ -106,23 +109,31 @@ export class AuthService {
       throw new Error("Erro ao criar usuário.");
     }
 
-    // Create profile in database
-    const { error: profileError } = await supabase
-      .from("profiles")
+    // Create user role in identity.user_roles
+    // First, get the role_id from identity.roles based on the role name
+    const client = getFrontendClient() as any;
+    const { data: roleData, error: roleError } = await client
+      .schema("identity")
+      .from("roles")
+      .select("id")
+      .eq("name", role)
+      .single();
+
+    if (roleError || !roleData) {
+      throw new Error("Erro ao buscar role no sistema.");
+    }
+
+    // Create user role assignment
+    const { error: userRoleError } = await client
+      .schema("identity")
+      .from("user_roles")
       .insert({
         user_id: user.id,
-        name,
-        email,
-        role,
-        status: role === UserRole.DISTRIBUIDOR ? "pending" : "active",
-        phone: extra?.phone,
-        cpf: extra?.cpf,
-        sponsor_id: extra?.sponsor_id || activeSponsor,
-        referral_code: role === UserRole.DISTRIBUIDOR ? name.toLowerCase().replace(/\s+/g, "") : null,
+        role_id: roleData.id,
       });
 
-    if (profileError) {
-      throw new Error("Erro ao criar perfil de usuário.");
+    if (userRoleError) {
+      throw new Error("Erro ao criar role de usuário.");
     }
 
     // Fetch complete user profile
@@ -140,7 +151,7 @@ export class AuthService {
    * Does not manage UI state
    */
   static async logout(): Promise<void> {
-    await supabase.auth.signOut();
+    await getSupabaseClient().auth.signOut();
   }
 
   /**
@@ -156,9 +167,24 @@ export class AuthService {
       throw new Error("Acesso negado: Requer privilégio Admin Master.");
     }
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: targetRole, updated_at: new Date().toISOString() })
+    // Get the role_id from identity.roles based on the role name
+    const client = getSupabaseClient();
+    const { data: roleData, error: roleError } = await client
+      .schema("identity")
+      .from("roles")
+      .select("id")
+      .eq("name", targetRole)
+      .single();
+
+    if (roleError || !roleData) {
+      throw new Error("Erro ao buscar role no sistema.");
+    }
+
+    // Update user role assignment
+    const { error } = await client
+      .schema("identity")
+      .from("user_roles")
+      .update({ role_id: roleData.id, updated_at: new Date().toISOString() })
       .eq("user_id", userId);
 
     if (error) {

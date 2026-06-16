@@ -7,7 +7,8 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
   async getExecutiveAnalytics(): Promise<any> {
     const { data: orders, error: ordersError } = await this.getClient()
-      .from("orders")
+      .schema("commerce")
+      .from("pedidos")
       .select("valor_total_pedido, created_at");
 
     if (ordersError) throw ordersError;
@@ -18,6 +19,7 @@ export class AnalyticsRepository extends BaseRepository<any> {
     const averageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
 
     const { count: totalCustomers } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("status", "active");
@@ -40,7 +42,8 @@ export class AnalyticsRepository extends BaseRepository<any> {
     startDate.setDate(startDate.getDate() - days);
 
     const { data, error } = await this.getClient()
-      .from("orders")
+      .schema("commerce")
+      .from("pedidos")
       .select("valor_total_pedido, created_at")
       .gte("created_at", startDate.toISOString());
 
@@ -62,10 +65,12 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
   async getNetworkAnalytics(): Promise<any> {
     const { count: totalNetworkSize } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true });
 
     const { count: activeDistributors } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("status", "active");

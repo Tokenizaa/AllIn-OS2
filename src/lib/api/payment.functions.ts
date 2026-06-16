@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import { paymentService } from '../../backend/modules/payments/services/payment.service';
-import { hybridPaymentService } from '../../backend/modules/payments/services/hybrid-payment.service';
-import { paymentSplitService } from '../../backend/modules/payments/services/payment-split.service';
-import { financialAuditService } from '../../backend/modules/payments/services/financial-audit.service';
+import { supabase } from '@/lib/supabase-client';
 
 // Validation schemas
 const createPaymentSchema = z.object({
@@ -64,8 +61,21 @@ const paymentSplitSchema = z.object({
 export const createPayment = async (data: any) => {
   const parsed = createPaymentSchema.parse(data);
   try {
-    const result = await paymentService.createPayment(parsed, parsed.gatewayType);
-    return { success: true, data: result };
+    const { data: payment, error } = await supabase.rpc('create_payment', {
+      p_id_comprador: parsed.idComprador,
+      p_order_id: parsed.orderId,
+      p_amount: parsed.amount,
+      p_currency: parsed.currency,
+      p_payment_method: parsed.paymentMethod,
+      p_gateway_type: parsed.gatewayType,
+      p_customer: parsed.customer,
+      p_card: parsed.card,
+      p_boleto: parsed.boleto,
+      p_pix: parsed.pix,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: payment };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to create payment' };
   }
@@ -75,8 +85,27 @@ export const createPayment = async (data: any) => {
 export const createHybridPayment = async (data: any) => {
   const parsed = hybridPaymentSchema.parse(data);
   try {
-    const result = await hybridPaymentService.processHybridPayment(parsed);
-    return { success: true, data: result };
+    const { data: payment, error } = await supabase.rpc('process_hybrid_payment', {
+      p_id_comprador: parsed.idComprador,
+      p_order_id: parsed.orderId,
+      p_original_amount: parsed.originalAmount,
+      p_currency: parsed.currency,
+      p_payment_method: parsed.paymentMethod,
+      p_gateway_type: parsed.gatewayType,
+      p_customer: parsed.customer,
+      p_card: parsed.card,
+      p_boleto: parsed.boleto,
+      p_pix: parsed.pix,
+      p_use_wallet: parsed.useWallet,
+      p_use_bonus: parsed.useBonus,
+      p_use_points: parsed.usePoints,
+      p_coupon_code: parsed.couponCode,
+      p_product_id: parsed.productId,
+      p_category_id: parsed.categoryId,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: payment };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to process hybrid payment' };
   }
@@ -105,17 +134,19 @@ export const getHybridPaymentPreview = async (data: {
   }).parse(data);
 
   try {
-    const result = await hybridPaymentService.calculateHybridPaymentPreview(
-      parsed.idComprador,
-      parsed.originalAmount,
-      parsed.useWallet,
-      parsed.useBonus,
-      parsed.usePoints,
-      parsed.couponCode,
-      parsed.productId,
-      parsed.categoryId
-    );
-    return { success: true, data: result };
+    const { data: preview, error } = await supabase.rpc('calculate_hybrid_payment_preview', {
+      p_id_comprador: parsed.idComprador,
+      p_original_amount: parsed.originalAmount,
+      p_use_wallet: parsed.useWallet,
+      p_use_bonus: parsed.useBonus,
+      p_use_points: parsed.usePoints,
+      p_coupon_code: parsed.couponCode,
+      p_product_id: parsed.productId,
+      p_category_id: parsed.categoryId,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: preview };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to calculate preview' };
   }
@@ -125,8 +156,15 @@ export const getHybridPaymentPreview = async (data: {
 export const getPayment = async (data: { id: string }) => {
   const parsed = z.object({ id: z.string().uuid() }).parse(data);
   try {
-    const result = await paymentService.findById(parsed.id);
-    return { success: true, data: result };
+    const { data: payment, error } = await supabase
+      .schema('commerce')
+      .from('payments')
+      .select('*')
+      .eq('id', parsed.id)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: payment };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get payment' };
   }
@@ -147,13 +185,25 @@ export const getCustomerPayments = async (data: {
   }).parse(data);
 
   try {
-    const result = await paymentService.findAll({
-      id_comprador: parsed.idComprador,
-      status: parsed.status,
-      page: parsed.page,
-      limit: parsed.limit,
-    });
-    return { success: true, data: result };
+    const from = (parsed.page - 1) * parsed.limit;
+    const to = from + parsed.limit - 1;
+
+    let query = supabase
+      .schema('commerce')
+      .from('payments')
+      .select('*')
+      .eq('id_comprador', parsed.idComprador);
+    
+    if (parsed.status) {
+      query = query.eq('status', parsed.status);
+    }
+    
+    const { data: payments, error } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    
+    if (error) throw error;
+    return { success: true, data: payments || [] };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get payments' };
   }
@@ -162,8 +212,10 @@ export const getCustomerPayments = async (data: {
 // Get payment statistics
 export const getPaymentStats = async () => {
   try {
-    const result = await paymentService.getStats();
-    return { success: true, data: result };
+    const { data: stats, error } = await supabase.rpc('get_payment_stats');
+    
+    if (error) throw error;
+    return { success: true, data: stats };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get statistics' };
   }
@@ -173,12 +225,14 @@ export const getPaymentStats = async () => {
 export const createPaymentSplit = async (data: any) => {
   const parsed = paymentSplitSchema.parse(data);
   try {
-    const result = await paymentSplitService.createPaymentSplit(
-      parsed.paymentId,
-      parsed.totalAmount,
-      parsed.splits
-    );
-    return { success: true, data: result };
+    const { data: split, error } = await supabase.rpc('create_payment_split', {
+      p_payment_id: parsed.paymentId,
+      p_total_amount: parsed.totalAmount,
+      p_splits: parsed.splits,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: split };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to create payment split' };
   }
@@ -188,7 +242,11 @@ export const createPaymentSplit = async (data: any) => {
 export const processPaymentSplit = async (data: { splitId: string }) => {
   const parsed = z.object({ splitId: z.string().uuid() }).parse(data);
   try {
-    const result = await paymentSplitService.processSplitPayment(parsed.splitId);
+    const { data: result, error } = await supabase.rpc('process_split_payment', {
+      p_split_id: parsed.splitId,
+    });
+    
+    if (error) throw error;
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to process payment split' };
@@ -199,8 +257,14 @@ export const processPaymentSplit = async (data: { splitId: string }) => {
 export const getPaymentSplits = async (data: { paymentId: string }) => {
   const parsed = z.object({ paymentId: z.string().uuid() }).parse(data);
   try {
-    const result = await paymentSplitService.getPaymentSplits(parsed.paymentId);
-    return { success: true, data: result };
+    const { data: splits, error } = await supabase
+      .schema('commerce')
+      .from('payment_splits')
+      .select('*')
+      .eq('payment_id', parsed.paymentId);
+    
+    if (error) throw error;
+    return { success: true, data: splits || [] };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get payment splits' };
   }
@@ -214,11 +278,13 @@ export const getFinancialSummary = async (data: { startDate: string; endDate: st
   }).parse(data);
 
   try {
-    const result = await financialAuditService.getFinancialSummary(
-      new Date(parsed.startDate),
-      new Date(parsed.endDate)
-    );
-    return { success: true, data: result };
+    const { data: summary, error } = await supabase.rpc('get_financial_summary', {
+      p_start_date: parsed.startDate,
+      p_end_date: parsed.endDate,
+    });
+    
+    if (error) throw error;
+    return { success: true, data: summary };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get financial summary' };
   }
@@ -241,14 +307,26 @@ export const getAuditLogs = async (data: {
   }).parse(data);
 
   try {
-    const result = await financialAuditService.getAuditLogs(
-      parsed.entityType,
-      parsed.entityId,
-      parsed.userId,
-      parsed.limit,
-      parsed.offset
-    );
-    return { success: true, data: result };
+    let query = supabase
+      .schema('commerce')
+      .from('financial_audit_logs')
+      .select('*')
+      .range(parsed.offset, parsed.offset + parsed.limit - 1);
+    
+    if (parsed.entityType) {
+      query = query.eq('entity_type', parsed.entityType);
+    }
+    if (parsed.entityId) {
+      query = query.eq('entity_id', parsed.entityId);
+    }
+    if (parsed.userId) {
+      query = query.eq('user_id', parsed.userId);
+    }
+    
+    const { data: logs, error } = await query.order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return { success: true, data: logs || [] };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get audit logs' };
   }
@@ -258,7 +336,11 @@ export const getAuditLogs = async (data: {
 export const retryPayment = async (data: { paymentId: string }) => {
   const parsed = z.object({ paymentId: z.string().uuid() }).parse(data);
   try {
-    const result = await paymentService.retryPayment(parsed.paymentId);
+    const { data: result, error } = await supabase.rpc('retry_payment', {
+      p_payment_id: parsed.paymentId,
+    });
+    
+    if (error) throw error;
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to retry payment' };

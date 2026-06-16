@@ -18,16 +18,24 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
  */
 let frontendClient: SupabaseClient | null = null;
 
+function readEnv(name: string): string | undefined {
+  const viteValue = import.meta.env?.[name];
+  const processValue =
+    typeof process !== "undefined"
+      ? process.env[name as keyof NodeJS.ProcessEnv]
+      : undefined;
+
+  return viteValue || processValue;
+}
+
 export function getFrontendClient(): SupabaseClient {
   if (!frontendClient) {
-    // Try both import.meta.env (Vite) and process.env (Node.js)
-    // process.env is only available in Node.js, not browser
-    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_URL : undefined) || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
-    const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_ANON_KEY : undefined) || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined);
-
-    // DEBUG: Log environment variables
-    console.log('[Supabase Client] VITE_SUPABASE_URL:', supabaseUrl);
-    console.log('[Supabase Client] VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '***' : 'undefined');
+    const supabaseUrl =
+      readEnv("VITE_SUPABASE_URL") ||
+      readEnv("SUPABASE_URL");
+    const supabaseAnonKey =
+      readEnv("VITE_SUPABASE_ANON_KEY") ||
+      readEnv("SUPABASE_ANON_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error(
@@ -41,6 +49,9 @@ export function getFrontendClient(): SupabaseClient {
         persistSession: true,
         detectSessionInUrl: true,
       },
+      db: {
+        schema: 'commerce',
+      },
       global: {
         headers: {
           'X-Client-Info': 'allin-os-frontend',
@@ -49,11 +60,6 @@ export function getFrontendClient(): SupabaseClient {
           return fetch(url, { ...options, signal: AbortSignal.timeout(60000) });
         },
       },
-      // Remove default schema to allow dynamic schema switching
-      // db: {
-      //   schema: 'public',
-      // },
-      // Add network resilience settings
       realtime: {
         params: {
           eventsPerSecond: 10,
@@ -90,8 +96,8 @@ export function getBackendClient(): SupabaseClient {
 
   // In a real server environment, these would come from process.env
   // For now, we'll use a placeholder that needs to be configured
-  const supabaseUrl = (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined) || import.meta.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined;
+  const supabaseUrl = readEnv("SUPABASE_URL") || readEnv("VITE_SUPABASE_URL");
+  const serviceRoleKey = readEnv("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(

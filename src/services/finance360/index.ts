@@ -41,7 +41,8 @@ export const Finance360Service = {
     let effectiveIdComprador = idComprador;
     if (!effectiveIdComprador) {
       const { data: profile } = await supabase
-        .from("profiles")
+        .schema("crm")
+        .from("customers")
         .select("id_comprador")
         .eq("id", profileId)
         .maybeSingle();
@@ -84,6 +85,7 @@ export const Finance360Service = {
    */
   async fetchWallet(idComprador: string): Promise<Wallet | null> {
     const { data, error } = await supabase
+      .schema("finance")
       .from("wallets")
       .select("*")
       .eq("id_comprador", idComprador)
@@ -98,6 +100,7 @@ export const Finance360Service = {
    */
   async fetchPointsWallet(idComprador: string): Promise<PointsWallet | null> {
     const { data, error } = await supabase
+      .schema("finance")
       .from("points_wallets")
       .select("*")
       .eq("id_comprador", idComprador)
@@ -112,6 +115,7 @@ export const Finance360Service = {
    */
   async fetchWalletTransactions(walletId: string): Promise<WalletTransaction[]> {
     const { data, error } = await supabase
+      .schema("finance")
       .from("wallet_transactions")
       .select("*")
       .eq("wallet_id", walletId)

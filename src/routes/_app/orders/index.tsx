@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/widgets/page-header";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
 import { useOrderList } from "@/hooks/orders/useOrderList";
+import { OrderService } from "@/services/orders";
 
 export const Route = createFileRoute("/_app/orders/")({ component: OrdersPage });
 
@@ -23,10 +26,15 @@ function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: ordersPageData, isLoading, isError, error, refetch } = useOrderList(currentPage, pageSize);
+  const { data: orderStatsResponse } = useQuery({
+    queryKey: ["orders", "stats"],
+    queryFn: () => OrderService.fetchOrderStats(),
+  });
 
-  const orders = ordersPageData?.orders || [];
-  const customers = ordersPageData?.customers || [];
+  const orders = useMemo(() => ordersPageData?.orders || [], [ordersPageData]);
+  const customers = useMemo(() => ordersPageData?.customers || [], [ordersPageData]);
   const totalCount = ordersPageData?.totalCount || 0;
+  const orderStats = (orderStatsResponse as any)?.data || {};
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -62,6 +70,32 @@ function OrdersPage() {
         title="Pedidos"
         subtitle={`${totalCount.toLocaleString("pt-BR")} pedidos no total · R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} em receita bruta`}
       />
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <Card className="border-border/60 bg-card/60 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">Total de pedidos</div>
+          <div className="mt-2 text-2xl font-semibold tabular-nums">
+            {Number(orderStats.totalOrders || totalCount).toLocaleString("pt-BR")}
+          </div>
+        </Card>
+        <Card className="border-border/60 bg-card/60 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">Pendentes</div>
+          <div className="mt-2 text-2xl font-semibold tabular-nums">
+            {Number(orderStats.pendingOrders || 0).toLocaleString("pt-BR")}
+          </div>
+        </Card>
+        <Card className="border-border/60 bg-card/60 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">Em processamento</div>
+          <div className="mt-2 text-2xl font-semibold tabular-nums">
+            {Number(orderStats.processingOrders || 0).toLocaleString("pt-BR")}
+          </div>
+        </Card>
+        <Card className="border-border/60 bg-card/60 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">Receita total</div>
+          <div className="mt-2 text-2xl font-semibold tabular-nums">
+            R$ {Number(orderStats.totalRevenue || total).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          </div>
+        </Card>
+      </div>
       <div className="flex flex-wrap gap-2">
         <div className="relative flex-1 min-w-[240px] max-w-md">
           <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -119,14 +153,14 @@ function OrdersPage() {
               </tr>
             ) : (
               filteredOrders.map((o) => {
-                const customer = customers.find((x) => x.id === o.id_comprador);
+                const customer = customers.find((x) => x.id_comprador === o.id_comprador || x.id === o.id_comprador);
                 const customerLabel = (customer as any)?.name || customer?.usuario || customer?.id_comprador || customer?.user_id || customer?.id || o.id_comprador;
                 return (
                   <tr key={o.id} className="hover:bg-accent/30">
                     <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>
                     <td className="px-4 py-3">
                       {customer ? (
-                        <Link to="/customers/$id" params={{ id: customer.id }} className="hover:text-primary">
+                        <Link to="/_app/customers/$id" params={{ id: customer.id_comprador || customer.id }} className="hover:text-primary">
                           {customerLabel}
                         </Link>
                       ) : (

@@ -3,8 +3,9 @@ import { supabase } from "@/lib/supabase-client";
 export const OrderService = {
   async fetchOrdersForDashboard() {
     const { data, error } = await supabase
-      .from("orders")
-      .select("id, numero_pedido, valor_total_pedido, status_pedido, created_at")
+      .schema("commerce")
+      .from("pedidos")
+      .select("id, numero_pedido, valor_total, status_pedido, created_at")
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) throw error;
@@ -13,9 +14,10 @@ export const OrderService = {
 
   async fetchOrdersByidComprador(idComprador: string) {
     const { data, error } = await supabase
-      .from("orders")
+      .schema("commerce")
+      .from("pedidos")
       .select("*")
-      .eq("id_comprador", idComprador)
+      .or(`distribuidor_comprador_id.eq.${idComprador},cliente_id.eq.${idComprador},auth_user_id.eq.${idComprador}`)
       .order("created_at", { ascending: false });
     if (error) throw error;
     return data || [];
@@ -26,7 +28,8 @@ export const OrderService = {
     const to = from + pageSize - 1;
 
     const { data, error, count } = await supabase
-      .from("orders")
+      .schema("commerce")
+      .from("pedidos")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to);
@@ -41,8 +44,9 @@ export const OrderService = {
 
   async fetchOfficeOrders(limit = 200) {
     const { data, error } = await supabase
-      .from("orders")
-      .select("id, order_number, status, order_type, payment_method, total_amount, customer_name, created_at")
+      .schema("commerce")
+      .from("pedidos")
+      .select("id, numero_pedido, status_pedido, tipo_nome, forma_pagamento, valor_total, cliente_nome, created_at")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -54,8 +58,8 @@ export const OrderService = {
     const to = from + pageSize - 1;
 
     const [{ data: ordersData, error: ordersError, count: ordersCount }, { data: customersData, error: customersError }] = await Promise.all([
-      supabase.from("orders").select("*", { count: "exact" }).order("created_at", { ascending: false }).range(from, to),
-      supabase.from("customers").select("id, usuario, id_comprador, user_id, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
+      supabase.schema("commerce").from("pedidos").select("*", { count: "exact" }).order("created_at", { ascending: false }).range(from, to),
+      supabase.schema("crm").from("customers").select("id, usuario, id_comprador, auth_user_id, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
     ]);
     if (ordersError) throw ordersError;
     if (customersError) throw customersError;
@@ -73,10 +77,10 @@ export const OrderService = {
     const limit = options.limit || 20;
     const offset = (page - 1) * limit;
 
-    let query = supabase.from("orders").select("*", { count: "exact" });
+    let query = supabase.schema("commerce").from("pedidos").select("*", { count: "exact" });
 
     if (options.id_comprador) {
-      query = query.or(`user_id.eq.${options.id_comprador},comprador.eq.${options.id_comprador}`);
+      query = query.or(`distribuidor_comprador_id.eq.${options.id_comprador},cliente_id.eq.${options.id_comprador},auth_user_id.eq.${options.id_comprador}`);
     }
     if (options.status) {
       query = query.eq("status_pedido", options.status);
@@ -101,7 +105,8 @@ export const OrderService = {
   async fetchOrderStats() {
     const countStatus = async (status: string) => {
       const { count, error } = await supabase
-        .from("orders")
+        .schema("commerce")
+        .from("pedidos")
         .select("*", { count: "exact", head: true })
         .eq("status_pedido", status);
       if (error) throw error;
@@ -110,7 +115,8 @@ export const OrderService = {
 
     const countAll = async () => {
       const { count, error } = await supabase
-        .from("orders")
+        .schema("commerce")
+        .from("pedidos")
         .select("*", { count: "exact", head: true });
       if (error) throw error;
       return count || 0;
@@ -119,7 +125,7 @@ export const OrderService = {
     const calculateTotalRevenue = async () => {
       // OTIMIZAÇÃO: Usar RPC function para calcular SUM no banco
       const { data, error } = await supabase.rpc('calculate_total_revenue');
-      
+
       if (error) throw error;
       return data || 0;
     };

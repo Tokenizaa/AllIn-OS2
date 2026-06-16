@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProcesses, getProcessById, createProcess, updateProcess, deleteProcess } from '@/backend/modules/industrial/api/industrial.api';
+import { getProcesses, getProcessById, createProcess, updateProcess, deleteProcess } from '@/services/industrial.service';
 
 export function useProcesses() {
   return useQuery({

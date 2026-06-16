@@ -23,7 +23,19 @@ function AppLayoutSecure() {
   }
 
   return (
-    <RouteGuard allowedRoles={[UserRole.ADMIN_MASTER, UserRole.GESTAO_ADMIN, UserRole.FINANCEIRO, UserRole.SUPORTE]}>
+    <RouteGuard allowedRoles={[
+      UserRole.ADMIN_MASTER,
+      UserRole.GESTAO_ADMIN,
+      UserRole.FINANCEIRO,
+      UserRole.SUPORTE,
+      UserRole.LOGISTICA,
+      UserRole.MARKETING,
+      UserRole.ANALYTICS,
+      UserRole.AUDITOR,
+      UserRole.OPERADOR,
+      UserRole.DISTRIBUIDOR,
+      UserRole.AFILIADO
+    ]}>
       <AppLayout />
     </RouteGuard>
   );

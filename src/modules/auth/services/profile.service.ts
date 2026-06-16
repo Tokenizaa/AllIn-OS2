@@ -18,12 +18,13 @@ export class ProfileService {
     if (!user) throw new Error("Não autenticado.");
 
     const { error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .update({
         ...updates,
         updated_at: new Date().toISOString()
       })
-      .eq("user_id", user.id);
+      .eq("auth_user_id", user.id);
 
     if (error) {
       throw new Error(error.message || "Erro ao atualizar perfil.");
@@ -49,12 +50,13 @@ export class ProfileService {
     }
 
     const { error } = await supabase
+      .schema("crm")
       .from("customers")
       .update({
         ...updates,
         updated_at: new Date().toISOString()
       })
-      .eq("user_id", user.id);
+      .eq("auth_user_id", user.id);
 
     if (error) {
       throw new Error(error.message || "Erro ao atualizar perfil de distribuidor.");

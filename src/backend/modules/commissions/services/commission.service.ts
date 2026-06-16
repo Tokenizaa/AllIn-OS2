@@ -20,7 +20,8 @@ export class CommissionService {
     try {
       // Buscar informações do pedido
       const { data: order, error: orderError } = await supabase
-        .from('orders')
+        .schema('commerce')
+        .from('pedidos')
         .select('id_comprador, valor_total_pedido, numero_pedido')
         .eq('id', orderId)
         .single();
@@ -33,13 +34,14 @@ export class CommissionService {
 
       // Buscar o patrocinador do customer
       const { data: customer, error: customerError } = await supabase
+        .schema('crm')
         .from('customers')
-        .select('sponsor_id')
+        .select('patrocinador_id')
         .eq('id', order.id_comprador)
         .single();
 
       if (customerError) throw customerError;
-      if (!customer || !customer.sponsor_id) {
+      if (!customer || !customer.patrocinador_id) {
         console.log(`No sponsor found for customer ${order.id_comprador}`);
         return;
       }
@@ -50,15 +52,16 @@ export class CommissionService {
 
       // Criar registro de comissão
       const { error: insertError } = await supabase
-        .from('commissions')
+        .schema('mlm')
+        .from('comissoes')
         .insert({
-          id_comprador: customer.sponsor_id,
-          order_id: orderId,
-          commission_type: 'direct',
-          amount: commissionAmount,
-          percentage: commissionPercentage,
+          id_comprador: customer.patrocinador_id,
+          pedido_id: orderId,
+          tipo_comissao: 'direct',
+          valor: commissionAmount,
+          porcentagem: commissionPercentage,
           status: 'pending',
-          calculated_at: new Date().toISOString(),
+          calculado_em: new Date().toISOString(),
           metadata: {
             order_number: order.numero_pedido,
             order_value: order.valor_total_pedido,
@@ -67,7 +70,7 @@ export class CommissionService {
 
       if (insertError) throw insertError;
 
-      console.log(`Direct commission calculated for order ${orderId}: ${commissionAmount} for sponsor ${customer.sponsor_id}`);
+      console.log(`Direct commission calculated for order ${orderId}: ${commissionAmount} for sponsor ${customer.patrocinador_id}`);
     } catch (error) {
       console.error('Error calculating direct commission:', error);
       throw error;
@@ -82,7 +85,8 @@ export class CommissionService {
     try {
       // Buscar informações do pedido
       const { data: order, error: orderError } = await supabase
-        .from('orders')
+        .schema('commerce')
+        .from('pedidos')
         .select('id_comprador, valor_total_pedido, numero_pedido')
         .eq('id', orderId)
         .single();
@@ -95,19 +99,20 @@ export class CommissionService {
 
       // Buscar a cadeia de patrocinadores (uplines)
       const { data: customer, error: customerError } = await supabase
+        .schema('crm')
         .from('customers')
-        .select('sponsor_id')
+        .select('patrocinador_id')
         .eq('id', order.id_comprador)
         .single();
 
       if (customerError) throw customerError;
-      if (!customer || !customer.sponsor_id) {
+      if (!customer || !customer.patrocinador_id) {
         console.log(`No sponsor found for customer ${order.id_comprador}`);
         return;
       }
 
       // Buscar uplines recursivamente (até 5 níveis)
-      const uplines = await this.getUplines(customer.sponsor_id, 5);
+      const uplines = await this.getUplines(customer.patrocinador_id, 5);
       const orderValue = parseFloat(order.valor_total_pedido) || 0;
 
       // Definir porcentagens por nível (pode ser configurável)
@@ -117,21 +122,22 @@ export class CommissionService {
       for (let i = 0; i < uplines.length; i++) {
         const upline = uplines[i];
         const percentage = levelPercentages[i] || 0;
-        
+
         if (percentage === 0) continue;
 
         const commissionAmount = orderValue * (percentage / 100);
 
         const { error: insertError } = await supabase
-          .from('commissions')
+          .schema('mlm')
+          .from('comissoes')
           .insert({
             id_comprador: upline.id,
-            order_id: orderId,
-            commission_type: 'indirect',
-            amount: commissionAmount,
-            percentage: percentage,
+            pedido_id: orderId,
+            tipo_comissao: 'indirect',
+            valor: commissionAmount,
+            porcentagem: percentage,
             status: 'pending',
-            calculated_at: new Date().toISOString(),
+            calculado_em: new Date().toISOString(),
             metadata: {
               order_number: order.numero_pedido,
               order_value: order.valor_total_pedido,
@@ -158,17 +164,18 @@ export class CommissionService {
 
     for (let level = 0; level < maxLevel; level++) {
       const { data: customer, error: customerError } = await supabase
+        .schema('crm')
         .from('customers')
-        .select('sponsor_id')
+        .select('patrocinador_id')
         .eq('id', currentidComprador)
         .single();
 
-      if (customerError || !customer || !customer.sponsor_id) {
+      if (customerError || !customer || !customer.patrocinador_id) {
         break;
       }
 
-      uplines.push({ id: customer.sponsor_id });
-      currentidComprador = customer.sponsor_id;
+      uplines.push({ id: customer.patrocinador_id });
+      currentidComprador = customer.patrocinador_id;
     }
 
     return uplines;
@@ -201,7 +208,8 @@ export class CommissionService {
   async approvePendingCommissions(idComprador?: string): Promise<void> {
     try {
       let query = supabase
-        .from('commissions')
+        .schema('mlm')
+        .from('comissoes')
         .update({ status: 'approved', updated_at: new Date().toISOString() })
         .eq('status', 'pending');
 
@@ -226,11 +234,12 @@ export class CommissionService {
   async markCommissionsAsPaid(commissionIds: string[], paymentId: string): Promise<void> {
     try {
       const { error } = await supabase
-        .from('commissions')
-        .update({ 
+        .schema('mlm')
+        .from('comissoes')
+        .update({
           status: 'paid',
-          payment_id: paymentId,
-          paid_at: new Date().toISOString(),
+          pagamento_id: paymentId,
+          pago_em: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .in('id', commissionIds);
@@ -250,7 +259,8 @@ export class CommissionService {
   async getCustomerCommissions(idComprador: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
-        .from('commissions')
+        .schema('mlm')
+        .from('comissoes')
         .select('*')
         .eq('id_comprador', idComprador)
         .order('created_at', { ascending: false });
@@ -270,14 +280,15 @@ export class CommissionService {
   async getPendingCommissionTotal(idComprador: string): Promise<number> {
     try {
       const { data, error } = await supabase
-        .from('commissions')
-        .select('amount')
+        .schema('mlm')
+        .from('comissoes')
+        .select('valor')
         .eq('id_comprador', idComprador)
         .eq('status', 'pending');
 
       if (error) throw error;
 
-      const total = data?.reduce((sum, commission) => sum + (parseFloat(commission.amount) || 0), 0) || 0;
+      const total = data?.reduce((sum, commission) => sum + (parseFloat(commission.valor) || 0), 0) || 0;
       return total;
     } catch (error) {
       console.error('Error getting pending commission total:', error);
