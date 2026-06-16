@@ -1,13 +1,11 @@
-import { supabase } from "@/lib/supabase-client";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export const PlanService = {
   async fetchActivePlans() {
-    const { data, error } = await supabase
-      .from("plans")
-      .select("id, name, price, commission_percent, generations, benefits, is_active, sort_order")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true });
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getPlans();
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch active plans");
+    }
+    return result.data || [];
   }
 };

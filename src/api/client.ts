@@ -53,7 +53,8 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Authentication failed: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Authentication failed: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();

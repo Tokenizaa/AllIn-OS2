@@ -1,43 +1,35 @@
-import { supabase } from "@/lib/supabase-client";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export const PaymentService = {
   async fetchPaymentsForDashboard() {
-    const { data, error } = await supabase
-      .from("payments")
-      .select("id, amount, created_at, status")
-      .order("created_at", { ascending: false })
-      .limit(300);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getPayments({ limit: 300 });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch payments for dashboard");
+    }
+    return result.data || [];
   },
 
   async fetchRecentPayments(limit = 5) {
-    const { data, error } = await supabase
-      .from("payments")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getPayments({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch recent payments");
+    }
+    return result.data || [];
   },
 
   async fetchPaymentsForCommissions(limit = 18) {
-    const { data, error } = await supabase
-      .from("payments")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getPayments({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch payments for commissions");
+    }
+    return result.data || [];
   },
 
   async fetchPaymentsForReports(limit = 500) {
-    const { data, error } = await supabase
-      .from("payments")
-      .select("amount, created_at, status")
-      .order("created_at", { ascending: true })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getPayments({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch payments for reports");
+    }
+    return result.data || [];
   }
 };

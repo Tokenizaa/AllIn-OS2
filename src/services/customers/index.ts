@@ -1,140 +1,96 @@
 /**
  * CustomerService
- * 
+ *
  * IDENTIFIER STRATEGY:
  * This service uses `id_comprador` (text) as the canonical identifier for customer operations.
  * The `customers.id` (UUID) is only used as a technical primary key in the database.
- * 
+ *
  * Rationale: The entire application is built around id_comprador (247 occurrences across 54 files).
  * Using it consistently avoids confusion and maintains compatibility with the existing system.
- * 
+ *
  * For migration planning, see: docs/IDENTITY_MIGRATION_MASTER_PLAN.md
  */
 
-import { supabase } from "@/lib/supabase-client";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export const CustomerService = {
   async fetchCustomerById(id: string) {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getCustomerById(id);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch customer");
+    }
+    return result.data;
   },
 
   async fetchCustomerByCompradorId(compradorId: string) {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("id_comprador", compradorId)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getCustomerByCompradorId(compradorId);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch customer by comprador ID");
+    }
+    return result.data;
   },
 
   async fetchDownlines(compradorId: string) {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("id, usuario, id_comprador, telefone, created_at, cidade, estado, nome_completo")
-      .eq("patrocinador_comprador", compradorId)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getCustomerDownlinesByComprador(compradorId);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch downlines");
+    }
+    return result.data || [];
   },
 
   async fetchCustomersList(limit = 100) {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("id, nome_completo, email, cpf, user_id, updated_at, created_at, usuario, id_comprador, patrocinador_comprador, cidade, estado, telefone, plano_comprador")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getCustomersList({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch customers list");
+    }
+    return result.data || [];
   },
 
   async fetchCustomersWithOrderStats(page = 1, pageSize = 15) {
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-
-    const [{ data: customerData, error: customerError, count: customerCount }, { data: orderStats, error: statsError }] = await Promise.all([
-      supabase
-        .from("customers")
-        .select("id, user_id, usuario, id_comprador, telefone, created_at, nome_completo, plano_comprador, cidade, estado", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .range(from, to),
-      supabase
-        .from("customer_order_stats")
-        .select("id_comprador, order_count, ltv"),
-    ]);
-
-    if (customerError) throw customerError;
-    if (statsError) throw statsError;
-
-    const statsMap: Record<string, { count: number; ltv: number }> = {};
-    if (orderStats) {
-      orderStats.forEach((stat: any) => {
-        statsMap[stat.id_comprador] = {
-          count: stat.order_count || 0,
-          ltv: Number(stat.ltv || 0),
-        };
-      });
+    const result = await httpClient.getCustomersWithOrderStats({ page, pageSize });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch customers with order stats");
     }
-
-    return {
-      customers: customerData || [],
-      orderStats: statsMap,
-      totalCount: customerCount || 0,
-      page,
-      pageSize,
-    };
+    return result.data;
   },
 
   async fetchRecentCustomers(limit = 20) {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("id, usuario, id_comprador, cidade, estado, user_id, nome_completo")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getRecentCustomers({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch recent customers");
+    }
+    return result.data || [];
   },
 
   async fetchNetworkMembers(limit = 500) {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("id, usuario, id_comprador, user_id, cidade, estado, nome_completo")
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getNetworkMembers({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch network members");
+    }
+    return result.data || [];
   },
 
   async fetchAnalyticsCustomers() {
-    const { data, error } = await supabase
-      .from("customers")
-      .select("id, usuario, id_comprador, user_id, nome_completo");
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getAnalyticsCustomers();
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch analytics customers");
+    }
+    return result.data || [];
   },
 
   async fetchCustomerBonus(compradorId: string) {
-    const { data, error } = await supabase
-      .from("customer_bonus_view")
-      .select("*")
-      .eq("id_comprador", compradorId)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getCustomerBonus(compradorId);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch customer bonus");
+    }
+    return result.data;
   },
 
   async fetchCustomerPlan(compradorId: string) {
-    const { data, error } = await supabase
-      .from("customer_plans")
-      .select("*, plans(*)")
-      .eq("id_comprador", compradorId)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getCustomerPlan(compradorId);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch customer plan");
+    }
+    return result.data;
   }
 };

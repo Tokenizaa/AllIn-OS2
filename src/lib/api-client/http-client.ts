@@ -175,6 +175,42 @@ class HttpClient {
     return this.get<Downline[]>(`/api/customers/${sponsorId}/downlines`, params);
   }
 
+  async getCustomerByCompradorId(compradorId: string): Promise<ApiResponse<Customer>> {
+    return this.get<Customer>(`/api/customers/comprador/${compradorId}`);
+  }
+
+  async getCustomerDownlinesByComprador(compradorId: string): Promise<ApiResponse<Customer[]>> {
+    return this.get<Customer[]>(`/api/customers/${compradorId}/downlines`);
+  }
+
+  async getCustomersList(params?: { limit?: number }): Promise<ApiResponse<Customer[]>> {
+    return this.get<Customer[]>('/api/customers/list', params);
+  }
+
+  async getCustomersWithOrderStats(params?: { page?: number; pageSize?: number }): Promise<ApiResponse<{ customers: Customer[]; orderStats: Record<string, { count: number; ltv: number }>; totalCount: number; page: number; pageSize: number }>> {
+    return this.get<{ customers: Customer[]; orderStats: Record<string, { count: number; ltv: number }>; totalCount: number; page: number; pageSize: number }>('/api/customers/with-order-stats', params);
+  }
+
+  async getRecentCustomers(params?: { limit?: number }): Promise<ApiResponse<Customer[]>> {
+    return this.get<Customer[]>('/api/customers/recent', params);
+  }
+
+  async getNetworkMembers(params?: { limit?: number }): Promise<ApiResponse<Customer[]>> {
+    return this.get<Customer[]>('/api/customers/network', params);
+  }
+
+  async getAnalyticsCustomers(): Promise<ApiResponse<Customer[]>> {
+    return this.get<Customer[]>('/api/customers/analytics');
+  }
+
+  async getCustomerBonus(compradorId: string): Promise<ApiResponse<any>> {
+    return this.get<any>(`/api/customers/${compradorId}/bonus`);
+  }
+
+  async getCustomerPlan(compradorId: string): Promise<ApiResponse<any>> {
+    return this.get<any>(`/api/customers/${compradorId}/plan`);
+  }
+
   // ============================================================================
   // Plans API
   // ============================================================================
@@ -269,6 +305,22 @@ class HttpClient {
 
   async getOrderStats(): Promise<ApiResponse<OrderStats>> {
     return this.get<OrderStats>('/api/orders/stats/overview');
+  }
+
+  async getOrdersByComprador(idComprador: string): Promise<ApiResponse<Order[]>> {
+    return this.get<Order[]>(`/api/orders/comprador/${idComprador}`);
+  }
+
+  async getOfficeOrders(params?: { limit?: number }): Promise<ApiResponse<Order[]>> {
+    return this.get<Order[]>('/api/orders/office', params);
+  }
+
+  async getOrdersAndCustomers(params?: { page?: number; pageSize?: number }): Promise<ApiResponse<{ orders: Order[]; customers: Customer[]; totalCount: number; page: number; pageSize: number }>> {
+    return this.get<{ orders: Order[]; customers: Customer[]; totalCount: number; page: number; pageSize: number }>('/api/orders/with-customers', params);
+  }
+
+  async getRecentOrders(params?: { page?: number; limit?: number; id_comprador?: string; status?: string }): Promise<ApiResponse<{ data: Order[]; total: number; pages: number }>> {
+    return this.get<{ data: Order[]; total: number; pages: number }>('/api/orders/recent', params);
   }
 
   // ============================================================================
