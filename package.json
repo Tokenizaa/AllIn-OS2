@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "backend": "tsx src/backend/server/index.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run backend\""
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -47,6 +49,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "embla-carousel-react": "^8.6.0",
     "express": "^5.2.1",
@@ -71,15 +74,18 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@types/cors": "^2.8.17",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.1.2",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "prettier": "^3.7.3",
+    "tsx": "^4.19.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
