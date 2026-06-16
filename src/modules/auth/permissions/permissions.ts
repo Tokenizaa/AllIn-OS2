@@ -1,93 +1,37 @@
 import { UserRole } from "@/shared/types/roles";
 import { Permission } from "../context/auth.types";
+import { getPermissionsForRole as getCentralizedPermissionsForRole } from "@shared/config/role-permissions";
+import { PermissionEnum, enumToPermission } from "@shared/types/permissions";
 
 /**
  * Role-based permission matrix
  * Maps each user role to their allowed permissions
+ * 
+ * This now uses the centralized configuration from @shared/config/role-permissions.ts
+ * and converts PermissionEnum to Permission interface for frontend compatibility
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  admin_master: [
-    { id: "p1", module: "dashboard", action: "all", description: "Acesso total ao Dashboard executivo" },
-    { id: "p2", module: "analytics", action: "all", description: "Ver relatórios e analytics globais" },
-    { id: "p3", module: "finance", action: "all", description: "Gerenciar pagamentos, saques e bônus" },
-    { id: "p4", module: "support", action: "all", description: "Visualizar e atualizar chamados e KYC" },
-    { id: "p5", module: "network", action: "all", description: "Ver árvore unilevel e binária global" },
-    { id: "p6", module: "orders", action: "all", description: "Gerenciar todos os pedidos e logística" },
-    { id: "p7", module: "products", action: "all", description: "Criar, editar e excluir produtos" },
-    { id: "p8", module: "marketing", action: "all", description: "Disparar campanhas e banners corporativos" },
-    { id: "p9", module: "settings", action: "all", description: "Modificar regras comissões e gateways" },
-    { id: "p10", module: "system", action: "all", description: "Acesso total a auditoria e banco de dados" },
-    { id: "p11", module: "industrial", action: "all", description: "Gestão completa de máquinas, materiais e processos industriais" }
-  ],
-  gestao_admin: [
-    { id: "ga1", module: "dashboard", action: "all", description: "Acesso total ao Dashboard executivo" },
-    { id: "ga2", module: "analytics", action: "all", description: "Estatísticas gerenciais completas" },
-    { id: "ga3", module: "support", action: "all", description: "Gerenciamento de tickets" },
-    { id: "ga4", module: "orders", action: "all", description: "Controle operacional de pedidos" },
-    { id: "ga5", module: "products", action: "all", description: "Catálogo de produtos" },
-    { id: "ga6", module: "marketing", action: "all", description: "Campanhas de Marketing" },
-    { id: "ga7", module: "system", action: "read", description: "Verificação de logs" },
-    { id: "ga8", module: "industrial", action: "manage", description: "Gestão de operações industriais" }
-  ],
-  financeiro: [
-    { id: "fin1", module: "dashboard", action: "read", description: "Resumos de faturamento" },
-    { id: "fin2", module: "analytics", action: "read", description: "Painéis de faturamento e lucro" },
-    { id: "fin3", module: "finance", action: "manage", description: "Controle de saques e liquidações" },
-    { id: "fin4", module: "orders", action: "read", description: "Visualização de pedidos faturados" }
-  ],
-  suporte: [
-    { id: "sup1", module: "dashboard", action: "read", description: "Visualizar tickets de suporte" },
-    { id: "sup2", module: "support", action: "manage", description: "Responder e gerenciar tickets de suporte" },
-    { id: "sup3", module: "orders", action: "read", description: "Rastreamento e detalhes de pedidos" }
-  ],
-  logistica: [
-    { id: "log1", module: "dashboard", action: "read", description: "Estatísticas de expedição" },
-    { id: "log2", module: "orders", action: "manage", description: "Controle completo de remessas e expedição" },
-    { id: "log3", module: "products", action: "read", description: "Consultar estoque e produtos" },
-    { id: "log4", module: "industrial", action: "read", description: "Visualizar estoque de matérias-primas" }
-  ],
-  marketing: [
-    { id: "mkt1", module: "dashboard", action: "read", description: "Visualizar dados básicos" },
-    { id: "mkt2", module: "marketing", action: "manage", description: "Gestão completa de campanhas de marketing" },
-    { id: "mkt3", module: "products", action: "read", description: "Consulta ao catálogo de produtos" }
-  ],
-  analytics: [
-    { id: "an1", module: "dashboard", action: "read", description: "Visualização de dashboards" },
-    { id: "an2", module: "analytics", action: "all", description: "Análises avançadas e relatórios enterprise" }
-  ],
-  auditor: [
-    { id: "aud1", module: "dashboard", action: "read", description: "Visualização de Auditoria" },
-    { id: "aud2", module: "analytics", action: "read", description: "Leitura de relatórios de dados" },
-    { id: "aud3", module: "finance", action: "read", description: "Auditoria de fluxos de caixa" },
-    { id: "aud4", module: "system", action: "read", description: "Auditoria estrita de logs" }
-  ],
-  operador: [
-    { id: "ope1", module: "dashboard", action: "read", description: "Dashboard operacional básico" },
-    { id: "ope2", module: "orders", action: "write", description: "Lançamento e edição operacional de pedidos" },
-    { id: "ope3", module: "support", action: "read", description: "Leitura de tickets básicos" }
-  ],
-  distribuidor: [
-    { id: "d1", module: "dashboard", action: "read", description: "Ver painel de bônus e estatísticas próprias" },
-    { id: "d2", module: "network", action: "read", description: "Ver rede de cadastrados indicados diretos e indiretos" },
-    { id: "d3", module: "orders", action: "write", description: "Fazer novos pedidos pessoais e acompanhar entrega" },
-    { id: "d4", module: "finance", action: "write", description: "Solicitar transferências e saques das carteiras" }
-  ],
-  afiliado: [
-    { id: "af1", module: "dashboard", action: "read", description: "Ver painel de comissões" },
-    { id: "af2", module: "network", action: "read", description: "Ver rede de indicados" },
-    { id: "af3", module: "orders", action: "read", description: "Acompanhar pedidos da rede" }
-  ],
-  cliente_final: [
-    { id: "c1", module: "orders", action: "write", description: "Realizar compras de produtos e acompanhar pedidos" },
-    { id: "c2", module: "dashboard", action: "read", description: "Acessar histórico de compras e carteira de cashback" }
-  ]
+  admin_master: getCentralizedPermissionsForRole(UserRole.ADMIN_MASTER).map(enumToPermission),
+  gestao_admin: getCentralizedPermissionsForRole(UserRole.GESTAO_ADMIN).map(enumToPermission),
+  financeiro: getCentralizedPermissionsForRole(UserRole.FINANCEIRO).map(enumToPermission),
+  suporte: getCentralizedPermissionsForRole(UserRole.SUPORTE).map(enumToPermission),
+  logistica: getCentralizedPermissionsForRole(UserRole.LOGISTICA).map(enumToPermission),
+  marketing: getCentralizedPermissionsForRole(UserRole.MARKETING).map(enumToPermission),
+  analytics: getCentralizedPermissionsForRole(UserRole.ANALYTICS).map(enumToPermission),
+  auditor: getCentralizedPermissionsForRole(UserRole.AUDITOR).map(enumToPermission),
+  operador: getCentralizedPermissionsForRole(UserRole.OPERADOR).map(enumToPermission),
+  distribuidor: getCentralizedPermissionsForRole(UserRole.DISTRIBUIDOR).map(enumToPermission),
+  afiliado: getCentralizedPermissionsForRole(UserRole.AFILIADO).map(enumToPermission),
+  cliente_final: getCentralizedPermissionsForRole(UserRole.CLIENTE_FINAL).map(enumToPermission),
 };
 
 /**
  * Get permissions for a specific role
+ * Uses centralized configuration
  */
 export const getPermissionsForRole = (role: UserRole): Permission[] => {
-  return ROLE_PERMISSIONS[role] || [];
+  const permissions = getCentralizedPermissionsForRole(role);
+  return permissions.map(enumToPermission);
 };
 
 /**

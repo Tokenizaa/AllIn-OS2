@@ -106,11 +106,16 @@ export class DistributorSyncService {
           }
         } catch (error) {
           result.errors++;
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           result.errorDetails.push({
             id: allinDist.id,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: errorMessage,
           });
-          this.log(`Error processing distributor ${allinDist.id}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+          this.log(`Error processing distributor ${allinDist.id}: ${errorMessage}`, 'error');
+          // Log full error for debugging
+          if (error instanceof Error) {
+            this.log(`Error stack: ${error.stack}`, 'debug');
+          }
         }
       }
 
@@ -128,52 +133,38 @@ export class DistributorSyncService {
   private async fetchAllDistributors(): Promise<AllinDistributor[]> {
     const allDistributors: AllinDistributor[] = [];
     let page = 1;
-    const pageSize = 1000; // Aumentado para buscar mais por página
     let hasMore = true;
-    let emptyPageCount = 0; // Contador de páginas vazias consecutivas
 
     while (hasMore) {
       try {
+        this.log(`Fetching page ${page}...`, 'debug');
+        
         const response = await this.apiClient.getWithFilters<any>('/distribuidores', {
-          limit: pageSize,
           page: page,
         });
 
-        this.log(`Fetching page ${page} with limit ${pageSize}...`, 'debug');
-
-        // Handle different response formats
+        // Extract distributors from the correct location in response
         let distributors: AllinDistributor[] = [];
         
-        if (Array.isArray(response.data)) {
+        if (response.data?.distribuidores && Array.isArray(response.data.distribuidores)) {
+          distributors = response.data.distribuidores;
+        } else if (Array.isArray(response.data)) {
           distributors = response.data;
-        } else if (response.data?.data && Array.isArray(response.data.data)) {
-          distributors = response.data.data;
-        } else if (response.data?.items && Array.isArray(response.data.items)) {
-          distributors = response.data.items;
-        } else if (response.data?._embedded?.distribuidores && Array.isArray(response.data._embedded.distribuidores)) {
-          distributors = response.data._embedded.distribuidores;
-        } else if (response.data?._embedded?.items && Array.isArray(response.data._embedded.items)) {
-          distributors = response.data._embedded.items;
         }
-
-        this.log(`Extracted ${distributors.length} distributors from page ${page}`, 'debug');
 
         if (distributors.length > 0) {
           allDistributors.push(...distributors);
-          emptyPageCount = 0; // Reset contador
-          // Continua se houver próxima página ou se retornou o limite máximo
-          hasMore = response.data?._links?.next ? true : false;
-          page++;
-        } else {
-          emptyPageCount++;
-          // Para após 3 páginas vazias consecutivas para evitar loop infinito
-          if (emptyPageCount >= 3) {
-            this.log(`Stopping after ${emptyPageCount} consecutive empty pages`, 'debug');
-            hasMore = false;
+          this.log(`Fetched ${distributors.length} distributors from page ${page}`, 'debug');
+          
+          // Check if there are more pages based on _infos
+          const infos = response.data?._infos;
+          if (infos && infos.total_pages && page < infos.total_pages) {
+            page++;
           } else {
-            hasMore = response.data?._links?.next ? true : false;
-            if (hasMore) page++;
+            hasMore = false;
           }
+        } else {
+          hasMore = false;
         }
       } catch (error) {
         this.log(`Error fetching distributors page ${page}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');

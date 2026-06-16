@@ -1,27 +1,28 @@
-import { Permission } from "../../../shared/types/common.types";
+import { PermissionEnum } from '@shared/types/permissions';
+import { getPermissionsForRole as getCentralizedPermissionsForRole } from '@shared/config/role-permissions';
 
 export class PermissionGuard {
-  static hasPermission(userPermissions: Permission[], requiredPermission: Permission): boolean {
+  static hasPermission(userPermissions: PermissionEnum[], requiredPermission: PermissionEnum): boolean {
     // Admin has all permissions
-    if (userPermissions.includes(Permission.ADMIN_ALL)) {
+    if (userPermissions.includes(PermissionEnum.ADMIN_ALL)) {
       return true;
     }
 
     return userPermissions.includes(requiredPermission);
   }
 
-  static hasAnyPermission(userPermissions: Permission[], requiredPermissions: Permission[]): boolean {
+  static hasAnyPermission(userPermissions: PermissionEnum[], requiredPermissions: PermissionEnum[]): boolean {
     // Admin has all permissions
-    if (userPermissions.includes(Permission.ADMIN_ALL)) {
+    if (userPermissions.includes(PermissionEnum.ADMIN_ALL)) {
       return true;
     }
 
     return requiredPermissions.some((permission) => userPermissions.includes(permission));
   }
 
-  static hasAllPermissions(userPermissions: Permission[], requiredPermissions: Permission[]): boolean {
+  static hasAllPermissions(userPermissions: PermissionEnum[], requiredPermissions: PermissionEnum[]): boolean {
     // Admin has all permissions
-    if (userPermissions.includes(Permission.ADMIN_ALL)) {
+    if (userPermissions.includes(PermissionEnum.ADMIN_ALL)) {
       return true;
     }
 
@@ -29,27 +30,22 @@ export class PermissionGuard {
   }
 }
 
-// Role-based permissions mapping
-export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-  admin: [Permission.ADMIN_ALL],
-  operator: [
-    Permission.CUSTOMERS_READ,
-    Permission.ORDERS_READ,
-    Permission.ORDERS_WRITE,
-    Permission.NETWORK_READ,
-    Permission.PLANS_READ,
-    Permission.ANALYTICS_READ,
-    Permission.PAYMENTS_READ,
-  ],
-  distributor: [
-    Permission.CUSTOMERS_READ,
-    Permission.ORDERS_READ,
-    Permission.NETWORK_READ,
-    Permission.PLANS_READ,
-    Permission.ANALYTICS_READ,
-  ],
+// Role-based permissions mapping - Now uses centralized configuration
+export const ROLE_PERMISSIONS: Record<string, PermissionEnum[]> = {
+  admin_master: getCentralizedPermissionsForRole('admin_master' as any),
+  gestao_admin: getCentralizedPermissionsForRole('gestao_admin' as any),
+  financeiro: getCentralizedPermissionsForRole('financeiro' as any),
+  suporte: getCentralizedPermissionsForRole('suporte' as any),
+  logistica: getCentralizedPermissionsForRole('logistica' as any),
+  marketing: getCentralizedPermissionsForRole('marketing' as any),
+  analytics: getCentralizedPermissionsForRole('analytics' as any),
+  auditor: getCentralizedPermissionsForRole('auditor' as any),
+  operador: getCentralizedPermissionsForRole('operador' as any),
+  distribuidor: getCentralizedPermissionsForRole('distribuidor' as any),
+  afiliado: getCentralizedPermissionsForRole('afiliado' as any),
+  cliente_final: getCentralizedPermissionsForRole('cliente_final' as any),
 };
 
-export function getPermissionsForRole(role: string): Permission[] {
+export function getPermissionsForRole(role: string): PermissionEnum[] {
   return ROLE_PERMISSIONS[role] || [];
 }

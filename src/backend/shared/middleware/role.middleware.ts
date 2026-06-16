@@ -5,18 +5,15 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-
-export interface UserRole {
-  roles: string[];
-  permissions: any[];
-}
+import { UserRole as UserRoleEnum, isAdministrativeRole } from '@shared/types/roles';
+import { PermissionEnum, permissionActionImplies } from '@shared/types/permissions';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    roles?: string[];
-    permissions?: any[];
+    role?: UserRoleEnum;
+    permissions?: PermissionEnum[];
   };
 }
 
@@ -27,11 +24,18 @@ export class RoleMiddleware {
    * @param roles Roles permitidas
    * @returns Middleware
    */
-  static hasRole(...roles: string[]) {
+  static hasRole(...roles: UserRoleEnum[]) {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-      const userRoles = req.user?.roles || [];
+      const userRole = req.user?.role;
 
-      const hasRequiredRole = roles.some(role => userRoles.includes(role));
+      if (!userRole) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'User role not found',
+        });
+      }
+
+      const hasRequiredRole = roles.includes(userRole);
 
       if (!hasRequiredRole) {
         return res.status(403).json({
@@ -47,28 +51,30 @@ export class RoleMiddleware {
   /**
    * Verifica se usuário tem permissão específica
    * 
-   * @param resource Recurso
+   * @param module Módulo
    * @param action Ação (read, write, delete, etc)
    * @returns Middleware
    */
-  static hasPermission(resource: string, action: string) {
+  static hasPermission(module: string, action: string) {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      const userRole = req.user?.role;
       const userPermissions = req.user?.permissions || [];
 
-      // Verificar se tem permissão "all"
-      const hasAll = userPermissions.some((perm: any) => perm.all === true);
+      if (!userRole) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'User role not found',
+        });
+      }
 
-      if (hasAll) {
+      // Admin master tem todas as permissões
+      if (userRole === UserRoleEnum.ADMIN_MASTER) {
         return next();
       }
 
       // Verificar permissão específica
-      const hasPermission = userPermissions.some((perm: any) => {
-        if (perm[resource] && Array.isArray(perm[resource])) {
-          return perm[resource].includes(action);
-        }
-        return false;
-      });
+      const requiredPermission = `${module}:${action}` as PermissionEnum;
+      const hasPermission = userPermissions.includes(requiredPermission);
 
       if (!hasPermission) {
         return res.status(403).json({
@@ -87,7 +93,7 @@ export class RoleMiddleware {
    * @returns Middleware
    */
   static isAdmin() {
-    return this.hasRole('admin');
+    return this.hasRole(UserRoleEnum.ADMIN_MASTER, UserRoleEnum.GESTAO_ADMIN);
   }
 
   /**
@@ -96,16 +102,16 @@ export class RoleMiddleware {
    * @returns Middleware
    */
   static isDistributor() {
-    return this.hasRole('distributor');
+    return this.hasRole(UserRoleEnum.DISTRIBUIDOR);
   }
 
   /**
-   * Verifica se usuário é customer
+   * Verifica se usuário é cliente
    * 
    * @returns Middleware
    */
   static isCustomer() {
-    return this.hasRole('customer');
+    return this.hasRole(UserRoleEnum.CLIENTE_FINAL);
   }
 
   /**
@@ -114,7 +120,7 @@ export class RoleMiddleware {
    * @returns Middleware
    */
   static isManager() {
-    return this.hasRole('manager');
+    return this.hasRole(UserRoleEnum.GESTAO_ADMIN);
   }
 
   /**
@@ -123,17 +129,17 @@ export class RoleMiddleware {
    * @returns Middleware
    */
   static isSupport() {
-    return this.hasRole('support');
+    return this.hasRole(UserRoleEnum.SUPORTE);
   }
 
   /**
-   * Extrai roles do usuário
+   * Extrai role do usuário
    * 
    * @param req Request
-   * @returns Roles do usuário
+   * @returns Role do usuário
    */
-  static getUserRoles(req: AuthenticatedRequest): string[] {
-    return req.user?.roles || [];
+  static getUserRole(req: AuthenticatedRequest): UserRoleEnum | undefined {
+    return req.user?.role;
   }
 
   /**
@@ -142,7 +148,7 @@ export class RoleMiddleware {
    * @param req Request
    * @returns Permissões do usuário
    */
-  static getUserPermissions(req: AuthenticatedRequest): any[] {
+  static getUserPermissions(req: AuthenticatedRequest): PermissionEnum[] {
     return req.user?.permissions || [];
   }
 
@@ -153,9 +159,10 @@ export class RoleMiddleware {
    * @param roles Roles a verificar
    * @returns true se tem qualquer uma das roles
    */
-  static hasAnyRole(req: AuthenticatedRequest, roles: string[]): boolean {
-    const userRoles = this.getUserRoles(req);
-    return roles.some(role => userRoles.includes(role));
+  static hasAnyRole(req: AuthenticatedRequest, roles: UserRoleEnum[]): boolean {
+    const userRole = this.getUserRole(req);
+    if (!userRole) return false;
+    return roles.includes(userRole);
   }
 
   /**
@@ -165,8 +172,9 @@ export class RoleMiddleware {
    * @param roles Roles a verificar
    * @returns true se tem todas as roles
    */
-  static hasAllRoles(req: AuthenticatedRequest, roles: string[]): boolean {
-    const userRoles = this.getUserRoles(req);
-    return roles.every(role => userRoles.includes(role));
+  static hasAllRoles(req: AuthenticatedRequest, roles: UserRoleEnum[]): boolean {
+    const userRole = this.getUserRole(req);
+    if (!userRole) return false;
+    return roles.includes(userRole);
   }
 }
