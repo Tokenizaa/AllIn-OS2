@@ -350,6 +350,78 @@ class HttpClient {
   async getBonusDistribution(params?: Record<string, unknown>): Promise<ApiResponse<BonusDistribution>> {
     return this.get<BonusDistribution>('/api/analytics/bonus-distribution', params);
   }
+
+  // ============================================================================
+  // Wallet API
+  // ============================================================================
+
+  async getWalletBalance(idComprador: string): Promise<ApiResponse<{ balance: number; availableBalance: number; frozenBalance: number; currency: string }>> {
+    return this.get<{ balance: number; availableBalance: number; frozenBalance: number; currency: string }>(`/api/wallets/${idComprador}/balance`);
+  }
+
+  async getWalletTransactions(idComprador: string, params?: { limit?: number; transactionType?: 'credit' | 'debit' | 'freeze' | 'unfreeze' }): Promise<ApiResponse<any[]>> {
+    return this.get<any[]>(`/api/wallets/${idComprador}/transactions`, params);
+  }
+
+  async ensureWallet(idComprador: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/ensure`);
+  }
+
+  async creditWallet(idComprador: string, amount: number, description: string, referenceId?: string, referenceType?: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/credit`, { amount, description, referenceId, referenceType });
+  }
+
+  async debitWallet(idComprador: string, amount: number, description: string, referenceId?: string, referenceType?: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/debit`, { amount, description, referenceId, referenceType });
+  }
+
+  async freezeWallet(idComprador: string, amount: number, description: string, referenceId?: string, referenceType?: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/freeze`, { amount, description, referenceId, referenceType });
+  }
+
+  async unfreezeWallet(idComprador: string, amount: number, description: string, referenceId?: string, referenceType?: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/unfreeze`, { amount, description, referenceId, referenceType });
+  }
+
+  // ============================================================================
+  // Bonus Wallet API
+  // ============================================================================
+
+  async getBonusWalletBalance(idComprador: string): Promise<ApiResponse<{ balance: number; availableBalance: number }>> {
+    return this.get<{ balance: number; availableBalance: number }>(`/api/wallets/${idComprador}/bonus/balance`);
+  }
+
+  async getBonusTransactions(idComprador: string, params?: { limit?: number }): Promise<ApiResponse<any[]>> {
+    return this.get<any[]>(`/api/wallets/${idComprador}/bonus/transactions`, params);
+  }
+
+  async ensureBonusWallet(idComprador: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/bonus/ensure`);
+  }
+
+  // ============================================================================
+  // Points Wallet API
+  // ============================================================================
+
+  async getPointsWalletBalance(idComprador: string): Promise<ApiResponse<{ balance: number; availableBalance: number }>> {
+    return this.get<{ balance: number; availableBalance: number }>(`/api/wallets/${idComprador}/points/balance`);
+  }
+
+  async getPointsTransactions(idComprador: string, params?: { limit?: number }): Promise<ApiResponse<any[]>> {
+    return this.get<any[]>(`/api/wallets/${idComprador}/points/transactions`, params);
+  }
+
+  async ensurePointsWallet(idComprador: string): Promise<ApiResponse<any>> {
+    return this.post<any>(`/api/wallets/${idComprador}/points/ensure`);
+  }
+
+  // ============================================================================
+  // MLM Commission API
+  // ============================================================================
+
+  async simulateCommission(sellerId: string, orderAmount: number): Promise<ApiResponse<any>> {
+    return this.post<any>('/api/mlm/simulate', { seller_id: sellerId, order_amount: orderAmount });
+  }
 }
 
 export const httpClient = new HttpClient(BASE_URL);

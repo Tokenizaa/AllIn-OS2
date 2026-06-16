@@ -20,6 +20,7 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
   offset?: number;
+  [key: string]: unknown; // Index signature for compatibility with Record<string, unknown>
 }
 
 export interface PaginationMeta {

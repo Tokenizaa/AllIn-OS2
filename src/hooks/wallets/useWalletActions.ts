@@ -1,16 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import { creditWallet, debitWallet } from "@/lib/api/wallet.functions";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export function useWalletActions(idComprador?: string | null, onSettled?: () => void) {
   const credit = useMutation({
     mutationFn: async (amount: number) => {
       if (!idComprador) throw new Error("No ID Comprador");
-      return creditWallet({
+      const result = await httpClient.creditWallet(
         idComprador,
         amount,
-        description: "Adição de fundos via simulação",
-        referenceType: "manual",
-      });
+        "Adição de fundos via simulação",
+        undefined,
+        "manual"
+      );
+      if (!result.success) {
+        throw new Error(result.error || "Failed to credit wallet");
+      }
+      return result.data;
     },
     onSuccess: onSettled,
   });
@@ -18,12 +23,17 @@ export function useWalletActions(idComprador?: string | null, onSettled?: () => 
   const debit = useMutation({
     mutationFn: async (amount: number) => {
       if (!idComprador) throw new Error("No ID Comprador");
-      return debitWallet({
+      const result = await httpClient.debitWallet(
         idComprador,
         amount,
-        description: "Saque de fundos via simulação",
-        referenceType: "withdrawal",
-      });
+        "Saque de fundos via simulação",
+        undefined,
+        "withdrawal"
+      );
+      if (!result.success) {
+        throw new Error(result.error || "Failed to debit wallet");
+      }
+      return result.data;
     },
     onSuccess: onSettled,
   });

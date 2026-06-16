@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
-import { getWalletBalance, getWalletTransactions, ensureWallet, creditWallet, debitWallet } from "@/lib/api/wallet.functions";
-import { getBonusWalletBalance, getBonusTransactions, ensureBonusWallet } from "@/lib/api/bonus-wallet.functions";
-import { getPointsWalletBalance, getPointsTransactions, ensurePointsWallet } from "@/lib/api/points-wallet.functions";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export function useWalletData(idComprador?: string | null) {
   return useQuery({
@@ -10,17 +8,21 @@ export function useWalletData(idComprador?: string | null) {
     queryFn: async () => {
       if (!idComprador) return null;
       try {
-        await Promise.all([ensureWallet({ idComprador }), ensureBonusWallet({ idComprador }), ensurePointsWallet({ idComprador })]);
+        await Promise.all([
+          httpClient.ensureWallet(idComprador),
+          httpClient.ensureBonusWallet(idComprador),
+          httpClient.ensurePointsWallet(idComprador),
+        ]);
       } catch {
         // Silently ignore wallet creation errors
       }
       const [walletRes, bonusRes, pointsRes, txsRes, bonusTxsRes, pointsTxsRes] = await Promise.all([
-        getWalletBalance({ idComprador }),
-        getBonusWalletBalance({ idComprador }),
-        getPointsWalletBalance({ idComprador }),
-        getWalletTransactions({ idComprador, limit: 10 }),
-        getBonusTransactions({ idComprador, limit: 10 }),
-        getPointsTransactions({ idComprador, limit: 10 }),
+        httpClient.getWalletBalance(idComprador),
+        httpClient.getBonusWalletBalance(idComprador),
+        httpClient.getPointsWalletBalance(idComprador),
+        httpClient.getWalletTransactions(idComprador, { limit: 10 }),
+        httpClient.getBonusTransactions(idComprador, { limit: 10 }),
+        httpClient.getPointsTransactions(idComprador, { limit: 10 }),
       ]);
       const balanceInfo = walletRes.success ? walletRes.data : { balance: 0, availableBalance: 0, frozenBalance: 0 };
       const bonusInfo = bonusRes.success ? bonusRes.data : { balance: 0, availableBalance: 0 };
