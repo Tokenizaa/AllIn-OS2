@@ -1,52 +1,37 @@
-import { supabase } from "@/lib/supabase-client";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export const NetworkService = {
   async fetchNetworkRelationships(limit = 12) {
-    const { data, error } = await supabase
-      .from("network_relationships")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client for network relationships
+    throw new Error("fetchNetworkRelationships not yet implemented in HTTP client");
   },
 
   async fetchRecentNetworkRelationships(limit = 12) {
-    const { data, error } = await supabase
-      .from("network_relationships")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client for recent network relationships
+    throw new Error("fetchRecentNetworkRelationships not yet implemented in HTTP client");
   },
 
   async fetchSponsorRelationship(idComprador: string) {
-    const { data, error } = await supabase
-      .from("network_relationships")
-      .select("distributor_id,sponsor_id,level")
-      .eq("id_comprador", idComprador)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getUpline(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch sponsor relationship");
+    }
+    return result.data?.[0]; // Return first upline (sponsor)
   },
 
   async fetchUplineRelationships(idComprador: string) {
-    const { data, error } = await supabase
-      .from("network_relationships")
-      .select("distributor_id,sponsor_id,level")
-      .eq("id_comprador", idComprador)
-      .order("level", { ascending: true });
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getUpline(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch upline relationships");
+    }
+    return result.data || [];
   },
 
   async countDirectRelationships(idComprador: string) {
-    const { data, error } = await supabase
-      .from("network_relationships")
-      .select("distributor_id")
-      .eq("id_comprador", idComprador);
-    if (error) throw error;
-    return data?.length || 0;
+    const result = await httpClient.getDownlines(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to count direct relationships");
+    }
+    return result.data?.length || 0;
   }
 };

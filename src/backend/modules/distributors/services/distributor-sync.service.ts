@@ -37,6 +37,18 @@ export class DistributorSyncService {
     this.apiClient = new ApiClient(apiConfig);
   }
 
+  private async ensureAuthenticated(): Promise<void> {
+    try {
+      await this.apiClient.authenticate();
+    } catch (error) {
+      // Se client credentials falhar, tentar com usuário/senha
+      this.log('Client credentials failed, trying password authentication...', 'debug');
+      const username = process.env.ALLIN_USERNAME || 'juniorind';
+      const password = process.env.ALLIN_PASSWORD || 'allin2025';
+      await this.apiClient.authenticateWithPassword(username, password);
+    }
+  }
+
   private log(message: string, level: 'info' | 'error' | 'debug' = 'info') {
     const timestamp = new Date().toISOString();
     const prefix = `[DistributorSyncService]`;
@@ -68,7 +80,7 @@ export class DistributorSyncService {
 
     try {
       // Authenticate with AllIn API
-      await this.apiClient.authenticate();
+      await this.ensureAuthenticated();
       
       // Fetch all distributors from AllIn API
       const allinDistributors = await this.fetchAllDistributors();
@@ -116,24 +128,52 @@ export class DistributorSyncService {
   private async fetchAllDistributors(): Promise<AllinDistributor[]> {
     const allDistributors: AllinDistributor[] = [];
     let page = 1;
-    const pageSize = 100;
+    const pageSize = 1000; // Aumentado para buscar mais por página
     let hasMore = true;
+    let emptyPageCount = 0; // Contador de páginas vazias consecutivas
 
     while (hasMore) {
       try {
-        const response = await this.apiClient.getWithFilters<any>('/v1/distribuidores', {
+        const response = await this.apiClient.getWithFilters<any>('/distribuidores', {
           limit: pageSize,
           page: page,
         });
 
-        this.log(`API Response page ${page}: ${JSON.stringify(response.data).substring(0, 200)}...`, 'debug');
+        this.log(`Fetching page ${page} with limit ${pageSize}...`, 'debug');
 
-        if (response.data && response.data.length > 0) {
-          allDistributors.push(...response.data);
-          hasMore = response.data.length === pageSize;
+        // Handle different response formats
+        let distributors: AllinDistributor[] = [];
+        
+        if (Array.isArray(response.data)) {
+          distributors = response.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          distributors = response.data.data;
+        } else if (response.data?.items && Array.isArray(response.data.items)) {
+          distributors = response.data.items;
+        } else if (response.data?._embedded?.distribuidores && Array.isArray(response.data._embedded.distribuidores)) {
+          distributors = response.data._embedded.distribuidores;
+        } else if (response.data?._embedded?.items && Array.isArray(response.data._embedded.items)) {
+          distributors = response.data._embedded.items;
+        }
+
+        this.log(`Extracted ${distributors.length} distributors from page ${page}`, 'debug');
+
+        if (distributors.length > 0) {
+          allDistributors.push(...distributors);
+          emptyPageCount = 0; // Reset contador
+          // Continua se houver próxima página ou se retornou o limite máximo
+          hasMore = response.data?._links?.next ? true : false;
           page++;
         } else {
-          hasMore = false;
+          emptyPageCount++;
+          // Para após 3 páginas vazias consecutivas para evitar loop infinito
+          if (emptyPageCount >= 3) {
+            this.log(`Stopping after ${emptyPageCount} consecutive empty pages`, 'debug');
+            hasMore = false;
+          } else {
+            hasMore = response.data?._links?.next ? true : false;
+            if (hasMore) page++;
+          }
         }
       } catch (error) {
         this.log(`Error fetching distributors page ${page}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
@@ -141,6 +181,7 @@ export class DistributorSyncService {
       }
     }
 
+    this.log(`Total distributors fetched: ${allDistributors.length}`, 'info');
     return allDistributors;
   }
 
@@ -191,9 +232,9 @@ export class DistributorSyncService {
     this.log(`Syncing distributor with AllIn ID: ${allinId}`);
     
     try {
-      await this.apiClient.authenticate();
+      await this.ensureAuthenticated();
       
-      const response = await this.apiClient.get<AllinDistributor>(`/v1/distribuidores/${allinId}`);
+      const response = await this.apiClient.get<AllinDistributor>(`/distribuidores/${allinId}`);
       const allinDist = response.data;
       
       const existingDist = await this.distributorRepository.findByAllinId(allinId);

@@ -40,7 +40,7 @@ export class ApiClient {
   // ============================================================================
 
   async authenticate(): Promise<void> {
-    const response = await fetch(`${this.config.baseUrl}/v1/auth/token`, {
+    const response = await fetch(`${this.config.baseUrl}/auth/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -63,7 +63,7 @@ export class ApiClient {
   }
 
   async authenticateWithPassword(username: string, password: string): Promise<void> {
-    const response = await fetch(`${this.config.baseUrl}/v1/auth/token`, {
+    const response = await fetch(`${this.config.baseUrl}/auth/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

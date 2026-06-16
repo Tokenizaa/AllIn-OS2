@@ -24,6 +24,7 @@ import type {
   OrderStats,
   Payment,
   PaymentStats,
+  Product,
   NetworkNode,
   Downline,
   Upline,
@@ -353,6 +354,22 @@ class HttpClient {
 
   async getPaymentStats(): Promise<ApiResponse<PaymentStats>> {
     return this.get<PaymentStats>('/api/payments/stats/overview');
+  }
+
+  // ============================================================================
+  // Products API
+  // ============================================================================
+
+  async getProducts(params?: { limit?: number }): Promise<ApiResponse<Product[]>> {
+    return this.get<Product[]>('/api/products', params);
+  }
+
+  async getProductById(id: string): Promise<ApiResponse<Product>> {
+    return this.get<Product>(`/api/products/${id}`);
+  }
+
+  async getStoresProducts(params?: { limit?: number }): Promise<ApiResponse<Product[]>> {
+    return this.get<Product[]>('/api/products/stores', params);
   }
 
   // ============================================================================

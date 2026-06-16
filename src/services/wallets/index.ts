@@ -1,70 +1,41 @@
-import { supabase } from "@/lib/supabase-client";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export const WalletService = {
   async fetchWalletByidComprador(idComprador: string) {
-    const { data, error } = await supabase
-      .from("wallets")
-      .select("*")
-      .eq("id_comprador", idComprador)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getWalletBalance(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch wallet");
+    }
+    return result.data;
   },
 
   async fetchWalletTransactionsByWalletId(walletId: string) {
-    const { data, error } = await supabase
-      .from("wallet_transactions")
-      .select("*")
-      .eq("wallet_id", walletId)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client
+    throw new Error("fetchWalletTransactionsByWalletId not yet implemented in HTTP client");
   },
 
   async fetchPointsWalletByidComprador(idComprador: string) {
-    const { data, error } = await supabase
-      .from("points_wallets")
-      .select("*")
-      .eq("id_comprador", idComprador)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getPointsWalletBalance(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch points wallet");
+    }
+    return result.data;
   },
 
   async createWallet(idComprador: string) {
-    const { data, error } = await supabase
-      .from("wallets")
-      .insert({
-        id_comprador: idComprador,
-        balance: 0,
-        available_balance: 0,
-        frozen_balance: 0,
-        currency: "BRL",
-        status: "active"
-      })
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.ensureWallet(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to create wallet");
+    }
+    return result.data;
   },
 
   async createPointsWallet(idComprador: string) {
-    const { data, error } = await supabase
-      .from("points_wallets")
-      .insert({
-        id_comprador: idComprador,
-        balance: 0,
-        available_balance: 0,
-        frozen_balance: 0,
-        total_earned: 0,
-        total_redeemed: 0,
-        currency: "PTS",
-        status: "active"
-      })
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.ensurePointsWallet(idComprador);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to create points wallet");
+    }
+    return result.data;
   },
 
   async createWalletTransaction(
@@ -74,97 +45,37 @@ export const WalletService = {
     description: string,
     reference_type: string = "adjustment"
   ) {
-    const { data, error } = await supabase
-      .from("wallet_transactions")
-      .insert({
-        wallet_id: walletId,
-        transaction_type,
-        amount,
-        description,
-        reference_type,
-        reference_id: "manual-" + Date.now().toString().slice(-6),
-      })
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    // TODO: Add method to HTTP client
+    throw new Error("createWalletTransaction not yet implemented in HTTP client");
   },
 
   async updateWalletBalance(walletId: string, balance: number) {
-    const { data, error } = await supabase
-      .from("wallets")
-      .update({
-        balance,
-        available_balance: balance,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", walletId)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    // TODO: Add method to HTTP client
+    throw new Error("updateWalletBalance not yet implemented in HTTP client");
   },
 
   async fetchWithdrawals(userId?: string) {
-    let query = supabase
-      .from("withdrawals")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (userId) {
-      query = query.eq("user_id", userId);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client
+    throw new Error("fetchWithdrawals not yet implemented in HTTP client");
   },
 
   async fetchRecentWithdrawals(limit = 5) {
-    const { data, error } = await supabase
-      .from("withdrawals")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client
+    throw new Error("fetchRecentWithdrawals not yet implemented in HTTP client");
   },
 
   async fetchWorkspaceSettings() {
-    const { data, error } = await supabase
-      .from("workspace_settings")
-      .select("balance_available, balance_blocked, balance_pending, total_year, total_month")
-      .limit(1)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    // TODO: Add method to HTTP client
+    throw new Error("fetchWorkspaceSettings not yet implemented in HTTP client");
   },
 
   async approveWithdrawals(withdrawalIds: string[]) {
-    const { data, error } = await supabase
-      .from("withdrawals")
-      .update({
-        status: "approved",
-        approved_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", withdrawalIds)
-      .select();
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client
+    throw new Error("approveWithdrawals not yet implemented in HTTP client");
   },
 
   async rejectWithdrawals(withdrawalIds: string[]) {
-    const { data, error } = await supabase
-      .from("withdrawals")
-      .update({
-        status: "rejected",
-        rejected_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", withdrawalIds)
-      .select();
-    if (error) throw error;
-    return data || [];
+    // TODO: Add method to HTTP client
+    throw new Error("rejectWithdrawals not yet implemented in HTTP client");
   },
 };

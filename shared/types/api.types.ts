@@ -97,6 +97,16 @@ export interface Customer {
 
 export type CustomerStatus = 'active' | 'inactive' | 'pending' | 'suspended';
 
+export interface Address {
+  street: string;
+  number: string;
+  complement?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country?: string;
+}
+
 export interface CustomerStats {
   totalCustomers: number;
   activeCustomers: number;
@@ -250,6 +260,7 @@ export type PaymentMethod =
   | 'debit_card'
   | 'pix'
   | 'boleto'
+  | 'cash'
   | 'bank_transfer';
 
 export interface PaymentStats {
@@ -258,6 +269,23 @@ export interface PaymentStats {
   failedPayments: number;
   totalAmount: number;
   averageAmount: number;
+}
+
+// ============================================================================
+// Product Types
+// ============================================================================
+
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category?: string;
+  imageUrl?: string;
+  stock?: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================

@@ -1,32 +1,27 @@
-import { supabase } from "@/lib/supabase-client";
+import { httpClient } from "@/lib/api-client/http-client";
 
 export const ProductService = {
   async fetchProducts(limit = 20) {
-    const { data, error } = await supabase
-      .from("products")
-      .select("id, name, price")
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getProducts({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch products");
+    }
+    return result.data || [];
   },
 
   async fetchStoresProducts(limit = 12) {
-    const { data, error } = await supabase
-      .from("products")
-      .select("id, name, description, price, category")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-    if (error) throw error;
-    return data || [];
+    const result = await httpClient.getStoresProducts({ limit });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch stores products");
+    }
+    return result.data || [];
   },
 
   async fetchProductById(id: string) {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
+    const result = await httpClient.getProductById(id);
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch product by ID");
+    }
+    return result.data;
   }
 };
