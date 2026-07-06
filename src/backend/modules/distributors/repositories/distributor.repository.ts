@@ -65,6 +65,26 @@ export class DistribuidorRepository extends BaseRepository<Distribuidor> {
     return data;
   }
 
+  async count(filters?: Record<string, any>): Promise<number> {
+    let query = this.getClient()
+      .schema("mlm")
+      .from("distribuidores")
+      .select("*", { count: "exact", head: true });
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          query = query.eq(key, value);
+        }
+      });
+    }
+
+    const { count, error } = await query;
+
+    if (error) throw error;
+    return count || 0;
+  }
+
   async findAll(options?: {
     filters?: Record<string, any>;
     orderBy?: string;

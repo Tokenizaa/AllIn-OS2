@@ -1,10 +1,10 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 import { CopilotDrawer } from "@/components/app/copilot-drawer";
 import { SidebarNav } from "@/components/app/sidebar-nav";
 import { Topbar } from "@/components/app/topbar";
-import { RouteGuard, useAuth } from "@/modules/auth";
+import { RouteGuard } from "@/modules/auth";
 import { UserRole } from "@/shared/types/roles";
 
 export const Route = createFileRoute("/_app")({
@@ -12,18 +12,8 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayoutSecure() {
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#06080d]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
-      </div>
-    );
-  }
-
   return (
-    <RouteGuard allowedRoles={[UserRole.ADMIN_MASTER, UserRole.GESTAO_ADMIN, UserRole.FINANCEIRO, UserRole.SUPORTE]}>
+    <RouteGuard allowedRoles={[UserRole.ADMIN_MASTER, UserRole.GESTAO_ADMIN, UserRole.FINANCEIRO, UserRole.SUPORTE, UserRole.LOGISTICA, UserRole.MARKETING, UserRole.ANALYTICS, UserRole.AUDITOR, UserRole.OPERADOR]}>
       <AppLayout />
     </RouteGuard>
   );

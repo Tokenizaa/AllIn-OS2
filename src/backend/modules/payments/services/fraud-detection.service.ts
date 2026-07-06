@@ -1,5 +1,5 @@
 import { logger } from '../../../shared/observability/logger.service';
-import { getBackendClient } from '../../../../lib/supabase/client';
+import { getBackendClient } from '../../../shared/infrastructure/supabase/client';
 
 export interface FraudRiskScore {
   score: number;
@@ -157,6 +157,7 @@ export class FraudDetectionService {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       
       const { data, error } = await supabase
+        .schema('finance')
         .from('payments')
         .select('id')
         .eq('id_comprador', idComprador)

@@ -10,10 +10,20 @@ import { PublicHeader } from '@/components/app/public-header';
 import { StyleProvider } from '@/contexts/StyleContext';
 import { useToast } from '@/hooks/use-toast';
 import { useProductsFromCSV } from '@/hooks/useProductsFromCSV';
+import { RouteGuard } from "@/modules/auth";
+import { UserRole } from "@/shared/types/roles";
 
 export const Route = createFileRoute("/loja")({
-  component: LojaPage,
+  component: LojaPageSecure,
 });
+
+function LojaPageSecure() {
+  return (
+    <RouteGuard allowedRoles={[UserRole.CLIENTE_FINAL, UserRole.DISTRIBUIDOR, UserRole.AFILIADO, UserRole.ADMIN_MASTER, UserRole.GESTAO_ADMIN, UserRole.FINANCEIRO, UserRole.SUPORTE, UserRole.LOGISTICA, UserRole.MARKETING, UserRole.ANALYTICS, UserRole.AUDITOR, UserRole.OPERADOR]}>
+      <LojaPage />
+    </RouteGuard>
+  );
+}
 
 type StoreInfo = {
   id: string;

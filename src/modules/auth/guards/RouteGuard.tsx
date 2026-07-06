@@ -4,7 +4,7 @@ import { UserRole } from "@/shared/types/roles";
 import { Permission } from "../context/auth.types";
 import { useAuth } from "../hooks/useAuth";
 import { usePermissions } from "../hooks/usePermissions";
-import { getRoleRedirectPath, getPrimaryPathForRole } from "../navigation";
+import { DashboardResolver } from "../services/dashboardResolver.service";
 
 interface GuardProps {
   children: React.ReactNode;
@@ -41,17 +41,14 @@ function resolvePathPermission(pathname: string) {
  */
 export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requiredPermission }) => {
   const { user, loading } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
   const inferredPermission = requiredPermission || resolvePathPermission(location.pathname);
 
-  // RouteGuard render
-
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !permissionsLoading) {
       if (!user) {
-        // Only redirect if not already on login page
         if (location.pathname !== "/login") {
           navigate({
             to: "/login",
@@ -61,28 +58,24 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
         return;
       }
 
-      // Check role permissions
       if (allowedRoles && !allowedRoles.includes(user.role)) {
-        const targetPath = getPrimaryPathForRole(user.role);
-        // Only redirect if not already on target path
+        const targetPath = DashboardResolver.getDashboardPathForUser(user);
         if (location.pathname !== targetPath) {
           navigate({ to: targetPath });
         }
         return;
       }
 
-      // Check specific modular permission
       if (inferredPermission && !hasPermission(inferredPermission.module, inferredPermission.action || "read")) {
-        const targetPath = getRoleRedirectPath(user);
-        // Only redirect if not already on target path
+        const targetPath = DashboardResolver.getDashboardPathForUser(user);
         if (location.pathname !== targetPath) {
           navigate({ to: targetPath });
         }
       }
     }
-  }, [user, loading, allowedRoles, inferredPermission, navigate, location.pathname, hasPermission]);
+  }, [user, loading, permissionsLoading, allowedRoles, inferredPermission, navigate, location.pathname, hasPermission]);
 
-  if (loading) {
+  if (loading || permissionsLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#07090e] text-white">
         <div className="relative flex items-center justify-center">
@@ -94,7 +87,6 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
     );
   }
 
-  // Double check authorization
   if (!user) return null;
   if (allowedRoles && !allowedRoles.includes(user.role)) return null;
   if (inferredPermission && !hasPermission(inferredPermission.module, inferredPermission.action || "read")) return null;

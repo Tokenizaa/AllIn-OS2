@@ -4,8 +4,8 @@ import { ShoppingCart, Plus, Minus, Trash2, MessageCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useCart } from '@/contexts/CartContext';
-import { useStoreSettings } from '@/contexts/StoreSettingsContext';
+import { useCart } from '@/hooks/cart/useCartQuery';
+import { useStoreSettings } from '@/hooks/store/useStoreSettings';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/utils/priceFormatter';
 

@@ -13,7 +13,6 @@ function OfficeLayoutSecure() {
     <RouteGuard allowedRoles={[
       UserRole.DISTRIBUIDOR,
       UserRole.AFILIADO,
-      UserRole.CLIENTE_FINAL,
       UserRole.ADMIN_MASTER,
       UserRole.GESTAO_ADMIN,
       UserRole.FINANCEIRO,

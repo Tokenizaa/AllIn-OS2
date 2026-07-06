@@ -1,8 +1,8 @@
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 
 export const LeadService = {
   async fetchLeads(userId?: string) {
-    let query = supabase.from("leads").select("*");
+    let query = supabase.from("crm.leads").select("*");
     if (userId) {
       query = query.eq("user_id", userId);
     }
@@ -23,7 +23,7 @@ export const LeadService = {
       metadata: lead.metadata || { captured_at: new Date().toISOString() },
     };
 
-    const { data, error } = await supabase.from("leads").insert(payload);
+    const { data, error } = await supabase.from("crm.leads").insert(payload);
     if (error) throw error;
     return data;
   }

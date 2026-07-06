@@ -60,6 +60,7 @@ export class WebhookProcessorService {
   private async logWebhook(gatewayType: GatewayType, event: WebhookEvent): Promise<void> {
     try {
       const { error } = await supabase
+        .schema('finance')
         .from('gateway_webhooks')
         .insert({
           gateway_id: gatewayType,
@@ -83,6 +84,7 @@ export class WebhookProcessorService {
   private async markWebhookAsProcessed(event: WebhookEvent, success: boolean, errorMessage?: string): Promise<void> {
     try {
       const { data: existingWebhook } = await supabase
+        .schema('finance')
         .from('gateway_webhooks')
         .select('processing_attempts')
         .eq('payload', event.payload)
@@ -90,6 +92,7 @@ export class WebhookProcessorService {
         .maybeSingle();
 
       const { error } = await supabase
+        .schema('finance')
         .from('gateway_webhooks')
         .update({
           processed: true,
@@ -111,6 +114,7 @@ export class WebhookProcessorService {
   private async updatePaymentStatus(gatewayTransactionId: string, status: string): Promise<void> {
     try {
       const { error } = await supabase
+        .schema('finance')
         .from('payments')
         .update({
           status: status,
@@ -136,6 +140,7 @@ export class WebhookProcessorService {
 
     try {
       const { data: failedWebhooks, error } = await supabase
+        .schema('finance')
         .from('gateway_webhooks')
         .select('*')
         .eq('processed', false)

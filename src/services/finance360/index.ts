@@ -17,7 +17,7 @@
  * - withdrawals (saques)
  */
 
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import type {
   Wallet,
   PointsWallet,
@@ -41,7 +41,7 @@ export const Finance360Service = {
     let effectiveIdComprador = idComprador;
     if (!effectiveIdComprador) {
       const { data: profile } = await supabase
-        .from("profiles")
+        .from("crm.customers")
         .select("id_comprador")
         .eq("id", profileId)
         .maybeSingle();
@@ -84,7 +84,7 @@ export const Finance360Service = {
    */
   async fetchWallet(idComprador: string): Promise<Wallet | null> {
     const { data, error } = await supabase
-      .from("wallets")
+      .from("finance.wallets")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -98,7 +98,7 @@ export const Finance360Service = {
    */
   async fetchPointsWallet(idComprador: string): Promise<PointsWallet | null> {
     const { data, error } = await supabase
-      .from("points_wallets")
+      .from("finance.points_wallets")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -112,7 +112,7 @@ export const Finance360Service = {
    */
   async fetchWalletTransactions(walletId: string): Promise<WalletTransaction[]> {
     const { data, error } = await supabase
-      .from("wallet_transactions")
+      .from("finance.wallet_transactions")
       .select("*")
       .eq("wallet_id", walletId)
       .order("created_at", { ascending: false })

@@ -77,12 +77,22 @@ def processar_pedidos_migrados():
             # Chamar função SQL via RPC
             response = client.rpc('processar_pedido_mlm', {'pedido_id': pedido_id})
             
-            # Verificar se houve erro na função (a função pode lançar exceção)
-            # Se a função retornar sem erro, consideramos sucesso
-            processados += 1
+            # Verificar se o pedido foi realmente marcado como processado
+            check_response = client.table('pedidos').select('comissoes_geradas').eq('id', pedido_id).execute()
             
-            if processados % 50 == 0:
-                print(f"   - {processados} pedidos processados com sucesso")
+            if check_response.data and len(check_response.data) > 0:
+                pedido_processado = check_response.data[0].get('comissoes_geradas', False)
+                if pedido_processado:
+                    processados += 1
+                    
+                    if processados % 50 == 0:
+                        print(f"   - {processados} pedidos processados com sucesso")
+                else:
+                    erros += 1
+                    print(f"   [ERROR] Pedido {pedido_id} não foi marcado como processado")
+            else:
+                erros += 1
+                print(f"   [ERROR] Não foi possível verificar status do pedido {pedido_id}")
             
             time.sleep(DELAY_BETWEEN_REQUESTS)
             

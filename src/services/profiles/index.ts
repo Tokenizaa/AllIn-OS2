@@ -1,9 +1,10 @@
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 
 export const ProfileService = {
   async fetchUserProfile(userId: string) {
     const { data, error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
@@ -13,8 +14,9 @@ export const ProfileService = {
 
   async fetchLastProfile() {
     const { data, error } = await supabase
-      .from("profiles")
-      .select("id, name, role, created_at")
+      .schema("crm")
+      .from("customers")
+      .select("id, nome, tipo_cliente, created_at")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -24,8 +26,9 @@ export const ProfileService = {
 
   async fetchMyProfile() {
     const { data, error } = await supabase
-      .from("profiles")
-      .select("id, name, email, phone, cpf, sponsor_id, city, state, role")
+      .schema("crm")
+      .from("customers")
+      .select("id, nome, email, telefone, cpf, patrocinador_id, cidade, estado, tipo_cliente")
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -39,16 +42,19 @@ export const ProfileService = {
 
   /**
    * Busca todos os perfis com filtro opcional por role
+   * NOTE: This filters by tipo_cliente in crm.customers for commercial classification
+   * For actual role-based filtering, use identity.user_roles
    */
   async fetchProfiles(role?: string, limit = 100) {
     let query = supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(limit);
 
     if (role) {
-      query = query.eq("role", role);
+      query = query.eq("tipo_cliente", role);
     }
 
     const { data, error } = await query;
@@ -61,7 +67,8 @@ export const ProfileService = {
    */
   async fetchProfileById(id: string) {
     const { data, error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*")
       .eq("id", id)
       .maybeSingle();
@@ -70,28 +77,29 @@ export const ProfileService = {
   },
 
   /**
-   * Busca distribuidores (role = 'distribuidor')
+   * Busca distribuidores (tipo_cliente = 'distribuidor')
    */
   async fetchDistributors(limit = 100) {
     return this.fetchProfiles("distribuidor", limit);
   },
 
   /**
-   * Busca clientes finais (role = 'customer_final')
+   * Busca clientes finais (tipo_cliente = 'cliente_final')
    */
   async fetchCustomerFinals(limit = 100) {
-    return this.fetchProfiles("customer_final", limit);
+    return this.fetchProfiles("cliente_final", limit);
   },
 
   /**
-   * Busca clientes diretos (role = 'cliente_direto')
+   * Busca clientes diretos (tipo_cliente = 'cliente_direto')
    */
   async fetchClienteDiretos(limit = 100) {
     return this.fetchProfiles("cliente_direto", limit);
   },
 
   /**
-   * Busca admins (role = 'admin')
+   * Busca admins (tipo_cliente = 'admin')
+   * NOTE: For actual admin role filtering, use identity.user_roles
    */
   async fetchAdmins(limit = 100) {
     return this.fetchProfiles("admin", limit);
@@ -106,13 +114,14 @@ export const ProfileService = {
     const to = from + pageSize - 1;
 
     let query = supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to);
 
     if (role) {
-      query = query.eq("role", role);
+      query = query.eq("tipo_cliente", role);
     }
 
     const { data, error, count } = await query;
@@ -133,13 +142,14 @@ export const ProfileService = {
    */
   async fetchAnalyticsProfiles(role?: string) {
     let query = supabase
-      .from("profiles")
-      .select("id, name, email, role, created_at")
+      .schema("crm")
+      .from("customers")
+      .select("id, nome, email, tipo_cliente, created_at")
       .order("created_at", { ascending: false })
       .limit(500);
 
     if (role) {
-      query = query.eq("role", role);
+      query = query.eq("tipo_cliente", role);
     }
 
     const { data, error } = await query;
@@ -166,64 +176,19 @@ export const ProfileService = {
   // ============================================================================
 
   /**
-   * Busca bônus de um perfil por profile_id
-   * Tenta usar profile_id, mas fallback para id_comprador se necessário
+   * Busca bônus de um perfil por profile_id (deprecated - customer_bonus_view does not exist)
    */
   async fetchProfileBonus(profileId: string) {
-    // Primeiro tenta usar profile_id direto na view
-    let { data, error } = await supabase
-      .from("customer_bonus_view")
-      .select("*")
-      .eq("profile_id", profileId)
-      .maybeSingle();
-
-    // Se não encontrar ou se a coluna não existir, tenta usar id_comprador
-    if (error || !data) {
-      // Busca o profile para obter id_comprador
-      const profile = await this.fetchProfileById(profileId);
-      if (profile?.id_comprador) {
-        const result = await supabase
-          .from("customer_bonus_view")
-          .select("*")
-          .eq("id_comprador", profile.id_comprador)
-          .maybeSingle();
-        data = result.data;
-        error = result.error;
-      }
-    }
-
-    if (error) throw error;
-    return data;
+    console.warn("[ProfileService] fetchProfileBonus is deprecated - customer_bonus_view does not exist");
+    return null;
   },
 
   /**
-   * Busca plano de um perfil por profile_id
-   * Tenta usar profile_id, mas fallback para id_comprador se necessário
+   * Busca plano de um perfil por profile_id (deprecated - customer_plans does not exist)
+   * Use mlm.planos_distribuidores instead
    */
   async fetchProfilePlan(profileId: string) {
-    // Primeiro tenta usar profile_id direto
-    let { data, error } = await supabase
-      .from("customer_plans")
-      .select("*, plans(*)")
-      .eq("profile_id", profileId)
-      .maybeSingle();
-
-    // Se não encontrar ou se a coluna não existir, tenta usar id_comprador
-    if (error || !data) {
-      // Busca o profile para obter id_comprador
-      const profile = await this.fetchProfileById(profileId);
-      if (profile?.id_comprador) {
-        const result = await supabase
-          .from("customer_plans")
-          .select("*, plans(*)")
-          .eq("id_comprador", profile.id_comprador)
-          .maybeSingle();
-        data = result.data;
-        error = result.error;
-      }
-    }
-
-    if (error) throw error;
-    return data;
+    console.warn("[ProfileService] fetchProfilePlan is deprecated - customer_plans does not exist, use mlm.planos_distribuidores instead");
+    return null;
   },
 };

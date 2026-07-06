@@ -8,6 +8,7 @@ import { Search, Download, Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { useAuth } from '@/modules/auth';
 import { usePayments } from '@/hooks/payments/usePayments';
 import { usePaymentHistoryFilters } from '@/hooks/payments/usePaymentHistoryFilters';
+import { useDistributorProfileQuery } from '@/hooks/distributor/useDistributorProfileQuery';
 
 interface Payment {
   id: string;
@@ -21,7 +22,8 @@ interface Payment {
 }
 
 export function PaymentHistory() {
-  const { user, distributorProfile } = useAuth();
+  const { user } = useAuth();
+  const { distributorProfile } = useDistributorProfileQuery();
   const idComprador = distributorProfile?.id || user?.id;
 
   const { data: paymentsData, isLoading, refetch } = usePayments(50);

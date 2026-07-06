@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase-client';
+import { supabase } from '../lib/supabase/client';
 import { Product } from '../types/products';
 
 /**
@@ -11,7 +11,8 @@ export const productsService = {
    */
   getAllProducts: async (): Promise<Product[]> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('*')
       .eq('status', 'active')
       .order('created_at', { ascending: false });
@@ -23,7 +24,7 @@ export const productsService = {
 
     return (data || []).map(product => ({
       id: product.id,
-      name: product.name,
+      nome: product.nome,
       category: product.category,
       price: product.price?.toString() || '0',
       images: product.images || [],
@@ -35,16 +36,6 @@ export const productsService = {
       metadata: product.metadata || {},
       created_at: product.created_at,
       updated_at: product.updated_at,
-      // Legacy fields for backward compatibility
-      linkProduto: product.metadata?.linkProduto,
-      imgSrc: product.images?.[0],
-      imgSrc2: product.images?.[1],
-      caption: product.name,
-      caption2: product.description,
-      promotion: product.metadata?.promotion,
-      parcelasValor: product.metadata?.parcelasValor,
-      produtoTag: product.metadata?.produtoTag,
-      categorias: product.category,
     }));
   },
 
@@ -53,7 +44,8 @@ export const productsService = {
    */
   getProductsByCategory: async (categoryName: string): Promise<Product[]> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('*')
       .eq('category', categoryName)
       .eq('status', 'active')
@@ -66,7 +58,7 @@ export const productsService = {
 
     return (data || []).map(product => ({
       id: product.id,
-      name: product.name,
+      nome: product.nome,
       category: product.category,
       price: product.price?.toString() || '0',
       images: product.images || [],
@@ -78,16 +70,6 @@ export const productsService = {
       metadata: product.metadata || {},
       created_at: product.created_at,
       updated_at: product.updated_at,
-      // Legacy fields for backward compatibility
-      linkProduto: product.metadata?.linkProduto,
-      imgSrc: product.images?.[0],
-      imgSrc2: product.images?.[1],
-      caption: product.name,
-      caption2: product.description,
-      promotion: product.metadata?.promotion,
-      parcelasValor: product.metadata?.parcelasValor,
-      produtoTag: product.metadata?.produtoTag,
-      categorias: product.category,
     }));
   },
 
@@ -96,7 +78,8 @@ export const productsService = {
    */
   getProductById: async (id: string): Promise<Product | undefined> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('*')
       .eq('id', id)
       .single();
@@ -110,7 +93,7 @@ export const productsService = {
 
     return {
       id: data.id,
-      name: data.name,
+      nome: data.nome,
       category: data.category,
       price: data.price?.toString() || '0',
       images: data.images || [],
@@ -122,16 +105,6 @@ export const productsService = {
       metadata: data.metadata || {},
       created_at: data.created_at,
       updated_at: data.updated_at,
-      // Legacy fields for backward compatibility
-      linkProduto: data.metadata?.linkProduto,
-      imgSrc: data.images?.[0],
-      imgSrc2: data.images?.[1],
-      caption: data.name,
-      caption2: data.description,
-      promotion: data.metadata?.promotion,
-      parcelasValor: data.metadata?.parcelasValor,
-      produtoTag: data.metadata?.produtoTag,
-      categorias: data.category,
     };
   },
 
@@ -140,7 +113,8 @@ export const productsService = {
    */
   getCategories: async (): Promise<string[]> => {
     const { data, error } = await supabase
-      .from('products')
+      .schema('commerce')
+      .from('produtos')
       .select('category')
       .not('category', 'is', null)
       .eq('status', 'active');

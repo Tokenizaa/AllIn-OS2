@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 
 export function useUpgradeSuggestions() {
   return useQuery({
@@ -8,7 +8,7 @@ export function useUpgradeSuggestions() {
       // Query upgrade suggestions from the database
       // This would typically come from an AI-powered analysis or precomputed suggestions
       const { data, error } = await supabase
-        .from("upgrade_suggestions")
+        .from("mlm.upgrade_suggestions")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(10);

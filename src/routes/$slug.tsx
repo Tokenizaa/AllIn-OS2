@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
-import { useDistributor } from "@/lib/distributor-context";
-import { useProducts } from "@/contexts/ProductsContext";
+import { createFileRoute, Link, useNavigate, useParams, useLoaderData } from "@tanstack/react-router";
+import { useProductsQuery } from "@/hooks/products/useProductsQuery";
+import { resolveDistributor } from "@/hooks/distributor/useDistributorQuery";
 import { 
   Crown, Star, ShoppingBag,
   ArrowRight, MessageSquare, Instagram, ShieldCheck,
@@ -14,33 +14,36 @@ import { PublicHeader } from "@/components/app/public-header";
 
 export const Route = createFileRoute("/$slug")({
   component: DistributorPage,
+  // Sprint 3: Implementar loader para carregar dados antes da renderização
+  loader: async ({ params }) => {
+    const slug = params.slug?.toLowerCase().trim();
+    if (!slug) {
+      return { distributor: null };
+    }
+    const distributor = await resolveDistributor(slug);
+    return { distributor };
+  },
 });
 
 function DistributorPage() {
   const params = useParams({ strict: false }) as { slug?: string };
-  const { currentDistributor, setDistributorBySlug } = useDistributor();
+  const routeSlug = params.slug?.toLowerCase().trim();
   const navigate = useNavigate();
-  const { products } = useProducts();
+  const { products } = useProductsQuery();
+
+  // Sprint 3: Usar loader para dados pré-carregados
+  const { distributor: currentDistributor } = useLoaderData({ from: "/$slug" });
 
   const formatBRL = (value: string) => {
     const num = parseFloat(value);
     return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
-  
-  // Clean parameter and sync
-  const routeSlug = params.slug?.toLowerCase().trim();
-  
-  useEffect(() => {
-    if (routeSlug) {
-      setDistributorBySlug(routeSlug);
-    }
-  }, [routeSlug, setDistributorBySlug]);
 
-  const sponsorSlug = currentDistributor.slug;
-  const theme = currentDistributor.theme;
-  const distName = currentDistributor.name;
-  const distRank = currentDistributor.rank;
-  const distAvatar = currentDistributor.avatar;
+  const sponsorSlug = currentDistributor?.slug || "";
+  const theme = currentDistributor?.theme;
+  const distName = currentDistributor?.name || "Distribuidor";
+  const distRank = currentDistributor?.rank || "";
+  const distAvatar = currentDistributor?.avatar || "";
 
   // DEPRECATED: usersList removed - use Supabase directly
   // TODO: Fetch distributor data from Supabase if needed
@@ -115,22 +118,42 @@ function DistributorPage() {
             </p>
 
             <div className="flex flex-wrap gap-3.5 pt-2">
-              <Link
-                to="/loja/$slug"
-                params={{ slug: sponsorSlug }}
-                className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:opacity-90 transition-all font-bold text-black text-xs shadow-lg shadow-emerald-500/10 cursor-pointer"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                Explorar Vitrine On-Line
-              </Link>
-              <Link
-                to="/seja-distribuidor/$slug"
-                params={{ slug: sponsorSlug }}
-                className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl border border-border/80 bg-background/40 hover:bg-background/80 transition-all font-semibold text-white text-xs cursor-pointer"
-              >
-                Trabalhar Conosco
-                <ArrowRight className="h-4 w-4 text-emerald-400" />
-              </Link>
+              {sponsorSlug ? (
+                <Link
+                  to="/loja/$slug"
+                  params={{ slug: sponsorSlug }}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:opacity-90 transition-all font-bold text-black text-xs shadow-lg shadow-emerald-500/10 cursor-pointer"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Explorar Vitrine On-Line
+                </Link>
+              ) : (
+                <Link
+                  to="/loja"
+                  className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:opacity-90 transition-all font-bold text-black text-xs shadow-lg shadow-emerald-500/10 cursor-pointer"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Explorar Vitrine On-Line
+                </Link>
+              )}
+              {sponsorSlug ? (
+                <Link
+                  to="/seja-distribuidor/$slug"
+                  params={{ slug: sponsorSlug }}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl border border-border/80 bg-background/40 hover:bg-background/80 transition-all font-semibold text-white text-xs cursor-pointer"
+                >
+                  Trabalhar Conosco
+                  <ArrowRight className="h-4 w-4 text-emerald-400" />
+                </Link>
+              ) : (
+                <Link
+                  to="/seja-distribuidor"
+                  className="inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl border border-border/80 bg-background/40 hover:bg-background/80 transition-all font-semibold text-white text-xs cursor-pointer"
+                >
+                  Trabalhar Conosco
+                  <ArrowRight className="h-4 w-4 text-emerald-400" />
+                </Link>
+              )}
               <button 
                 onClick={shareProfile}
                 className="h-10 w-10 rounded-xl border border-border/50 bg-[#090d16] flex items-center justify-center cursor-pointer hover:border-border text-muted-foreground hover:text-white"
@@ -163,12 +186,18 @@ function DistributorPage() {
               
               <div className="relative rounded-2xl border border-border/60 bg-[#090d16] p-4 text-center w-full max-w-[340px] space-y-4">
                 <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border-2 border-emerald-500/30">
-                  <img 
-                    src={distAvatar} 
-                    alt={distName} 
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
+                  {distAvatar ? (
+                    <img 
+                      src={distAvatar} 
+                      alt={distName} 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-emerald-500/20 to-indigo-500/20 flex items-center justify-center">
+                      <span className="text-3xl font-bold text-white">{distName?.charAt(0)?.toUpperCase() || "?"}</span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-md font-bold text-white font-sans">{distName}</h3>
@@ -223,9 +252,15 @@ function DistributorPage() {
               </span>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1.5">Nossos Lançamentos de Alta Performance</h2>
             </div>
-            <Link to="/loja/$slug" params={{ slug: sponsorSlug }} className="text-xs text-emerald-400 hover:underline flex items-center gap-0.5 cursor-pointer">
-              Ver vitrine completa <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
+            {sponsorSlug ? (
+              <Link to="/loja/$slug" params={{ slug: sponsorSlug }} className="text-xs text-emerald-400 hover:underline flex items-center gap-0.5 cursor-pointer">
+                Ver vitrine completa <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : (
+              <Link to="/loja" className="text-xs text-emerald-400 hover:underline flex items-center gap-0.5 cursor-pointer">
+                Ver vitrine completa <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -395,7 +430,7 @@ function DistributorPage() {
                       size="sm" 
                       variant="outline" 
                       className="text-xs font-mono"
-                      onClick={() => navigate({ to: "/seja-distribuidor/$slug", params: { slug: sponsorSlug } })}
+                      onClick={() => sponsorSlug ? navigate({ to: "/seja-distribuidor/$slug", params: { slug: sponsorSlug } }) : navigate({ to: "/seja-distribuidor" })}
                     >
                       Acessar Onboarding MLM
                     </Button>
@@ -430,7 +465,13 @@ function DistributorPage() {
           <div>
             <h4 className="font-bold text-white mb-3">Patrocinador Ativo</h4>
             <div className="flex items-center gap-2">
-              <img src={distAvatar} alt={distName} className="h-8 w-8 rounded-full border border-border/40" />
+              {distAvatar ? (
+                <img src={distAvatar} alt={distName} className="h-8 w-8 rounded-full border border-border/40" />
+              ) : (
+                <div className="h-8 w-8 rounded-full border border-border/40 bg-gradient-to-br from-emerald-500/20 to-indigo-500/20 flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">{distName?.charAt(0)?.toUpperCase() || "?"}</span>
+                </div>
+              )}
               <div>
                 <p className="font-semibold text-white leading-none">{distName}</p>
                 <p className="text-[10px] text-emerald-400 font-mono mt-0.5">@{sponsorSlug}</p>

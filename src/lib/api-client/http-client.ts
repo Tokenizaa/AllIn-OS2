@@ -35,6 +35,7 @@ import type {
   PlanAnalytics,
   BonusDistribution,
 } from '../../../shared/types/api.types';
+import { supabase } from '@/lib/supabase/client';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -49,12 +50,12 @@ class HttpClient {
     };
   }
 
-  private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('access_token');
-    if (token) {
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
       return {
         ...this.defaultHeaders,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${session.access_token}`,
       };
     }
     return this.defaultHeaders;
@@ -65,7 +66,7 @@ class HttpClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    const headers = await this.getAuthHeaders();
 
     try {
       const response = await fetch(url, {

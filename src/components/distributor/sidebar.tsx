@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/modules/auth";
+import { useDistributorProfileQuery } from "@/hooks/distributor/useDistributorProfileQuery";
 import { toast } from "sonner";
 
 const items = [
@@ -23,7 +24,8 @@ const items = [
 export function OfficeSidebar() {
   const { location } = useRouterState();
   const navigate = useNavigate();
-  const { user, distributorProfile, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { distributorProfile } = useDistributorProfileQuery();
   const path = location.pathname;
 
   const handleLogout = async () => {

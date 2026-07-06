@@ -81,7 +81,8 @@ export class BankAccountService {
       }
 
       const { data, error } = await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .insert({
           distribuidor_id: dto.distributorId,
           codigo_banco: dto.bankCode,
@@ -121,7 +122,8 @@ export class BankAccountService {
   async getBankAccountById(id: string): Promise<BankAccount | null> {
     try {
       const { data, error } = await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .select()
         .eq('id', id)
         .single();
@@ -149,7 +151,8 @@ export class BankAccountService {
   ): Promise<BankAccount[]> {
     try {
       let query = supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .select()
         .eq('distribuidor_id', distributorId)
         .order('is_principal', { ascending: false })
@@ -180,7 +183,8 @@ export class BankAccountService {
   async getPrimaryBankAccount(distributorId: string): Promise<BankAccount | null> {
     try {
       const { data, error } = await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .select()
         .eq('distribuidor_id', distributorId)
         .eq('is_principal', true)
@@ -232,7 +236,8 @@ export class BankAccountService {
       updateData.updated_at = new Date().toISOString();
 
       const { data, error } = await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .update(updateData)
         .eq('id', id)
         .select()
@@ -279,7 +284,8 @@ export class BankAccountService {
   async deactivateBankAccount(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .update({ is_active: false, updated_at: new Date().toISOString() })
         .eq('id', id);
 
@@ -300,7 +306,8 @@ export class BankAccountService {
   async deleteBankAccount(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .delete()
         .eq('id', id);
 
@@ -320,7 +327,8 @@ export class BankAccountService {
   private async unsetPrimaryAccounts(distributorId: string): Promise<void> {
     try {
       await supabase
-        .from('finance.contas_bancarias')
+        .schema('finance')
+        .from('contas_bancarias')
         .update({ is_principal: false, updated_at: new Date().toISOString() })
         .eq('distribuidor_id', distributorId)
         .eq('is_principal', true);

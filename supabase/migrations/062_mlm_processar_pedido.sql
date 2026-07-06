@@ -30,7 +30,7 @@ BEGIN
     END IF;
     
     -- Verificar se já foi processado
-    IF pedido.comissoes_geradas THEN
+    IF pedido.comissoes_geradas = true THEN
         RAISE NOTICE 'Pedido % já foi processado', pedido_id;
         RETURN;
     END IF;
@@ -44,8 +44,8 @@ BEGIN
     -- Identificar se comprador é distribuidor
     SELECT EXISTS(
         SELECT 1 FROM mlm.distribuidores d
-        WHERE d.id = pedido.distribuidor_comprador_id
-           OR d.allin_id::TEXT = pedido.metadata->>'id_comprador'
+        WHERE (pedido.distribuidor_comprador_id IS NOT NULL AND d.id = pedido.distribuidor_comprador_id::uuid)
+           OR (pedido.metadata->>'id_comprador' IS NOT NULL AND d.allin_id::TEXT = pedido.metadata->>'id_comprador')
     ) INTO e_distribuidor;
     
     -- Log para debug

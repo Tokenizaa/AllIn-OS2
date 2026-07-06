@@ -2,15 +2,15 @@ import { Home, ShoppingCart, UserPlus, Store } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/CartContext";
-import { useDistributor } from "@/lib/distributor-context";
+import { useCart } from "@/hooks/cart/useCartQuery";
+import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
 import { cn } from "@/lib/utils";
 
 const MobileBottomNav = () => {
   const { setIsOpen } = useCart();
-  const { currentDistributor } = useDistributor();
-  const sponsorSlug = currentDistributor.slug;
-  const isDefaultTenant = !sponsorSlug || currentDistributor.isFallback;
+  const { data: currentDistributor } = useDistributorDefault();
+  const sponsorSlug = currentDistributor?.slug || "";
+  const isDefaultTenant = !sponsorSlug || currentDistributor?.isFallback;
 
   const navItems = [
     { 

@@ -1,18 +1,20 @@
 // Context
 export { AuthContext, AuthProvider } from "./context";
-export type { User, DistributorProfile, CustomerReferral, AuditLog, Permission, AdminInvite, AuthContextType } from "./context";
+export type { User, DistributorProfile, CustomerReferral, Permission, AuthContextType } from "./context";
 
 // Hooks
-export { useAuth, usePermissions, useRole, useSession, useProfile } from "./hooks";
+export { useAuth, usePermissions } from "./hooks";
 
 // Services
-export { AuthService, ProfileService, InviteService, AuditService } from "./services";
+export { AuthService, ProfileService } from "./services";
+export { RoleResolver } from "./services/roleResolver.service";
+export { DashboardResolver } from "./services/dashboardResolver.service";
 
 // Guards
-export { RouteGuard, RoleGuard, PermissionGuard } from "./guards";
+export { RouteGuard } from "./guards";
 
 // Permissions
-export { ROLE_PERMISSIONS, getPermissionsForRole, hasPermissionForRole } from "./permissions";
+export { getPermissionsForRole, hasPermissionForRole, getUserPermissions } from "./permissions";
 export {
   ADMINISTRATIVE_ROLES,
   DEPARTMENTAL_ROLES,

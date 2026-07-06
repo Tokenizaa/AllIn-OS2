@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useDistributor } from "@/lib/distributor-context";
+import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/app/public-header";
 import Footer from "@/components/Footer";
@@ -12,9 +12,10 @@ export const Route = createFileRoute("/doencas")({
 });
 
 function DiseasesPage() {
-  const { currentDistributor } = useDistributor();
-  const sponsorSlug = currentDistributor.slug;
-  const isDefaultTenant = !sponsorSlug || currentDistributor.isFallback;
+  // Sprint 2: Usar TanStack Query em vez de Context API
+  const { data: currentDistributor } = useDistributorDefault();
+  const sponsorSlug = currentDistributor?.slug || "";
+  const isDefaultTenant = !sponsorSlug || currentDistributor?.isFallback;
 
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
 

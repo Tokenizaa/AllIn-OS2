@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AuthContext } from "./AuthContext";
 import { AuthContextType } from "./auth.types";
-import { User, DistributorProfile, AdminInvite } from "./auth.types";
+import { User } from "./auth.types";
 import { AuthService } from "../services/auth.service";
 import { ProfileService } from "../services/profile.service";
-import { InviteService } from "../services/invite.service";
-import { AuditService } from "../services/audit.service";
 import { SupabaseService } from "../services/supabase.service";
-import { referralTrackingService } from "@/services/referralTrackingService";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import { UserRole } from "@/shared/types/roles";
 
 /**
@@ -17,13 +14,10 @@ import { UserRole } from "@/shared/types/roles";
  * Target: 250-300 lines
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // State - Core authentication state only
+  // Sprint 4: Manter apenas estado de autenticação core
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [distributorProfile, setDistributorProfile] = useState<DistributorProfile | null>(null);
-  const [activeSponsor, setActiveSponsor] = useState<string | null>(null);
-  const [activeReferralMetadata, setActiveReferralMetadata] = useState<any | null>(null);
-  
+
   // Ref to track loaded user ID to prevent unnecessary reloads
   const loadedUserIdRef = useRef<string | null>(null);
 
@@ -40,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  // Initialization
+  // Sprint 4: Simplificar initialization - carregar apenas session
   useEffect(() => {
     if (typeof window === "undefined") {
       setLoading(false);
@@ -50,35 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let isMounted = true;
     const skipHeavyBootstrap = isPublicAuthRoute();
 
-    const loadPublicSponsor = () => {
-      const params = new URLSearchParams(window.location.search);
-      const refParam = params.get("ref");
-      const currentPath = window.location.pathname;
-
-      let potentialSponsor = refParam;
-      if (!potentialSponsor && currentPath.includes("/ref/")) {
-        const parts = currentPath.split("/ref/");
-        if (parts[1]) {
-          potentialSponsor = parts[1].split(/[/?#]/)[0];
-        }
-      }
-
-      if (potentialSponsor) {
-        const cleanRef = potentialSponsor.trim().toLowerCase();
-        setActiveSponsor(cleanRef);
-        setActiveReferralMetadata({
-          clicked_at: new Date().toISOString(),
-          landing_url: window.location.href,
-          referrer_code: cleanRef
-        });
-      }
-    };
-
     (async () => {
       try {
-        // Always load public sponsor first
-        loadPublicSponsor();
-
         if (skipHeavyBootstrap) {
           setLoading(false);
           return;
@@ -86,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Check for existing session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
+
         if (sessionError) {
           console.error("[AuthProvider] Session error:", sessionError);
         }
@@ -101,10 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Fetch user profile with timeout protection
         const profilePromise = SupabaseService.fetchUserProfile(session.user.id);
-        const timeoutPromise = new Promise<null>((_, reject) => 
+        const timeoutPromise = new Promise<null>((_, reject) =>
           setTimeout(() => reject(new Error("Profile fetch timeout")), 20000)
         );
-        
+
         const currentUser = await Promise.race([profilePromise, timeoutPromise]) as User | null;
 
         if (!isMounted || !currentUser) {
@@ -113,26 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         setUser(currentUser);
-
-        if (currentUser.role === UserRole.DISTRIBUIDOR) {
-          const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);
-          if (isMounted) {
-            setDistributorProfile(dProf);
-          }
-        }
-
-        // Carregar referral_tracking apenas para distribuidores e afiliados
-        if (currentUser.role === UserRole.DISTRIBUIDOR || currentUser.role === UserRole.AFILIADO) {
-          try {
-            const tracking = await referralTrackingService.getReferralTracking(currentUser.id);
-            if (isMounted && tracking) {
-              setActiveSponsor(tracking.distributor_slug);
-              setActiveReferralMetadata(tracking.metadata);
-            }
-          } catch (error) {
-            console.error("[AuthProvider] Error loading referral tracking:", error);
-          }
-        }
       } catch (error) {
         console.error("[AuthProvider] Fatal error during initialization:", error);
       } finally {
@@ -146,15 +93,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("[AuthProvider] onAuthStateChange - event:", _event, "session exists:", !!session?.user);
       console.log("[AuthProvider] onAuthStateChange - current user:", user?.id, "session user:", session?.user?.id);
       console.log("[AuthProvider] onAuthStateChange - loadedUserIdRef:", loadedUserIdRef.current);
-      
+
       if (!isMounted) return;
-      
+
       // Set loadedUserIdRef immediately when session exists to prevent refetch
       if (session?.user && !loadedUserIdRef.current) {
         loadedUserIdRef.current = session.user.id;
         console.log("[AuthProvider] onAuthStateChange - set loadedUserIdRef to prevent refetch");
       }
-      
+
       // Verificar se estamos em rota pública para evitar loops
       if (isPublicAuthRoute()) {
         console.log("[AuthProvider] onAuthStateChange - public route, skipping");
@@ -164,7 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!session?.user) {
         console.log("[AuthProvider] onAuthStateChange - no session, clearing user");
         setUser(null);
-        setDistributorProfile(null);
         loadedUserIdRef.current = null;
         return;
       }
@@ -176,13 +122,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       console.log("[AuthProvider] onAuthStateChange - loading profile for user:", session.user.id);
-      
+
       // Add timeout protection to prevent hanging
       const profilePromise = SupabaseService.fetchUserProfile(session.user.id);
-      const timeoutPromise = new Promise<null>((_, reject) => 
+      const timeoutPromise = new Promise<null>((_, reject) =>
         setTimeout(() => reject(new Error("Profile fetch timeout in listener")), 10000)
       );
-      
+
       let currentUser;
       try {
         currentUser = await Promise.race([profilePromise, timeoutPromise]) as User | null;
@@ -190,18 +136,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("[AuthProvider] onAuthStateChange - Profile fetch timeout or error:", error);
         return;
       }
-      
+
       if (!isMounted || !currentUser) return;
 
       console.log("[AuthProvider] onAuthStateChange - profile loaded:", currentUser.email);
       loadedUserIdRef.current = currentUser.id;
       setUser(currentUser);
-      if (currentUser.role === UserRole.DISTRIBUIDOR) {
-        const dProf = await SupabaseService.fetchDistributorProfile(currentUser.id);
-        if (isMounted) {
-          setDistributorProfile(dProf);
-        }
-      }
     });
 
     return () => {
@@ -230,13 +170,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         role,
         extra,
-        activeSponsor
+        null // Sprint 4: activeSponsor migrado para useReferralTrackingQuery
       );
       setUser(userProfile);
-      if (role === UserRole.DISTRIBUIDOR) {
-        const dProf = await SupabaseService.fetchDistributorProfile(userProfile.id);
-        setDistributorProfile(dProf);
-      }
       return userProfile;
     } finally {
       setLoading(false);
@@ -248,7 +184,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await AuthService.logout();
       setUser(null);
-      setDistributorProfile(null);
     } finally {
       setLoading(false);
     }
@@ -259,15 +194,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updates,
       user,
       setUser
-    );
-  };
-
-  const updateDistributorProfile = async (updates: Partial<DistributorProfile>) => {
-    return ProfileService.updateDistributorProfile(
-      updates,
-      user,
-      distributorProfile,
-      setDistributorProfile
     );
   };
 
@@ -282,87 +208,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const activateDistributorOffice = async (_planId: string) => {
-    void _planId;
-    throw new Error("activateDistributorOffice needs to be migrated to Supabase");
-  };
-
-  const createAdminInvite = async (invite: Omit<AdminInvite, "id" | "invite_token" | "invite_link" | "created_at" | "expires_at" | "status">) => {
-    return InviteService.createAdminInvite(invite, user);
-  };
-
-  const revokeAdminInvite = async (inviteId: string) => {
-    return InviteService.revokeAdminInvite(inviteId, user);
-  };
-
-  const resendAdminInvite = async (inviteId: string) => {
-    return InviteService.resendAdminInvite(inviteId, user);
-  };
-
-  const getAdminInviteByToken = async (token: string) => {
-    return InviteService.getAdminInviteByToken(token);
-  };
-
-  const acceptAdminInvite = async (token: string, name: string, password: string) => {
-    return InviteService.acceptAdminInvite(token, name, password);
-  };
-
-  const deleteUserAndInviteSession = async (userId: string) => {
-    return InviteService.deleteUserAndInviteSession(userId);
-  };
-
-  const simulateAuditLog = async (action: string, entity: string, details?: string) => {
-    await AuditService.logAudit(action, entity, details, user);
-  };
-
-  const addAuditLog = async (logInput: any) => {
-    await AuditService.addAuditLog(logInput, user);
-  };
-
-  const triggerBinomialBonusPay = async (points: number, commission: number, value: number) => {
-    await AuditService.triggerBinomialBonusPay(points, commission, value, activeSponsor);
-  };
-
-  const clearSponsor = async () => {
-    // MIGRATED: Use database referral tracking table
-    if (user?.id) {
-      try {
-        await referralTrackingService.clearReferralTracking(user.id);
-      } catch (error) {
-        console.error("[AuthProvider] Error clearing referral tracking:", error);
-      }
-    }
-    setActiveSponsor(null);
-    setActiveReferralMetadata(null);
-  };
-
-  // Context value
+  // Sprint 4: Context value - manter apenas funcionalidades core
   const value: AuthContextType = {
     user,
     loading,
-    distributorProfile,
-    activeSponsor,
-    activeReferralMetadata,
-    auditLogs: [], // Deprecated - use AuditService.fetchAuditLogs() from Supabase
-    usersList: [], // Deprecated - use Supabase profiles/customers tables
-    adminInvites: [], // Deprecated - use Supabase admin_invites table
+    distributorProfile: null, // Sprint 4: Migrado para useDistributorProfileQuery
+    activeSponsor: null, // Sprint 4: Migrado para useReferralTrackingQuery
+    activeReferralMetadata: null, // Sprint 4: Migrado para useReferralTrackingQuery
     login,
     register,
     logout,
     updateProfile,
-    updateDistributorProfile,
+    updateDistributorProfile: async () => { throw new Error("Use useDistributorProfileQuery instead"); },
     changeUserRole,
-    simulateAuditLog,
-    clearSponsor,
-    activateDistributorOffice,
-    addAuditLog,
-    triggerBinomialBonusPay,
-    createAdminInvite,
-    revokeAdminInvite,
-    resendAdminInvite,
-    getAdminInviteByToken,
-    acceptAdminInvite,
-    deleteUserAndInviteSession,
+    clearSponsor: async () => { throw new Error("Use useReferralTrackingQuery instead"); },
+    activateDistributorOffice: async () => { throw new Error("Use useDistributorProfileQuery instead"); },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

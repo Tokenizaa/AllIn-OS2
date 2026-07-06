@@ -2,11 +2,12 @@ import { BaseRepository } from "../../../infra/database/base.repository";
 
 export class AnalyticsRepository extends BaseRepository<any> {
   constructor() {
-    super("analytics_plan_performance");
+    super("mlm.analytics_plan_performance");
   }
 
   async getExecutiveAnalytics(): Promise<any> {
     const { data: orders, error: ordersError } = await this.getClient()
+      .schema("commerce")
       .from("orders")
       .select("valor_total_pedido, created_at");
 
@@ -18,6 +19,7 @@ export class AnalyticsRepository extends BaseRepository<any> {
     const averageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
 
     const { count: totalCustomers } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("status", "active");
@@ -40,6 +42,7 @@ export class AnalyticsRepository extends BaseRepository<any> {
     startDate.setDate(startDate.getDate() - days);
 
     const { data, error } = await this.getClient()
+      .schema("commerce")
       .from("orders")
       .select("valor_total_pedido, created_at")
       .gte("created_at", startDate.toISOString());
@@ -62,10 +65,12 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
   async getNetworkAnalytics(): Promise<any> {
     const { count: totalNetworkSize } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true });
 
     const { count: activeDistributors } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("status", "active");
@@ -81,6 +86,7 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
   async getPlanAnalytics(): Promise<any[]> {
     const { data, error } = await this.getClient()
+      .schema("mlm")
       .from("analytics_plan_performance")
       .select("*")
       .order("total_customers", { ascending: false });
@@ -92,6 +98,7 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
   async getBonusDistribution(): Promise<any[]> {
     const { data, error } = await this.getClient()
+      .schema("mlm")
       .from("analytics_bonus_distribution")
       .select("*")
       .order("total_bonus_pool", { ascending: false });
@@ -103,6 +110,7 @@ export class AnalyticsRepository extends BaseRepository<any> {
 
   async getPlanAnalyticsById(planId: string): Promise<any | null> {
     const { data, error } = await this.getClient()
+      .schema("mlm")
       .from("analytics_plan_performance")
       .select("*")
       .eq("plan_id", planId)

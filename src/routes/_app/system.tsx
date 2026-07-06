@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import { useAuditLogs } from "@/hooks/system/useAuditLogs";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,15 +21,15 @@ function useSystemMetrics() {
     queryFn: async () => {
       // Count admin users
       const { data: adminUsers, error: adminError } = await supabase
-        .from("profiles")
+        .from("crm.customers")
         .select("id")
-        .eq("role", "admin");
+        .eq("tipo_cliente", "admin");
       
       const adminCount = adminUsers?.length || 0;
 
       // Count feature flags
       const { data: featureFlags, error: flagsError } = await supabase
-        .from("feature_flags")
+        .from("system.feature_flags")
         .select("id")
         .eq("is_global", true);
       
@@ -37,7 +37,7 @@ function useSystemMetrics() {
 
       // Integrations - count from integrations table
       const { data: integrations, error: integrationsError } = await supabase
-        .from("integrations")
+        .from("system.integrations")
         .select("id", { count: "exact", head: true });
       
       const integrationsCount = integrations?.length || 0;

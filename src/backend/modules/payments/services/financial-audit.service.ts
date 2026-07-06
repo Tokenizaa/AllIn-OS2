@@ -40,6 +40,7 @@ export class FinancialAuditService {
   ): Promise<void> {
     try {
       await supabase
+        .schema('finance')
         .from('financial_audit_logs')
         .insert({
           entity_type: entityType,
@@ -68,6 +69,7 @@ export class FinancialAuditService {
   ): Promise<AuditLog[]> {
     try {
       let query = supabase
+        .schema('finance')
         .from('financial_audit_logs')
         .select('*')
         .order('created_at', { ascending: false })
@@ -129,6 +131,7 @@ export class FinancialAuditService {
 
       // Get total revenue
       const { data: payments } = await supabase
+        .schema('finance')
         .from('payments')
         .select('amount')
         .eq('status', 'approved')
@@ -139,6 +142,7 @@ export class FinancialAuditService {
 
       // Get total refunds
       const { data: refunds } = await supabase
+        .schema('finance')
         .from('payments')
         .select('amount')
         .eq('status', 'refunded')
@@ -149,6 +153,7 @@ export class FinancialAuditService {
 
       // Get total bonuses issued
       const { data: bonuses } = await supabase
+        .schema('finance')
         .from('bonus_transactions')
         .select('amount')
         .eq('transaction_type', 'earned')
@@ -159,6 +164,7 @@ export class FinancialAuditService {
 
       // Get total points issued
       const { data: points } = await supabase
+        .schema('finance')
         .from('points_transactions')
         .select('amount')
         .eq('transaction_type', 'earned')
@@ -169,6 +175,7 @@ export class FinancialAuditService {
 
       // Get transaction count
       const { count: transactionCount } = await supabase
+        .schema('finance')
         .from('payments')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', start)
@@ -176,6 +183,7 @@ export class FinancialAuditService {
 
       // Get unique customers
       const { data: customers } = await supabase
+        .schema('finance')
         .from('payments')
         .select('id_comprador')
         .gte('created_at', start)
@@ -211,6 +219,7 @@ export class FinancialAuditService {
   }> {
     try {
       const largeTransactions = await supabase
+        .schema('finance')
         .from('financial_audit_logs')
         .select('*')
         .eq('entity_type', 'payment')
@@ -219,6 +228,7 @@ export class FinancialAuditService {
         .limit(50);
 
       const rapidRefunds = await supabase
+        .schema('finance')
         .from('financial_audit_logs')
         .select('*')
         .eq('action', 'refund')
@@ -226,6 +236,7 @@ export class FinancialAuditService {
         .limit(50);
 
       const suspiciousActivity = await supabase
+        .schema('finance')
         .from('financial_audit_logs')
         .select('*')
         .eq('action', 'failed_payment')

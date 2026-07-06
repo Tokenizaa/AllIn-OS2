@@ -54,44 +54,24 @@ export async function resolveDistributor(slug: string | undefined): Promise<Dist
 
   const distributorData = await SupabaseService.fetchDistributorBySlug(activeSlug);
   if (distributorData) {
-    const themeData = await SupabaseService.fetchDistributorTheme(distributorData.user_id);
+    // Theme functionality is deprecated - distributor_themes table does not exist
+    // Using fallback theme
     return {
       slug: activeSlug,
-      name: distributorData.usuario || distributorData.id_comprador || "Distribuidor",
-      rank: distributorData.qualification || "",
+      name: distributorData.nome || distributorData.usuario || "Distribuidor",
+      rank: "",
       avatar: "",
-      theme: {
-        color: themeData?.color || "",
-        gradient: themeData?.gradient || "",
-        badgeBg: themeData?.badge_bg || "",
-        btnBg: themeData?.btn_bg || "",
-        accentText: themeData?.accent_text || "",
-        slogan: themeData?.slogan || "",
-        bio: themeData?.bio || "",
-        quote: themeData?.quote || "",
-        videoUrl: themeData?.video_url || undefined,
-      },
+      theme: EMPTY_THEME,
       isFallback: false,
     };
   }
 
-  const defaultThemeData = await SupabaseService.fetchDistributorTheme();
   return {
     slug: activeSlug,
     name: "Distribuidor",
     rank: "",
     avatar: "",
-    theme: {
-      color: defaultThemeData?.color || "",
-      gradient: defaultThemeData?.gradient || "",
-      badgeBg: defaultThemeData?.badge_bg || "",
-      btnBg: defaultThemeData?.btn_bg || "",
-      accentText: defaultThemeData?.accent_text || "",
-      slogan: defaultThemeData?.slogan || "",
-      bio: defaultThemeData?.bio || "",
-      quote: defaultThemeData?.quote || "",
-      videoUrl: defaultThemeData?.video_url || undefined,
-    },
+    theme: EMPTY_THEME,
     isFallback: true,
   };
 }

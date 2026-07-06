@@ -15,7 +15,7 @@
  * - customers (downlines e sponsor)
  */
 
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import type {
   NetworkRelationship,
   Downline,
@@ -39,8 +39,8 @@ export const MLM360Service = {
     let effectiveIdComprador = idComprador;
     if (!effectiveIdComprador) {
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("id_comprador, patrocinador_comprador")
+        .from("crm.customers")
+        .select("id_comprador, patrocinador_id")
         .eq("id", profileId)
         .maybeSingle();
       effectiveIdComprador = profile?.id_comprador;
@@ -77,7 +77,7 @@ export const MLM360Service = {
    */
   async fetchNetworkRelationships(idComprador: string): Promise<NetworkRelationship[]> {
     const { data, error } = await supabase
-      .from("network_relationships")
+      .from("mlm.network_relationships")
       .select("*")
       .eq("id_comprador", idComprador)
       .limit(100);
@@ -91,9 +91,9 @@ export const MLM360Service = {
    */
   async fetchDownlines(idComprador: string): Promise<Downline[]> {
     const { data, error } = await supabase
-      .from("customers")
-      .select("id, id_comprador, usuario, nome_completo, email, telefone, cidade, estado, created_at")
-      .eq("patrocinador_comprador", idComprador)
+      .from("crm.customers")
+      .select("id, id_comprador, usuario, nome, email, telefone, cidade, estado, created_at")
+      .eq("patrocinador_id", idComprador)
       .order("created_at", { ascending: false })
       .limit(500);
 
@@ -107,19 +107,19 @@ export const MLM360Service = {
   async fetchSponsor(idComprador: string): Promise<Sponsor | null> {
     // Primeiro busca o customer para obter o patrocinador
     const { data: customer } = await supabase
-      .from("customers")
-      .select("patrocinador_comprador")
+      .from("crm.customers")
+      .select("patrocinador_id")
       .eq("id_comprador", idComprador)
       .maybeSingle();
 
-    if (!customer?.patrocinador_comprador) {
+    if (!customer?.patrocinador_id) {
       return null;
     }
 
     const { data, error } = await supabase
-      .from("customers")
-      .select("id, id_comprador, usuario, nome_completo, email")
-      .eq("id_comprador", customer.patrocinador_comprador)
+      .from("crm.customers")
+      .select("id, id_comprador, usuario, nome, email")
+      .eq("id_comprador", customer.patrocinador_id)
       .maybeSingle();
 
     if (error) throw error;

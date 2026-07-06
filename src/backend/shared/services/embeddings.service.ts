@@ -108,7 +108,8 @@ export class EmbeddingsService {
    */
   async findByResource(resourceType: string, resourceId: string): Promise<Embedding | null> {
     const { data, error } = await supabase
-      .from('system.embeddings')
+      .schema('system')
+      .from('embeddings')
       .select('*')
       .eq('resource_type', resourceType)
       .eq('resource_id', resourceId)
@@ -133,7 +134,8 @@ export class EmbeddingsService {
    */
   async deleteByResourceType(resourceType: string): Promise<number> {
     const { error } = await supabase
-      .from('system.embeddings')
+      .schema('system')
+      .from('embeddings')
       .delete()
       .eq('resource_type', resourceType);
 
@@ -149,7 +151,8 @@ export class EmbeddingsService {
    */
   async countByResourceType(resourceType: string): Promise<number> {
     const { count, error } = await supabase
-      .from('system.embeddings')
+      .schema('system')
+      .from('embeddings')
       .select('*', { count: 'exact', head: true })
       .eq('resource_type', resourceType);
 
@@ -166,7 +169,8 @@ export class EmbeddingsService {
    */
   async listByResourceType(resourceType: string, limit: number = 100): Promise<Embedding[]> {
     const { data, error } = await supabase
-      .from('system.embeddings')
+      .schema('system')
+      .from('embeddings')
       .select('*')
       .eq('resource_type', resourceType)
       .limit(limit);

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useLoaderData } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
-import { useDistributor } from "@/lib/distributor-context";
-import { useProducts } from "@/contexts/ProductsContext";
+import { resolveDistributor } from "@/hooks/distributor/useDistributorQuery";
+import { useProductsQuery } from "@/hooks/products/useProductsQuery";
 import { AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/app/public-header";
@@ -17,31 +17,35 @@ import { ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/loja/$slug")({
   component: DistributorStorePage,
+  // Sprint 3: Implementar loader para carregar dados antes da renderização
+  loader: async ({ params }) => {
+    const slug = params.slug?.toLowerCase().trim();
+    if (!slug) {
+      return { distributor: null };
+    }
+    const distributor = await resolveDistributor(slug);
+    return { distributor };
+  },
 });
 
 export function DistributorStorePage() {
   const params = useParams({ strict: false }) as { slug?: string };
-  const { currentDistributor, setDistributorBySlug } = useDistributor();
+  const routeSlug = params.slug?.toLowerCase().trim();
   const { triggerBinomialBonusPay, addAuditLog } = useAuth();
-  const { products } = useProducts();
+  const { products } = useProductsQuery();
+
+  // Sprint 3: Usar loader para dados pré-carregados
+  const { distributor: currentDistributor } = useLoaderData({ from: "/loja/$slug" });
 
   const formatBRL = (value: string) => {
     const num = parseFloat(value);
     return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
-  
-  const routeSlug = params.slug?.toLowerCase().trim();
-  
-  useEffect(() => {
-    if (routeSlug) {
-      setDistributorBySlug(routeSlug);
-    }
-  }, [routeSlug, setDistributorBySlug]);
 
-  const sponsorSlug = currentDistributor.slug;
-  const distName = currentDistributor.name;
-  const distRank = currentDistributor.rank;
-  const distAvatar = currentDistributor.avatar;
+  const sponsorSlug = currentDistributor?.slug || "";
+  const distName = currentDistributor?.name || "Distribuidor";
+  const distRank = currentDistributor?.rank || "";
+  const distAvatar = currentDistributor?.avatar || "";
 
   const { cart, addToCart, removeFromCart, updateQty, clearCart, subtotal } = useStoreCart(routeSlug);
   
@@ -204,7 +208,7 @@ export function DistributorStorePage() {
           <p className="max-w-md mx-auto leading-relaxed">
             Plataforma de varejo integrada à estrutura da All-In Brasil. Suas transações faturam cashback direto e volume de perna de rede em conformidade com as diretivas MLM oficiais.
           </p>
-          <p className="text-[10px]">Patrocinador: <span className="text-zinc-400 font-mono">@{sponsorSlug}</span> · ID: <span className="text-zinc-400 font-mono">{currentDistributor.slug || "dist_001"}</span></p>
+          <p className="text-[10px]">Patrocinador: <span className="text-zinc-400 font-mono">@{sponsorSlug}</span> · ID: <span className="text-zinc-400 font-mono">{currentDistributor?.slug || "dist_001"}</span></p>
         </div>
       </footer>
     </div>

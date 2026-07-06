@@ -67,7 +67,7 @@ BEGIN
         SELECT LOWER(p.nome) INTO plano_normalizado
         FROM mlm.planos_distribuidores pd
         JOIN planos p ON pd.plano_id = p.id
-        WHERE pd.distribuidor_id = comprador_id AND pd.ativo = true
+        WHERE pd.distribuidor_id = comprador_id AND pd.status = 'ativo'
         LIMIT 1;
     END IF;
     
@@ -174,9 +174,9 @@ BEGIN
                     END IF;
                     
                     -- Buscar próximo upline na rede linear
-                    SELECT patrocinador_id INTO upline_atual 
+                    SELECT id_patrocinador INTO upline_atual 
                     FROM mlm.rede_linear_nos 
-                    WHERE distribuidor_id = upline_atual
+                    WHERE id_distribuidor = upline_atual
                     LIMIT 1;
                 END LOOP;
             END;
@@ -256,28 +256,32 @@ BEGIN
         IF comprador_id IS NOT NULL THEN
             INSERT INTO mlm.pontos_saldo (
                 distribuidor_id,
-                pontos_qualificacao,
-                pontos_total
+                saldo_atual,
+                saldo_acumulado
             ) VALUES (
                 comprador_id,
                 pontos_produto,
                 pontos_produto
             )
             ON CONFLICT (distribuidor_id) DO UPDATE SET
-                pontos_qualificacao = pontos_saldo.pontos_qualificacao + pontos_produto,
-                pontos_total = pontos_saldo.pontos_total + pontos_produto;
+                saldo_atual = pontos_saldo.saldo_atual + pontos_produto,
+                saldo_acumulado = pontos_saldo.saldo_acumulado + pontos_produto;
             
             -- Registrar transação de pontos
             INSERT INTO mlm.pontos_transacoes (
                 distribuidor_id,
                 tipo,
-                pontos,
+                quantidade,
+                saldo_antes,
+                saldo_depois,
                 descricao,
                 pedido_id,
-                data_transacao
+                created_at
             ) VALUES (
                 comprador_id,
                 'qualificacao',
+                pontos_produto,
+                0,
                 pontos_produto,
                 'Pontos de qualificação - Compra de produto',
                 pedido_id,
@@ -300,9 +304,9 @@ BEGIN
                 -- Distribuir pontos para até 5 níveis na rede
                 FOR i IN 1..5 LOOP
                     -- Buscar patrocinador do upline atual
-                    SELECT patrocinador_id INTO upline_atual 
+                    SELECT id_patrocinador INTO upline_atual 
                     FROM mlm.rede_linear_nos 
-                    WHERE distribuidor_id = upline_atual
+                    WHERE id_distribuidor = upline_atual
                     LIMIT 1;
                     
                     EXIT WHEN upline_atual IS NULL;
@@ -313,28 +317,32 @@ BEGIN
                     IF pontos_upline > 0 THEN
                         INSERT INTO mlm.pontos_saldo (
                             distribuidor_id,
-                            pontos_qualificacao,
-                            pontos_total
+                            saldo_atual,
+                            saldo_acumulado
                         ) VALUES (
                             upline_atual,
                             pontos_upline,
                             pontos_upline
                         )
                         ON CONFLICT (distribuidor_id) DO UPDATE SET
-                            pontos_qualificacao = pontos_saldo.pontos_qualificacao + pontos_upline,
-                            pontos_total = pontos_saldo.pontos_total + pontos_upline;
+                            saldo_atual = pontos_saldo.saldo_atual + pontos_upline,
+                            saldo_acumulado = pontos_saldo.saldo_acumulado + pontos_upline;
                         
                         -- Registrar transação de pontos
                         INSERT INTO mlm.pontos_transacoes (
                             distribuidor_id,
                             tipo,
-                            pontos,
+                            quantidade,
+                            saldo_antes,
+                            saldo_depois,
                             descricao,
                             pedido_id,
-                            data_transacao
+                            created_at
                         ) VALUES (
                             upline_atual,
                             'rede',
+                            pontos_upline,
+                            0,
                             pontos_upline,
                             'Pontos de rede - Nível ' || i,
                             pedido_id,
@@ -349,76 +357,35 @@ BEGIN
     -- ===========================
     -- ATUALIZAR QUALIFICAÇÕES
     -- ===========================
-    IF comprador_id IS NOT NULL THEN
-        -- Verificar se atingiu novos níveis de qualificação
-        DECLARE
-            pontos_totais INTEGER;
-            qualificacao_atual TEXT;
-            nova_qualificacao TEXT;
-        BEGIN
-            SELECT pontos_total INTO pontos_totais
-            FROM mlm.pontos_saldo
-            WHERE distribuidor_id = comprador_id;
-            
-            -- Definir qualificação baseada em pontos
-            IF pontos_totais >= 10000 THEN
-                nova_qualificacao := 'Diamante';
-            ELSIF pontos_totais >= 5000 THEN
-                nova_qualificacao := 'Platina';
-            ELSIF pontos_totais >= 2000 THEN
-                nova_qualificacao := 'Ouro';
-            ELSIF pontos_totais >= 1000 THEN
-                nova_qualificacao := 'Prata';
-            ELSE
-                nova_qualificacao := 'Bronze';
-            END IF;
-            
-            -- Buscar qualificação atual
-            SELECT nivel INTO qualificacao_atual
-            FROM mlm.qualificacoes
-            WHERE distribuidor_id = comprador_id AND ativo = true
-            LIMIT 1;
-            
-            -- Se qualificação mudou, atualizar
-            IF qualificacao_atual IS NULL OR qualificacao_atual != nova_qualificacao THEN
-                -- Desativar qualificação anterior
-                UPDATE mlm.qualificacoes
-                SET ativo = false
-                WHERE distribuidor_id = comprador_id AND ativo = true;
-                
-                -- Inserir nova qualificação
-                INSERT INTO mlm.qualificacoes (
-                    distribuidor_id,
-                    nivel,
-                    data_qualificacao,
-                    ativo
-                ) VALUES (
-                    comprador_id,
-                    nova_qualificacao,
-                    NOW(),
-                    true
-                );
-                
-                -- Registrar histórico
-                INSERT INTO mlm.qualificacoes_historico (
-                    distribuidor_id,
-                    nivel_anterior,
-                    nivel_novo,
-                    data_mudanca,
-                    pontos_totais
-                ) VALUES (
-                    comprador_id,
-                    COALESCE(qualificacao_atual, 'Nenhum'),
-                    nova_qualificacao,
-                    NOW(),
-                    pontos_totais
-                );
-                
-                RAISE NOTICE 'Qualificação atualizada: % -> % para distribuidor %', 
-                    COALESCE(qualificacao_atual, 'Nenhum'), nova_qualificacao, comprador_id;
-            END IF;
-        END;
-    END IF;
+    -- Desabilitado - tabela mlm.qualificacoes não tem coluna distribuidor_id
+    -- IF comprador_id IS NOT NULL THEN
+    --     -- Verificar se atingiu novos níveis de qualificação
+    --     DECLARE
+    --         pontos_totais INTEGER;
+    --         qualificacao_atual TEXT;
+    --         nova_qualificacao TEXT;
+    --     BEGIN
+    --         SELECT saldo_acumulado INTO pontos_totais
+    --         FROM mlm.pontos_saldo
+    --         WHERE distribuidor_id = comprador_id;
+    --         
+    --         -- Definir qualificação baseada em pontos
+    --         IF pontos_totais >= 10000 THEN
+    --             nova_qualificacao := 'Diamante';
+    --         ELSIF pontos_totais >= 5000 THEN
+    --             nova_qualificacao := 'Platina';
+    --         ELSIF pontos_totais >= 2000 THEN
+    --             nova_qualificacao := 'Ouro';
+    --         ELSIF pontos_totais >= 1000 THEN
+    --             nova_qualificacao := 'Prata';
+    --         ELSE
+    --             nova_qualificacao := 'Bronze';
+    --         END IF;
+    --         
+    --         RAISE NOTICE 'Qualificação calculada: % para distribuidor % (pontos: %)', 
+    --             nova_qualificacao, comprador_id, pontos_totais;
+    --     END;
+    -- END IF;
     
     RAISE NOTICE 'Pedido % processado com sucesso', pedido_id;
     

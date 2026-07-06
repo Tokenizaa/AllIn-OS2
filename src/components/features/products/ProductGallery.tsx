@@ -6,8 +6,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCart } from "@/contexts/CartContext";
-import { useProducts } from "@/contexts/ProductsContext";
+import { useCart } from "@/hooks/cart/useCartQuery";
+import { useProductsQuery } from "@/hooks/products/useProductsQuery";
 import { formatPrice } from "@/utils/priceFormatter";
 import ProductModal from "@/components/ProductModal";
 
@@ -15,14 +15,14 @@ interface ProductGalleryProps {
   limit?: number;
 }
 
-const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
+const ProductGallery = ({ limit }: ProductGalleryProps) => {
   const { setIsOpen } = useCart();
   const [displayedProducts, setDisplayedProducts] = useState<ReturnType<typeof useProducts>["products"]>([]);
   const [selectedProduct, setSelectedProduct] = useState<ReturnType<typeof useProducts>["products"][number] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { products, loading, error } = useProducts();
+  const { products, loading, error } = useProductsQuery();
 
   useEffect(() => {
     if (products.length > 0) {
@@ -41,7 +41,7 @@ const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
           <Skeleton className="h-12 w-64 mx-auto mb-6" />
           <Skeleton className="h-6 w-96 mx-auto" />
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: limit || 8 }).map((_, index) => (
             <Card key={index} className="overflow-hidden">
@@ -94,8 +94,8 @@ const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {displayedProducts.map((product, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="overflow-hidden border border-allin-orange/40 shadow-lg hover:shadow-xl transition-all duration-300 bg-allin-bg-light-1 dark:bg-allin-bg-dark-1 group animate-slide-up glass-card h-full flex flex-col dark:dark:bg-allin-bg-dark-3 dark:dark:border-allin-bg-dark-2 cursor-pointer"
                 style={{animationDelay: `${0.05 * index}s`}}
                 onClick={() => {
@@ -104,9 +104,9 @@ const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
                 }}
               >
                 <div className="relative">
-                  <img 
-                    src={product.imgSrc} 
-                    alt={product.caption} 
+                  <img
+                    src={product.imgSrc}
+                    alt={product.caption}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -131,7 +131,7 @@ const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
                   </p>
                 </CardHeader>
                 <CardContent className="p-4 mt-auto">
-                  <Button 
+                  <Button
                     variant="default"
                     className="w-full bg-allin-orange hover:bg-allin-orange/90 text-allin-dark"
                     onClick={(e) => {
@@ -146,10 +146,10 @@ const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
               </Card>
             ))}
           </div>
-          
+
           {limit !== undefined && (
             <div className="text-center mt-12">
-              <Button 
+              <Button
                 variant="default"
                 onClick={() => navigate({ to: '/loja' })}
                 className="px-8 py-3 text-lg font-semibold transition-all duration-300 hover:scale-105 gap-2 bg-allin-orange hover:bg-allin-orange/90 text-allin-dark"
@@ -188,10 +188,6 @@ const ProductGalleryContent = ({ limit }: ProductGalleryProps) => {
       )}
     </>
   );
-};
-
-const ProductGallery = ({ limit }: ProductGalleryProps) => {
-  return <ProductGalleryContent limit={limit} />;
 };
 
 export default ProductGallery;

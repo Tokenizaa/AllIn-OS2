@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PermissionGuard } from '@/modules/auth/guards/PermissionGuard';
+import { RouteGuard } from '@/modules/auth/guards/RouteGuard';
 
 export const Route = createFileRoute('/_app/industrial/materials')({
   component: IndustrialMaterials,
@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_app/industrial/materials')({
 
 function IndustrialMaterials() {
   return (
-    <PermissionGuard module="industrial" action="read">
+    <RouteGuard requiredPermission={{ module: "industrial", action: "read" }}>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Matérias-Primas</h1>
         <div className="bg-white rounded-lg shadow p-6">
@@ -16,6 +16,6 @@ function IndustrialMaterials() {
           </p>
         </div>
       </div>
-    </PermissionGuard>
+    </RouteGuard>
   );
 }

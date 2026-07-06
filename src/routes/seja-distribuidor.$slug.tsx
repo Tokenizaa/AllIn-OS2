@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useLoaderData } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
-import { useDistributor } from "@/lib/distributor-context";
+import { resolveDistributor } from "@/hooks/distributor/useDistributorQuery";
 import { ChevronRight } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { PublicHeader } from "@/components/app/public-header";
@@ -16,24 +16,28 @@ import { RegistrationSuccess } from "@/components/distributor/RegistrationSucces
 
 export const Route = createFileRoute("/seja-distribuidor/$slug")({
   component: DistributorRecruitmentPage,
+  // Sprint 3: Implementar loader para carregar dados antes da renderização
+  loader: async ({ params }) => {
+    const slug = params.slug?.toLowerCase().trim();
+    if (!slug) {
+      return { distributor: null };
+    }
+    const distributor = await resolveDistributor(slug);
+    return { distributor };
+  },
 });
 
 function DistributorRecruitmentPage() {
   const params = useParams({ strict: false }) as { slug?: string };
-  const { currentDistributor, setDistributorBySlug } = useDistributor();
-  const { register } = useAuth();
-  
   const routeSlug = params.slug?.toLowerCase().trim();
-  
-  useEffect(() => {
-    if (routeSlug) {
-      setDistributorBySlug(routeSlug);
-    }
-  }, [routeSlug, setDistributorBySlug]);
+  const { register } = useAuth();
 
-  const sponsorSlug = currentDistributor.slug;
-  const distName = currentDistributor.name;
-  const distRank = currentDistributor.rank;
+  // Sprint 3: Usar loader para dados pré-carregados
+  const { distributor: currentDistributor } = useLoaderData({ from: "/seja-distribuidor/$slug" });
+
+  const sponsorSlug = currentDistributor?.slug || "";
+  const distName = currentDistributor?.name || "Distribuidor";
+  const distRank = currentDistributor?.rank || "";
 
   const { plans } = useDistributorPlans();
   

@@ -21,7 +21,7 @@
  * - customer_automations (automações)
  */
 
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import type {
   Order,
   OrderItem,
@@ -45,7 +45,8 @@ export const CRM360Service = {
     let effectiveIdComprador = idComprador;
     if (!effectiveIdComprador) {
       const { data: profile } = await supabase
-        .from("profiles")
+        .schema("crm")
+        .from("customers")
         .select("id_comprador")
         .eq("id", profileId)
         .maybeSingle();
@@ -61,15 +62,15 @@ export const CRM360Service = {
     }
 
     // Busca dados em paralelo
-    const [orders, orderItems, products] = await Promise.all([
+    const [orders, orderItemsData] = await Promise.all([
       this.fetchOrders(effectiveIdComprador),
       this.fetchOrderItemsAndProducts(effectiveIdComprador),
     ]);
 
     return {
       orders,
-      orderItems: orderItems.items,
-      products: orderItems.products,
+      orderItems: orderItemsData.items,
+      products: orderItemsData.products,
     };
   },
 
@@ -82,14 +83,36 @@ export const CRM360Service = {
    */
   async fetchOrders(idComprador: string): Promise<Order[]> {
     const { data, error } = await supabase
-      .from("orders")
+      .schema("commerce")
+      .from("pedidos")
       .select("*")
-      .eq("id_comprador", idComprador)
-      .order("created_at", { ascending: false })
+      .eq("distribuidor_comprador_id", idComprador)
+      .order("data_criacao", { ascending: false })
       .limit(100);
 
     if (error) throw error;
-    return data || [];
+    
+    // Mapear campos do banco (português) para tipos TypeScript (inglês)
+    return (data || []).map(order => this.mapOrderFromDB(order));
+  },
+
+  /**
+   * Mapeia pedido do banco para formato TypeScript
+   */
+  mapOrderFromDB(dbOrder: any): Order {
+    return {
+      id: dbOrder.id,
+      numero_pedido: dbOrder.numero_pedido || dbOrder.id.slice(0, 10),
+      id_comprador: dbOrder.distribuidor_comprador_id || "",
+      customer_id: dbOrder.cliente_id,
+      valor_total_pedido: dbOrder.valor_total || 0,
+      status_pedido: dbOrder.status_pedido || "pendente",
+      payment_method: dbOrder.forma_pagamento,
+      payment_status: dbOrder.pagamento_confirmado ? "pago" : "pendente",
+      created_at: dbOrder.data_criacao || dbOrder.created_at,
+      updated_at: dbOrder.updated_at,
+      data_criacao: dbOrder.data_criacao,
+    };
   },
 
   /**
@@ -134,12 +157,33 @@ export const CRM360Service = {
     if (orderIds.length === 0) return [];
 
     const { data, error } = await supabase
-      .from("order_items")
+      .schema("commerce")
+      .from("pedidos_itens")
       .select("*")
-      .in("order_id", orderIds);
+      .in("pedido_id", orderIds);
 
     if (error) throw error;
-    return data || [];
+    
+    // Mapear campos do banco para formato TypeScript
+    return (data || []).map(item => this.mapOrderItemFromDB(item));
+  },
+
+  /**
+   * Mapeia item de pedido do banco para formato TypeScript
+   */
+  mapOrderItemFromDB(dbItem: any): OrderItem {
+    return {
+      id: dbItem.id,
+      order_id: dbItem.pedido_id,
+      product_id: dbItem.produto_id,
+      product_name: dbItem.nome_produto || "",
+      product_code: null,
+      quantity: dbItem.quantidade || 1,
+      size: null,
+      variant: null,
+      valor_unitario: dbItem.preco_unitario || 0,
+      valor_total: dbItem.preco_total || 0,
+    };
   },
 
   /**
@@ -149,11 +193,31 @@ export const CRM360Service = {
     if (!productIds || productIds.length === 0) return [];
 
     const { data, error } = await supabase
-      .from("products")
+      .schema("commerce")
+      .from("produtos")
       .select("*")
       .in("id", productIds);
 
     if (error) throw error;
-    return data || [];
+    
+    // Mapear campos do banco para formato TypeScript
+    return (data || []).map(product => this.mapProductFromDB(product));
+  },
+
+  /**
+   * Mapeia produto do banco para formato TypeScript
+   */
+  mapProductFromDB(dbProduct: any): Product {
+    return {
+      id: dbProduct.id,
+      nome: dbProduct.nome || "",
+      codigo: dbProduct.codigo,
+      categoria: dbProduct.categoria,
+      preco: dbProduct.preco || 0,
+      imagem: dbProduct.imagem,
+      status: dbProduct.status || "ativo",
+      created_at: dbProduct.created_at,
+      updated_at: dbProduct.updated_at,
+    };
   },
 };

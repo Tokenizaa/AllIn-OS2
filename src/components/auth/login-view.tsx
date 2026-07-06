@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TestAccountsFill } from "@/components/auth/test-accounts-fill";
 import { useAuth } from "@/modules/auth";
-import { getRoleRedirectPath } from "@/modules/auth/navigation";
+import { useReferralTrackingQuery } from "@/hooks/referral/useReferralTrackingQuery";
+import { DashboardResolver } from "@/modules/auth/services/dashboardResolver.service";
 import { getNetworkErrorMessage } from "@/lib/network-resilience";
 
 export function LoginView() {
   const navigate = useNavigate();
-  const { login, user, activeSponsor } = useAuth();
+  const { login, user } = useAuth();
+  const { activeSponsor } = useReferralTrackingQuery();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export function LoginView() {
 
   useEffect(() => {
     if (user) {
-      navigate({ to: getRoleRedirectPath(user), replace: true });
+      navigate({ to: DashboardResolver.getDashboardPathForUser(user), replace: true });
     }
   }, [navigate, user]);
 
@@ -31,7 +33,7 @@ export function LoginView() {
     try {
       const loggedUser = await login(nextEmail, nextPassword);
       toast.success(`Bem-vindo de volta, ${loggedUser.name}!`);
-      navigate({ to: getRoleRedirectPath(loggedUser), replace: true });
+      navigate({ to: DashboardResolver.getDashboardPathForUser(loggedUser), replace: true });
     } catch (error: any) {
       console.error("[LoginView] Login error:", error);
       

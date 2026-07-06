@@ -6,9 +6,11 @@ import { useAuth } from '@/modules/auth';
 import { toast } from 'sonner';
 import { useWalletData } from '@/hooks/wallets/useWalletData';
 import { useWalletActions } from '@/hooks/wallets/useWalletActions';
+import { useDistributorProfileQuery } from '@/hooks/distributor/useDistributorProfileQuery';
 
 export function WalletDashboard() {
-  const { user, distributorProfile } = useAuth();
+  const { user } = useAuth();
+  const { distributorProfile } = useDistributorProfileQuery();
   const idComprador = distributorProfile?.id || user?.id;
   const { data: walletData, isLoading, refetch } = useWalletData(idComprador);
   const { credit, debit } = useWalletActions(idComprador, () => { void refetch(); });

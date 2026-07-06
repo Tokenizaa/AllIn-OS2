@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import { OrderService } from "../orders";
 
 export const AnalyticsService = {
@@ -12,7 +12,7 @@ export const AnalyticsService = {
 
   async fetchAuditLogs(limit = 12) {
     const { data, error } = await supabase
-      .from("audit_log")
+      .from("system.audit_log")
       .select("id, action, created_at")
       .order("created_at", { ascending: false })
       .limit(limit);

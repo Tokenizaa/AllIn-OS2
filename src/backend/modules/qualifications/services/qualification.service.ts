@@ -62,7 +62,8 @@ export class QualificationService {
     try {
       // Buscar qualificação atual do customer
       const { data: currentQualification, error: qualError } = await supabase
-        .from('customer_qualifications')
+        .schema('crm')
+      .from('customer_qualifications')
         .select('*')
         .eq('id_comprador', idComprador)
         .eq('status', 'active')
@@ -74,7 +75,7 @@ export class QualificationService {
 
       // Buscar métricas do customer
       const { data: metrics, error: metricsError } = await supabase
-        .from('customer_metrics')
+        .from('crm.customer_metrics')
         .select('*')
         .eq('id_comprador', idComprador)
         .single();
@@ -136,7 +137,8 @@ export class QualificationService {
     try {
       // Desativar qualificação anterior
       const { error: updateError } = await supabase
-        .from('customer_qualifications')
+        .schema('crm')
+      .from('customer_qualifications')
         .update({ status: 'inactive', updated_at: new Date().toISOString() })
         .eq('id_comprador', idComprador)
         .eq('status', 'active');
@@ -145,7 +147,8 @@ export class QualificationService {
 
       // Criar nova qualificação
       const { error: insertError } = await supabase
-        .from('customer_qualifications')
+        .schema('crm')
+      .from('customer_qualifications')
         .insert({
           id_comprador: idComprador,
           qualification_id: newQualification,
@@ -175,7 +178,8 @@ export class QualificationService {
 
       // Buscar todos os customers
       const { data: customers, error: customersError } = await supabase
-        .from('customers')
+        .schema('crm')
+      .from('customers')
         .select('id');
 
       if (customersError) throw customersError;
@@ -206,9 +210,10 @@ export class QualificationService {
       // OTIMIZAÇÃO: Buscar downlines primeiro, depois métricas em batch
       // Isso evita N+1 queries e é mais eficiente que subqueries complexas
       const { data: downlines, error: downlinesError } = await supabase
-        .from('customers')
+        .schema('crm')
+      .from('customers')
         .select('id_comprador')
-        .eq('patrocinador_comprador', idComprador);
+        .eq('patrocinador_id', idComprador);
 
       if (downlinesError) throw downlinesError;
 
@@ -217,7 +222,7 @@ export class QualificationService {
       // Buscar métricas de todos os downlines em uma única query
       const downlineIds = downlines.map(d => d.id_comprador);
       const { data: metrics, error: metricsError } = await supabase
-        .from('customer_metrics')
+        .from('crm.customer_metrics')
         .select('total_gasto')
         .in('id_comprador', downlineIds);
 
@@ -237,9 +242,10 @@ export class QualificationService {
   private async getActiveDownlinesCount(idComprador: string): Promise<number> {
     try {
       const { data: downlines, error: downlinesError } = await supabase
-        .from('customers')
+        .schema('crm')
+      .from('customers')
         .select('id')
-        .eq('sponsor_id', idComprador)
+        .eq('patrocinador_id', idComprador)
         .eq('status', 'active');
 
       if (downlinesError) throw downlinesError;
@@ -258,9 +264,10 @@ export class QualificationService {
     try {
       // Buscar todos os downlines
       const { data: downlines, error: downlinesError } = await supabase
-        .from('customers')
+        .schema('crm')
+      .from('customers')
         .select('id')
-        .eq('sponsor_id', idComprador);
+        .eq('patrocinador_id', idComprador);
 
       if (downlinesError) throw downlinesError;
 
@@ -269,7 +276,8 @@ export class QualificationService {
       // Buscar qualificações dos downlines
       const downlineIds = downlines.map(d => d.id);
       const { data: qualifications, error: qualError } = await supabase
-        .from('customer_qualifications')
+        .schema('crm')
+      .from('customer_qualifications')
         .select('qualification_id')
         .in('id_comprador', downlineIds)
         .eq('status', 'active');
@@ -327,7 +335,8 @@ export class QualificationService {
   private async getCurrentQualification(idComprador: string): Promise<string> {
     try {
       const { data: qual, error: qualError } = await supabase
-        .from('customer_qualifications')
+        .schema('crm')
+      .from('customer_qualifications')
         .select('qualification_id')
         .eq('id_comprador', idComprador)
         .eq('status', 'active')

@@ -126,7 +126,7 @@ export class OrderRepository extends BaseRepository<Order> {
 
   async getItemsByOrderId(orderId: string): Promise<OrderItem[]> {
     const { data, error } = await this.getClient()
-      .from("order_items")
+      .from("commerce.order_items")
       .select("*")
       .eq("order_id", orderId);
 
@@ -137,7 +137,7 @@ export class OrderRepository extends BaseRepository<Order> {
 
 export class OrderItemRepository extends BaseRepository<OrderItem> {
   constructor() {
-    super("order_items");
+    super("commerce.order_items");
   }
 
   async findByOrderId(orderId: string): Promise<OrderItem[]> {

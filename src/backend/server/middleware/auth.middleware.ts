@@ -55,11 +55,12 @@ export const authMiddleware = async (
       return;
     }
 
-    // Get customer and profile information
+    // Get customer and profile information using user_id
     const { data: customer } = await supabase
+      .schema('crm')
       .from('customers')
-      .select('id, email, name')
-      .eq('email', user.email)
+      .select('id, email, nome')
+      .eq('auth_user_id', user.id)
       .single();
 
     if (!customer) {
@@ -70,21 +71,25 @@ export const authMiddleware = async (
       return;
     }
 
-    // Get user role from profiles table
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('user_id', customer.id)
-      .single();
+    // Get user role from crm.user_roles_view (view over identity.user_roles)
+    const { data: userRole } = await supabase
+      .schema('crm')
+      .from('user_roles_view')
+      .select('role_name')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    const role = (profile?.role || UserRole.CLIENTE_FINAL) as UserRole;
+    let role = UserRole.CLIENTE_FINAL;
+    if (userRole?.role_name && Object.values(UserRole).includes(userRole.role_name as UserRole)) {
+      role = userRole.role_name as UserRole;
+    }
 
     // Get permissions for the role
     const permissions = getPermissionsForRole(role);
 
     // Attach user information to the request
     req.user = {
-      id: customer.id,
+      id: user.id,
       email: customer.email,
       role,
       permissions,
@@ -126,9 +131,10 @@ export const optionalAuthMiddleware = async (
     }
 
     const { data: customer } = await supabase
+      .schema('crm')
       .from('customers')
-      .select('id, email, name')
-      .eq('email', user.email)
+      .select('id, email, nome')
+      .eq('auth_user_id', user.id)
       .single();
 
     if (!customer) {
@@ -136,17 +142,21 @@ export const optionalAuthMiddleware = async (
       return;
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('user_id', customer.id)
-      .single();
+    const { data: userRole } = await supabase
+      .schema('crm')
+      .from('user_roles_view')
+      .select('role_name')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    const role = (profile?.role || UserRole.CLIENTE_FINAL) as UserRole;
+    let role = UserRole.CLIENTE_FINAL;
+    if (userRole?.role_name && Object.values(UserRole).includes(userRole.role_name as UserRole)) {
+      role = userRole.role_name as UserRole;
+    }
     const permissions = getPermissionsForRole(role);
 
     req.user = {
-      id: customer.id,
+      id: user.id,
       email: customer.email,
       role,
       permissions,

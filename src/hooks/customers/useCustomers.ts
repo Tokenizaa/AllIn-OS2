@@ -12,48 +12,21 @@ import { ProfileService } from "@/services/profiles";
 export function useCustomers(page = 1, pageSize = 15) {
   return useQuery({
     queryKey: [...queryKeys.customers, page, pageSize],
-    queryFn: () => CustomerService.fetchCustomersWithOrderStats(page, pageSize) as any,
+    queryFn: async () => {
+      try {
+        const data = await CustomerService.fetchCustomersWithOrderStats(page, pageSize);
+        return {
+          customers: data?.customers || [],
+          orderStats: data?.orderStats || {},
+          totalCount: data?.totalCount || 0,
+          page,
+          pageSize,
+        };
+      } catch (error) {
+        console.error('[useCustomers] Error fetching customers:', error);
+        return { customers: [], orderStats: {}, totalCount: 0, page, pageSize };
+      }
+    },
   });
 }
 
-/**
- * Hook para buscar distribuidores usando ProfileService (NOVO)
- * 
- * Este é o hook correto para usar quando a migração para profiles estiver completa
- */
-export function useDistributors(page = 1, pageSize = 15) {
-  return useQuery({
-    queryKey: ["distributors", page, pageSize],
-    queryFn: () => ProfileService.fetchProfilesWithStats(page, pageSize, "distribuidor") as any,
-  });
-}
-
-/**
- * Hook para buscar clientes finais usando ProfileService (NOVO)
- */
-export function useCustomerFinals(page = 1, pageSize = 15) {
-  return useQuery({
-    queryKey: ["customer-finals", page, pageSize],
-    queryFn: () => ProfileService.fetchProfilesWithStats(page, pageSize, "customer_final") as any,
-  });
-}
-
-/**
- * Hook para buscar clientes diretos usando ProfileService (NOVO)
- */
-export function useClienteDiretos(page = 1, pageSize = 15) {
-  return useQuery({
-    queryKey: ["cliente-diretos", page, pageSize],
-    queryFn: () => ProfileService.fetchProfilesWithStats(page, pageSize, "cliente_direto") as any,
-  });
-}
-
-/**
- * Hook para buscar admins usando ProfileService (NOVO)
- */
-export function useAdmins(page = 1, pageSize = 15) {
-  return useQuery({
-    queryKey: ["admins", page, pageSize],
-    queryFn: () => ProfileService.fetchProfilesWithStats(page, pageSize, "admin") as any,
-  });
-}

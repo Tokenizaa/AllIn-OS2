@@ -134,6 +134,7 @@ export class DiscountEngineService {
       const now = new Date().toISOString();
 
       const { data, error } = await supabase
+        .schema('commerce')
         .from('discount_rules')
         .select('*')
         .eq('is_active', true)
@@ -278,6 +279,7 @@ export class DiscountEngineService {
 
       // Increment rule usage count
       await supabase
+        .schema('commerce')
         .from('discount_rules')
         .update({ usage_count: (rule.usage_count || 0) + 1 })
         .eq('id', rule.id);
@@ -337,6 +339,7 @@ export class DiscountEngineService {
 
     try {
       const { data, error } = await supabase
+        .schema('commerce')
         .from('discount_rules')
         .insert({
           ...rule,

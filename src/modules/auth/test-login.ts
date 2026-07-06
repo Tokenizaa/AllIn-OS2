@@ -1,5 +1,5 @@
 import { UserRole } from "@/shared/types/roles";
-import { getDemoRedirectPath } from "./navigation";
+import { DashboardResolver } from "./services/dashboardResolver.service";
 
 export type TestLoginAccount = {
   role: UserRole;
@@ -46,7 +46,7 @@ export function getTestLoginAccounts(): Array<TestLoginAccount & { destination: 
   if (!rawValue) {
     return DEFAULT_TEST_LOGIN_ACCOUNTS.map((account) => ({
       ...account,
-      destination: getDemoRedirectPath(account.role),
+      destination: DashboardResolver.getDemoPath(account.role),
     }));
   }
 
@@ -54,12 +54,12 @@ export function getTestLoginAccounts(): Array<TestLoginAccount & { destination: 
     const parsed = JSON.parse(rawValue) as unknown;
     return normalizeAccounts(parsed).map((account) => ({
       ...account,
-      destination: getDemoRedirectPath(account.role),
+      destination: DashboardResolver.getDemoPath(account.role),
     }));
   } catch {
     return DEFAULT_TEST_LOGIN_ACCOUNTS.map((account) => ({
       ...account,
-      destination: getDemoRedirectPath(account.role),
+      destination: DashboardResolver.getDemoPath(account.role),
     }));
   }
 }

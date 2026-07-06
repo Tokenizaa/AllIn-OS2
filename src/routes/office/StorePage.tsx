@@ -1,20 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { QrCode, Eye, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/distributor/stat-card";
 import { ProductService } from "@/services/products";
-import { useAuth } from "@/modules/auth";
 import { useProducts } from "@/hooks/products/useProducts";
-import { UserRole } from "@/shared/types/roles";
 import { formatCurrency } from "@/utils/priceFormatter";
 
 type ProductRow = { id: string; name?: string | null; description?: string | null; price?: number | null; category?: string | null };
 
 export function StorePage() {
-  const { user } = useAuth();
-  const isCustomer = user?.role === UserRole.CLIENTE_FINAL;
-
   const { data: products = [], isLoading } = useProducts(12);
 
   const storeAnalytics = useMemo(() => ({
@@ -36,41 +30,6 @@ export function StorePage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-muted-foreground animate-pulse text-sm">Carregando produtos e loja...</div>
-      </div>
-    );
-  }
-
-  if (isCustomer) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 mb-1.5 uppercase font-mono tracking-wider">
-            Consumidor Autorizado
-          </span>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Loja All-In Life</h1>
-          <p className="text-xs text-muted-foreground">Produtos reais carregados do Supabase.</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {products.map((prod) => (
-            <div key={prod.id} className="rounded-2xl border border-border/65 bg-[#090d16]/80 overflow-hidden flex flex-col justify-between">
-              <div className="p-5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold tracking-wider uppercase bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-md">
-                    {prod.category || "Produto"}
-                  </span>
-                  <span className="text-[10px] font-bold font-mono text-emerald-400">Produto real</span>
-                </div>
-                <h3 className="text-sm font-bold text-white line-clamp-2 leading-snug">{prod.name}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{prod.description}</p>
-                <div className="flex justify-between items-baseline pt-4 border-t border-border/50">
-                  <strong className="text-lg font-extrabold text-white">{formatCurrency(Number(prod.price || 0))}</strong>
-                  <Button className="h-9 gap-1.5 text-xs"><ShoppingCart className="h-3.5 w-3.5" /> Comprar agora</Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     );
   }

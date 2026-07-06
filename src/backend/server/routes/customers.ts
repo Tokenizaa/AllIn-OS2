@@ -30,6 +30,28 @@ router.get('/', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, re
   res.json(result);
 });
 
+// GET /api/customers/with-order-stats - Get customers with order statistics (requires read permission)
+// This must be defined before the /:id route to avoid being caught as an ID parameter
+router.get('/with-order-stats', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, res) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 15;
+
+  const result = await getCustomers({ page, limit: pageSize });
+  
+  // Transform the response to match the expected ApiResponse format
+  const response = {
+    success: true,
+    data: {
+      customers: result.data || [],
+      orderStats: result.orderStats || {},
+      totalCount: result.meta?.total || 0,
+      page: result.meta?.page || page,
+      pageSize: result.meta?.limit || pageSize,
+    }
+  };
+  res.json(response);
+});
+
 // GET /api/customers/:id - Get customer by ID (requires read permission)
 router.get('/:id', requirePermission(PermissionEnum.CUSTOMERS_READ), async (req, res) => {
   const result = await getCustomerById({ id: req.params.id });

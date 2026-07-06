@@ -1,7 +1,8 @@
 import { UserRole } from "@/shared/types/roles";
 import { User } from "../context/auth.types";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import { SupabaseService } from "./supabase.service";
+import { RoleResolver } from "./roleResolver.service";
 import { withRetry, withTimeout, getNetworkErrorMessage } from "@/lib/network-resilience";
 
 /**
@@ -108,17 +109,17 @@ export class AuthService {
 
     // Create profile in database
     const { error: profileError } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .insert({
-        user_id: user.id,
-        name,
+        auth_user_id: user.id,
+        nome: name,
         email,
-        role,
+        tipo_cliente: role,
         status: role === UserRole.DISTRIBUIDOR ? "pending" : "active",
-        phone: extra?.phone,
+        telefone: extra?.phone,
         cpf: extra?.cpf,
-        sponsor_id: extra?.sponsor_id || activeSponsor,
-        referral_code: role === UserRole.DISTRIBUIDOR ? name.toLowerCase().replace(/\s+/g, "") : null,
+        patrocinador_id: extra?.sponsor_id || activeSponsor,
       });
 
     if (profileError) {
@@ -144,7 +145,7 @@ export class AuthService {
   }
 
   /**
-   * Change user role (admin only) using Supabase
+   * Change user role (admin only) using RoleResolver
    * Returns updated profile without managing UI state
    */
   static async changeUserRole(
@@ -156,19 +157,19 @@ export class AuthService {
       throw new Error("Acesso negado: Requer privilégio Admin Master.");
     }
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: targetRole, updated_at: new Date().toISOString() })
-      .eq("user_id", userId);
+    try {
+      // Assign new role using RoleResolver
+      const success = await RoleResolver.assignRole(userId, targetRole);
+      
+      if (!success) {
+        throw new Error("Erro ao alterar role do usuário.");
+      }
 
-    if (error) {
-      throw new Error(error.message || "Erro ao alterar role do usuário.");
-    }
-
-    if (currentUser.id === userId) {
+      // Fetch updated user profile
       return await SupabaseService.fetchUserProfile(userId);
+    } catch (error) {
+      console.error("[AuthService] Error changing user role:", error);
+      throw error;
     }
-
-    return null;
   }
 }

@@ -227,6 +227,7 @@ export class PaymentSplitService {
     try {
       // Try to get existing wallet
       const { data: existingWallet, error: existingWalletError } = await supabase
+        .schema('finance')
         .from('wallets')
         .select('*')
         .eq('id_comprador', recipientId)
@@ -243,6 +244,7 @@ export class PaymentSplitService {
 
       // Create new wallet
       const { data: newWallet, error: createError } = await supabase
+        .schema('finance')
         .from('wallets')
         .insert({
           id_comprador: recipientId,
@@ -270,6 +272,7 @@ export class PaymentSplitService {
   async getPaymentSplits(paymentId: string): Promise<PaymentSplitResult['splits']> {
     try {
       const { data, error } = await supabase
+        .schema('finance')
         .from('payment_splits')
         .select('*')
         .eq('payment_id', paymentId);

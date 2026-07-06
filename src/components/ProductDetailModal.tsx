@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { formatPrice } from '@/utils/priceFormatter';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/hooks/cart/useCartQuery';
 
 // Ícones simples para os botões de fechar e quantidade
 const CloseIcon = () => (

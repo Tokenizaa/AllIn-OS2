@@ -1,4 +1,4 @@
-export { ROLE_PERMISSIONS, getPermissionsForRole, hasPermissionForRole } from "./permissions";
+export { getPermissionsForRole, hasPermissionForRole, getUserPermissions } from "./permissions";
 export {
   ADMINISTRATIVE_ROLES,
   DEPARTMENTAL_ROLES,

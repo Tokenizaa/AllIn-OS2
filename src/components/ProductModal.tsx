@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/hooks/cart/useCartQuery";
 import { useModal } from "@/hooks/useModal";
 
 import AdditionalInfo from './product-modal/AdditionalInfo';

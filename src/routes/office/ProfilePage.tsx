@@ -99,7 +99,7 @@ export function ProfilePage() {
             <TabsContent value="perfil" className="space-y-5 rounded-2xl border border-border/60 bg-card/40 p-6">
               <div>
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Dados Cadastrais Básicos</h3>
-                <p className="text-xs text-muted-foreground">Os campos agora são preenchidos a partir de profiles.</p>
+                <p className="text-xs text-muted-foreground">Os campos são preenchidos a partir de crm.customers.</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Nome Completo" value={profile?.name || "-"} />

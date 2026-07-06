@@ -9,7 +9,7 @@ export class CustomerService {
     this.repository = new CustomerRepository();
   }
 
-  async findAll(params: PaginationParams & { status?: string }): Promise<PaginatedResponse<Customer>> {
+  async findAll(params: PaginationParams & { status?: string }): Promise<PaginatedResponse<Customer> & { orderStats?: Record<string, { count: number; ltv: number }> }> {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const offset = (page - 1) * limit;
@@ -24,8 +24,13 @@ export class CustomerService {
       this.repository.count(filters),
     ]);
 
+    // Calculate order statistics for all customers
+    const customerIds = data.map(c => c.id);
+    const orderStats = await this.repository.getOrderStatsForCustomers(customerIds);
+
     return {
       data,
+      orderStats,
       meta: {
         page,
         limit,

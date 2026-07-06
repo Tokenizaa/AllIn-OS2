@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase-client';
+import { supabase } from '../lib/supabase/client';
 
 export interface CartItem {
   id: string;
@@ -11,7 +11,7 @@ export interface CartItem {
   // Product details joined
   product?: {
     id: string;
-    name: string;
+    nome: string;
     price: string;
     images: string[];
     category: string | null;
@@ -33,18 +33,10 @@ export const cartService = {
    * Get all cart items for current user
    */
   getCartItems: async (userId: string): Promise<CartItem[]> => {
-    const { data, error } = await supabase
+    const { data: cartItems, error } = await supabase
+      .schema('commerce')
       .from('cart_items')
-      .select(`
-        *,
-        products (
-          id,
-          name,
-          price,
-          images,
-          category
-        )
-      `)
+      .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -53,7 +45,21 @@ export const cartService = {
       throw error;
     }
 
-    return (data || []).map(item => ({
+    if (!cartItems || cartItems.length === 0) {
+      return [];
+    }
+
+    // Fetch product details separately
+    const productIds = cartItems.map(item => item.product_id).filter(Boolean);
+    const { data: products } = await supabase
+      .schema('commerce')
+      .from('produtos')
+      .select('id, nome, price, images, category')
+      .in('id', productIds);
+
+    const productMap = new Map((products || []).map(p => [p.id, p]));
+
+    return cartItems.map(item => ({
       id: item.id,
       user_id: item.user_id,
       product_id: item.product_id,
@@ -61,7 +67,7 @@ export const cartService = {
       metadata: item.metadata || {},
       created_at: item.created_at,
       updated_at: item.updated_at,
-      product: item.products,
+      product: productMap.get(item.product_id) || undefined,
     }));
   },
 
@@ -71,6 +77,7 @@ export const cartService = {
   addItem: async (userId: string, item: CartItemInput): Promise<CartItem> => {
     // Check if item already exists in cart
     const { data: existing } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .select('*')
       .eq('user_id', userId)
@@ -80,28 +87,28 @@ export const cartService = {
     if (existing) {
       // Update quantity if item exists
       const { data, error } = await supabase
+        .schema('commerce')
         .from('cart_items')
         .update({ 
           quantity: existing.quantity + item.quantity,
           metadata: { ...existing.metadata, ...item.metadata }
         })
         .eq('id', existing.id)
-        .select(`
-          *,
-          products (
-            id,
-            name,
-            price,
-            images,
-            category
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) {
         console.error('[cartService] Error updating cart item:', error);
         throw error;
       }
+
+      // Fetch product details
+      const { data: product } = await supabase
+        .schema('commerce')
+        .from('produtos')
+        .select('id, nome, price, images, category')
+        .eq('id', data.product_id)
+        .single();
 
       return {
         id: data.id,
@@ -111,12 +118,13 @@ export const cartService = {
         metadata: data.metadata || {},
         created_at: data.created_at,
         updated_at: data.updated_at,
-        product: data.products,
+        product: product || undefined,
       };
     }
 
     // Insert new item
     const { data, error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .insert({
         user_id: userId,
@@ -124,22 +132,21 @@ export const cartService = {
         quantity: item.quantity,
         metadata: item.metadata || {},
       })
-      .select(`
-        *,
-        products (
-          id,
-          name,
-          price,
-          images,
-          category
-        )
-      `)
+      .select('*')
       .single();
 
     if (error) {
       console.error('[cartService] Error adding cart item:', error);
       throw error;
     }
+
+    // Fetch product details
+    const { data: product } = await supabase
+      .schema('commerce')
+      .from('produtos')
+      .select('id, nome, price, images, category')
+      .eq('id', data.product_id)
+      .single();
 
     return {
       id: data.id,
@@ -149,7 +156,7 @@ export const cartService = {
       metadata: data.metadata || {},
       created_at: data.created_at,
       updated_at: data.updated_at,
-      product: data.products,
+      product: product || undefined,
     };
   },
 
@@ -163,6 +170,7 @@ export const cartService = {
     }
 
     const { error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .update({ quantity })
       .eq('id', cartItemId);
@@ -178,6 +186,7 @@ export const cartService = {
    */
   removeItem: async (cartItemId: string): Promise<void> => {
     const { error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .delete()
       .eq('id', cartItemId);
@@ -193,6 +202,7 @@ export const cartService = {
    */
   clearCart: async (userId: string): Promise<void> => {
     const { error } = await supabase
+      .schema('commerce')
       .from('cart_items')
       .delete()
       .eq('user_id', userId);

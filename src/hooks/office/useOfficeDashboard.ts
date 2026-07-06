@@ -42,22 +42,23 @@ export function useOfficeDashboard() {
       // MIGRAÇÃO EM PROGRESSO: Usando ProfileService em vez de CustomerService
       if (currentProfile?.id) {
         try {
-          const [bonusData, planData] = await Promise.all([
-            ProfileService.fetchProfileBonus(currentProfile.id),
-            ProfileService.fetchProfilePlan(currentProfile.id),
-          ]);
-          customerBonus = bonusData;
-          customerPlan = planData;
+          // fetchProfileBonus and fetchProfilePlan are deprecated - skip for now
+          // const [bonusData, planData] = await Promise.all([
+          //   ProfileService.fetchProfileBonus(currentProfile.id),
+          //   ProfileService.fetchProfilePlan(currentProfile.id),
+          // ]);
+          // customerBonus = bonusData;
+          // customerPlan = planData;
           
-          if (customerBonus) {
-            totalBonus = Number(customerBonus.total_bonus || 0);
-            directBonus = Number(customerBonus.direct_bonus || 0);
-            networkBonus = Number(customerBonus.network_bonus || 0);
-          }
+          // if (customerBonus) {
+          //   totalBonus = Number(customerBonus.total_bonus || 0);
+          //   directBonus = Number(customerBonus.direct_bonus || 0);
+          //   networkBonus = Number(customerBonus.network_bonus || 0);
+          // }
           
-          if (customerPlan?.plans) {
-            planName = customerPlan.plans.name || "Plano Padrão";
-          }
+          // if (customerPlan?.plans) {
+          //   planName = customerPlan.plans.name || "Plano Padrão";
+          // }
         } catch (error) {
           console.error("Error fetching customer bonus/plan:", error);
         }

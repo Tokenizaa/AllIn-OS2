@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useDistributor } from "@/lib/distributor-context";
-import { useProducts } from "@/contexts/ProductsContext";
+import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
+import { useProductsQuery } from "@/hooks/products/useProductsQuery";
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/app/public-header";
 import Footer from "@/components/Footer";
@@ -13,10 +13,11 @@ export const Route = createFileRoute("/busca-produtos")({
 });
 
 function ProductSearchPage() {
-  const { currentDistributor } = useDistributor();
-  const sponsorSlug = currentDistributor.slug;
-  const isDefaultTenant = !sponsorSlug || currentDistributor.isFallback;
-  const { products, loading } = useProducts();
+  // Sprint 2: Usar TanStack Query em vez de Context API
+  const { data: currentDistributor } = useDistributorDefault();
+  const sponsorSlug = currentDistributor?.slug || "";
+  const isDefaultTenant = !sponsorSlug || currentDistributor?.isFallback;
+  const { products, loading } = useProductsQuery();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

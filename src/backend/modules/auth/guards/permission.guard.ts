@@ -31,21 +31,23 @@ export class PermissionGuard {
 }
 
 // Role-based permissions mapping - Now uses centralized configuration
-export const ROLE_PERMISSIONS: Record<string, PermissionEnum[]> = {
-  admin_master: getCentralizedPermissionsForRole('admin_master' as any),
-  gestao_admin: getCentralizedPermissionsForRole('gestao_admin' as any),
-  financeiro: getCentralizedPermissionsForRole('financeiro' as any),
-  suporte: getCentralizedPermissionsForRole('suporte' as any),
-  logistica: getCentralizedPermissionsForRole('logistica' as any),
-  marketing: getCentralizedPermissionsForRole('marketing' as any),
-  analytics: getCentralizedPermissionsForRole('analytics' as any),
-  auditor: getCentralizedPermissionsForRole('auditor' as any),
-  operador: getCentralizedPermissionsForRole('operador' as any),
-  distribuidor: getCentralizedPermissionsForRole('distribuidor' as any),
-  afiliado: getCentralizedPermissionsForRole('afiliado' as any),
-  cliente_final: getCentralizedPermissionsForRole('cliente_final' as any),
+import { UserRole } from '@shared/types/roles';
+
+export const ROLE_PERMISSIONS: Record<UserRole, PermissionEnum[]> = {
+  [UserRole.ADMIN_MASTER]: getCentralizedPermissionsForRole(UserRole.ADMIN_MASTER),
+  [UserRole.GESTAO_ADMIN]: getCentralizedPermissionsForRole(UserRole.GESTAO_ADMIN),
+  [UserRole.FINANCEIRO]: getCentralizedPermissionsForRole(UserRole.FINANCEIRO),
+  [UserRole.SUPORTE]: getCentralizedPermissionsForRole(UserRole.SUPORTE),
+  [UserRole.LOGISTICA]: getCentralizedPermissionsForRole(UserRole.LOGISTICA),
+  [UserRole.MARKETING]: getCentralizedPermissionsForRole(UserRole.MARKETING),
+  [UserRole.ANALYTICS]: getCentralizedPermissionsForRole(UserRole.ANALYTICS),
+  [UserRole.AUDITOR]: getCentralizedPermissionsForRole(UserRole.AUDITOR),
+  [UserRole.OPERADOR]: getCentralizedPermissionsForRole(UserRole.OPERADOR),
+  [UserRole.DISTRIBUIDOR]: getCentralizedPermissionsForRole(UserRole.DISTRIBUIDOR),
+  [UserRole.AFILIADO]: getCentralizedPermissionsForRole(UserRole.AFILIADO),
+  [UserRole.CLIENTE_FINAL]: getCentralizedPermissionsForRole(UserRole.CLIENTE_FINAL),
 };
 
-export function getPermissionsForRole(role: string): PermissionEnum[] {
+export function getPermissionsForRole(role: UserRole): PermissionEnum[] {
   return ROLE_PERMISSIONS[role] || [];
 }

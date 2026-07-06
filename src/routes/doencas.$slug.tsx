@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useDistributor } from "@/lib/distributor-context";
+import { useDistributorQuery } from "@/hooks/distributor/useDistributorQuery";
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/app/public-header";
 import Footer from "@/components/Footer";
@@ -13,17 +13,12 @@ export const Route = createFileRoute("/doencas/$slug")({
 
 function DiseasesPage() {
   const params = useParams({ strict: false }) as { slug?: string };
-  const { currentDistributor, setDistributorBySlug } = useDistributor();
-  
   const routeSlug = params.slug?.toLowerCase().trim();
-  
-  useState(() => {
-    if (routeSlug) {
-      setDistributorBySlug(routeSlug);
-    }
-  });
 
-  const sponsorSlug = currentDistributor.slug;
+  // Sprint 2: Usar TanStack Query em vez de Context API
+  const { data: currentDistributor } = useDistributorQuery(routeSlug);
+
+  const sponsorSlug = currentDistributor?.slug || "";
 
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
 

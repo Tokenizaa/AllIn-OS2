@@ -46,7 +46,8 @@ export function useOfficeFinance() {
       // MIGRAÇÃO EM PROGRESSO: Usando ProfileService em vez de CustomerService
       if (currentProfile?.id) {
         try {
-          customerBonus = await ProfileService.fetchProfileBonus(currentProfile.id);
+          // fetchProfileBonus is deprecated - skip for now
+          // customerBonus = await ProfileService.fetchProfileBonus(currentProfile.id);
         } catch (error) {
           console.error("Error fetching customer bonus:", error);
         }

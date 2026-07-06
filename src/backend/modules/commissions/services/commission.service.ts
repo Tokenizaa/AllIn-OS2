@@ -20,6 +20,7 @@ export class CommissionService {
     try {
       // Buscar informações do pedido
       const { data: order, error: orderError } = await supabase
+        .schema('commerce')
         .from('orders')
         .select('id_comprador, valor_total_pedido, numero_pedido')
         .eq('id', orderId)
@@ -33,6 +34,7 @@ export class CommissionService {
 
       // Buscar o patrocinador do customer
       const { data: customer, error: customerError } = await supabase
+        .schema('crm')
         .from('customers')
         .select('sponsor_id')
         .eq('id', order.id_comprador)
@@ -50,6 +52,7 @@ export class CommissionService {
 
       // Criar registro de comissão
       const { error: insertError } = await supabase
+        .schema('finance')
         .from('commissions')
         .insert({
           id_comprador: customer.sponsor_id,
@@ -82,6 +85,7 @@ export class CommissionService {
     try {
       // Buscar informações do pedido
       const { data: order, error: orderError } = await supabase
+        .schema('commerce')
         .from('orders')
         .select('id_comprador, valor_total_pedido, numero_pedido')
         .eq('id', orderId)
@@ -95,6 +99,7 @@ export class CommissionService {
 
       // Buscar a cadeia de patrocinadores (uplines)
       const { data: customer, error: customerError } = await supabase
+        .schema('crm')
         .from('customers')
         .select('sponsor_id')
         .eq('id', order.id_comprador)
@@ -123,6 +128,7 @@ export class CommissionService {
         const commissionAmount = orderValue * (percentage / 100);
 
         const { error: insertError } = await supabase
+          .schema('finance')
           .from('commissions')
           .insert({
             id_comprador: upline.id,
@@ -158,6 +164,7 @@ export class CommissionService {
 
     for (let level = 0; level < maxLevel; level++) {
       const { data: customer, error: customerError } = await supabase
+        .schema('crm')
         .from('customers')
         .select('sponsor_id')
         .eq('id', currentidComprador)
@@ -201,6 +208,7 @@ export class CommissionService {
   async approvePendingCommissions(idComprador?: string): Promise<void> {
     try {
       let query = supabase
+        .schema('finance')
         .from('commissions')
         .update({ status: 'approved', updated_at: new Date().toISOString() })
         .eq('status', 'pending');
@@ -226,6 +234,7 @@ export class CommissionService {
   async markCommissionsAsPaid(commissionIds: string[], paymentId: string): Promise<void> {
     try {
       const { error } = await supabase
+        .schema('finance')
         .from('commissions')
         .update({ 
           status: 'paid',
@@ -250,6 +259,7 @@ export class CommissionService {
   async getCustomerCommissions(idComprador: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
+        .schema('finance')
         .from('commissions')
         .select('*')
         .eq('id_comprador', idComprador)
@@ -270,6 +280,7 @@ export class CommissionService {
   async getPendingCommissionTotal(idComprador: string): Promise<number> {
     try {
       const { data, error } = await supabase
+        .schema('finance')
         .from('commissions')
         .select('amount')
         .eq('id_comprador', idComprador)

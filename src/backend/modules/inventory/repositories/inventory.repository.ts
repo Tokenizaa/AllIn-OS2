@@ -112,20 +112,23 @@ export class InventoryMovementRepository extends BaseRepository<InventoryMovemen
     const [productsResult, lowStockResult, outOfStockResult] = await Promise.all([
       this.executeQuery(
         supabase
-          .from('commerce.produtos')
+          .schema('commerce')
+          .from('produtos')
           .select('id, estoque, preco')
           .is('deleted_at', null)
       ),
       this.executeQuery(
         supabase
-          .from('commerce.produtos')
+          .schema('commerce')
+          .from('produtos')
           .select('id')
           .lt('estoque', supabase.raw('estoque_minimo'))
           .is('deleted_at', null)
       ),
       this.executeQuery(
         supabase
-          .from('commerce.produtos')
+          .schema('commerce')
+          .from('produtos')
           .select('id')
           .eq('estoque', 0)
           .is('deleted_at', null)
@@ -215,7 +218,8 @@ export class InventoryAlertRepository extends BaseRepository<InventoryAlert> {
   async checkAndCreateAlerts(): Promise<InventoryAlert[]> {
     const { data, error } = await this.executeQuery(
       supabase
-        .from('commerce.produtos')
+        .schema('commerce')
+        .from('produtos')
         .select('id, nome, estoque, estoque_minimo')
         .is('deleted_at', null)
     );

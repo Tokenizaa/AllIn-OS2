@@ -44,6 +44,7 @@ export class WalletService {
   async getWalletByidComprador(idComprador: string): Promise<Wallet | null> {
     try {
       const { data, error } = await supabase
+        .schema('finance')
         .from('wallets')
         .select('*')
         .eq('id_comprador', idComprador)
@@ -66,6 +67,7 @@ export class WalletService {
 
     try {
       const { data, error } = await supabase
+        .schema('finance')
         .from('wallets')
         .insert({
           id_comprador: idComprador,
@@ -117,6 +119,7 @@ export class WalletService {
 
       // Update wallet
       const { error: updateError } = await supabase
+        .schema('finance')
         .from('wallets')
         .update({
           balance: wallet.balance + amount,
@@ -132,6 +135,7 @@ export class WalletService {
 
       // Create transaction record
       const { data: transaction, error: transactionError } = await supabase
+        .schema('finance')
         .from('wallet_transactions')
         .insert({
           wallet_id: wallet.id,
@@ -195,6 +199,7 @@ export class WalletService {
 
       // Update wallet
       const { error: updateError } = await supabase
+        .schema('finance')
         .from('wallets')
         .update({
           balance: wallet.balance - amount,
@@ -210,6 +215,7 @@ export class WalletService {
 
       // Create transaction record
       const { data: transaction, error: transactionError } = await supabase
+        .schema('finance')
         .from('wallet_transactions')
         .insert({
           wallet_id: wallet.id,
@@ -271,6 +277,7 @@ export class WalletService {
 
       // Update wallet
       const { error: updateError } = await supabase
+        .schema('finance')
         .from('wallets')
         .update({
           available_balance: balanceAfter,
@@ -286,6 +293,7 @@ export class WalletService {
 
       // Create transaction record
       const { data: transaction, error: transactionError } = await supabase
+        .schema('finance')
         .from('wallet_transactions')
         .insert({
           wallet_id: wallet.id,
@@ -334,6 +342,7 @@ export class WalletService {
 
       // Update wallet
       const { error: updateError } = await supabase
+        .schema('finance')
         .from('wallets')
         .update({
           available_balance: balanceAfter,
@@ -349,6 +358,7 @@ export class WalletService {
 
       // Create transaction record
       const { data: transaction, error: transactionError } = await supabase
+        .schema('finance')
         .from('wallet_transactions')
         .insert({
           wallet_id: wallet.id,
@@ -389,6 +399,7 @@ export class WalletService {
       }
 
       const { data, error } = await supabase
+        .schema('finance')
         .from('wallet_transactions')
         .select('*')
         .eq('wallet_id', wallet.id)

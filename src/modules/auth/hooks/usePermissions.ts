@@ -1,26 +1,46 @@
 import { Permission } from "../context/auth.types";
 import { useAuth } from "./useAuth";
-import { ROLE_PERMISSIONS } from "../permissions/permissions";
+import { getUserPermissions } from "../permissions/permissions";
 import { UserRole } from "@/shared/types/roles";
+import { useState, useEffect } from "react";
 
 /**
  * Hook to access permission system
  * Provides methods to check user permissions based on role
+ * Permissions are loaded from identity.roles and identity.user_roles tables
  */
 export const usePermissions = () => {
   const { user } = useAuth();
-  
-  const getPermissions = (): Permission[] => {
-    if (!user) return [];
-    return ROLE_PERMISSIONS[user.role] || [];
-  };
+  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (!user) {
+        setPermissions([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const userPerms = await getUserPermissions(user.id);
+        setPermissions(userPerms);
+      } catch (error) {
+        console.error("[usePermissions] Error loading permissions:", error);
+        setPermissions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPermissions();
+  }, [user]);
 
   const hasPermission = (module: Permission["module"], action: Permission["action"] = "read"): boolean => {
     if (!user) return false;
-    if (user.role === "admin_master") return true; // full global access
-    
-    const perms = getPermissions();
-    return perms.some(
+    if (user.role === UserRole.ADMIN_MASTER) return true;
+
+    return permissions.some(
       (p) => p.module === module && (p.action === "all" || p.action === "manage" || p.action === action)
     );
   };
@@ -49,7 +69,7 @@ export const usePermissions = () => {
   };
 
   return {
-    permissions: getPermissions(),
+    permissions,
     hasPermission,
     hasRole,
     canRead,
@@ -57,7 +77,7 @@ export const usePermissions = () => {
     canDelete,
     canManage,
     isRole,
-    isLoading: false,
+    isLoading,
     role: user?.role || null
   };
 };

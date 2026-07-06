@@ -1,5 +1,5 @@
 import { User, DistributorProfile } from "../context/auth.types";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import { UserRole } from "@/shared/types/roles";
 
 /**
@@ -18,12 +18,17 @@ export class ProfileService {
     if (!user) throw new Error("Não autenticado.");
 
     const { error } = await supabase
-      .from("profiles")
+      .schema("crm")
+      .from("customers")
       .update({
-        ...updates,
+        nome: updates.name,
+        email: updates.email,
+        telefone: updates.phone,
+        cpf: updates.cpf,
+        avatar: updates.avatar,
         updated_at: new Date().toISOString()
       })
-      .eq("user_id", user.id);
+      .eq("auth_user_id", user.id);
 
     if (error) {
       throw new Error(error.message || "Erro ao atualizar perfil.");
@@ -49,12 +54,15 @@ export class ProfileService {
     }
 
     const { error } = await supabase
+      .schema("crm")
       .from("customers")
       .update({
-        ...updates,
+        usuario: updates.referral_code,
+        qualification: updates.qualification,
+        metadata: updates,
         updated_at: new Date().toISOString()
       })
-      .eq("user_id", user.id);
+      .eq("auth_user_id", user.id);
 
     if (error) {
       throw new Error(error.message || "Erro ao atualizar perfil de distribuidor.");
@@ -66,20 +74,4 @@ export class ProfileService {
     return updatedProf;
   }
 
-  /**
-   * Activate distributor office with selected plan
-   * TODO: Migrate to Supabase - currently disabled
-   */
-  static async activateDistributorOffice(
-    planId: string,
-    user: User | null,
-    setDistributorProfile: (profile: DistributorProfile) => void,
-    setUser: (user: User) => void
-  ): Promise<void> {
-    void planId;
-    void user;
-    void setDistributorProfile;
-    void setUser;
-    throw new Error("activateDistributorOffice needs to be migrated to Supabase");
-  }
 }

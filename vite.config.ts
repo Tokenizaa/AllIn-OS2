@@ -2,12 +2,20 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   plugins: [
     tailwindcss(),
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
     react(),
+    // FASE 0: Performance Baseline - Bundle Analyzer
+    visualizer({
+      open: true,
+      filename: './dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
   resolve: {
     alias: {
@@ -35,6 +43,25 @@ export default defineConfig({
       external: ["jsonwebtoken", "express", "uuid", "crypto", "fs", "path", "os", "net", "tls", "http", "https", "stream"],
       output: {
         manualChunks(id) {
+          // Sprint 1: Separar rotas públicas de admin
+          // Mover componentes compartilhados para chunk separado
+          if (id.includes("/components/")) {
+            return "shared-components";
+          }
+          
+          if (id.includes("/routes/_app/")) {
+            return "admin-routes";
+          }
+          
+          if (id.includes("/routes/office/")) {
+            return "office-routes";
+          }
+          
+          // Rotas públicas
+          if (id.includes("/routes/") && !id.includes("/routes/_app/") && !id.includes("/routes/office/")) {
+            return "public-routes";
+          }
+          
           // React core
           if (id.includes("react") && !id.includes("@radix-ui")) {
             return "react-vendor";

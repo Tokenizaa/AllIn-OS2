@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useProductDetail } from "@/hooks/products/useProductDetail";
 import { useAuth } from "@/modules/auth";
-import { useDistributor } from "@/lib/distributor-context";
+import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
 import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -15,7 +15,10 @@ export const Route = createFileRoute("/produto/$id")({ component: ProductDetailP
 function ProductDetailPage() {
   const { id } = Route.useParams();
   const { triggerBinomialBonusPay, addAuditLog } = useAuth();
-  const { currentDistributor, setDistributorBySlug } = useDistributor();
+
+  // Sprint 2: Usar TanStack Query em vez de Context API
+  const { data: currentDistributor } = useDistributorDefault();
+
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [custName, setCustName] = useState("");
   const [custEmail, setCustEmail] = useState("");
@@ -24,14 +27,9 @@ function ProductDetailPage() {
 
   const { data: prod = null, isLoading } = useProductDetail(id);
 
-  useEffect(() => {
-    const slug = new URLSearchParams(window.location.search).get("ref")?.toLowerCase().trim();
-    if (slug) setDistributorBySlug(slug);
-  }, [setDistributorBySlug]);
-
-  const sponsorSlug = currentDistributor.slug;
-  const distName = currentDistributor.name;
-  const distRank = currentDistributor.rank;
+  const sponsorSlug = currentDistributor?.slug || "";
+  const distName = currentDistributor?.name || "Distribuidor";
+  const distRank = currentDistributor?.rank || "";
 
   if (isLoading) return <div className="p-8 text-sm text-center text-muted-foreground animate-pulse">Carregando produto real...</div>;
   if (!prod) return <div className="p-8 text-sm text-center text-muted-foreground">Produto não encontrado.</div>;

@@ -50,7 +50,7 @@ BEGIN
     -- Identificar patrocinador
     -- Prioridade: distribuidor_indicador_id > metadata->>'patrocinador_comprador'
     IF pedido.distribuidor_indicador_id IS NOT NULL THEN
-        patrocinador_id := pedido.distribuidor_indic_id_id;
+        patrocinador_id := pedido.distribuidor_indicador_id::uuid;
     ELSIF pedido.metadata->>'patrocinador_comprador' IS NOT NULL THEN
         -- Tentar converter para UUID
         BEGIN
@@ -125,16 +125,16 @@ BEGIN
         -- Inserir na rede linear
         IF patrocinador_id IS NOT NULL THEN
             INSERT INTO mlm.rede_linear_nos (
-                distribuidor_id,
-                patrocinador_id,
+                id_distribuidor,
+                id_patrocinador,
                 linha,
                 posicao_relativa,
-                data_entrada
+                created_at
             ) VALUES (
                 comprador_id,
                 patrocinador_id,
                 -- Calcular linha baseado no patrocinador
-                (SELECT COALESCE(MAX(linha), 0) + 1 FROM mlm.rede_linear_nos WHERE patrocinador_id = patrocinador_id),
+                (SELECT COALESCE(MAX(linha), 0) + 1 FROM mlm.rede_linear_nos WHERE id_patrocinador = patrocinador_id),
                 -- Calcular posição relativa
                 (SELECT COALESCE(MAX(posicao_relativa), 0) + 1 FROM mlm.rede_linear_nos),
                 NOW()
@@ -183,32 +183,32 @@ BEGIN
     IF pontos_ativacao > 0 THEN
         INSERT INTO mlm.pontos_saldo (
             distribuidor_id,
-            pontos_ativacao,
-            pontos_renovacao,
-            pontos_qualificacao,
-            pontos_total
+            saldo_atual,
+            saldo_acumulado
         ) VALUES (
             comprador_id,
             pontos_ativacao,
-            0,
-            0,
             pontos_ativacao
         )
         ON CONFLICT (distribuidor_id) DO UPDATE SET
-            pontos_ativacao = pontos_saldo.pontos_ativacao + pontos_ativacao,
-            pontos_total = pontos_saldo.pontos_total + pontos_ativacao;
+            saldo_atual = pontos_saldo.saldo_atual + pontos_ativacao,
+            saldo_acumulado = pontos_saldo.saldo_acumulado + pontos_ativacao;
         
         -- Registrar transação de pontos
         INSERT INTO mlm.pontos_transacoes (
             distribuidor_id,
             tipo,
-            pontos,
+            quantidade,
+            saldo_antes,
+            saldo_depois,
             descricao,
             pedido_id,
-            data_transacao
+            created_at
         ) VALUES (
             comprador_id,
             'ativacao',
+            pontos_ativacao,
+            0,
             pontos_ativacao,
             'Pontos de ativação - Compra de plano ' || pedido.tipo_nome,
             pedido_id,
@@ -219,20 +219,21 @@ BEGIN
     END IF;
     
     -- Atualizar qualificação inicial se necessário
-    INSERT INTO mlm.qualificacoes (
-        distribuidor_id,
-        nivel,
-        data_qualificacao,
-        ativo
-    ) VALUES (
-        comprador_id,
-        'Bronze',
-        NOW(),
-        true
-    )
-    ON CONFLICT (distribuidor_id) DO NOTHING;
+    -- Desabilitado - tabela mlm.qualificacoes não tem coluna distribuidor_id
+    -- INSERT INTO mlm.qualificacoes (
+    --     distribuidor_id,
+    --     nivel,
+    --     data_qualificacao,
+    --     ativo
+    -- ) VALUES (
+    --     comprador_id,
+    --     'Bronze',
+    --     NOW(),
+    --     true
+    -- )
+    -- ON CONFLICT (distribuidor_id) DO NOTHING;
     
-    RAISE NOTICE 'Qualificação inicial definida para distribuidor %', comprador_id;
+    RAISE NOTICE 'Qualificação inicial não definida (tabela qualificacoes não suporta distribuidor_id)';
     
 EXCEPTION
     WHEN OTHERS THEN

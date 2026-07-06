@@ -83,7 +83,8 @@ export class WithdrawalService {
     try {
       // Buscar dados do distribuidor
       const { data: distributor, error: distributorError } = await supabase
-        .from('mlm.distribuidores')
+        .schema('mlm')
+      .from('distribuidores')
         .select('nome, usuario, data_nascimento, qualificacao')
         .eq('id', dto.distributorId)
         .single();
@@ -93,7 +94,8 @@ export class WithdrawalService {
 
       // Buscar saldo do distribuidor
       const { data: balance, error: balanceError } = await supabase
-        .from('finance.saldos')
+        .schema('finance')
+        .from('saldos')
         .select('saldo_disponivel')
         .eq('distribuidor_id', dto.distributorId)
         .single();
@@ -104,7 +106,8 @@ export class WithdrawalService {
 
       // Buscar saques pendentes
       const { data: pendingWithdrawals, error: pendingError } = await supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .select('valor_solicitado')
         .eq('distribuidor_id', dto.distributorId)
         .eq('status', 'requested');
@@ -145,7 +148,8 @@ export class WithdrawalService {
 
       // Criar solicitação
       const { data, error } = await supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .insert({
           distribuidor_id: dto.distributorId,
           distribuidor_nome: distributor.nome,
@@ -189,7 +193,8 @@ export class WithdrawalService {
   async getWithdrawalById(id: string): Promise<Withdrawal | null> {
     try {
       const { data, error } = await supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .select()
         .eq('id', id)
         .single();
@@ -217,7 +222,8 @@ export class WithdrawalService {
   ): Promise<Withdrawal[]> {
     try {
       let query = supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .select()
         .eq('distribuidor_id', distributorId)
         .order('data_pedido', { ascending: false });
@@ -247,7 +253,8 @@ export class WithdrawalService {
   async approveWithdrawal(id: string): Promise<Withdrawal> {
     try {
       const { data, error } = await supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .update({
           status_id: 3,
           status_descricao: 'Depositado',
@@ -278,7 +285,8 @@ export class WithdrawalService {
   async rejectWithdrawal(id: string, reason: string): Promise<Withdrawal> {
     try {
       const { data, error } = await supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .update({
           status_id: 4,
           status_descricao: 'Estornado',
@@ -309,7 +317,8 @@ export class WithdrawalService {
   async getAllWithdrawals(status?: Withdrawal['status']): Promise<Withdrawal[]> {
     try {
       let query = supabase
-        .from('finance.solicitacoes_saque')
+        .schema('finance')
+        .from('solicitacoes_saque')
         .select()
         .order('data_pedido', { ascending: false });
 

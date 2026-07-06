@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 
 export interface CommissionCycle {
   id: string;
@@ -12,7 +12,7 @@ export interface CommissionCycle {
 export const CommissionService = {
   async fetchCommissionCycles(limit = 50): Promise<CommissionCycle[]> {
     const { data, error } = await supabase
-      .from("commission_cycles")
+      .from("mlm.commission_cycles")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -38,7 +38,7 @@ export const CommissionService = {
 
   async updateCycleStatus(cycleId: string, status: string): Promise<void> {
     const { error } = await supabase
-      .from("commission_cycles")
+      .from("mlm.commission_cycles")
       .update({ status, updated_at: new Date().toISOString() })
       .eq("id", cycleId);
     

@@ -71,6 +71,7 @@ export class CarrierService {
   async createCarrier(dto: CreateCarrierDTO): Promise<Carrier> {
     try {
       const { data, error } = await supabase
+        .schema('logistics')
         .from('logistics_carriers')
         .insert({
           name: dto.name,

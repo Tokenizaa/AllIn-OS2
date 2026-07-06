@@ -28,7 +28,7 @@
  * For migration planning, see: docs/IDENTITY_MIGRATION_MASTER_PLAN.md
  */
 
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import type {
   CustomerProfile,
   CustomerMetrics,
@@ -140,7 +140,7 @@ export const Profile360Service = {
    */
   async fetchCustomer360View(idComprador: string): Promise<any | null> {
     const { data, error } = await supabase
-      .from("customer_360_view")
+      .from("crm.customer_360_view")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -234,7 +234,7 @@ export const Profile360Service = {
    */
   async fetchProfileById(profileId: string): Promise<CustomerProfile | null> {
     const { data, error } = await supabase
-      .from("profiles")
+      .from("crm.customers")
       .select("*")
       .eq("id", profileId)
       .maybeSingle();
@@ -248,7 +248,7 @@ export const Profile360Service = {
    */
   async fetchProfileByIdComprador(idComprador: string): Promise<CustomerProfile | null> {
     const { data, error } = await supabase
-      .from("customers")
+      .from("crm.customers")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -266,7 +266,7 @@ export const Profile360Service = {
     try {
       // Query direta usando id_comprador (adicionado na migration)
       const { data, error } = await supabase
-        .from("customer_metrics")
+        .from("crm.customer_metrics")
         .select("*")
         .eq("id_comprador", idComprador)
         .maybeSingle();
@@ -291,7 +291,7 @@ export const Profile360Service = {
     try {
       // Query direta usando id_comprador (adicionado na migration)
       const { data, error } = await supabase
-        .from("customer_network_metrics")
+        .from("crm.customer_network_metrics")
         .select("*")
         .eq("id_comprador", idComprador)
         .maybeSingle();
@@ -316,7 +316,7 @@ export const Profile360Service = {
     try {
       // Query direta usando id_comprador (adicionado na migration)
       const { data, error } = await supabase
-        .from("customer_scores")
+        .from("crm.customer_scores")
         .select("*")
         .eq("id_comprador", idComprador)
         .maybeSingle();

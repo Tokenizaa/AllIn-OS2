@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/lib/supabase/client';
 
 export interface CopilotMessage {
   id: string;
@@ -72,17 +72,19 @@ export class CopilotService {
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user?.id || 'anonymous';
       
-      // Get user role from profiles
+      // Get user role from crm.user_roles_view (view over identity.user_roles)
+      // tipo_cliente in crm.customers is for commercial classification only
       let userRole = 'distributor'; // default
       if (userId !== 'anonymous') {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
+        const { data: userRoleData } = await supabase
+          .schema('crm')
+          .from('user_roles_view')
+          .select('role_name')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
         
-        if (profile) {
-          userRole = profile.role;
+        if (userRoleData) {
+          userRole = userRoleData.role_name;
         }
       }
 
@@ -203,17 +205,19 @@ export class CopilotService {
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user?.id || 'anonymous';
       
-      // Get user role from profiles
+      // Get user role from crm.user_roles_view (view over identity.user_roles)
+      // tipo_cliente in crm.customers is for commercial classification only
       let userRole = 'distributor'; // default
       if (userId !== 'anonymous') {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
+        const { data: userRoleData } = await supabase
+          .schema('crm')
+          .from('user_roles_view')
+          .select('role_name')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
         
-        if (profile) {
-          userRole = profile.role;
+        if (userRoleData) {
+          userRole = userRoleData.role_name;
         }
       }
 

@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/modules/auth';
-import { getPrimaryPathForRole } from '@/modules/auth/navigation';
+import { DashboardResolver } from '@/modules/auth/services/dashboardResolver.service';
 import { ROLE_DISPLAY_NAMES, isAdministrativeRole } from '@/shared/types/roles';
 
 const UserMenu = () => {
@@ -21,6 +21,7 @@ const UserMenu = () => {
 
   const isAdmin = isAdministrativeRole(user.role as any);
   const roleLabel = ROLE_DISPLAY_NAMES[user.role as keyof typeof ROLE_DISPLAY_NAMES] || user.role;
+  const dashboardPath = DashboardResolver.getDashboardPathForUser(user);
 
   return (
     <div className="flex items-center space-x-2">
@@ -36,7 +37,7 @@ const UserMenu = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate({ to: getPrimaryPathForRole(user.role) })}
+            onClick={() => navigate({ to: dashboardPath })}
             className="hidden md:flex text-allin-dark dark:text-allin-white hover:text-allin-orange"
           >
             <Settings className="w-4 h-4 mr-2" />

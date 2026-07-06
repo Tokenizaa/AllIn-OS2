@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 
 export interface Document {
   id: string;
@@ -14,7 +14,7 @@ export interface Document {
 export const DocumentService = {
   async fetchCustomerDocuments(idComprador: string): Promise<Document[]> {
     const { data, error } = await supabase
-      .from("customer_documents")
+      .from("crm.customer_documents")
       .select("*")
       .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
@@ -29,7 +29,7 @@ export const DocumentService = {
 
   async updateDocumentStatus(documentId: string, status: string): Promise<boolean> {
     const { error } = await supabase
-      .from("customer_documents")
+      .from("crm.customer_documents")
       .update({ 
         status, 
         updated_at: new Date().toISOString() 
@@ -46,7 +46,7 @@ export const DocumentService = {
 
   async createDocument(document: Omit<Document, "id" | "created_at" | "updated_at">): Promise<Document | null> {
     const { data, error } = await supabase
-      .from("customer_documents")
+      .from("crm.customer_documents")
       .insert({
         ...document,
         created_at: new Date().toISOString(),

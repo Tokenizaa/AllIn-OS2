@@ -166,7 +166,8 @@ export class BalanceService {
   async getTransactions(distributorId: string, limit: number = 50): Promise<BalanceTransaction[]> {
     try {
       const { data, error } = await supabase
-        .from('finance.transacoes_saldo')
+        .schema('finance')
+        .from('transacoes_saldo')
         .select()
         .eq('distribuidor_id', distributorId)
         .order('created_at', { ascending: false })
@@ -203,7 +204,8 @@ export class BalanceService {
   ): Promise<BalanceTransaction> {
     try {
       const { data, error } = await supabase
-        .from('finance.transacoes_saldo')
+        .schema('finance')
+        .from('transacoes_saldo')
         .insert({
           distribuidor_id: distributorId,
           tipo: type,

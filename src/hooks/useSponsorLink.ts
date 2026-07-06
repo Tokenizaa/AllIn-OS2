@@ -1,4 +1,4 @@
-import { useStoreSettings } from '../contexts/StoreSettingsContext';
+import { useStoreSettings } from '../hooks/store/useStoreSettings';
 
 export const useSponsorLink = () => {
   const { settings } = useStoreSettings();

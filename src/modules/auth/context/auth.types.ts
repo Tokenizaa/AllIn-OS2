@@ -54,21 +54,6 @@ export interface CustomerReferral {
 }
 
 /**
- * Audit log entry for tracking system actions
- */
-export interface AuditLog {
-  id: string;
-  user_id: string;
-  actor: string;
-  action: string;
-  entity: string;
-  details?: string;
-  ip_address?: string;
-  tenant_id: string;
-  created_at: string;
-}
-
-/**
  * Permission definition for RBAC system
  */
 export interface Permission {
@@ -76,27 +61,6 @@ export interface Permission {
   module: "dashboard" | "analytics" | "finance" | "support" | "network" | "orders" | "products" | "marketing" | "settings" | "system" | "industrial";
   action: "read" | "write" | "delete" | "manage" | "all";
   description: string;
-}
-
-/**
- * Admin invite for onboarding administrative users
- */
-export interface AdminInvite {
-  id: string;
-  email: string;
-  full_name: string;
-  role: UserRole;
-  permissions: string[]; // custom additional modules/permissions
-  invite_token: string;
-  invite_link: string;
-  invited_by: string; // Actor who did the inviting
-  expires_at: string;
-  accepted_at?: string;
-  revoked_at?: string;
-  status: "pending" | "accepted" | "expired" | "revoked";
-  notes?: string;
-  metadata?: any;
-  created_at: string;
 }
 
 /**
@@ -109,24 +73,12 @@ export interface AuthContextType {
   distributorProfile: DistributorProfile | null;
   activeSponsor: string | null;
   activeReferralMetadata: any | null;
-  auditLogs: AuditLog[];
-  usersList: User[];
-  adminInvites: AdminInvite[];
   login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, role: UserRole, extra?: { phone?: string; cpf?: string; sponsor_id?: string; password?: string }) => Promise<User>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<User>;
   updateDistributorProfile: (updates: Partial<DistributorProfile>) => Promise<DistributorProfile>;
   changeUserRole: (userId: string, targetRole: UserRole) => Promise<void>;
-  simulateAuditLog: (action: string, entity: string, details?: string) => void;
   clearSponsor: () => void;
-  activateDistributorOffice: (planId: string) => Promise<void>;
-  addAuditLog: (logInput: any) => void;
-  triggerBinomialBonusPay: (points: number, commission: number, value: number) => Promise<void>;
-  createAdminInvite: (invite: Omit<AdminInvite, "id" | "invite_token" | "invite_link" | "created_at" | "expires_at" | "status">) => Promise<AdminInvite>;
-  revokeAdminInvite: (inviteId: string) => Promise<void>;
-  resendAdminInvite: (inviteId: string) => Promise<void>;
-  getAdminInviteByToken: (token: string) => Promise<AdminInvite | null>;
-  acceptAdminInvite: (token: string, name: string, password: string) => Promise<User>;
-  deleteUserAndInviteSession: (userId: string) => void;
+  activateDistributorOffice: (planId: string) => Promise<DistributorProfile | null>;
 }

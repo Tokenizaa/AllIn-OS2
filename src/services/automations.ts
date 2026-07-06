@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 
 export interface Automation {
   id: string;
@@ -15,7 +15,7 @@ export interface Automation {
 export const AutomationService = {
   async fetchCustomerAutomations(idComprador: string): Promise<Automation[]> {
     const { data, error } = await supabase
-      .from("customer_automations")
+      .from("crm.customer_automations")
       .select("*")
       .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false });
@@ -30,7 +30,7 @@ export const AutomationService = {
 
   async updateAutomationStatus(automationId: string, active: boolean): Promise<boolean> {
     const { error } = await supabase
-      .from("customer_automations")
+      .from("crm.customer_automations")
       .update({ 
         active, 
         updated_at: new Date().toISOString() 

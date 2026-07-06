@@ -42,6 +42,7 @@ export class EmbeddingService {
 
       // Store embedding
       const { error: insertError } = await supabase
+        .schema('crm')
         .from('customer_embeddings')
         .upsert({
           id_comprador: idComprador,
@@ -74,6 +75,7 @@ export class EmbeddingService {
     try {
       // Fetch product data
       const { data: product, error: productError } = await supabase
+        .schema('commerce')
         .from('products')
         .select('*')
         .eq('id', productId)
@@ -93,6 +95,7 @@ export class EmbeddingService {
 
       // Store embedding
       const { error: insertError } = await supabase
+        .schema('commerce')
         .from('product_embeddings')
         .upsert({
           product_id: productId,
@@ -133,6 +136,7 @@ export class EmbeddingService {
 
       // Store embedding
       const { error: insertError } = await supabase
+        .schema('system')
         .from('document_embeddings')
         .upsert({
           document_id: documentId,
@@ -296,6 +300,7 @@ export class EmbeddingService {
 
       // Fetch all customers
       const { data: customers, error: customersError } = await supabase
+        .schema('crm')
         .from('customers')
         .select('id');
 
@@ -327,6 +332,7 @@ export class EmbeddingService {
 
       // Fetch all products
       const { data: products, error: productsError } = await supabase
+        .schema('commerce')
         .from('products')
         .select('id');
 

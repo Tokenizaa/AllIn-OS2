@@ -44,15 +44,16 @@ export function getFrontendClient(): SupabaseClient {
       global: {
         headers: {
           'X-Client-Info': 'allin-os-frontend',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
         fetch: (url, options) => {
           return fetch(url, { ...options, signal: AbortSignal.timeout(60000) });
         },
       },
-      // Remove default schema to allow dynamic schema switching
-      // db: {
-      //   schema: 'public',
-      // },
+      db: {
+        schema: 'public',
+      },
       // Add network resilience settings
       realtime: {
         params: {
@@ -107,10 +108,3 @@ export function getBackendClient(): SupabaseClient {
   });
 }
 
-/**
- * Legacy alias for getBackendClient
- * @deprecated Use getBackendClient instead
- */
-export function getSupabaseAdminClient(): SupabaseClient {
-  return getBackendClient();
-}

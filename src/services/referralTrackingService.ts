@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase-client';
+import { supabase } from '../lib/supabase/client';
 
 export interface ReferralTracking {
   id: string;
@@ -27,6 +27,7 @@ export const referralTrackingService = {
    */
   getReferralTracking: async (userId: string): Promise<ReferralTracking | null> => {
     const { data, error } = await supabase
+      .schema('crm')
       .from('referral_tracking')
       .select('*')
       .eq('user_id', userId)
@@ -50,7 +51,8 @@ export const referralTrackingService = {
     if (existing) {
       // Update existing
       const { data, error } = await supabase
-        .from('referral_tracking')
+        .schema('crm')
+      .from('referral_tracking')
         .update({
           referrer_id: input.referrer_id,
           distributor_slug: input.distributor_slug,
@@ -70,6 +72,7 @@ export const referralTrackingService = {
 
     // Insert new
     const { data, error } = await supabase
+      .schema('crm')
       .from('referral_tracking')
       .insert({
         user_id: input.user_id,
@@ -93,6 +96,7 @@ export const referralTrackingService = {
    */
   clearReferralTracking: async (userId: string): Promise<void> => {
     const { error } = await supabase
+      .schema('crm')
       .from('referral_tracking')
       .delete()
       .eq('user_id', userId);

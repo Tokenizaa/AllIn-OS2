@@ -30,7 +30,7 @@
  * For migration planning, see: docs/IDENTITY_MIGRATION_MASTER_PLAN.md
  */
 
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import type {
   Customer360,
   Customer360Params,
@@ -181,7 +181,7 @@ export const Customer360Service = {
    */
   async fetchCustomer360View(idComprador: string): Promise<any | null> {
     const { data, error } = await supabase
-      .from("customer_360_view")
+      .from("crm.customer_360_view")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -275,7 +275,7 @@ export const Customer360Service = {
    */
   async fetchProfile(idComprador: string): Promise<CustomerProfile | null> {
     const { data, error } = await supabase
-      .from("customers")
+      .from("crm.customers")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -289,7 +289,7 @@ export const Customer360Service = {
    */
   async fetchProfileByCustomerId(customerId: string): Promise<CustomerProfile | null> {
     const { data, error } = await supabase
-      .from("customers")
+      .from("crm.customers")
       .select("*")
       .eq("id", customerId)
       .maybeSingle();
@@ -303,7 +303,7 @@ export const Customer360Service = {
    */
   async fetchMetrics(idComprador: string): Promise<CustomerMetrics | null> {
     const { data, error } = await supabase
-      .from("customer_metrics")
+      .from("crm.customer_metrics")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -317,7 +317,7 @@ export const Customer360Service = {
    */
   async fetchNetworkMetrics(idComprador: string): Promise<CustomerNetworkMetrics | null> {
     const { data, error } = await supabase
-      .from("customer_network_metrics")
+      .from("crm.customer_network_metrics")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -331,7 +331,7 @@ export const Customer360Service = {
    */
   async fetchScore(idComprador: string): Promise<CustomerScore | null> {
     const { data, error } = await supabase
-      .from("customer_scores")
+      .from("crm.customer_scores")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -345,7 +345,7 @@ export const Customer360Service = {
    */
   async fetchWallet(idComprador: string): Promise<Wallet | null> {
     const { data, error } = await supabase
-      .from("wallets")
+      .from("finance.wallets")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -359,7 +359,7 @@ export const Customer360Service = {
    */
   async fetchPointsWallet(idComprador: string): Promise<PointsWallet | null> {
     const { data, error } = await supabase
-      .from("points_wallets")
+      .from("finance.points_wallets")
       .select("*")
       .eq("id_comprador", idComprador)
       .maybeSingle();
@@ -373,7 +373,7 @@ export const Customer360Service = {
    */
   async fetchWalletTransactions(walletId: string): Promise<WalletTransaction[]> {
     const { data, error } = await supabase
-      .from("wallet_transactions")
+      .from("finance.wallet_transactions")
       .select("*")
       .eq("wallet_id", walletId)
       .order("created_at", { ascending: false })
@@ -388,7 +388,7 @@ export const Customer360Service = {
    */
   async fetchOrders(idComprador: string): Promise<Order[]> {
     const { data, error } = await supabase
-      .from("orders")
+      .from("commerce.orders")
       .select("*")
       .eq("id_comprador", idComprador)
       .order("created_at", { ascending: false })
@@ -405,7 +405,7 @@ export const Customer360Service = {
     if (orderIds.length === 0) return [];
 
     const { data, error } = await supabase
-      .from("order_items")
+      .from("commerce.order_items")
       .select("*")
       .in("order_id", orderIds);
 
@@ -420,7 +420,7 @@ export const Customer360Service = {
     if (!productIds || productIds.length === 0) return [];
 
     const { data, error } = await supabase
-      .from("products")
+      .from("commerce.produtos")
       .select("*")
       .in("id", productIds);
 
@@ -433,7 +433,7 @@ export const Customer360Service = {
    */
   async fetchProductAffinities(idComprador: string): Promise<CustomerProductAffinity[]> {
     const { data, error } = await supabase
-      .from("customer_product_affinities")
+      .from("crm.customer_product_affinities")
       .select("*")
       .eq("id_comprador", idComprador)
       .order("affinity_score", { ascending: false })
@@ -448,7 +448,7 @@ export const Customer360Service = {
    */
   async fetchNetworkRelationships(idComprador: string): Promise<NetworkRelationship[]> {
     const { data, error } = await supabase
-      .from("network_relationships")
+      .from("mlm.network_relationships")
       .select("*")
       .eq("id_comprador", idComprador)
       .limit(100);
@@ -462,9 +462,9 @@ export const Customer360Service = {
    */
   async fetchDownlines(idComprador: string): Promise<Downline[]> {
     const { data, error } = await supabase
-      .from("customers")
-      .select("id, id_comprador, usuario, nome_completo, email, telefone, cidade, estado, created_at")
-      .eq("patrocinador_comprador", idComprador)
+      .from("crm.customers")
+      .select("id, id_comprador, usuario, nome, email, telefone, cidade, estado, created_at")
+      .eq("patrocinador_id", idComprador)
       .order("created_at", { ascending: false })
       .limit(500);
 
@@ -477,8 +477,8 @@ export const Customer360Service = {
    */
   async fetchSponsor(sponsorIdComprador: string): Promise<Sponsor | null> {
     const { data, error } = await supabase
-      .from("customers")
-      .select("id, id_comprador, usuario, nome_completo, email")
+      .from("crm.customers")
+      .select("id, id_comprador, usuario, nome, email")
       .eq("id_comprador", sponsorIdComprador)
       .maybeSingle();
 

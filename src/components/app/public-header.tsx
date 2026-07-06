@@ -7,14 +7,18 @@ import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useSponsorLink } from "@/hooks/useSponsorLink";
 import { useAuth } from "@/modules/auth";
-import { getRoleRedirectPath } from "@/modules/auth/navigation";
+import { DashboardResolver } from "@/modules/auth/services/dashboardResolver.service";
+import { UserRole } from "@/shared/types/roles";
 
 export function PublicHeader() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { handleCadastro } = useSponsorLink();
   const { user } = useAuth();
-  const dashboardHref = user ? getRoleRedirectPath(user) : "/login";
+  const dashboardHref = user ? DashboardResolver.getDashboardPathForUser(user) : "/login";
+
+  // All authenticated users can access their dashboard
+  const showDashboardButton = !!user;
 
   const navItems = [
     { label: "Inicio", href: "/" },
@@ -53,13 +57,13 @@ export function PublicHeader() {
 
           <div className="hidden items-center gap-3 md:flex">
             <ThemeToggle />
-            {user ? (
+            {showDashboardButton ? (
               <Link to={dashboardHref}>
                 <Button variant="outline" className="border-allin-orange text-allin-orange hover:bg-allin-orange/10 font-semibold">
                   Dashboard
                 </Button>
               </Link>
-            ) : (
+            ) : user ? null : (
               <>
                 <Link to="/login">
                   <Button variant="outline" className="border-allin-orange text-allin-orange hover:bg-allin-orange/10 font-semibold">
@@ -111,7 +115,7 @@ export function PublicHeader() {
                 ))}
 
                 <div className="pt-2">
-                  {user ? (
+                  {showDashboardButton ? (
                     <Link to={dashboardHref}>
                       <Button
                         variant="outline"
@@ -121,7 +125,7 @@ export function PublicHeader() {
                         Dashboard
                       </Button>
                     </Link>
-                  ) : (
+                  ) : user ? null : (
                     <div className="space-y-2">
                       <Link to="/login">
                         <Button

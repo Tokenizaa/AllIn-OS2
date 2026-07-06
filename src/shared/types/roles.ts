@@ -5,9 +5,9 @@
  * Both frontend and backend should import from this file to ensure consistency.
  * 
  * Architecture Decision:
- * - roles are stored in profiles table (NOT in customers)
- * - customer_type in customers table is for commercial classification only
- * - plan_id in customers table references the plans table
+ * - roles are stored in identity.roles and identity.user_roles
+ * - tipo_cliente in crm.customers table is for commercial classification only
+ * - plan_id in mlm.planos_distribuidores references the plans table
  */
 
 export enum UserRole {

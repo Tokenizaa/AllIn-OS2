@@ -36,9 +36,14 @@ function CustomersPage() {
   const orderStats = (data as any)?.orderStats || {};
   const totalCount = (data as any)?.totalCount || 0;
 
+  // Filter to show only final customers (not distributors)
+  const finalCustomers = useMemo(() => {
+    return customers.filter((c: any) => !c.tipo_cliente || c.tipo_cliente !== 'distribuidor');
+  }, [customers]);
+
   // Get unique values for filters
   const uniquePlanos = useMemo(() => {
-    const planos = new Set(customers.map((c: any) => c.plano_comprador).filter(Boolean));
+    const planos = new Set(customers.map((c: any) => c.tipo_cliente).filter(Boolean));
     return Array.from(planos).sort();
   }, [customers]);
 
@@ -54,13 +59,13 @@ function CustomersPage() {
 
   const filtered = useMemo(
     () =>
-      customers.filter(
+      finalCustomers.filter(
         (c) =>
           (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())) &&
-          (planoFilter === "all" || c.plano_comprador === planoFilter) &&
+          (planoFilter === "all" || c.tipo_cliente === planoFilter) &&
           (cidadeFilter === "all" || c.cidade === cidadeFilter),
       ),
-    [q, planoFilter, cidadeFilter, customers],
+    [q, planoFilter, cidadeFilter, finalCustomers],
   );
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -69,8 +74,8 @@ function CustomersPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="CRM"
-        title="Distribuidores"
-        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${customers
+        title="Clientes"
+        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${finalCustomers
           .filter((c) => c.status === "active")
           .length.toLocaleString("pt-BR")} ativos nesta página`}
         actions={<Button size="sm" onClick={() => refetch()}>Atualizar base</Button>}
@@ -80,7 +85,7 @@ function CustomersPage() {
         <Sparkles className="h-4 w-4 text-primary shrink-0" />
         <p className="text-sm flex-1 min-w-0">
           <span className="font-medium">
-            {customers.filter((c) => (c.status || "") !== "active").length} distribuidores
+            {finalCustomers.filter((c) => (c.status || "") !== "active").length} clientes
           </span>{" "}
           em atenção. <span className="text-muted-foreground">Use os filtros para priorização.</span>
         </p>
@@ -105,7 +110,7 @@ function CustomersPage() {
             onChange={(e) => setPlanoFilter(e.target.value)}
             className="bg-card border border-border rounded-md px-3 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
           >
-            <option value="all">Todos os planos</option>
+            <option value="all">Todos os tipos</option>
             {uniquePlanos.map((plano) => (
               <option key={plano} value={plano}>
                 {plano}
@@ -131,8 +136,8 @@ function CustomersPage() {
         <table className="w-full text-sm">
           <thead className="bg-background/40 text-left">
             <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              <th className="px-4 py-2.5 font-medium">Distribuidor</th>
-              <th className="px-4 py-2.5 font-medium">Plano</th>
+              <th className="px-4 py-2.5 font-medium">Cliente</th>
+              <th className="px-4 py-2.5 font-medium">Tipo</th>
               <th className="px-4 py-2.5 font-medium">Cidade</th>
               <th className="px-4 py-2.5 font-medium">Status</th>
               <th className="px-4 py-2.5 font-medium text-right">Pedidos</th>
@@ -176,7 +181,7 @@ function CustomersPage() {
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
-                  Nenhum distribuidor encontrado com os filtros atuais.
+                  Nenhum cliente encontrado com os filtros atuais.
                 </td>
               </tr>
             ) : (
@@ -193,13 +198,13 @@ function CustomersPage() {
                           <Link to="/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
                             {getCustomerLabel(c)}
                           </Link>
-                          <div className="text-[11px] text-muted-foreground">{c.id_comprador || c.user_id || "-"}</div>
+                          <div className="text-[11px] text-muted-foreground">{c.allin_id || c.id || "-"}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-xs text-muted-foreground truncate max-w-[150px] block">
-                        {c.plano_comprador || "-"}
+                        {c.tipo_cliente || "-"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -245,7 +250,7 @@ function CustomersPage() {
             <div className="text-xs text-muted-foreground">
               Exibindo <span className="font-semibold text-foreground">{Math.min(filtered.length, (currentPage - 1) * pageSize + 1)}</span> a{" "}
               <span className="font-semibold text-foreground">{Math.min(filtered.length, currentPage * pageSize)}</span> de{" "}
-              <span className="font-semibold text-foreground">{totalCount}</span> distribuidores
+              <span className="font-semibold text-foreground">{totalCount}</span> clientes
             </div>
 
             <div className="flex items-center gap-6">

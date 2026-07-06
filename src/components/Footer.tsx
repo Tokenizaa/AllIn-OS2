@@ -1,16 +1,16 @@
 import { Heart, Home, ShoppingCart, UserPlus, Store } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/hooks/cart/useCartQuery";
 import { useSponsorLink } from "@/hooks/useSponsorLink";
 import { useAuth } from "@/modules/auth";
-import { getRoleRedirectPath } from "@/modules/auth/navigation";
+import { DashboardResolver } from "@/modules/auth/services/dashboardResolver.service";
 
 const Footer = () => {
   const { handleCadastro } = useSponsorLink();
   const { getTotalItems } = useCart();
   const { user } = useAuth();
-  const dashboardHref = user ? getRoleRedirectPath(user) : "/login";
+  const dashboardHref = user ? DashboardResolver.getDashboardPathForUser(user) : "/login";
 
   return (
     <footer className="bg-allin-bg-light-2 dark:bg-allin-bg-dark-2 text-allin-dark dark:text-allin-white py-12 border-t border-allin-orange/20 dark:border-allin-bg-dark-3">
