@@ -22,7 +22,7 @@ export function configureAllInService(): void {
     baseUrl,
     clientId,
     clientSecret,
-    grantType,
+    scope: 'clientes distribuidores produtos pedidos simulacao_planos_listar simulacao_bonus_faturamento',
   });
 
   console.log("AllIn service configured successfully", {

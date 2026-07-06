@@ -11,8 +11,13 @@ export function useNetwork(limit = 12) {
         CustomerService.fetchRecentCustomers(20),
         NetworkService.fetchRecentNetworkRelationships(limit),
       ]);
-      const legs = (relationshipData || []).map((r: any, i: number) => ({ name: `G${i + 1}`, esquerda: Number(r.left_count || r.left_side_count || 0), direita: Number(r.right_count || r.right_side_count || 0) }));
-      return { customers: customerData || [], legs };
+      const legs = (relationshipData || []).map((r: any, i: number) => ({
+        name: `G${i + 1}`,
+        esquerda: Number(r.left_count || r.left_side_count || 0),
+        direita: Number(r.right_count || r.right_side_count || 0),
+      }));
+
+      return { customers: distributorData || [], legs, relationships: relationshipData || [] };
     },
   });
 }

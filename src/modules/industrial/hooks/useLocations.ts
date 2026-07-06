@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getLocations, getLocationById, createLocation, updateLocation, deleteLocation } from '@/backend/modules/industrial/api/industrial.api';
+import { getLocations, getLocationById, createLocation, updateLocation, deleteLocation } from '@/services/industrial.service';
 
 export function useLocations() {
   return useQuery({

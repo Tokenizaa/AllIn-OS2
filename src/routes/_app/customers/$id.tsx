@@ -77,14 +77,11 @@ function Customer360() {
   // Combinar dados dos diferentes services
   const customer = profile360?.profile;
   const orders = crm360?.orders || [];
-  const orderItems = customer360?.orderItems || [];
-  const products = customer360?.products || [];
   const sponsor = customer360?.sponsor;
   const wallet = finance360?.wallet;
   const pointsWallet = finance360?.pointsWallet;
   const walletTransactions = finance360?.walletTransactions || [];
   const downlines = mlm360?.downlines || [];
-  const networkRelationships = mlm360?.networkRelationships || [];
   const metrics = profile360?.metrics;
   const networkMetrics = profile360?.networkMetrics;
   const score = profile360?.score;
@@ -261,7 +258,7 @@ function Customer360() {
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Link to="/customers" className="hover:text-foreground transition-colors">
+        <Link to="/_app/customers" className="hover:text-foreground transition-colors">
           Distribuidores
         </Link>
         <span>/</span>

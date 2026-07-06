@@ -61,16 +61,8 @@ export class ProductRepository extends BaseRepository<Product> {
    * @returns Lista de produtos com baixo estoque
    */
   async findLowStock(options?: FindOptions): Promise<Product[]> {
-    const { data, error } = await this.executeQuery(
-      supabase
-        .from(this.tableName)
-        .select('*')
-        .lt('estoque', supabase.raw('estoque_minimo'))
-        .is('deleted_at', null)
-    );
-
-    if (error) throw error;
-    return data as Product[];
+    const products = await this.findAll(options);
+    return products.filter(p => p.estoque < p.estoque_minimo);
   }
 
   /**
@@ -80,16 +72,8 @@ export class ProductRepository extends BaseRepository<Product> {
    * @returns Lista de produtos em promoção
    */
   async findOnPromotion(options?: FindOptions): Promise<Product[]> {
-    const { data, error } = await this.executeQuery(
-      supabase
-        .from(this.tableName)
-        .select('*')
-        .not('preco_promocional', 'is', null)
-        .is('deleted_at', null)
-    );
-
-    if (error) throw error;
-    return data as Product[];
+    const products = await this.findAll(options);
+    return products.filter(p => p.preco_promocional !== null && p.preco_promocional !== undefined);
   }
 
   /**
@@ -100,16 +84,10 @@ export class ProductRepository extends BaseRepository<Product> {
    * @returns Lista de produtos
    */
   async findByTags(tags: string[], options?: FindOptions): Promise<Product[]> {
-    const { data, error } = await this.executeQuery(
-      supabase
-        .from(this.tableName)
-        .select('*')
-        .contains('tags', tags)
-        .is('deleted_at', null)
+    const products = await this.findAll(options);
+    return products.filter(p => 
+      p.tags && tags.some(tag => p.tags?.includes(tag))
     );
-
-    if (error) throw error;
-    return data as Product[];
   }
 
   /**
@@ -175,7 +153,7 @@ export class ProductRepository extends BaseRepository<Product> {
    * @returns Produto atualizado
    */
   async removePromotionalPrice(id: string): Promise<Product> {
-    return this.update(id, { preco_promocional: null });
+    return this.update(id, { preco_promocional: undefined });
   }
 
   /**

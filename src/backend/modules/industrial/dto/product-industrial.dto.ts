@@ -4,6 +4,9 @@ export const productIndustrialSchema = z.object({
   id: z.string().uuid(),
   modelo: z.string().min(1),
   categoria: z.string().optional(),
+  subcategoria: z.string().optional(),
+  linha: z.string().optional(),
+  colecao: z.string().optional(),
   largura_cm: z.number().optional(),
   comprimento_cm: z.number().optional(),
   altura_cm: z.number().optional(),
@@ -17,6 +20,9 @@ export const productIndustrialSchema = z.object({
   qtd_camadas: z.number().optional(),
   especificacoes: z.any().optional(),
   observacoes: z.string().optional(),
+  observacoes_tecnicas: z.string().optional(),
+  normas_tecnicas: z.string().optional(),
+  certificacoes: z.string().optional(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
   deleted_at: z.string().datetime().nullable().optional(),
@@ -25,6 +31,9 @@ export const productIndustrialSchema = z.object({
 export const createProductIndustrialSchema = z.object({
   modelo: z.string().min(1),
   categoria: z.string().optional(),
+  subcategoria: z.string().optional(),
+  linha: z.string().optional(),
+  colecao: z.string().optional(),
   largura_cm: z.number().optional(),
   comprimento_cm: z.number().optional(),
   altura_cm: z.number().optional(),
@@ -38,11 +47,17 @@ export const createProductIndustrialSchema = z.object({
   qtd_camadas: z.number().optional(),
   especificacoes: z.any().optional(),
   observacoes: z.string().optional(),
+  observacoes_tecnicas: z.string().optional(),
+  normas_tecnicas: z.string().optional(),
+  certificacoes: z.string().optional(),
 });
 
 export const updateProductIndustrialSchema = z.object({
   modelo: z.string().min(1).optional(),
   categoria: z.string().optional(),
+  subcategoria: z.string().optional(),
+  linha: z.string().optional(),
+  colecao: z.string().optional(),
   largura_cm: z.number().optional(),
   comprimento_cm: z.number().optional(),
   altura_cm: z.number().optional(),
@@ -56,6 +71,9 @@ export const updateProductIndustrialSchema = z.object({
   qtd_camadas: z.number().optional(),
   especificacoes: z.any().optional(),
   observacoes: z.string().optional(),
+  observacoes_tecnicas: z.string().optional(),
+  normas_tecnicas: z.string().optional(),
+  certificacoes: z.string().optional(),
 });
 
 export type ProductIndustrial = z.infer<typeof productIndustrialSchema>;

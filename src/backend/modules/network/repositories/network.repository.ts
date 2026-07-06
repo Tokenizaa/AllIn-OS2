@@ -4,7 +4,7 @@ import { getPlanRule } from "@/modules/plans/mlm-rules";
 
 export class NetworkRepository extends BaseRepository<any> {
   constructor() {
-    super("network_tree_view");
+    super("rede_linear_nos", "mlm");
   }
 
   private normalizePlanName(planIdOrName: string | null | undefined, fallback?: string | null): string | null {
@@ -14,7 +14,8 @@ export class NetworkRepository extends BaseRepository<any> {
 
   async getNetworkTree(idComprador: string, maxDepth: number = 5): Promise<NetworkTree | null> {
     const { data, error } = await this.getClient()
-      .from("network_tree_view")
+      .schema("mlm")
+      .from("rede_linear_nos")
       .select("*")
       .eq("id", idComprador)
       .single();
@@ -49,7 +50,8 @@ export class NetworkRepository extends BaseRepository<any> {
     if (currentDepth > maxDepth) return [];
 
     const { data, error } = await this.getClient()
-      .from("network_tree_view")
+      .schema("mlm")
+      .from("rede_linear_nos")
       .select("*")
       .eq("sponsor_id", sponsorId);
 
@@ -91,7 +93,8 @@ export class NetworkRepository extends BaseRepository<any> {
     maxDepth?: number;
   }): Promise<DownlineNode[]> {
     let query = this.getClient()
-      .from("network_tree_view")
+      .schema("mlm")
+      .from("rede_linear_nos")
       .select("*")
       .eq("sponsor_id", idComprador);
 
@@ -129,7 +132,8 @@ export class NetworkRepository extends BaseRepository<any> {
 
     while (currentId && level < maxLevels) {
       const { data, error } = await this.getClient()
-        .from("network_tree_view")
+        .schema("mlm")
+        .from("rede_linear_nos")
         .select("*")
         .eq("id", currentId)
         .single();
@@ -138,7 +142,8 @@ export class NetworkRepository extends BaseRepository<any> {
 
       if (data.sponsor_id) {
         const { data: sponsorData, error: sponsorError } = await this.getClient()
-          .from("network_tree_view")
+          .schema("mlm")
+          .from("rede_linear_nos")
           .select("*")
           .eq("id", data.sponsor_id)
           .single();
@@ -174,7 +179,8 @@ export class NetworkRepository extends BaseRepository<any> {
 
     if (idComprador) {
       const { data, error } = await this.getClient()
-        .from("network_tree_view")
+        .schema("mlm")
+        .from("rede_linear_nos")
         .select("*")
         .eq("id", idComprador)
         .single();
@@ -186,10 +192,12 @@ export class NetworkRepository extends BaseRepository<any> {
       totalRevenue = data?.total_revenue || 0;
     } else {
       const { count: total } = await this.getClient()
+        .schema("crm")
         .from("customers")
         .select("*", { count: "exact", head: true });
 
       const { count: active } = await this.getClient()
+        .schema("crm")
         .from("customers")
         .select("*", { count: "exact", head: true })
         .eq("status", "active");
@@ -209,6 +217,7 @@ export class NetworkRepository extends BaseRepository<any> {
 
   async countDownlines(idComprador: string): Promise<number> {
     const { count, error } = await this.getClient()
+      .schema("crm")
       .from("customers")
       .select("*", { count: "exact", head: true })
       .eq("patrocinador_comprador", idComprador);

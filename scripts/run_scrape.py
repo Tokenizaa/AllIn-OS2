@@ -25,8 +25,8 @@ from scrape.transformers import SupabaseTransformer
 from scrape.loaders import SupabaseLoader
 
 # Configurações
-SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://kynbbidsjzfccelqpohu.supabase.co')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5bmJiaWRzanpmY2NlbHFwb2h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTM5OTUsImV4cCI6MjA5NjYyOTk5NX0.M5hew-WBZVBoikt-hKBdlJZpWy4M8hnBekFOaNrbueg')
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY', os.getenv('SUPABASE_ANON_KEY'))
 LOJA_VIRTUAL_BASE_URL = "https://allinbrasil.com.br/loja/admin"
 BATCH_SIZE = 100  # Salvar no banco a cada 100 pedidos
 CHECKPOINT_FILE = "data/checkpoint.json"
@@ -127,8 +127,8 @@ def main():
     try:
         # 2. Executar scrape completo automático (alinhamento de dados)
         print("\n🎯 Iniciando scrape completo para alinhamento de dados...")
-        # Scrape completo sem limites
-        scrape_orders_with_customers(session, loja_base_url, token, SUPABASE_URL, SUPABASE_KEY, limit_orders=None)
+        # TESTE: Limitar a 3 pedidos
+        scrape_orders_with_customers(session, loja_base_url, token, SUPABASE_URL, SUPABASE_KEY, limit_orders=3)
         
         print("\n🎉 Scrape finalizado!")
     finally:
@@ -300,18 +300,14 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
         
         # Contar registros atuais no banco (usando abordagem alternativa)
         try:
-            orders_result = supabase_client.table('orders').select('id').execute()
+            orders_result = supabase_client.table('pedidos').select('id').execute()
             current_orders = len(orders_result.data) if orders_result.data else 0
         except Exception as e:
-            print(f"⚠️ Erro ao contar orders: {e}")
+            print(f"⚠️ Erro ao contar pedidos: {e}")
             current_orders = 0
         
-        try:
-            customers_result = supabase_client.table('customers').select('id').execute()
-            current_customers = len(customers_result.data) if customers_result.data else 0
-        except Exception as e:
-            print(f"⚠️ Erro ao contar customers: {e}")
-            current_customers = 0
+        # Tabela customers não existe neste banco
+        current_customers = 0
         
         try:
             order_items_result = supabase_client.table('order_items').select('id').execute()
@@ -323,8 +319,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
         print(f"\n{'='*60}")
         print(f"📊 ESTADO ATUAL DO BANCO DE DADOS")
         print(f"{'='*60}")
-        print(f"📦 Orders no banco: {current_orders}")
-        print(f"👥 Customers no banco: {current_customers}")
+        print(f"📦 Pedidos no banco: {current_orders}")
         print(f"📦 Order items no banco: {current_order_items}")
         print(f"{'='*60}\n")
     except Exception as e:
@@ -459,7 +454,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                         for order_data in batch_orders_data:
                             numero_pedido = order_data['numero_pedido']
                             try:
-                                result = loader.supabase.table('orders').select('id').eq('numero_pedido', numero_pedido).execute()
+                                result = loader.supabase.table('pedidos').select('id').eq('numero_pedido', numero_pedido).execute()
                                 if result.data:
                                     order_uuids[numero_pedido] = result.data[0]['id']
                             except Exception as e:
@@ -539,7 +534,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                     print(f"{'='*60}")
                     print(f"📊 Total processado nesta sessão: {total_processed} pedidos")
                     print(f"📊 Total real no banco (após salvar): {total_real_orders} pedidos")
-                    print(f"👥 Customers únicos nesta sessão: {len(customers_dict)}")
+                    print(f"👥 Customers únicos nesta sessão: {len(customers_dict)} (não salvos - tabela não existe)")
                     print(f"👥 Total real no banco (após salvar): {total_real_customers} customers")
                     print(f"📦 Itens de pedido neste batch: {len(batch_order_items)}")
                     print(f"📦 Total real no banco (após salvar): {total_real_items} items")
@@ -547,9 +542,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                     # Salvar customers do batch
                     if batch_customers_dict:
                         customers_data = list(batch_customers_dict.values())
-                        print(f"📥 Carregando {len(customers_data)} customers no Supabase...")
-                        loader.update_customers(customers_data)
-                        
+                        print(f"⚠️ {len(customers_data)} customers não salvos - tabela customers não existe neste banco")
                         # Salvar backup JSON dos customers
                         all_customers_json.extend(customers_data)
                         save_to_json(all_customers_json, 'customers.json')
@@ -571,7 +564,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                             numero_pedido = order_data['numero_pedido']
                             # Buscar UUID da order pelo numero_pedido
                             try:
-                                result = loader.supabase.table('orders').select('id').eq('numero_pedido', numero_pedido).execute()
+                                result = loader.supabase.table('pedidos').select('id').eq('numero_pedido', numero_pedido).execute()
                                 if result.data:
                                     order_uuids[numero_pedido] = result.data[0]['id']
                             except Exception as e:
@@ -638,7 +631,6 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
                     # Incluir estado atual do banco para sincronização
                     db_state = {
                         'orders_in_db': initial_orders + total_processed,
-                        'customers_in_db': initial_customers + len(customers_dict),
                         'order_items_in_db': initial_order_items + len(batch_order_items)
                     }
                     save_checkpoint(checkpoint_data, db_state)
@@ -682,8 +674,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
     
     if batch_customers_dict:
         customers_data = list(batch_customers_dict.values())
-        print(f"\n📥 Carregando {len(customers_data)} customers restantes no Supabase...")
-        loader.update_customers(customers_data)
+        print(f"\n⚠️ {len(customers_data)} customers restantes não salvos - tabela customers não existe neste banco")
         
         # Salvar backup JSON dos customers restantes
         all_customers_json.extend(customers_data)
@@ -706,7 +697,7 @@ def scrape_orders_with_customers(session, loja_base_url, token, supabase_url, su
         for order_data in batch_orders_data:
             numero_pedido = order_data['numero_pedido']
             try:
-                result = loader.supabase.table('orders').select('id').eq('numero_pedido', numero_pedido).execute()
+                result = loader.supabase.table('pedidos').select('id').eq('numero_pedido', numero_pedido).execute()
                 if result.data:
                     order_uuids[numero_pedido] = result.data[0]['id']
             except Exception as e:

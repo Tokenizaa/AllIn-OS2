@@ -26,7 +26,7 @@ export interface CartItemInput {
 
 /**
  * Cart Service
- * MIGRATED: Now uses Supabase cart_items table as single source of truth
+ * MIGRATED: Now uses commerce.cart_items table as single source of truth
  */
 export const cartService = {
   /**

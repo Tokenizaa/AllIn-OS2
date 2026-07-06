@@ -4,6 +4,7 @@ export const processSchema = z.object({
   id: z.string().uuid(),
   nome: z.string().min(1),
   descricao: z.string().optional(),
+  tipo_processo: z.string().optional(), // recebimento, corte, montagem, costura, fechamento, embalagem, expedicao
   sequencia: z.number().optional(),
   entradas: z.array(z.any()).optional(),
   saidas: z.array(z.any()).optional(),
@@ -24,6 +25,7 @@ export const processSchema = z.object({
 export const createProcessSchema = z.object({
   nome: z.string().min(1),
   descricao: z.string().optional(),
+  tipo_processo: z.string().optional(),
   sequencia: z.number().optional(),
   entradas: z.array(z.any()).optional(),
   saidas: z.array(z.any()).optional(),
@@ -41,6 +43,7 @@ export const createProcessSchema = z.object({
 export const updateProcessSchema = z.object({
   nome: z.string().min(1).optional(),
   descricao: z.string().optional(),
+  tipo_processo: z.string().optional(),
   sequencia: z.number().optional(),
   entradas: z.array(z.any()).optional(),
   saidas: z.array(z.any()).optional(),

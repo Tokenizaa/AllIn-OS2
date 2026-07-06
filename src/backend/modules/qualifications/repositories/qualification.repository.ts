@@ -27,8 +27,7 @@ export class QualificationRepository extends BaseRepository<Qualification> {
    * @returns Qualificação atual ou null
    */
   async findCurrentByDistributor(distributorId: string): Promise<Qualification | null> {
-    const { data, error } = await supabase
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select('*')
       .eq('distribuidor_id', distributorId)
       .eq('status', 'active')

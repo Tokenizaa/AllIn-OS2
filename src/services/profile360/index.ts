@@ -12,7 +12,7 @@
  * 
  * Fontes de dados:
  * - customer_360_view (view consolidada - otimizado)
- * - profiles (tabela principal)
+ * - crm.customers (tabela principal)
  */
 
 /**

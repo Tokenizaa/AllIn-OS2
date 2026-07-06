@@ -122,9 +122,10 @@ export const CustomerService = {
 
   async fetchAnalyticsCustomers() {
     const { data, error } = await supabase
-      .from("customers")
+      .schema("crm").from("customers")
       .select("id, usuario, id_comprador, user_id, nome_completo");
     if (error) throw error;
     return data || [];
   }
 };
+

@@ -18,6 +18,16 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
  */
 let frontendClient: SupabaseClient | null = null;
 
+function readEnv(name: string): string | undefined {
+  const viteValue = import.meta.env?.[name];
+  const processValue =
+    typeof process !== "undefined"
+      ? process.env[name as keyof NodeJS.ProcessEnv]
+      : undefined;
+
+  return viteValue || processValue;
+}
+
 export function getFrontendClient(): SupabaseClient {
   if (!frontendClient) {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

@@ -19,7 +19,7 @@ export interface ReferralTrackingInput {
 
 /**
  * Referral Tracking Service
- * MIGRATED: Now uses Supabase referral_tracking table as single source of truth
+ * MIGRATED: Now uses identity.referral_tracking table as single source of truth
  */
 export const referralTrackingService = {
   /**

@@ -65,15 +65,17 @@ export class AllInSyncService {
         try {
           // Verificar se já existe pelo allin_id
           const existing = await customerRepository.getClient()
-            .from("crm.customers")
+            .schema("crm")
+            .from("customers")
             .select("*")
             .eq("allin_id", customerDTO.allin_id)
-            .single();
+            .maybeSingle();
 
           if (existing.data) {
             // Atualizar registro existente
             await customerRepository.getClient()
-              .from("crm.customers")
+              .schema("crm")
+              .from("customers")
               .update({
                 ...customerDTO,
                 allin_synced_at: now,
@@ -84,7 +86,8 @@ export class AllInSyncService {
           } else {
             // Inserir novo registro
             await customerRepository.getClient()
-              .from("crm.customers")
+              .schema("crm")
+              .from("customers")
               .insert({
                 ...customerDTO,
                 allin_synced_at: now,
@@ -160,7 +163,8 @@ export class AllInSyncService {
           if (existing) {
             // Atualizar registro existente
             await distribuidorRepository.getClient()
-              .from("mlm.distribuidores")
+              .schema("mlm")
+              .from("distribuidores")
               .update({
                 ...distribuidorDTO,
                 allin_synced_at: now,
@@ -171,7 +175,8 @@ export class AllInSyncService {
           } else {
             // Inserir novo registro
             await distribuidorRepository.getClient()
-              .from("mlm.distribuidores")
+              .schema("mlm")
+              .from("distribuidores")
               .insert({
                 ...distribuidorDTO,
                 allin_synced_at: now,
@@ -243,15 +248,17 @@ export class AllInSyncService {
         try {
           // Verificar se já existe pelo allin_id
           const existing = await productRepository.getClient()
-            .from("commerce.produtos")
+            .schema("commerce")
+            .from("produtos")
             .select("*")
             .eq("allin_id", produtoDTO.allin_id)
-            .single();
+            .maybeSingle();
 
           if (existing.data) {
             // Atualizar registro existente
             await productRepository.getClient()
-              .from("commerce.produtos")
+              .schema("commerce")
+              .from("produtos")
               .update({
                 ...produtoDTO,
                 allin_synced_at: now,
@@ -262,7 +269,8 @@ export class AllInSyncService {
           } else {
             // Inserir novo registro
             await productRepository.getClient()
-              .from("commerce.produtos")
+              .schema("commerce")
+              .from("produtos")
               .insert({
                 ...produtoDTO,
                 allin_synced_at: now,
@@ -334,15 +342,17 @@ export class AllInSyncService {
         try {
           // Verificar se já existe pelo allin_id
           const existing = await orderRepository.getClient()
-            .from("commerce.pedidos")
+            .schema("commerce")
+            .from("pedidos")
             .select("*")
             .eq("allin_id", pedidoDTO.allin_id)
-            .single();
+            .maybeSingle();
 
           if (existing.data) {
             // Atualizar registro existente
             await orderRepository.getClient()
-              .from("commerce.pedidos")
+              .schema("commerce")
+              .from("pedidos")
               .update({
                 ...pedidoDTO,
                 allin_synced_at: now,
@@ -353,7 +363,8 @@ export class AllInSyncService {
           } else {
             // Inserir novo registro
             await orderRepository.getClient()
-              .from("commerce.pedidos")
+              .schema("commerce")
+              .from("pedidos")
               .insert({
                 ...pedidoDTO,
                 allin_synced_at: now,
@@ -412,7 +423,7 @@ export class AllInSyncService {
       logger.info("Starting planos sync from AllIn", "allin-sync");
 
       // Buscar planos da API AllIn
-      const planos = await allinService.getPlanos();
+      const planos = await allinService.getPlanosAtivos();
 
       // Mapear para formato do Supabase
       const planoDTOs = allinDataMapper.mapPlanosToSupabase(planos);
@@ -425,15 +436,17 @@ export class AllInSyncService {
         try {
           // Verificar se já existe pelo allin_id
           const existing = await planRepository.getClient()
-            .from("mlm.planos")
+            .schema("mlm")
+            .from("planos")
             .select("*")
             .eq("allin_id", planoDTO.allin_id)
-            .single();
+            .maybeSingle();
 
           if (existing.data) {
             // Atualizar registro existente
             await planRepository.getClient()
-              .from("mlm.planos")
+              .schema("mlm")
+              .from("planos")
               .update({
                 ...planoDTO,
                 allin_synced_at: now,
@@ -444,7 +457,8 @@ export class AllInSyncService {
           } else {
             // Inserir novo registro
             await planRepository.getClient()
-              .from("mlm.planos")
+              .schema("mlm")
+              .from("planos")
               .insert({
                 ...planoDTO,
                 allin_synced_at: now,

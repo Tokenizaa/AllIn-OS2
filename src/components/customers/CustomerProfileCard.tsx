@@ -56,7 +56,7 @@ export function CustomerProfileCard({ customer, sponsor }: CustomerProfileCardPr
       {sponsor && (
         <div className="rounded-lg border border-border bg-background/40 p-2.5 text-xs shadow-inner">
           <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Patrocinador</p>
-          <Link to="/customers/$id" params={{ id: sponsor.id }} className="mt-1 font-semibold hover:text-primary transition-all flex items-center gap-1 text-white">
+          <Link to="/_app/customers/$id" params={{ id: sponsor.id }} className="mt-1 font-semibold hover:text-primary transition-all flex items-center gap-1 text-white">
             {getCustomerLabel(sponsor)} <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
           </Link>
         </div>

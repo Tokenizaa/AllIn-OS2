@@ -201,27 +201,27 @@ const downlines = await api.mlm.listRedeLinearDownlines(distribuidorId);
 // Listar uplines
 const uplines = await api.mlm.listRedeLinearUplines(distribuidorId);
 
-// Criar simulação
-const simulacao = await api.mlm.createSimulacao({
+// Criar plano de comissão
+const plano = await api.mlm.createPlanoComissao({
   distribuidor_id: distribuidorId,
   data_inicio: '2026-01-01',
   data_fim: '2026-12-31',
 });
 
-// Executar simulação
-await api.mlm.executeSimulacao(simulacaoId);
+// Executar cálculo de comissão
+await api.mlm.executeCalculoComissao(planoId);
 
-// Cancelar simulação
-await api.mlm.cancelSimulacao(simulacaoId);
+// Cancelar plano de comissão
+await api.mlm.cancelPlanoComissao(planoId);
 
-// Obter bônus e faturamento
-const bonusFaturamento = await api.mlm.getSimulacaoBonusFaturamento({
+// Obter bônus de comissão
+const bonusComissao = await api.mlm.getBonusComissao({
   mes: 6,
   ano: 2026,
 });
 
-// Listar planos de simulação
-const planos = await api.mlm.listSimulacaoPlanos();
+// Listar planos ativos
+const planos = await api.mlm.listPlanosAtivos();
 ```
 
 ### 5. Commerce Service

@@ -174,27 +174,33 @@ class SupabaseTransformer:
         # Nota: Campos de endereço foram movidos para tabela customers para evitar duplicação
         envio_frete = pedido.envio.frete if pedido.envio and hasattr(pedido.envio, 'frete') else None
         
+        # Transformar itens do pedido
+        items = self.transform_order_items(pedido)
+        
         return {
             'numero_pedido': pedido.pedido.id,
             'status_pedido': status_mapeado,
             'id_comprador': pedido.pedido.cliente_id,
-            'comprador': pedido.pedido.cliente,
-            'usuario': pedido.pedido.cliente,
+            'cliente_nome': pedido.pedido.cliente,  # Campo correto para tabela pedidos
+            'cliente_email': pedido.pedido.email,  # Campo correto para tabela pedidos
+            'cliente_telefone': pedido.pedido.telefone,  # Campo correto para tabela pedidos
+            'cliente_cpf': pedido.pedido.cnpj,  # Campo correto para tabela pedidos
+            'cliente_cnpj': pedido.pedido.cnpj,  # Campo correto para tabela pedidos
             'patrocinador_comprador': pedido.pedido.patrocinador_usuario,
             'forma_pagamento': pedido.pagamento.pagamentos[0].forma if pedido.pagamento.pagamentos else None,
-            'forma_entrega': envio_frete,
+            'loja_nome': pedido.pedido.loja if hasattr(pedido.pedido, 'loja') and pedido.pedido.loja else "All-in life style",
+            'pagamento_confirmado': pedido.pagamento.pagamentos[0].confirmado if pedido.pagamento.pagamentos else False,
             'cancelado': pedido.pedido.situacao == 'cancelado',
-            'pago': pedido.pagamento.pagamentos[0].confirmado if pedido.pagamento.pagamentos else False,
             'data_pagamento': data_pagamento_str,
-            'valor_total_pedido': pedido.pedido.total,
+            'valor_total': pedido.pedido.total,
             'pagamentos': json.dumps(pagamentos_serializaveis),
             'plano_comprador': pedido.distribuidor.nome_fantasia if pedido.distribuidor and hasattr(pedido.distribuidor, 'nome_fantasia') else None,
             # Campos adicionais mapeados
-            'loja': pedido.pedido.loja if hasattr(pedido.pedido, 'loja') and pedido.pedido.loja else "All-in life style",
             'tipo_compra': pedido.pedido.tipo_cliente if hasattr(pedido.pedido, 'tipo_cliente') else None,
             'custo_frete': custo_frete,
             'hora_pagamento': hora_pagamento,
-            'gateway_transaction_id': gateway_transaction_id
+            'gateway_transaction_id': gateway_transaction_id,
+            'items': items  # Adicionar itens para sync na tabela order_items
         }
     
     def transform_order_items(self, pedido: PedidoCompleto):
@@ -205,7 +211,7 @@ class SupabaseTransformer:
             product_code = item.sku if item.sku else f"{item.nome}-{item.modelo}".replace(' ', '-').upper()
             
             items.append({
-                'order_id': pedido.pedido.id,  # ✅ CRÍTICO: Incluir order_id
+                'pedido_id': pedido.pedido.id,  # Campo correto: pedido_id em vez de order_id
                 'product_code': product_code,
                 'product_name': item.nome,
                 'quantity': item.quantidade,

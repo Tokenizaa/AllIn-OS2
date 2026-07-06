@@ -5,6 +5,9 @@ import { SupabaseService } from "./supabase.service";
 import { RoleResolver } from "./roleResolver.service";
 import { withRetry, withTimeout, getNetworkErrorMessage } from "@/lib/network-resilience";
 
+// Get Supabase client for auth operations
+const getSupabaseClient = () => getFrontendClient() as any;
+
 /**
  * Authentication service for handling user login, registration, and logout
  * Pure business logic without UI state management
@@ -22,14 +25,14 @@ export class AuthService {
       // Login with Supabase with retry and timeout protection
       const signInResult = await withRetry(
         () => withTimeout(
-          () => supabase.auth.signInWithPassword({ email, password }),
+          () => getSupabaseClient().auth.signInWithPassword({ email, password }),
           12000,
           "Tempo esgotado ao conectar com o servidor. Verifique sua conexão."
         ),
         { maxRetries: 2, delayMs: 1000 }
       );
 
-      const { data: { user }, error } = signInResult;
+      const { data: { user }, error } = signInResult as any;
 
       if (error) {
         throw new Error(error.message || "Credenciais inválidas.");
@@ -85,7 +88,7 @@ export class AuthService {
     activeSponsor?: string | null
   ): Promise<User> {
     // Register with Supabase Auth
-    const { data: { user }, error } = await supabase.auth.signUp({
+    const { data: { user }, error } = await getSupabaseClient().auth.signUp({
       email,
       password: extra?.password || (() => { throw new Error("Senha obrigatória para registro."); })(),
       options: {
@@ -97,7 +100,7 @@ export class AuthService {
           sponsor_id: extra?.sponsor_id || activeSponsor,
         },
       },
-    });
+    }) as any;
 
     if (error) {
       throw new Error(error.message || "Erro ao registrar usuário.");
@@ -122,8 +125,8 @@ export class AuthService {
         patrocinador_id: extra?.sponsor_id || activeSponsor,
       });
 
-    if (profileError) {
-      throw new Error("Erro ao criar perfil de usuário.");
+    if (userRoleError) {
+      throw new Error("Erro ao criar role de usuário.");
     }
 
     // Fetch complete user profile
@@ -141,7 +144,7 @@ export class AuthService {
    * Does not manage UI state
    */
   static async logout(): Promise<void> {
-    await supabase.auth.signOut();
+    await getSupabaseClient().auth.signOut();
   }
 
   /**

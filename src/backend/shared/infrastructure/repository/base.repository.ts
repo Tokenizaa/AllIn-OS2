@@ -4,7 +4,7 @@
  * Interface base para todos os repositories, padronizando operações CRUD.
  */
 
-import { supabase } from './supabase/client';
+import { getBackendClient } from '../../../../lib/supabase/client';
 
 export interface BaseEntity {
   id: string;
@@ -39,8 +39,31 @@ export abstract class BaseRepository<T extends BaseEntity> {
   protected schema: string;
 
   constructor(tableName: string, schema: string = 'public') {
-    this.tableName = tableName;
-    this.schema = schema;
+    // Extrair schema e nome da tabela se tableName for qualificado
+    if (tableName.includes('.')) {
+      const parts = tableName.split('.');
+      this.schema = parts[0];
+      this.tableName = parts[1];
+    } else {
+      this.schema = schema;
+      this.tableName = tableName;
+    }
+  }
+
+  /**
+   * Obtém query com schema aplicado
+   */
+  protected getQuery() {
+    // Use .schema() method instead of qualified table name
+    const supabase = getBackendClient();
+    return supabase.schema(this.schema).from(this.tableName);
+  }
+
+  /**
+   * Obtém o cliente Supabase
+   */
+  public getClient() {
+    return getBackendClient();
   }
 
   /**
@@ -50,9 +73,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Lista de registros
    */
   async findAll(options?: FindOptions): Promise<T[]> {
-    let query = supabase
-      .from(this.tableName)
-      .select('*');
+    let query = this.getQuery().select('*');
 
     // Aplicar filtros
     if (options?.filters) {
@@ -91,8 +112,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Registro ou null
    */
   async findById(id: string): Promise<T | null> {
-    const { data, error } = await supabase
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select('*')
       .eq('id', id)
       .is('deleted_at', null)
@@ -113,8 +133,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Registro ou null
    */
   async findOne(filters: Record<string, any>): Promise<T | null> {
-    let query = supabase
-      .from(this.tableName)
+    let query = this.getQuery()
       .select('*')
       .is('deleted_at', null);
 
@@ -139,8 +158,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Registro criado
    */
   async create(entity: Partial<T>): Promise<T> {
-    const { data, error } = await supabase
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .insert({
         ...entity,
         created_at: new Date().toISOString(),
@@ -161,8 +179,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Registro atualizado
    */
   async update(id: string, entity: Partial<T>): Promise<T> {
-    const { data, error } = await supabase
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .update({
         ...entity,
         updated_at: new Date().toISOString(),
@@ -182,8 +199,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns true se removido com sucesso
    */
   async delete(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from(this.tableName)
+    const { error } = await this.getQuery()
       .update({
         deleted_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -201,8 +217,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns true se removido com sucesso
    */
   async hardDelete(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from(this.tableName)
+    const { error } = await this.getQuery()
       .delete()
       .eq('id', id);
 
@@ -217,8 +232,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Total de registros
    */
   async count(filters?: Record<string, any>): Promise<number> {
-    let query = supabase
-      .from(this.tableName)
+    let query = this.getQuery()
       .select('*', { count: 'exact', head: true })
       .is('deleted_at', null);
 
@@ -281,8 +295,7 @@ export abstract class BaseRepository<T extends BaseEntity> {
    * @returns Lista de registros
    */
   async findByIds(ids: string[]): Promise<T[]> {
-    const { data, error } = await supabase
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select('*')
       .in('id', ids)
       .is('deleted_at', null);

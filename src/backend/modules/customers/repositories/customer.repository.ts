@@ -28,7 +28,7 @@ export class CustomerRepository extends BaseRepository<Customer> {
       .eq("email", email)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 

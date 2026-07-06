@@ -1,7 +1,7 @@
 import { BaseRepository } from "../../../infra/database/base.repository";
 
 export interface Distribuidor {
-  id: string;
+  id?: string;
   usuario: string;
   nome: string;
   email: string;
@@ -18,6 +18,8 @@ export interface Distribuidor {
   status?: string;
   data_cadastro?: string;
   patrocinador_id?: string;
+  perna_esquerda_id?: string;
+  perna_direita_id?: string;
   allin_id?: number;
   allin_synced_at?: string;
   created_at?: string;
@@ -26,7 +28,7 @@ export interface Distribuidor {
 
 export class DistribuidorRepository extends BaseRepository<Distribuidor> {
   constructor() {
-    super("mlm.distribuidores");
+    super("distribuidores", "mlm");
   }
 
   async findByAllinId(allinId: number): Promise<Distribuidor | null> {
@@ -37,7 +39,7 @@ export class DistribuidorRepository extends BaseRepository<Distribuidor> {
       .eq("allin_id", allinId)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
@@ -47,9 +49,9 @@ export class DistribuidorRepository extends BaseRepository<Distribuidor> {
       .from("distribuidores")
       .select("*")
       .eq("usuario", usuario)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 
@@ -59,9 +61,9 @@ export class DistribuidorRepository extends BaseRepository<Distribuidor> {
       .from("distribuidores")
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
 

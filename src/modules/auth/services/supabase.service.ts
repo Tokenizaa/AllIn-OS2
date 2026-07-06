@@ -101,7 +101,7 @@ export class SupabaseService {
   }
 
   /**
-   * Fetch distributor profile from customers table
+   * Fetch distributor profile from mlm.distribuidores table
    */
   static async fetchDistributorProfile(userId: string): Promise<DistributorProfile | null> {
     try {
@@ -121,7 +121,7 @@ export class SupabaseService {
         return null;
       }
 
-      // Map customer data to DistributorProfile format
+      // Map distributor data to DistributorProfile format
       return {
         id: data.id,
         id_comprador: data.auth_user_id,
@@ -129,7 +129,7 @@ export class SupabaseService {
         referral_code: data.usuario || data.id_comprador || "",
         referral_link: `/loja/ref/${data.usuario || data.id_comprador}`,
         plan_id: data.plan_id || "none",
-        qualification: data.qualification || "Associado",
+        qualification: data.qualificacao || "Associado",
         wallet_balance: 0, // Would need to fetch from wallets table
         bonus_balance: 0, // Would need to fetch from wallets table
         status: data.status || "active",

@@ -1,5 +1,61 @@
 import { supabase } from "@/lib/supabase/client";
 
+type CustomerRow = Record<string, any>;
+
+function mapCustomerToProfile(customer: CustomerRow | null) {
+  if (!customer) return null;
+
+  return {
+    id: customer.id,
+    id_comprador: customer.id_comprador || customer.id || null,
+    user_id: customer.auth_user_id || customer.user_id || null,
+    name: customer.name || customer.nome_completo || customer.usuario || null,
+    email: customer.email || null,
+    role: customer.role || customer.customer_type || "cliente_final",
+    status: customer.status || "active",
+    display_name: customer.display_name || customer.nome_completo || customer.name || null,
+    avatar_url: customer.avatar_url || null,
+    phone: customer.phone || customer.telefone || null,
+    cpf: customer.cpf || customer.documento_cpf_cnpj || null,
+    sponsor_id: customer.sponsor_id || customer.patrocinador_comprador || null,
+    created_at: customer.created_at,
+    updated_at: customer.updated_at,
+  };
+}
+
+async function getRoleForAuthUserId(authUserId: string | null | undefined): Promise<string> {
+  if (!authUserId) return "cliente_final";
+
+  const { data: userRole } = await supabase
+    .schema("identity")
+    .from("user_roles")
+    .select("role_id, is_active")
+    .eq("user_id", authUserId)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!userRole?.role_id) return "cliente_final";
+
+  const { data: roleData } = await supabase
+    .schema("identity")
+    .from("roles")
+    .select("name")
+    .eq("id", userRole.role_id)
+    .maybeSingle();
+
+  return roleData?.name || "cliente_final";
+}
+
+async function mapCustomerRow(customer: CustomerRow | null) {
+  const profile = mapCustomerToProfile(customer);
+  if (!profile) return null;
+
+  profile.role = await getRoleForAuthUserId(profile.user_id);
+  return profile;
+}
+
 export const ProfileService = {
   async fetchUserProfile(userId: string) {
     const { data, error } = await supabase
@@ -9,7 +65,7 @@ export const ProfileService = {
       .eq("id", userId)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
   async fetchLastProfile() {
@@ -21,7 +77,7 @@ export const ProfileService = {
       .limit(1)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
   async fetchMyProfile() {
@@ -33,7 +89,7 @@ export const ProfileService = {
       .limit(1)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
   // ============================================================================
@@ -59,12 +115,18 @@ export const ProfileService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data || [];
+
+    const rows = data || [];
+    const mapped = [];
+    for (const row of rows) {
+      const profile = await mapCustomerRow(row);
+      if (!role || profile?.role === role) {
+        mapped.push(profile);
+      }
+    }
+    return mapped;
   },
 
-  /**
-   * Busca perfil por ID
-   */
   async fetchProfileById(id: string) {
     const { data, error } = await supabase
       .schema("crm")
@@ -73,7 +135,7 @@ export const ProfileService = {
       .eq("id", id)
       .maybeSingle();
     if (error) throw error;
-    return data;
+    return mapCustomerRow(data);
   },
 
   /**
@@ -105,10 +167,6 @@ export const ProfileService = {
     return this.fetchProfiles("admin", limit);
   },
 
-  /**
-   * Busca perfis com paginação (compatível com CustomerService.fetchCustomersWithOrderStats)
-   * NOTA: Este método precisa ser adaptado para incluir stats de pedidos
-   */
   async fetchProfilesWithStats(page = 1, pageSize = 15, role?: string) {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
@@ -127,19 +185,23 @@ export const ProfileService = {
     const { data, error, count } = await query;
     if (error) throw error;
 
-    // TODO: Integrar com customer_order_stats quando a migração para profiles estiver completa
+    const profiles = [];
+    for (const row of data || []) {
+      const profile = await mapCustomerRow(row);
+      if (!role || profile?.role === role) {
+        profiles.push(profile);
+      }
+    }
+
     return {
-      profiles: data || [],
-      orderStats: {}, // Placeholder - precisa ser implementado
+      profiles,
+      orderStats: {},
       totalCount: count || 0,
       page,
       pageSize,
     };
   },
 
-  /**
-   * Busca perfis para analytics (compatível com CustomerService.fetchAnalyticsCustomers)
-   */
   async fetchAnalyticsProfiles(role?: string) {
     let query = supabase
       .schema("crm")
@@ -157,16 +219,10 @@ export const ProfileService = {
     return data || [];
   },
 
-  /**
-   * Busca perfis recentes (compatível com CustomerService.fetchRecentCustomers)
-   */
   async fetchRecentProfiles(limit = 20, role?: string) {
     return this.fetchProfiles(role, limit);
   },
 
-  /**
-   * Busca membros da rede (compatível com CustomerService.fetchNetworkMembers)
-   */
   async fetchNetworkMembers(limit = 500, role?: string) {
     return this.fetchProfiles(role, limit);
   },

@@ -3,7 +3,7 @@ import { Product } from '../types/products';
 
 /**
  * Products Service
- * MIGRATED: Now uses Supabase products table as single source of truth
+ * MIGRATED: Now uses commerce.produtos table as single source of truth
  */
 export const productsService = {
   /**
@@ -30,8 +30,8 @@ export const productsService = {
       images: product.images || [],
       description: product.description,
       sku: product.sku,
-      manufacturer: product.manufacturer,
-      stock: product.stock || 0,
+      manufacturer: product.fabricante,
+      stock: product.estoque || 0,
       is_active: product.status === 'active',
       metadata: product.metadata || {},
       created_at: product.created_at,
@@ -47,7 +47,7 @@ export const productsService = {
       .schema('commerce')
       .from('produtos')
       .select('*')
-      .eq('category', categoryName)
+      .eq('categoria', categoryName)
       .eq('status', 'active')
       .order('created_at', { ascending: false });
 
@@ -64,8 +64,8 @@ export const productsService = {
       images: product.images || [],
       description: product.description,
       sku: product.sku,
-      manufacturer: product.manufacturer,
-      stock: product.stock || 0,
+      manufacturer: product.fabricante,
+      stock: product.estoque || 0,
       is_active: product.status === 'active',
       metadata: product.metadata || {},
       created_at: product.created_at,
@@ -99,9 +99,9 @@ export const productsService = {
       images: data.images || [],
       description: data.description,
       sku: data.sku,
-      manufacturer: data.manufacturer,
-      stock: data.stock || 0,
-      is_active: data.is_active ?? true,
+      manufacturer: data.fabricante,
+      stock: data.estoque || 0,
+      is_active: data.status === 'active',
       metadata: data.metadata || {},
       created_at: data.created_at,
       updated_at: data.updated_at,
@@ -124,7 +124,7 @@ export const productsService = {
       return [];
     }
 
-    const categories = [...new Set((data || []).map(p => p.category).filter(Boolean))];
+    const categories = [...new Set((data || []).map(p => p.categoria).filter(Boolean))];
     return categories;
   },
 

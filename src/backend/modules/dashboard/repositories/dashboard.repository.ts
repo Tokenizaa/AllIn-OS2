@@ -254,7 +254,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getTotalCommissionsPaid(start: Date, end: Date): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .gte('data_pagamento', start.toISOString())
       .lte('data_pagamento', end.toISOString())
@@ -266,7 +267,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getPendingCommissions(): Promise<number> {
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .eq('status', 'pendente');
 
@@ -392,7 +394,8 @@ export class DashboardRepository extends BaseRepository<any> {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .gte('data_pagamento', startOfMonth.toISOString())
       .eq('status', 'pago');
@@ -406,7 +409,8 @@ export class DashboardRepository extends BaseRepository<any> {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('valor')
       .gte('created_at', startOfMonth.toISOString())
       .eq('status', 'pendente');
@@ -417,7 +421,8 @@ export class DashboardRepository extends BaseRepository<any> {
 
   private async getRecentCommissionPayments(limit: number): Promise<any[]> {
     const { data, error } = await supabase
-      .from('mlm.comissoes')
+      .schema('mlm')
+      .from('comissoes')
       .select('id, distribuidor_id, valor, status, data_pagamento')
       .eq('status', 'pago')
       .order('data_pagamento', { ascending: false })

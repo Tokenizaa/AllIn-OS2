@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getMachines, getMachineById, createMachine, updateMachine, deleteMachine } from '@/backend/modules/industrial/api/industrial.api';
+import { getMachines, getMachineById, createMachine, updateMachine, deleteMachine } from '@/services/industrial.service';
 
 export function useMachines() {
   return useQuery({

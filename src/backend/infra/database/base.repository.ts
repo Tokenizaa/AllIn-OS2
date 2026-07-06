@@ -1,19 +1,33 @@
-import { getSupabaseAdminClient } from "../supabase/client";
+﻿import { getSupabaseAdminClient } from "../supabase/client";
 
 export abstract class BaseRepository<T> {
   protected tableName: string;
+  protected schema: string;
 
-  constructor(tableName: string) {
-    this.tableName = tableName;
+  constructor(tableName: string, schema: string = 'public') {
+    // Extrair schema e nome da tabela se tableName for qualificado
+    if (tableName.includes('.')) {
+      const parts = tableName.split('.');
+      this.schema = parts[0];
+      this.tableName = parts[1];
+    } else {
+      this.schema = schema;
+      this.tableName = tableName;
+    }
   }
 
-  protected getClient() {
+  public getClient() {
+    // Use backend client for full access without schema restrictions
     return getSupabaseAdminClient();
   }
 
+  protected getQuery() {
+    // Use .schema() method instead of qualified table name
+    return this.getClient().schema(this.schema).from(this.tableName);
+  }
+
   async findById(id: string): Promise<T | null> {
-    const { data, error } = await this.getClient()
-      .from(this.tableName)
+    const { data, error } = await this.getQuery()
       .select("*")
       .eq("id", id)
       .single();
@@ -29,7 +43,7 @@ export abstract class BaseRepository<T> {
     limit?: number;
     offset?: number;
   }): Promise<T[]> {
-    let query = this.getClient().from(this.tableName).select("*");
+    let query = this.getQuery().select("*");
 
     if (options?.filters) {
       Object.entries(options.filters).forEach(([key, value]) => {
@@ -58,8 +72,7 @@ export abstract class BaseRepository<T> {
   }
 
   async create(data: Partial<T>): Promise<T> {
-    const { data: result, error } = await this.getClient()
-      .from(this.tableName)
+    const { data: result, error } = await this.getQuery()
       .insert(data as any)
       .select()
       .single();
@@ -68,21 +81,19 @@ export abstract class BaseRepository<T> {
     return result;
   }
 
-  async update(id: string, data: Partial<T>): Promise<T> {
-    const { data: result, error } = await this.getClient()
-      .from(this.tableName)
+  async update(id: string, data: Partial<T>): Promise<T | null> {
+    const { data: result, error } = await this.getQuery()
       .update(data as any)
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return result;
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.getClient()
-      .from(this.tableName)
+    const { error } = await this.getQuery()
       .delete()
       .eq("id", id);
 
@@ -90,7 +101,7 @@ export abstract class BaseRepository<T> {
   }
 
   async count(filters?: Record<string, any>): Promise<number> {
-    let query = this.getClient().from(this.tableName).select("*", { count: "exact", head: true });
+    let query = this.getQuery().select("*", { count: "exact", head: true });
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {

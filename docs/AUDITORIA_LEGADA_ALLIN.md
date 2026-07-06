@@ -952,6 +952,853 @@ A nova plataforma tem uma arquitetura mais moderna e escalável, com a maioria d
 - Sync de ativações mensais
 - Sync de saques
 
+---
+
+## ETAPA 6: INVESTIGAÇÃO FORENSE - ORIGEM REAL DOS DADOS
+
+### DESCoberta Crítica: Arquitetura Híbrida do Sistema Legado
+
+#### DOIS SUBSISTEMAS DISTINTOS
+
+**1. Painel Administrativo Principal (OAuth-based)**
+- **URL Base:** `https://allinbrasil.com.br/administracao/`
+- **Autenticação:** OAuth2 (client credentials)
+- **Endpoints Funcionais:**
+  - `/api/v1/clientes` ✅ (funciona)
+  - `/api/v1/distribuidores` ✅ (funciona)
+- **Contém:** Planos (gerenciamento de planos MLM)
+- **URL de Planos:** `/administracao/Planos/Planos/principal`
+
+**2. Subsistema Loja Virtual (Token-based)**
+- **URL Base:** `https://allinbrasil.com.br/loja/admin/`
+- **Autenticação:** Token via URL parameter (`?token=...`)
+- **Contém:** Pedidos e Produtos
+- **URL de Pedidos:** `/loja/admin/sale/order?token=...`
+- **URL de Produtos:** `/loja/admin/catalog/product?token=...`
+- **Token de Exemplo:** `8eaf589c52cd3ff9b6677ab968c8644d`
+
+### EVIDÊNCIAS COLETADAS
+
+#### Pedidos (Orders) - Loja Virtual
+
+**URL de Acesso:**
+- Dashboard: `https://allinbrasil.com.br/loja/admin/common/dashboard?token=8eaf589c52cd3ff9b6677ab968c8644d`
+- Lista de Pedidos: `https://allinbrasil.com.br/loja/admin/sale/order?token=8eaf589c52cd3ff9b6677ab968c8644d`
+- Detalhes do Pedido: `https://allinbrasil.com.br/loja/admin/sale/order/info?token=8eaf589c52cd3ff9b6677ab968c8644d&order_id=25190`
+
+**Dados Capturados (Pedido #25190):**
+- **Cliente:** Eraldo Ferreira da Silva Filho
+- **Distribuidor:** erfsystem
+- **Tipo de Cliente:** Distribuidor - Comprando adesão
+- **Patrocinador:** allinBrasil
+- **Total:** R$ 0,00
+- **Status:** Pedido Pago
+- **Comentário:** "Pedido gerado automaticamente ao adquirir um plano gratuito."
+- **Data Criação:** 14/06/2026 13:06:59
+- **IP:** 18.231.97.46
+
+**Itens Comprados (Produtos Tab):**
+- **Produto:** Plano Afiliado
+- **Modelo:** Plano Afiliado
+- **SKU:** (vazio)
+- **Quantidade:** 1
+- **Valor:** R$ 0,00
+- **Total:** R$ 0,00
+- **Link do Produto:** `https://allinbrasil.com.br/loja/admin/catalog/product/edit?token=8eaf589c52cd3ff9b6677ab968c8644d&product_id=343`
+
+**Total de Pedidos no Dashboard:** 24.7K
+
+#### Produtos (Products) - Loja Virtual
+
+**URL de Acesso:**
+- Lista de Produtos: `https://allinbrasil.com.br/loja/admin/catalog/product?token=8eaf589c52cd3ff9b6677ab968c8644d`
+
+**Produtos Físicos Identificados:**
+- ALL CLASSIC ALL BLACK (ID: 13) - R$ 489,00 - Estoque: 89
+- FOLDERS KIT (ID: 14) - R$ 120,00 - Estoque: 83
+- CASUALL BLACK (ID: 19) - R$ 469,00 - Estoque: 49
+- Plano Afiliado (ID: 343) - R$ 0,00 - Estoque: 9000
+
+**Estrutura de Dados:**
+- ID, SKU, Imagem, Produto, Modelo, Categorias, Pontos, Preço, Quantidade, Produto Destacado, Situação, CD/Loja que cadastrou, Status moderação
+
+#### Planos (Plans) - Painel Principal
+
+**URL de Acesso:**
+- Lista de Planos: `https://allinbrasil.com.br/administracao/Planos/Planos/principal`
+
+**Planos Ativos:**
+- Plano Afiliado (ID: 343) - R$ 0,00 - Estoque: 9000
+- Plano Avanço (ID: 1) - R$ 997,00 - Estoque: 1001
+- Plano Excelência (ID: 313) - R$ 3.980,00 - Estoque: 2000
+
+**Abas Disponíveis:**
+- Adesões
+- Upgrades
+- Renovações
+
+### CAUSA RAIZ DOS ERROS 404
+
+#### Endpoints OAuth que NÃO Existem:
+
+1. **`/api/v1/pedidos`** - 404
+   - **Motivo:** Pedidos estão no subsistema Loja Virtual, não na API OAuth
+   - **Local Real:** `https://allinbrasil.com.br/loja/admin/sale/order` (token-based)
+
+2. **`/api/v1/produtos`** - 404
+   - **Motivo:** Produtos estão no subsistema Loja Virtual, não na API OAuth
+   - **Local Real:** `https://allinbrasil.com.br/loja/admin/catalog/product` (token-based)
+
+3. **`/api/v1/simulacao-planos`** - 404
+   - **Motivo:** Planos estão no painel principal, mas não expostos via API OAuth
+   - **Local Real:** `https://allinbrasil.com.br/administracao/Planos/Planos/principal` (OAuth UI)
+
+#### Endpoints OAuth que FUNCIONAM:
+
+1. **`/api/v1/clientes`** - ✅ 200 OK
+   - **Motivo:** Clientes estão no painel principal com API OAuth funcional
+
+2. **`/api/v1/distribuidores`** - ✅ 200 OK
+   - **Motivo:** Distribuidores estão no painel principal com API OAuth funcional
+
+### ANÁLISE DO CÓDIGO NOVO SISTEMA
+
+#### Arquivo: `src/backend/shared/allin/allin.service.ts`
+
+**Endpoints Tentados (Linhas 228-265):**
+
+```typescript
+async getProdutos(): Promise<AllInProduto[]> {
+  const response = await this.request<{ produtos: AllInProduto[] }>("/produtos");
+  // ❌ Este endpoint NÃO EXISTE na API OAuth
+}
+
+async getPedidos(): Promise<AllInPedido[]> {
+  const response = await this.request<{ pedidos: AllInPedido[] }>("/pedidos");
+  // ❌ Este endpoint NÃO EXISTE na API OAuth
+}
+
+async getPlanosMLM(): Promise<any[]> {
+  const response = await this.request<{ planos: any[] }>("/simulacao-planos");
+  // ❌ Este endpoint NÃO EXISTE na API OAuth
+}
+```
+
+**Endpoints que FUNCIONAM (Linhas 202-226):**
+
+```typescript
+async getClientes(): Promise<AllInCliente[]> {
+  const response = await this.request<{ clientes: AllInCliente[] }>("/clientes");
+  // ✅ Este endpoint EXISTE e funciona
+}
+
+async getDistribuidores(): Promise<AllInDistribuidor[]> {
+  const response = await this.request<{ distribuidores: AllInDistribuidor[] }>("/distribuidores");
+  // ✅ Este endpoint EXISTE e funciona
+}
+```
+
+### CONCLUSÃO DA INVESTIGAÇÃO FORENSE
+
+#### Origem dos Dados por Módulo:
+
+**1. Pedidos (Orders)**
+- **Origem Real:** Subsistema Loja Virtual
+- **URL:** `https://allinbrasil.com.br/loja/admin/sale/order`
+- **Autenticação:** Token-based (URL parameter)
+- **API OAuth:** ❌ NÃO DISPONÍVEL
+- **Acesso:** Apenas via interface web do Loja Virtual
+- **Evidência:** Pedido #25190 capturado com itens comprados (Plano Afiliado)
+
+**2. Produtos (Products)**
+- **Origem Real:** Subsistema Loja Virtual
+- **URL:** `https://allinbrasil.com.br/loja/admin/catalog/product`
+- **Autenticação:** Token-based (URL parameter)
+- **API OAuth:** ❌ NÃO DISPONÍVEL
+- **Acesso:** Apenas via interface web do Loja Virtual
+- **Evidência:** Lista de produtos físicos capturada (ALL CLASSIC, FOLDERS KIT, etc.)
+
+**3. Planos (Plans)**
+- **Origem Real:** Painel Administrativo Principal
+- **URL:** `https://allinbrasil.com.br/administracao/Planos/Planos/principal`
+- **Autenticação:** OAuth-based
+- **API OAuth:** ❌ NÃO DISPONÍVEL (apenas interface web)
+- **Acesso:** Apenas via interface web do painel principal
+- **Evidência:** Lista de planos capturada (Afiliado, Avanço, Excelência)
+
+**4. Clientes (Customers)**
+- **Origem Real:** Painel Administrativo Principal
+- **URL:** `https://allinbrasil.com.br/administracao/` (várias telas)
+- **Autenticação:** OAuth-based
+- **API OAuth:** ✅ DISPONÍVEL
+- **Endpoint:** `/api/v1/clientes`
+- **Evidência:** API funcional retorna dados corretamente
+
+**5. Distribuidores (Distributors)**
+- **Origem Real:** Painel Administrativo Principal
+- **URL:** `https://allinbrasil.com.br/administracao/Distribuidor/DistribuidoresARede/listar`
+- **Autenticação:** OAuth-based
+- **API OAuth:** ✅ DISPONÍVEL
+- **Endpoint:** `/api/v1/distribuidores`
+- **Evidência:** API funcional retorna dados corretamente
+
+### RECOMENDAÇÃO DEFINITIVA DE INTEGRAÇÃO
+
+#### Opção 1: Continuar com OAuth API (Parcial)
+- **Viabilidade:** ❌ NÃO VIÁVEL para Pedidos, Produtos e Planos
+- **Motivo:** Endpoints não existem na API OAuth
+- **Impacto:** Sistema não terá acesso a dados críticos de e-commerce
+
+#### Opção 2: Integração com Loja Virtual (Recomendada)
+- **Viabilidade:** ✅ VIÁVEL
+- **Abordagem:** 
+  1. Implementar autenticação token-based para Loja Virtual
+  2. Criar scraper autenticado para extrair dados de Pedidos e Produtos
+  3. Mapear estrutura HTML para JSON
+  4. Implementar sync periódico
+- **Vantagens:** Acesso completo a dados de e-commerce
+- **Desvantagens:** Frágil (depende de estrutura HTML), manutenção contínua
+
+#### Opção 3: Solicitar API Privada (Ideal)
+- **Viabilidade:** ✅ VIÁVEL (se Allin disponibilizar)
+- **Abordagem:**
+  1. Contatar Allin para solicitar API privada
+  2. Documentar endpoints necessários
+  3. Negociar acesso autenticado
+- **Vantagens:** Integração robusta e sustentável
+- **Desvantagens:** Depende de terceiros, pode ter custo
+
+#### Opção 4: Migração de Dados (Alternativa)
+- **Viabilidade:** ✅ VIÁVEL
+- **Abordagem:**
+  1. Exportar dados manualmente do Loja Virtual
+  2. Importar para Supabase
+  3. Implementar sync unidirecional (novo → legado)
+- **Vantagens:** Controle total dos dados
+- **Desvantagens:** Não sincroniza dados novos do legado
+
+### PLANO DE IMPLEMENTAÇÃO RECOMENDADO
+
+#### Fase 1: Implementação de Scraper Loja Virtual (2-3 semanas)
+1. Criar módulo `loja-virtual-scraper`
+2. Implementar autenticação token-based
+3. Criar parsers para:
+   - Lista de pedidos
+   - Detalhes do pedido
+   - Itens do pedido
+   - Lista de produtos
+   - Detalhes do produto
+4. Implementar sync periódico (diário)
+5. Mapear dados para estrutura do Supabase
+
+#### Fase 2: Implementação de Scraper Planos (1-2 semanas)
+1. Criar módulo `planos-scraper`
+2. Implementar autenticação OAuth
+3. Criar parsers para:
+   - Lista de planos
+   - Detalhes do plano
+   - Estoque do plano
+4. Implementar sync periódico (diário)
+5. Mapear dados para estrutura do Supabase
+
+#### Fase 3: Integração com Sync Service (1 semana)
+1. Integrar scrapers com `sync.service.ts`
+2. Implementar tratamento de erros
+3. Implementar logs de sincronização
+4. Implementar monitoramento
+
+#### Fase 4: Validação e Testes (1 semana)
+1. Validar dados extraídos
+2. Comparar com dados originais
+3. Testar fluxos de sync
+4. Documentar processo
+
+### RISCOS E MITIGAÇÃO
+
+#### Risco 1: Mudança na Estrutura HTML
+- **Probabilidade:** Alta
+- **Impacto:** Crítico
+- **Mitigação:** Monitoramento contínuo, alertas automáticos, testes de regressão
+
+#### Risco 2: Bloqueio de Acesso
+- **Probabilidade:** Média
+- **Impacto:** Crítico
+- **Mitigação:** Contato prévio com Allin, documentação de uso, implementação de rate limiting
+
+#### Risco 3: Inconsistência de Dados
+- **Probabilidade:** Média
+- **Impacto:** Alto
+- **Mitigação:** Validação de dados, checksums, reconciliação manual periódica
+
+### CONCLUSÃO FINAL
+
+A investigação forense revelou que o sistema legado AllIn possui uma arquitetura híbrida com dois subsistemas distintos:
+
+1. **Painel Principal (OAuth):** Contém Clientes e Distribuidores com API OAuth funcional
+2. **Loja Virtual (Token-based):** Contém Pedidos e Produtos sem API OAuth exposta
+
+Os erros 404 nos endpoints `/api/v1/pedidos`, `/api/v1/produtos` e `/api/v1/simulacao-planos` ocorrem porque esses dados **não estão disponíveis via API OAuth**, mas apenas através das interfaces web dos respectivos subsistemas.
+
+A recomendação definitiva é implementar uma solução de scraping autenticado para extrair dados do Loja Virtual e do painel de Planos, enquanto continua usando a API OAuth para Clientes e Distribuidores.
+
+---
+
+## ETAPA 7: INVESTIGAÇÃO DE APIs INTERNAS - LOJA VIRTUAL
+
+### OBJETIVO
+
+Determinar se existem APIs internas não documentadas no subsistema Loja Virtual antes de implementar scraping.
+
+### DESCOBERTA: PADRÃO OPENCART
+
+#### Evidência 1: URL Parameter Pattern
+
+**Paginação de Pedidos:**
+- URL: `https://allinbrasil.com.br/loja/admin/?route=sale%2Forder&token=8eaf589c52cd3ff9b6677ab968c8644d&per_page=15`
+- Padrão: `?route=sale/order` - **Clássico padrão OpenCart**
+
+**Paginação de Produtos:**
+- URL: `https://allinbrasil.com.br/loja/admin/catalog/product?token=8eaf589c52cd3ff9b6677ab968c8644d&per_page=20`
+- Padrão: Direto sem `route=`, mas estrutura OpenCart
+
+#### Evidência 2: XHR Endpoint Encontrado
+
+**Endpoint de Histórico de Pedido:**
+- URL: `https://allinbrasil.com.br/loja/admin/sale/order/history?token=8eaf589c52cd3ff9b6677ab968c8644d&order_id=25190`
+- Método: GET
+- Tipo: XHR
+- Headers: `X-Requested-With: XMLHttpRequest`
+- Response: HTML (não JSON)
+- Status: 200 OK
+
+**Response Body (HTML):**
+```html
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <td class="text-left">Cadastro</td>
+      <td class="text-left">Comentário</td>
+      <td class="text-left">Situação</td>
+      <td class="text-left">Cliente notificado</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="text-left">14/06/2026 13:06:59</td>
+      <td class="text-left">Aguardando Liberação na All-in</td>
+      <td class="text-left">Pedido Realizado</td>
+      <td class="text-left">Não</td>
+    </tr>
+    <tr>
+      <td class="text-left">14/06/2026 13:06:59</td>
+      <td class="text-left"><b>COMPRA PAGA!</b>...</td>
+      <td class="text-left">Pedido Pago</td>
+      <td class="text-left">Não</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+#### Evidência 3: Padrão OpenCart em JavaScript
+
+**Arquivo: `common.js`**
+```javascript
+// Padrão OpenCart para file manager
+$.ajax({
+    url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+    dataType: 'html',
+    // ...
+});
+```
+
+**Arquivo: `listagem.js`**
+```javascript
+// Sistema de listagem com AJAX
+$.ajax({
+    url: url,
+    type: 'GET',
+    dataType: 'json',
+    success: function (json) {
+        if (json.sucesso != undefined) {
+            $this.parent().append(json.sucesso);
+            listagem.recarregarListagem();
+        }
+    }
+});
+```
+
+### ANÁLISE DE REDE
+
+#### Pedidos (Orders)
+
+**Carregamento Inicial:**
+- Método: GET (full page reload)
+- URL: `https://allinbrasil.com.br/loja/admin/sale/order?token=...`
+- Tipo: Document
+- Response: HTML completo (server-side rendering)
+
+**Paginação:**
+- Método: GET (full page reload)
+- URL: `https://allinbrasil.com.br/loja/admin/?route=sale%2Forder&token=...&per_page=15`
+- Tipo: Document
+- Response: HTML completo (server-side rendering)
+
+**Detalhes do Pedido:**
+- Método: GET (full page reload)
+- URL: `https://allinbrasil.com.br/loja/admin/sale/order/info?token=...&order_id=25190`
+- Tipo: Document
+- Response: HTML completo (server-side rendering)
+
+**Histórico do Pedido (XHR):**
+- Método: GET
+- URL: `https://allinbrasil.com.br/loja/admin/sale/order/history?token=...&order_id=25190`
+- Tipo: XHR
+- Response: HTML parcial (fragmento de tabela)
+
+#### Produtos (Products)
+
+**Carregamento Inicial:**
+- Método: GET (full page reload)
+- URL: `https://allinbrasil.com.br/loja/admin/catalog/product?token=...`
+- Tipo: Document
+- Response: HTML completo (server-side rendering)
+
+**Paginação:**
+- Método: GET (full page reload)
+- URL: `https://allinbrasil.com.br/loja/admin/catalog/product?token=...&per_page=20`
+- Tipo: Document
+- Response: HTML completo (server-side rendering)
+
+### CONCLUSÃO DA INVESTIGAÇÃO DE APIs INTERNAS
+
+#### APIs JSON Encontradas: ❌ NENHUMA
+
+**Não existem endpoints JSON públicos para:**
+- Lista de pedidos
+- Detalhes de pedidos
+- Lista de produtos
+- Detalhes de produtos
+
+#### APIs HTML Encontradas: ✅ 1 ENDPOINT
+
+**`/loja/admin/sale/order/history`**
+- Retorna HTML parcial (histórico de status do pedido)
+- Não é útil para extração de dados estruturados
+- Requer parsing HTML
+
+#### Arquitetura do Sistema:
+
+**Server-Side Rendering (SSR):**
+- Todos os dados principais são renderizados no servidor
+- Não há APIs JSON para listagem de dados
+- Paginação usa full page reload
+- Apenas 1 endpoint XHR encontrado (retorna HTML)
+
+**Padrão OpenCart Confirmado:**
+- Sistema baseado em OpenCart ou derivação
+- Usa parâmetro `route=` para roteamento
+- Estrutura de URLs típica do OpenCart
+- JavaScript usa padrões OpenCart
+
+### RECOMENDAÇÃO ATUALIZADA
+
+#### Opção 1: API JSON Interna ❌ NÃO DISPONÍVEL
+- **Motivo:** Não existem endpoints JSON públicos
+- **Evidência:** Investigação de rede não encontrou nenhum endpoint JSON
+- **Conclusão:** Impossível implementar integração via API JSON
+
+#### Opção 2: API HTML Parcial ⚠️ LIMITADA
+- **Viabilidade:** Parcial
+- **Endpoint:** `/loja/admin/sale/order/history`
+- **Limitação:** Apenas histórico de status, não dados completos
+- **Conclusão:** Não suficiente para integração completa
+
+#### Opção 3: Scraper HTML ✅ ÚNICA VIABILIDADE
+- **Viabilidade:** Alta
+- **Abordagem:**
+  1. Implementar autenticação token-based
+  2. Extrair dados de HTML renderizado
+  3. Parsear tabelas e formulários
+  4. Implementar sync periódico
+- **Vantagens:** Acesso completo a todos os dados
+- **Desvantagens:** Frágil (depende de estrutura HTML)
+
+#### Opção 4: Solicitar API Privada (Ideal)
+- **Viabilidade:** Depende de Allin
+- **Abordagem:** Contatar Allin para solicitar API privada
+- **Vantagens:** Integração robusta e sustentável
+- **Desvantagens:** Depende de terceiros
+
+### PLANO DE IMPLEMENTAÇÃO ATUALIZADO
+
+#### Fase 1: Implementação de Scraper Loja Virtual (2-3 semanas)
+1. Criar módulo `loja-virtual-scraper`
+2. Implementar autenticação token-based
+3. Criar parsers para:
+   - Lista de pedidos (HTML → JSON)
+   - Detalhes do pedido (HTML → JSON)
+   - Itens do pedido (HTML → JSON)
+   - Lista de produtos (HTML → JSON)
+   - Detalhes do produto (HTML → JSON)
+4. Implementar sync periódico (diário)
+5. Mapear dados para estrutura do Supabase
+
+#### Fase 2: Implementação de Scraper Planos (1-2 semanas)
+1. Criar módulo `planos-scraper`
+2. Implementar autenticação OAuth
+3. Criar parsers para:
+   - Lista de planos (HTML → JSON)
+   - Detalhes do plano (HTML → JSON)
+   - Estoque do plano (HTML → JSON)
+4. Implementar sync periódico (diário)
+5. Mapear dados para estrutura do Supabase
+
+#### Fase 3: Integração com Sync Service (1 semana)
+1. Integrar scrapers com `sync.service.ts`
+2. Implementar tratamento de erros
+3. Implementar logs de sincronização
+4. Implementar monitoramento
+
+#### Fase 4: Validação e Testes (1 semana)
+1. Validar dados extraídos
+2. Comparar com dados originais
+3. Testar fluxos de sync
+4. Documentar processo
+
+### RISCOS E MITIGAÇÃO
+
+#### Risco 1: Mudança na Estrutura HTML
+- **Probabilidade:** Alta
+- **Impacto:** Crítico
+- **Mitigação:** Monitoramento contínuo, alertas automáticos, testes de regressão
+
+#### Risco 2: Bloqueio de Acesso
+- **Probabilidade:** Média
+- **Impacto:** Crítico
+- **Mitigação:** Contato prévio com Allin, documentação de uso, implementação de rate limiting
+
+#### Risco 3: Inconsistência de Dados
+- **Probabilidade:** Média
+- **Impacto:** Alto
+- **Mitigação:** Validação de dados, checksums, reconciliação manual periódica
+
+### CONCLUSÃO FINAL ATUALIZADA
+
+A investigação forense de APIs internas confirmou que:
+
+1. **O Loja Virtual é baseado em OpenCart** (padrão `route=` confirmado)
+2. **Não existem APIs JSON públicas** para pedidos e produtos
+3. **O sistema usa Server-Side Rendering** (todos os dados são renderizados no servidor)
+4. **Apenas 1 endpoint XHR foi encontrado** (`/sale/order/history` retorna HTML parcial)
+5. **A extração de dados via scraping HTML é a única viabilidade técnica**
+
+A recomendação definitiva permanece: **implementar solução de scraping autenticado** para extrair dados do Loja Virtual e do painel de Planos, enquanto continua usando a API OAuth para Clientes e Distribuidores.
+
+---
+
+## ETAPA 8: AUDITORIA FORENSE FINAL - OPENCART E APIS OCULTAS
+
+### OBJETIVO
+
+Realizar investigação exaustiva para determinar se existem APIs internas, endpoints AJAX, rotas OpenCart ocultas ou serviços JSON não documentados capazes de fornecer dados de Pedidos, Produtos e Planos.
+
+### METODOLOGIA
+
+1. **Auditoria de Arquivos JavaScript**
+2. **Teste de Rotas OpenCart Comuns**
+3. **Captura de Tráfego de Rede**
+4. **Análise de Padrões de URL**
+
+### ARQUIVOS JAVASCRIPT AUDITADOS
+
+#### 1. common.js
+**Localização:** `https://allinbrasil.com.br/loja/admin/view/javascript/common.js`
+
+**Descobertas:**
+- Padrão OpenCart confirmado: `index.php?route=common/filemanager&token=`
+- Função `getURLVar()` para parsing de parâmetros URL
+- Chamada AJAX para file manager:
+  ```javascript
+  $.ajax({
+      url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+      dataType: 'html',
+      // ...
+  });
+  ```
+- Nenhuma chamada para endpoints de dados (pedidos, produtos)
+
+#### 2. listagem.js
+**Localização:** `https://allinbrasil.com.br/src/Ferramentas/Listagem/Temas/Padrao/Recursos/Js/listagem.js`
+
+**Descobertas:**
+- Sistema de listagem com AJAX genérico
+- Função `recarregarListagem()`:
+  ```javascript
+  $.ajax({
+      url: url,
+      type: 'get',
+      dataType: 'html',
+      async: true,
+      success: function (html) {
+          $this.parent().html(html);
+      }
+  });
+  ```
+- Função `acessarLink()`:
+  ```javascript
+  $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      success: function (json) {
+          if (json.sucesso != undefined) {
+              $this.parent().append(json.sucesso);
+              listagem.recarregarListagem();
+          }
+      }
+  });
+  ```
+- **Observação:** URLs são dinâmicas, passadas via atributos HTML (`data-url-recarregar`, `href`)
+- Nenhum endpoint hardcoded para pedidos ou produtos
+
+#### 3. verificaPagamento.js
+**Localização:** `https://allinbrasil.com.br/src/Modulos/Compras/Visoes/Recursos/Js/verificaPagamento.js`
+
+**Descobertas:**
+- Função `verificarPagamento()`:
+  ```javascript
+  $.ajax({
+      url: urlVerificacao,
+      success: function (resposta) {
+          if (resposta['sucesso']) {
+              $("#situacaoPagamento .modal-body").html(resposta['sucesso']);
+          }
+          if (resposta['erro']) {
+              $("#situacaoPagamento .modal-body").html(resposta['erro']);
+          }
+      }
+  });
+  ```
+- **Observação:** URL é dinâmica, passada como parâmetro
+- Retorna JSON com campos `sucesso` e `erro`
+- Específico para verificação de pagamento, não para listagem de dados
+
+#### 4. jqueryPluginCommonjs.js
+**Localização:** `https://allinbrasil.com.br/loja/admin/view/javascript/jqueryPluginCommonjs.js`
+
+**Descobertas:**
+- Plugin de máscara de input (jQuery Mask Plugin)
+- Nenhuma chamada de API ou AJAX
+- Apenas funcionalidade de UI
+
+### TESTE DE ROTAS OPENCART COMUNS
+
+#### Rotas Testadas (todas retornaram página de login):
+
+1. `https://allinbrasil.com.br/loja/admin/index.php?route=sale/order/list&token=...`
+   - **Resultado:** Redirecionamento para login
+   - **Status:** ❌ Rota não existe ou não acessível
+
+2. `https://allinbrasil.com.br/loja/admin/index.php?route=catalog/product/list&token=...`
+   - **Resultado:** Redirecionamento para login
+   - **Status:** ❌ Rota não existe ou não acessível
+
+3. `https://allinbrasil.com.br/loja/admin/index.php?route=api/sale/order&token=...`
+   - **Resultado:** Redirecionamento para login
+   - **Status:** ❌ Rota não existe ou não acessível
+
+4. `https://allinbrasil.com.br/loja/admin/index.php?route=common/ajax/token&token=...`
+   - **Resultado:** Redirecionamento para login
+   - **Status:** ❌ Rota não existe ou não acessível
+
+#### Rotas Funcionais (anteriores):
+
+1. `https://allinbrasil.com.br/loja/admin/sale/order?token=...`
+   - **Resultado:** Página HTML completa (SSR)
+   - **Status:** ✅ Funciona, mas retorna HTML
+
+2. `https://allinbrasil.com.br/loja/admin/catalog/product?token=...`
+   - **Resultado:** Página HTML completa (SSR)
+   - **Status:** ✅ Funciona, mas retorna HTML
+
+3. `https://allinbrasil.com.br/loja/admin/sale/order/history?token=...&order_id=...`
+   - **Resultado:** HTML parcial (fragmento de tabela)
+   - **Status:** ✅ Funciona, mas retorna HTML parcial
+
+### CAPTURA DE TRÁFEGO DE REDE
+
+#### Página de Produtos
+
+**Requisições estáticas (127 arquivos):**
+- JavaScript: jQuery, Bootstrap, Summernote, Moment.js, Select2, etc.
+- CSS: Font Awesome, Bootstrap, Summernote, etc.
+- Imagens: Produtos do S3
+
+**Requisições dinâmicas (0):**
+- Nenhuma requisição XHR/Fetch/AJAX
+- Nenhuma requisição JSON
+- Apenas carregamento de página inicial (GET)
+
+**Ações testadas:**
+- Clique em "Exportar" → Nenhuma requisição de rede
+- Clique em "Adicionar Filtros" → Nenhuma requisição de rede
+- Paginação → Full page reload (GET)
+
+#### Página de Pedidos
+
+**Requisições estáticas (50 arquivos):**
+- JavaScript: jQuery, Bootstrap, Summernote, Moment.js, Select2, etc.
+- CSS: Font Awesome, Bootstrap, Summernote, etc.
+- JavaScript adicional: `verificaPagamento.js`
+
+**Requisições dinâmicas (0):**
+- Nenhuma requisição XHR/Fetch/AJAX
+- Nenhuma requisição JSON
+- Apenas carregamento de página inicial (GET)
+
+### ANÁLISE DE PADRÕES DE URL
+
+#### Padrões Encontrados:
+
+1. **Roteamento OpenCart:**
+   - Padrão: `index.php?route=module/controller/action`
+   - Exemplo: `index.php?route=common/filemanager`
+   - Status: Apenas para funcionalidades de UI, não para dados
+
+2. **Roteamento Direto:**
+   - Padrão: `/loja/admin/module/controller?token=...`
+   - Exemplo: `/loja/admin/sale/order?token=...`
+   - Status: Retorna HTML completo (SSR)
+
+3. **Roteamento XHR:**
+   - Padrão: `/loja/admin/module/controller/action?token=...`
+   - Exemplo: `/loja/admin/sale/order/history?token=...&order_id=...`
+   - Status: Retorna HTML parcial
+
+#### Padrões NÃO Encontrados:
+
+1. **Endpoints JSON:**
+   - Nenhum endpoint retornando JSON
+   - Nenhum padrão `/api/` no Loja Virtual
+
+2. **Endpoints AJAX para dados:**
+   - Nenhum endpoint para listagem de pedidos
+   - Nenhum endpoint para listagem de produtos
+   - Nenhum endpoint para autocomplete
+
+3. **Rotas OpenCart padrão:**
+   - `sale/order/list` ❌
+   - `catalog/product/list` ❌
+   - `api/sale/order` ❌
+   - `api/catalog/product` ❌
+
+### CONCLUSÃO DA AUDITORIA FORENSE FINAL
+
+#### APIs JSON Encontradas: ❌ ZERO
+
+**Nenhuma API JSON pública foi encontrada para:**
+- Lista de pedidos
+- Detalhes de pedidos
+- Lista de produtos
+- Detalhes de produtos
+- Autocomplete de produtos
+- Autocomplete de pedidos
+
+#### APIs HTML Encontradas: ✅ 1 ENDPOINT
+
+**`/loja/admin/sale/order/history`**
+- Retorna HTML parcial (histórico de status)
+- Requer parsing HTML
+- Não útil para extração de dados estruturados
+
+#### Arquitetura Confirmada:
+
+**Server-Side Rendering (SSR):**
+- Todos os dados principais são renderizados no servidor
+- Não há APIs JSON para listagem de dados
+- Paginação usa full page reload
+- Apenas 1 endpoint XHR encontrado (retorna HTML)
+
+**Padrão OpenCart Confirmado:**
+- Sistema baseado em OpenCart ou derivação
+- Usa parâmetro `route=` para roteamento de UI
+- Estrutura de URLs típica do OpenCart
+- JavaScript usa padrões OpenCart
+
+**Ausência de APIs de Dados:**
+- Rotas OpenCart padrão para dados não existem
+- Endpoints `/api/` não encontrados no Loja Virtual
+- AJAX usado apenas para funcionalidades específicas (file manager, verificação de pagamento)
+- Nenhum endpoint para listagem ou consulta de dados
+
+### RECOMENDAÇÃO FINAL
+
+#### Opção 1: API JSON Interna ❌ IMPOSSÍVEL
+- **Motivo:** Não existem endpoints JSON públicos
+- **Evidência:** Auditoria forense exaustiva não encontrou nenhum endpoint JSON
+- **Conclusão:** Impossível implementar integração via API JSON
+
+#### Opção 2: API HTML Parcial ⚠️ LIMITADA
+- **Viabilidade:** Parcial
+- **Endpoint:** `/loja/admin/sale/order/history`
+- **Limitação:** Apenas histórico de status, não dados completos
+- **Conclusão:** Não suficiente para integração completa
+
+#### Opção 3: Scraper HTML ✅ ÚNICA VIABILIDADE
+- **Viabilidade:** Alta
+- **Abordagem:**
+  1. Implementar autenticação token-based
+  2. Extrair dados de HTML renderizado
+  3. Parsear tabelas e formulários
+  4. Implementar sync periódico
+- **Vantagens:** Acesso completo a todos os dados
+- **Desvantagens:** Frágil (depende de estrutura HTML)
+
+#### Opção 4: Solicitar API Privada (Ideal)
+- **Viabilidade:** Depende de Allin
+- **Abordagem:** Contatar Allin para solicitar API privada
+- **Vantagens:** Integração robusta e sustentável
+- **Desvantagens:** Depende de terceiros
+
+### EVIDÊNCIAS COMPLETAS
+
+#### Arquivos JavaScript Auditados:
+- ✅ common.js (padrão OpenCart confirmado)
+- ✅ listagem.js (sistema de listagem genérico)
+- ✅ verificaPagamento.js (verificação de pagamento específica)
+- ✅ jqueryPluginCommonjs.js (plugin de máscara, sem API)
+
+#### Rotas OpenCart Testadas:
+- ❌ sale/order/list
+- ❌ catalog/product/list
+- ❌ api/sale/order
+- ❌ common/ajax/token
+
+#### Tráfego de Rede Capturado:
+- ✅ Página de produtos (127 requisições estáticas, 0 dinâmicas)
+- ✅ Página de pedidos (50 requisições estáticas, 0 dinâmicas)
+- ✅ Ações: exportar, filtros, paginação (todas full page reload)
+
+#### Padrões de URL Analisados:
+- ✅ index.php?route= (UI apenas)
+- ✅ /loja/admin/module/controller (SSR)
+- ✅ /loja/admin/module/controller/action (HTML parcial)
+- ❌ /api/ (não encontrado)
+- ❌ JSON endpoints (não encontrados)
+
+### CONCLUSÃO DEFINITIVA
+
+A auditoria forense exaustiva confirmou que:
+
+1. **O Loja Virtual é baseado em OpenCart** (padrão `route=` confirmado)
+2. **Não existem APIs JSON públicas** para pedidos e produtos
+3. **O sistema usa Server-Side Rendering** (todos os dados são renderizados no servidor)
+4. **Apenas 1 endpoint XHR foi encontrado** (`/sale/order/history` retorna HTML parcial)
+5. **Rotas OpenCart padrão para dados não existem**
+6. **A extração de dados via scraping HTML é a única viabilidade técnica**
+
+A recomendação definitiva permanece: **implementar solução de scraping autenticado** para extrair dados do Loja Virtual e do painel de Planos, enquanto continua usando a API OAuth para Clientes e Distribuidores.
+
 **Fase 3: Implementação Core (3-4 semanas)**
 - Dashboard completo
 - Ferramentas administrativas

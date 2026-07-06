@@ -4,6 +4,7 @@ export const customerSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   email: z.string().email(),
+  auth_user_id: z.string().uuid().nullable().optional(),
   phone: z.string().optional(),
   cpf: z.string().optional(),
   status: z.enum(["active", "inactive", "pending", "suspended"]),
@@ -18,6 +19,7 @@ export type Customer = z.infer<typeof customerSchema>;
 export const createCustomerSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
+  auth_user_id: z.string().uuid().optional(),
   phone: z.string().optional(),
   cpf: z.string().optional(),
   sponsor_id: z.string().uuid().optional(),
@@ -41,6 +43,7 @@ export const customer360Schema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   email: z.string(),
+  auth_user_id: z.string().uuid().nullable().optional(),
   phone: z.string().nullable(),
   cpf: z.string().nullable(),
   status: z.string(),
