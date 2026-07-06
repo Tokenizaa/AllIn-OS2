@@ -1,0 +1,202 @@
+[
+  {
+    "id_comprador": "24420",
+    "plano": "Plano Excelência",
+    "data_pagamento": "2026-02-20T08:48:00",
+    "valor": 3980.0,
+    "metadata": {
+      "distribuidor": "Osvaldo da Silva",
+      "data_ultima_modificacao": "2026-02-06T15:36:52"
+    }
+  },
+  {
+    "id_comprador": "24414",
+    "plano": "Plano Excelência",
+    "data_pagamento": "2026-02-06T16:50:12",
+    "valor": 3980.0,
+    "metadata": {
+      "distribuidor": "Isolene Schmitz",
+      "data_ultima_modificacao": "2026-02-05T19:17:05"
+    }
+  },
+  {
+    "id_comprador": "24411",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-02-05T10:50:51",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Osvaldo da Silva",
+      "data_ultima_modificacao": "2026-02-05T10:50:51"
+    }
+  },
+  {
+    "id_comprador": "24405",
+    "plano": "Plano Avanço",
+    "data_pagamento": "2026-02-04T17:13:19",
+    "valor": 997.0,
+    "metadata": {
+      "distribuidor": "Guilherme Colussi",
+      "data_ultima_modificacao": "2026-02-04T17:13:05"
+    }
+  },
+  {
+    "id_comprador": "24354",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-01-29T11:44:15",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Greice Reichambach da rosa zocche",
+      "data_ultima_modificacao": "2026-01-29T11:44:15"
+    }
+  },
+  {
+    "id_comprador": "24322",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-01-25T12:01:19",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Gabriel Zanella Schneider",
+      "data_ultima_modificacao": "2026-01-25T12:01:19"
+    }
+  },
+  {
+    "id_comprador": "24310",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-01-22T08:49:48",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "SUELEN CRISTINA DA SILVA",
+      "data_ultima_modificacao": "2026-01-22T08:49:48"
+    }
+  },
+  {
+    "id_comprador": "24257",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-01-13T16:26:46",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "SIDNEI JOSE RIBAS RODRIGUES",
+      "data_ultima_modificacao": "2026-01-13T16:26:46"
+    }
+  },
+  {
+    "id_comprador": "24244",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-01-12T13:05:11",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "CRISETE DOS PASSOS VAZ",
+      "data_ultima_modificacao": "2026-01-12T13:05:11"
+    }
+  },
+  {
+    "id_comprador": "24240",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2026-01-11T11:46:26",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Maiara perosa",
+      "data_ultima_modificacao": "2026-01-11T11:46:26"
+    }
+  },
+  {
+    "id_comprador": "24047",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-12-10T09:23:51",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "TÂNIA REGINA GODOY",
+      "data_ultima_modificacao": "2025-12-10T09:23:51"
+    }
+  },
+  {
+    "id_comprador": "23988",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-12-02T13:56:37",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "sidinei Aparecido de souza",
+      "data_ultima_modificacao": "2025-12-02T13:56:37"
+    }
+  },
+  {
+    "id_comprador": "23925",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-11-27T13:25:24",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Cristiane Sedlmayer",
+      "data_ultima_modificacao": "2025-11-27T13:25:24"
+    }
+  },
+  {
+    "id_comprador": "23864",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-11-19T14:42:21",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Alessandra Manoel Passos",
+      "data_ultima_modificacao": "2025-11-19T12:46:07"
+    }
+  },
+  {
+    "id_comprador": "23840",
+    "plano": "Plano Avanço",
+    "data_pagamento": "2025-11-18T09:35:18",
+    "valor": 997.0,
+    "metadata": {
+      "distribuidor": "Márcia Gomes Fagundes da Silva",
+      "data_ultima_modificacao": "2025-11-18T09:14:02"
+    }
+  },
+  {
+    "id_comprador": "23830",
+    "plano": "Plano Avanço",
+    "data_pagamento": "2025-11-17T14:47:03",
+    "valor": 0.09,
+    "metadata": {
+      "distribuidor": "MARIA LIZIENE CONCOLATO DA SILVA",
+      "data_ultima_modificacao": "2025-11-17T14:46:33"
+    }
+  },
+  {
+    "id_comprador": "23762",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-11-14T09:45:36",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Angela Hemp Gonçalves",
+      "data_ultima_modificacao": "2025-11-14T09:45:36"
+    }
+  },
+  {
+    "id_comprador": "23722",
+    "plano": "Upgrade - Plano Avanço para Excelência",
+    "data_pagamento": "2025-11-12T11:20:44",
+    "valor": 2983.0,
+    "metadata": {
+      "distribuidor": "GENESIS COLCHOES E TRANSPORTES LTDA",
+      "data_ultima_modificacao": "2025-11-11T15:58:22"
+    }
+  },
+  {
+    "id_comprador": "23713",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-11-11T09:56:40",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "ANA ROMILDA DA SILVA CALAFATI",
+      "data_ultima_modificacao": "2025-11-11T09:56:40"
+    }
+  },
+  {
+    "id_comprador": "23711",
+    "plano": "Plano Afiliado",
+    "data_pagamento": "2025-11-10T20:03:41",
+    "valor": 0.0,
+    "metadata": {
+      "distribuidor": "Marilete de Franceschi",
+      "data_ultima_modificacao": "2025-11-10T20:03:41"
+    }
+  }
+]

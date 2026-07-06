@@ -52,8 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        const { data: { session } } = await authService.getSession();
-        const currentUser = session?.user ? await SupabaseService.fetchUserProfile(session.user.id) : null;
+        const { data: { session }, error: sessionError } = await authService.getSession();
 
         if (sessionError) {
           console.error("[AuthProvider] Session error:", sessionError);

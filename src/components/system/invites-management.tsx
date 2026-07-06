@@ -22,23 +22,10 @@ export function InvitesManagement() {
     adminInvites, createAdminInvite, revokeAdminInvite, resendAdminInvite
   } = useAuth();
 
-export function InvitesManagement() {
-  const { 
-    adminInvites, createAdminInvite, revokeAdminInvite, resendAdminInvite
-  } = useAuth();
-
   // Search, filter states
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [openInviteModal, setOpenInviteModal] = useState(false);
-
-  // Form states
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.GESTAO_ADMIN);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const [notes, setNotes] = useState("");
-  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
   const {
     fullName,
@@ -65,93 +52,6 @@ export function InvitesManagement() {
 
   const handleCreateInviteWrapper = (e: React.FormEvent) => {
     handleCreateInvite(e, setOpenInviteModal);
-  };
-
-  // Submit and create invitation
-  const handleCreateInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName || !email) {
-      toast.error("Por favor, preencha o Nome Completo e o E-mail.");
-      return;
-    }
-
-    if (!email.includes("@")) {
-      toast.error("Insira um endereço de e-mail corporativo válido.");
-      return;
-    }
-
-    setIsSubmitLoading(true);
-
-    try {
-      // Simulate micro loading trigger
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const newInv = await createAdminInvite({
-        full_name: fullName,
-        email: email,
-        role: selectedRole,
-        permissions: selectedPermissions,
-        notes: notes,
-        invited_by: "system"
-      });
-
-      // Notification toast
-      toast.success(
-        `Convite administrativo criado e enviado com sucesso para ${email}!`
-      );
-      
-      // Copy invitation link to clipboard automatically to boost UX
-      try {
-        await navigator.clipboard.writeText(newInv.invite_link);
-        toast.info("Link do convite copiado automaticamente na Área de Trabalho!");
-      } catch {
-        // Fallback silencioso
-      }
-
-      // Reset states and close modal
-      setFullName("");
-      setEmail("");
-      setSelectedRole(UserRole.GESTAO_ADMIN);
-      setSelectedPermissions([]);
-      setNotes("");
-      setOpenInviteModal(false);
-    } catch {
-      toast.error("Não foi possível gerar a credencial.");
-    } finally {
-      setIsSubmitLoading(false);
-    }
-  };
-
-  // One-click clipboard support
-  const handleCopyLink = async (inviteLink: string, token: string) => {
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopiedToken(token);
-      toast.success("Link do convite copiado!");
-      setTimeout(() => setCopiedToken(null), 1500);
-    } catch {
-      toast.error("Erro ao copiar para a área de transferência.");
-    }
-  };
-
-  // Cancel / Revoke invitation link
-  const handleRevokeInvite = async (inviteId: string) => {
-    try {
-      await revokeAdminInvite(inviteId);
-      toast.success("Convite revogado com sucesso. Token cancelado e inutilizável.");
-    } catch {
-      toast.error("Não foi possível cancelar o enlace.");
-    }
-  };
-
-  // Re-send / Renew invite (adds 48 hours and fresh token)
-  const handleResendInvite = async (inviteId: string) => {
-    try {
-      await resendAdminInvite(inviteId);
-      toast.success("Convite renovado com sucesso! Novo token gerado e estendido por mais 48h.");
-    } catch {
-      toast.error("Erro ao reemitir credencial temporária.");
-    }
   };
 
   // Filter criteria

@@ -1,0 +1,35 @@
+[
+  {
+    "nome": "Plano Afiliado",
+    "tipo": "adesao",
+    "slug": "plano-afiliado",
+    "preco": 0.0,
+    "is_active": true,
+    "metadata": {
+      "allin_id": "343",
+      "estoque": 9000
+    }
+  },
+  {
+    "nome": "Plano Avanço",
+    "tipo": "adesao",
+    "slug": "plano-avanco",
+    "preco": 997.0,
+    "is_active": true,
+    "metadata": {
+      "allin_id": "1",
+      "estoque": 1001
+    }
+  },
+  {
+    "nome": "Plano Excelência",
+    "tipo": "adesao",
+    "slug": "plano-excelência",
+    "preco": 3980.0,
+    "is_active": true,
+    "metadata": {
+      "allin_id": "313",
+      "estoque": 2000
+    }
+  }
+]

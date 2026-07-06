@@ -26,10 +26,6 @@ export function PaymentHistory() {
   const { distributorProfile } = useDistributorProfileQuery();
   const idComprador = distributorProfile?.id || user?.id;
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [methodFilter, setMethodFilter] = useState<string>('all');
-
   const { data: paymentsData, isLoading, refetch } = usePayments(50);
 
   const payments = paymentsData || [];

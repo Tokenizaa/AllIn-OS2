@@ -193,7 +193,6 @@ function DistributorRecruitmentPage() {
               <p className="text-xs text-zinc-400 leading-relaxed">Ganhe bonificação imediata polpuda de até R$ 350,00 por novas distribuições que adentrarem seu time direto.</p>
             </div>
           </div>
-        </section>
 
         <section className="space-y-4 rounded-3xl border border-zinc-800 bg-[#090d16]/65 p-6">
           <div className="space-y-2">

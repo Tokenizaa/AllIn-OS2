@@ -74,18 +74,6 @@ function Customer360() {
   const walletTransactions = queryData?.walletTransactions ?? EMPTY_LIST;
   const downlines = queryData?.downlines ?? EMPTY_LIST;
 
-  // Combinar dados dos diferentes services
-  const customer = profile360?.profile;
-  const orders = crm360?.orders || [];
-  const sponsor = customer360?.sponsor;
-  const wallet = finance360?.wallet;
-  const pointsWallet = finance360?.pointsWallet;
-  const walletTransactions = finance360?.walletTransactions || [];
-  const downlines = mlm360?.downlines || [];
-  const metrics = profile360?.metrics;
-  const networkMetrics = profile360?.networkMetrics;
-  const score = profile360?.score;
-
   // Wallet Movement Manual Trigger Form
   const [showAddTx, setShowAddTx] = useState(false);
   const [txType, setTxType] = useState<"credit" | "debit">("credit");
