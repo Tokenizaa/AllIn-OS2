@@ -13,61 +13,18 @@
 // For now, we'll use basic types. Replace with generated types when available.
 
 export interface Database {
-  identity: {
+  public: {
     Tables: {
-      roles: any;
-      user_roles: any;
-      permissions: any;
-      role_permissions: any;
-    };
-  };
-  crm: {
-    Tables: {
+      profiles: any;
       customers: any;
-      customer_distributor: any;
-    };
-  };
-  mlm: {
-    Tables: {
-      distribuidores: any;
-      planos: any;
-      planos_distribuidores: any;
-      comissoes: any;
-      bonus_regras: any;
-      rede_linear_nos: any;
-    };
-  };
-  commerce: {
-    Tables: {
-      produtos: any;
-      pedidos: any;
-      pedidos_itens: any;
-      pedidos_pagamentos: any;
-    };
-  };
-  finance: {
-    Tables: {
-      solicitacoes_saque: any;
-      carteiras: any;
-      transacoes: any;
-    };
-  };
-  logistics: {
-    Tables: {
-      envios: any;
-      rastreamentos: any;
-    };
-  };
-  industrial: {
-    Tables: {
-      producao: any;
-      estoque: any;
-    };
-  };
-  system: {
-    Tables: {
-      configuracoes: any;
-      auditoria: any;
+      products: any;
+      cart: any;
+      orders: any;
+      plans: any;
+      withdrawals: any;
+      leads: any;
+      admin_users: any;
+      distributor_themes: any;
     };
   };
 }

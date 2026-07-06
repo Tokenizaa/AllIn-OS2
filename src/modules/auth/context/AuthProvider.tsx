@@ -5,7 +5,8 @@ import { User } from "./auth.types";
 import { AuthService } from "../services/auth.service";
 import { ProfileService } from "../services/profile.service";
 import { SupabaseService } from "../services/supabase.service";
-import { supabase } from "@/lib/supabase/client";
+import { referralTrackingService } from "@/services/referralTrackingService";
+import { authService } from "@/services/auth/auth.service";
 import { UserRole } from "@/shared/types/roles";
 
 /**
@@ -51,8 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        // Check for existing session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session } } = await authService.getSession();
+        const currentUser = session?.user ? await SupabaseService.fetchUserProfile(session.user.id) : null;
 
         if (sessionError) {
           console.error("[AuthProvider] Session error:", sessionError);
@@ -89,11 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     })();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("[AuthProvider] onAuthStateChange - event:", _event, "session exists:", !!session?.user);
-      console.log("[AuthProvider] onAuthStateChange - current user:", user?.id, "session user:", session?.user?.id);
-      console.log("[AuthProvider] onAuthStateChange - loadedUserIdRef:", loadedUserIdRef.current);
-
+    const { data: authListener } = authService.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
 
       // Set loadedUserIdRef immediately when session exists to prevent refetch

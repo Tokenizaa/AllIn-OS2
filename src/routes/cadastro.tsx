@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
-import { useReferralTrackingQuery } from "@/hooks/referral/useReferralTrackingQuery";
 import { UserPlus, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";

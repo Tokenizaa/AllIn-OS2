@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { httpClient } from "@/lib/api-client/http-client";
+import { ensureWallet } from "@/lib/api/wallet.functions";
 
 export function useCreateWallet() {
   return useMutation({
-    mutationFn: async (idComprador: string) => {
-      const result = await httpClient.ensureWallet(idComprador);
+    mutationFn: async (customerId: string) => {
+      const result = await ensureWallet({ customerId });
       if (!result.success) {
         throw new Error(result.error || "Failed to create wallet");
       }

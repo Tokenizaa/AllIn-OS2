@@ -84,7 +84,6 @@ export class WebhookProcessorService {
   private async markWebhookAsProcessed(event: WebhookEvent, success: boolean, errorMessage?: string): Promise<void> {
     try {
       const { data: existingWebhook } = await supabase
-        .schema('finance')
         .from('gateway_webhooks')
         .select('processing_attempts')
         .eq('payload', event.payload)
@@ -92,7 +91,6 @@ export class WebhookProcessorService {
         .maybeSingle();
 
       const { error } = await supabase
-        .schema('finance')
         .from('gateway_webhooks')
         .update({
           processed: true,

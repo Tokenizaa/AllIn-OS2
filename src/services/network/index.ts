@@ -7,31 +7,41 @@ export const NetworkService = {
   },
 
   async fetchRecentNetworkRelationships(limit = 12) {
-    // TODO: Add method to HTTP client for recent network relationships
-    throw new Error("fetchRecentNetworkRelationships not yet implemented in HTTP client");
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
   },
 
-  async fetchSponsorRelationship(idComprador: string) {
-    const result = await httpClient.getUpline(idComprador);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch sponsor relationship");
-    }
-    return result.data?.[0]; // Return first upline (sponsor)
+  async fetchSponsorRelationship(customerId: string) {
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("customer_id,sponsor_customer_id,level")
+      .eq("customer_id", customerId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
   },
 
-  async fetchUplineRelationships(idComprador: string) {
-    const result = await httpClient.getUpline(idComprador);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch upline relationships");
-    }
-    return result.data || [];
+  async fetchUplineRelationships(customerId: string) {
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("customer_id,sponsor_customer_id,level")
+      .eq("customer_id", customerId)
+      .order("level", { ascending: true });
+    if (error) throw error;
+    return data || [];
   },
 
-  async countDirectRelationships(idComprador: string) {
-    const result = await httpClient.getDownlines(idComprador);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to count direct relationships");
-    }
-    return result.data?.length || 0;
+  async countDirectRelationships(customerId: string) {
+    const { data, error } = await supabase
+      .from("network_relationships")
+      .select("customer_id")
+      .eq("sponsor_customer_id", customerId);
+    if (error) throw error;
+    return data?.length || 0;
   }
 };

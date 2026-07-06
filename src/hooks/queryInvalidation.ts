@@ -6,13 +6,13 @@ import { queryKeys } from "./queryKeys";
  * All mutations should use these functions to invalidate related queries
  */
 
-export function invalidateCustomerQueries(queryClient: QueryClient, idComprador?: string) {
+export function invalidateCustomerQueries(queryClient: QueryClient, customerId?: string) {
   queryClient.invalidateQueries({ queryKey: queryKeys.customers });
-  if (idComprador) {
-    queryClient.invalidateQueries({ queryKey: queryKeys.customer(idComprador) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.customer360(idComprador) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(idComprador) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.paymentHistory(idComprador) });
+  if (customerId) {
+    queryClient.invalidateQueries({ queryKey: queryKeys.customer(customerId) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.customer360(customerId) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(customerId) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.paymentHistory(customerId) });
   }
   queryClient.invalidateQueries({ queryKey: queryKeys.network });
   queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
@@ -25,12 +25,12 @@ export function invalidateOrderQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.shipments });
 }
 
-export function invalidateWalletQueries(queryClient: QueryClient, idComprador?: string) {
+export function invalidateWalletQueries(queryClient: QueryClient, customerId?: string) {
   queryClient.invalidateQueries({ queryKey: queryKeys.wallets });
-  if (idComprador) {
-    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(idComprador) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.bonusWallet(idComprador) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.pointsWallet(idComprador) });
+  if (customerId) {
+    queryClient.invalidateQueries({ queryKey: queryKeys.walletData(customerId) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.bonusWallet(customerId) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.pointsWallet(customerId) });
   }
   queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
   queryClient.invalidateQueries({ queryKey: queryKeys.commissions });
@@ -62,5 +62,5 @@ export function invalidateAnalyticsQueries(queryClient: QueryClient) {
 
 export function invalidateAuditQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.auditLogs });
-  queryClient.invalidateQueries({ queryKey: queryKeys.audit as any });
+  queryClient.invalidateQueries({ queryKey: queryKeys.audit });
 }

@@ -40,71 +40,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
-      external: ["jsonwebtoken", "express", "uuid", "crypto", "fs", "path", "os", "net", "tls", "http", "https", "stream"],
-      output: {
-        manualChunks(id) {
-          // Sprint 1: Separar rotas públicas de admin
-          // Mover componentes compartilhados para chunk separado
-          if (id.includes("/components/")) {
-            return "shared-components";
-          }
-          
-          if (id.includes("/routes/_app/")) {
-            return "admin-routes";
-          }
-          
-          if (id.includes("/routes/office/")) {
-            return "office-routes";
-          }
-          
-          // Rotas públicas
-          if (id.includes("/routes/") && !id.includes("/routes/_app/") && !id.includes("/routes/office/")) {
-            return "public-routes";
-          }
-          
-          // React core
-          if (id.includes("react") && !id.includes("@radix-ui")) {
-            return "react-vendor";
-          }
-          
-          // TanStack Query
-          if (id.includes("@tanstack")) {
-            return "tanstack-query";
-          }
-          
-          // Supabase
-          if (id.includes("@supabase")) {
-            return "supabase";
-          }
-          
-          // Icons - keep with react-vendor to avoid circular dependencies
-          if (id.includes("lucide-react")) {
-            return "react-vendor";
-          }
-          
-          // Radix UI components
-          if (id.includes("@radix-ui")) {
-            return "ui-vendor";
-          }
-          
-          // Other UI utilities
-          if (id.includes("class-variance-authority") || 
-              id.includes("clsx") || 
-              id.includes("tailwind-merge")) {
-            return "ui-utils";
-          }
-          
-          // Other vendors
-          if (id.includes("sonner") || 
-              id.includes("framer-motion") || 
-              id.includes("date-fns") ||
-              id.includes("react-day-picker") ||
-              id.includes("react-hook-form") ||
-              id.includes("zod")) {
-            return "vendor";
-          }
-        },
-      },
+      external: ["jsonwebtoken"],
     },
   },
 });

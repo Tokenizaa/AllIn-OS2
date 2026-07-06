@@ -46,8 +46,7 @@ export class LoggerService {
     }
 
     // Also log to console in development
-    const isDev = import.meta.env?.DEV || process.env.NODE_ENV === 'development';
-    if (isDev) {
+    if (import.meta.env.DEV) {
       const consoleMethod = level === LogLevel.ERROR ? "error" : level === LogLevel.WARN ? "warn" : "log";
       console[consoleMethod](`[${entry.timestamp}] [${level.toUpperCase()}]${context ? ` [${context}]` : ""}: ${message}`, metadata || "");
     }

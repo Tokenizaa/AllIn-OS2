@@ -38,6 +38,18 @@ function NetworkPage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Rede MLM" title="Genealogia inteligente" subtitle="Falha ao carregar a rede." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Rede MLM" title="Genealogia inteligente" subtitle="Dados reais da rede no Supabase." />

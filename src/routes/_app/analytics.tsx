@@ -65,13 +65,12 @@ function AnalyticsPage() {
 
   const networkLegs = useMemo(() => {
     const total = Number(statsData?.data?.totalOrders || 0);
-    const delivered = Number(statsData?.data?.deliveredOrders || 0);
+    const active = Number(statsData?.data?.deliveredOrders || 0);
     const pending = Number(statsData?.data?.pendingOrders || 0);
-    const cancelled = Number(statsData?.data?.cancelledOrders || 0);
     return [
-      { name: "Total", esquerda: total, direita: delivered },
-      { name: "Pendentes", esquerda: pending, direita: cancelled },
-      { name: "Faturamento", esquerda: Number(statsData?.data?.totalRevenue || 0), direita: 0 },
+      { name: "Pedidos", esquerda: total, direita: active },
+      { name: "Entregues", esquerda: active, direita: pending },
+      { name: "Faturamento", esquerda: Number(statsData?.data?.totalRevenue || 0), direita: Number(statsData?.data?.processingOrders || 0) },
     ];
   }, [statsData]);
 

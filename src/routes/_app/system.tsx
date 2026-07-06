@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase/client";
 import { useAuditLogs } from "@/hooks/system/useAuditLogs";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,45 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/system")({ component: SystemPage });
 
-function useSystemMetrics() {
-  return useQuery({
-    queryKey: ["system-metrics"],
-    queryFn: async () => {
-      // Count admin users
-      const { data: adminUsers, error: adminError } = await supabase
-        .from("crm.customers")
-        .select("id")
-        .eq("tipo_cliente", "admin");
-      
-      const adminCount = adminUsers?.length || 0;
-
-      // Count feature flags
-      const { data: featureFlags, error: flagsError } = await supabase
-        .from("system.feature_flags")
-        .select("id")
-        .eq("is_global", true);
-      
-      const flagsCount = featureFlags?.length || 0;
-
-      // Integrations - count from integrations table
-      const { data: integrations, error: integrationsError } = await supabase
-        .from("system.integrations")
-        .select("id", { count: "exact", head: true });
-      
-      const integrationsCount = integrations?.length || 0;
-
-      return {
-        adminUsers: adminCount,
-        integrations: integrationsCount,
-        featureFlags: flagsCount,
-      };
-    },
-  });
-}
-
 function SystemPage() {
   const { data: auditLogs = [], isLoading, isError, error, refetch } = useAuditLogs(10);
-  const { data: metrics } = useSystemMetrics();
 
   if (isError) {
     return (

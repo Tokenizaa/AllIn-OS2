@@ -20,14 +20,8 @@ let frontendClient: SupabaseClient | null = null;
 
 export function getFrontendClient(): SupabaseClient {
   if (!frontendClient) {
-    // Try both import.meta.env (Vite) and process.env (Node.js)
-    // process.env is only available in Node.js, not browser
-    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_URL : undefined) || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
-    const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.VITE_SUPABASE_ANON_KEY : undefined) || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined);
-
-    // DEBUG: Log environment variables
-    console.log('[Supabase Client] VITE_SUPABASE_URL:', supabaseUrl);
-    console.log('[Supabase Client] VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? '***' : 'undefined');
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error(
@@ -40,25 +34,6 @@ export function getFrontendClient(): SupabaseClient {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-      },
-      global: {
-        headers: {
-          'X-Client-Info': 'allin-os-frontend',
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        fetch: (url, options) => {
-          return fetch(url, { ...options, signal: AbortSignal.timeout(60000) });
-        },
-      },
-      db: {
-        schema: 'public',
-      },
-      // Add network resilience settings
-      realtime: {
-        params: {
-          eventsPerSecond: 10,
-        },
       },
     });
   }
@@ -91,8 +66,8 @@ export function getBackendClient(): SupabaseClient {
 
   // In a real server environment, these would come from process.env
   // For now, we'll use a placeholder that needs to be configured
-  const supabaseUrl = (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined) || import.meta.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined;
+  const supabaseUrl = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(
@@ -108,3 +83,10 @@ export function getBackendClient(): SupabaseClient {
   });
 }
 
+/**
+ * Legacy alias for getBackendClient
+ * @deprecated Use getBackendClient instead
+ */
+export function getSupabaseAdminClient(): SupabaseClient {
+  return getBackendClient();
+}

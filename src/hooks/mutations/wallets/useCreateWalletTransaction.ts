@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase-client";
 
 export function useCreateWalletTransaction() {
   return useMutation({
@@ -12,7 +12,7 @@ export function useCreateWalletTransaction() {
       description: string;
     }) => {
       const { data: txData, error } = await supabase
-        .from("finance.wallet_transactions")
+        .from("wallet_transactions")
         .insert({
           wallet_id: data.walletId,
           transaction_type: data.transaction_type,

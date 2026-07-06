@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { useCommissions } from "@/hooks/commissions/useCommissions";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
@@ -12,7 +11,6 @@ export const Route = createFileRoute("/_app/commissions")({ component: Commissio
 
 function CommissionsPage() {
   const { data: commissionsData, isError, error, refetch } = useCommissions();
-  const [isRunningCycle, setIsRunningCycle] = useState(false);
 
   const rows = commissionsData?.rows || [];
   const plans = commissionsData?.plans || [];
@@ -22,24 +20,6 @@ function CommissionsPage() {
   const plan = plans[0];
   const activeDirects = customers.filter((c) => String(c.patrocinador_comprador || "").length > 0 && (c.status || "").toLowerCase() === "active").length;
   const simulation = computeGenerationBonus(plan?.name, total || 1000, activeDirects);
-
-  const pendingCycles = rows.filter((r) => r.status !== "pago");
-
-  const handleRunCycle = async () => {
-    if (pendingCycles.length === 0) return;
-    setIsRunningCycle(true);
-    try {
-      // Execute real commission cycle using the service
-      await CommissionService.runCycle();
-      refetch();
-      toast.success("Ciclo de comissões executado com sucesso!");
-    } catch (err) {
-      console.error("Erro ao rodar ciclo:", err);
-      toast.error("Erro ao executar ciclo de comissões. Verifique se a função RPC está configurada.");
-    } finally {
-      setIsRunningCycle(false);
-    }
-  };
 
   if (isError) {
     return (

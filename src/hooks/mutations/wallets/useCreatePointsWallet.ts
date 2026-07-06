@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { httpClient } from "@/lib/api-client/http-client";
+import { ensurePointsWallet } from "@/lib/api/points-wallet.functions";
 
 export function useCreatePointsWallet() {
   return useMutation({
-    mutationFn: async (idComprador: string) => {
-      const result = await httpClient.ensurePointsWallet(idComprador);
+    mutationFn: async (customerId: string) => {
+      const result = await ensurePointsWallet({ customerId });
       if (!result.success) {
         throw new Error(result.error || "Failed to create points wallet");
       }

@@ -1,9 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/widgets/page-header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
 import { useOrderList } from "@/hooks/orders/useOrderList";
 
 export const Route = createFileRoute("/_app/orders/")({ component: OrdersPage });
@@ -17,12 +13,7 @@ const statusColor: Record<string, string> = {
 };
 
 function OrdersPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(15);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const { data: ordersPageData, isLoading, isError, error, refetch } = useOrderList(currentPage, pageSize);
+  const { data: ordersPageData, isLoading, isError, error, refetch } = useOrderList(60);
 
   const orders = ordersPageData?.orders || [];
   const customers = ordersPageData?.customers || [];
@@ -42,6 +33,18 @@ function OrdersPage() {
   }, [orders, statusFilter, searchQuery]);
 
   const total = filteredOrders.reduce((sum, o) => sum + Number(o.valor_total_pedido || o.valor_total || 0), 0);
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="Comercial" title="Pedidos" subtitle="Falha ao carregar pedidos." />
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   if (isError) {
     return (

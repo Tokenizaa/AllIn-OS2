@@ -38,12 +38,17 @@ export const OrderService = {
     return result.data || [];
   },
 
-  async fetchOrdersAndCustomers(page = 1, pageSize = 15) {
-    const result = await httpClient.getOrdersAndCustomers({ page, pageSize });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch orders and customers");
-    }
-    return result.data;
+  async fetchOrdersAndCustomers(limit = 60) {
+    const [{ data: ordersData, error: ordersError }, { data: customersData, error: customersError }] = await Promise.all([
+      supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(limit),
+      supabase.from("customers").select("id, usuario, id_comprador, user_id, qualification, telefone, metadata, nome_completo").order("created_at", { ascending: false }),
+    ]);
+    if (ordersError) throw ordersError;
+    if (customersError) throw customersError;
+    return {
+      orders: ordersData || [],
+      customers: customersData || [],
+    };
   },
 
   async fetchRecentOrders(options: { page?: number; limit?: number; id_comprador?: string; status?: string } = {}) {

@@ -91,13 +91,17 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          {/* Sprint 2: Removido DistributorProvider - migrado para TanStack Query */}
-          {/* Sprint 2: Removido StoreSettingsProvider - migrado para hook simples */}
-          {/* Sprint 2: Removido CartProvider - migrado para TanStack Query */}
-          {/* Sprint 2: Removido ProductsProvider - migrado para TanStack Query */}
-          <StyleProvider>
-            <Outlet />
-          </StyleProvider>
+          <DistributorProvider>
+            <StoreSettingsProvider>
+              <CartProvider>
+                <ProductsProvider>
+                  <StyleProvider>
+                    <Outlet />
+                  </StyleProvider>
+                </ProductsProvider>
+              </CartProvider>
+            </StoreSettingsProvider>
+          </DistributorProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

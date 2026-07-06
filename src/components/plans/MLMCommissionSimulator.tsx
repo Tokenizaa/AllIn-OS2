@@ -5,7 +5,7 @@ import { Label } from "../ui/label";
 import { Calculator, TrendingUp, Users, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { httpClient } from "@/lib/api-client/http-client";
+import { simulateCommission } from "../../lib/api/bonus.functions";
 
 export function MLMCommissionSimulator() {
   const [sellerId, setSellerId] = useState("");
@@ -13,13 +13,7 @@ export function MLMCommissionSimulator() {
 
   const { data: simulation, refetch: simulationRefetch, isFetching } = useQuery({
     queryKey: ["mlm-simulation", sellerId, orderAmount],
-    queryFn: async () => {
-      const result = await httpClient.simulateCommission(sellerId, orderAmount);
-      if (!result.success) {
-        throw new Error(result.error || "Failed to simulate commission");
-      }
-      return result.data;
-    },
+    queryFn: async () => simulateCommission({ seller_id: sellerId, order_amount: orderAmount }),
     enabled: false,
   });
 

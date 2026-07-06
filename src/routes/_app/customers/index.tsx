@@ -30,7 +30,7 @@ function CustomersPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
 
-  const { data, isLoading, refetch } = useCustomers(currentPage, pageSize);
+  const { data, isLoading, refetch } = useCustomers();
 
   const customers = (data as any)?.customers || [];
   const orderStats = (data as any)?.orderStats || {};

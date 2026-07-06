@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useProductDetail } from "@/hooks/products/useProductDetail";
 import { useAuth } from "@/modules/auth";
-import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
+import { useDistributor } from "@/lib/distributor-context";
 import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";

@@ -163,9 +163,9 @@ export const activateCustomerPlan = async (data: unknown) => {
 };
 
 export const deactivateCustomerPlan = async (data: unknown) => {
-  const parsed = z.object({ idComprador: z.string().uuid() }).parse(data);
+  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
   try {
-    await planService.deactivateCustomerPlan(parsed.idComprador);
+    await planService.deactivateCustomerPlan(parsed.customerId);
     return {
       success: true,
       message: "Customer plan deactivated successfully",
@@ -179,9 +179,9 @@ export const deactivateCustomerPlan = async (data: unknown) => {
 };
 
 export const getCustomerPlans = async (data: unknown) => {
-  const parsed = z.object({ idComprador: z.string().uuid() }).parse(data);
+  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
   try {
-    const plans = await planService.getCustomerPlans(parsed.idComprador);
+    const plans = await planService.getCustomerPlans(parsed.customerId);
     return {
       success: true,
       data: plans,
@@ -195,9 +195,9 @@ export const getCustomerPlans = async (data: unknown) => {
 };
 
 export const getActiveCustomerPlan = async (data: unknown) => {
-  const parsed = z.object({ idComprador: z.string().uuid() }).parse(data);
+  const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
   try {
-    const plan = await planService.getActiveCustomerPlan(parsed.idComprador);
+    const plan = await planService.getActiveCustomerPlan(parsed.customerId);
     return {
       success: true,
       data: plan,

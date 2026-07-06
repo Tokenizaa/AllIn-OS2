@@ -46,36 +46,33 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
   const location = useLocation();
   const inferredPermission = requiredPermission || resolvePathPermission(location.pathname);
 
+  // RouteGuard render
+
   useEffect(() => {
-    if (!loading && !permissionsLoading) {
+    if (!loading) {
       if (!user) {
-        if (location.pathname !== "/login") {
-          navigate({
-            to: "/login",
-            search: location.pathname === "/" ? undefined : { redirect: location.pathname }
-          });
-        }
+        // Redirect to Login page and preserve return url
+        navigate({
+          to: "/login",
+          search: location.pathname === "/" ? undefined : { redirect: location.pathname }
+        });
         return;
       }
 
       if (allowedRoles && !allowedRoles.includes(user.role)) {
-        const targetPath = DashboardResolver.getDashboardPathForUser(user);
-        if (location.pathname !== targetPath) {
-          navigate({ to: targetPath });
-        }
+        // Role mismatch redirect to their respective primary view
+        navigate({ to: getPrimaryPathForRole(user.role) });
         return;
       }
 
       if (inferredPermission && !hasPermission(inferredPermission.module, inferredPermission.action || "read")) {
-        const targetPath = DashboardResolver.getDashboardPathForUser(user);
-        if (location.pathname !== targetPath) {
-          navigate({ to: targetPath });
-        }
+        // No permission error card redirect or similar
+        navigate({ to: getRoleRedirectPath(user) });
       }
     }
   }, [user, loading, permissionsLoading, allowedRoles, inferredPermission, navigate, location.pathname, hasPermission]);
 
-  if (loading || permissionsLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#07090e] text-white">
         <div className="relative flex items-center justify-center">

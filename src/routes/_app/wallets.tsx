@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { useWithdrawals } from "@/hooks/wallets/useWithdrawals";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
@@ -8,32 +7,14 @@ import { ShieldAlert, Check, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WalletDashboard } from "@/components/payments/wallet-dashboard";
 import { PaymentHistory } from "@/components/payments/payment-history";
-import { WalletService } from "@/services/wallets";
 
 export const Route = createFileRoute("/_app/wallets")({ component: WalletsPage });
 
 function WalletsPage() {
   const { data: saquesData, isError, error, refetch } = useWithdrawals();
-  const [isApproving, setIsApproving] = useState(false);
 
   const saques = saquesData?.saques || [];
   const summary = saquesData?.summary || { total: 0, pending: 0, approved: 0, anomalies: 0 };
-
-  const pendingSaques = saques.filter((s: any) => s.status === "pending");
-
-  const handleApproveAll = async () => {
-    if (pendingSaques.length === 0) return;
-    setIsApproving(true);
-    try {
-      const ids = pendingSaques.map((s: any) => s.id);
-      await WalletService.approveWithdrawals(ids);
-      refetch();
-    } catch (err) {
-      console.error("Erro ao aprovar saques:", err);
-    } finally {
-      setIsApproving(false);
-    }
-  };
 
   if (isError) {
     return (

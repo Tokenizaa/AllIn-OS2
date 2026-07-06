@@ -8,7 +8,7 @@ const orderService = new OrderService();
 export const getOrders = async (data: unknown) => {
   const parsed = paginationSchema.merge(filterSchema).merge(
     z.object({
-      id_comprador: z.string().optional(),
+      customer_id: z.string().uuid().optional(),
       status: z.string().optional(),
     })
   ).parse(data);
@@ -49,9 +49,9 @@ export const getOrderById = async (data: unknown) => {
 };
 
 export const getOrderSummary = async (data: unknown) => {
-  const parsed = z.object({ idComprador: z.string().optional() }).parse(data);
+  const parsed = z.object({ customerId: z.string().uuid().optional() }).parse(data);
   try {
-    const summary = await orderService.getOrderSummary(parsed.idComprador);
+    const summary = await orderService.getOrderSummary(parsed.customerId);
     return {
       success: true,
       data: summary,

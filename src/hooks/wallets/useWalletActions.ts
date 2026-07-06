@@ -1,39 +1,29 @@
 import { useMutation } from "@tanstack/react-query";
-import { httpClient } from "@/lib/api-client/http-client";
+import { creditWallet, debitWallet } from "@/lib/api/wallet.functions";
 
-export function useWalletActions(idComprador?: string | null, onSettled?: () => void) {
+export function useWalletActions(customerId?: string | null, onSettled?: () => void) {
   const credit = useMutation({
     mutationFn: async (amount: number) => {
-      if (!idComprador) throw new Error("No ID Comprador");
-      const result = await httpClient.creditWallet(
-        idComprador,
+      if (!customerId) throw new Error("No customer ID");
+      return creditWallet({
+        customerId,
         amount,
-        "Adição de fundos via simulação",
-        undefined,
-        "manual"
-      );
-      if (!result.success) {
-        throw new Error(result.error || "Failed to credit wallet");
-      }
-      return result.data;
+        description: "Adição de fundos via simulação",
+        referenceType: "manual",
+      });
     },
     onSuccess: onSettled,
   });
 
   const debit = useMutation({
     mutationFn: async (amount: number) => {
-      if (!idComprador) throw new Error("No ID Comprador");
-      const result = await httpClient.debitWallet(
-        idComprador,
+      if (!customerId) throw new Error("No customer ID");
+      return debitWallet({
+        customerId,
         amount,
-        "Saque de fundos via simulação",
-        undefined,
-        "withdrawal"
-      );
-      if (!result.success) {
-        throw new Error(result.error || "Failed to debit wallet");
-      }
-      return result.data;
+        description: "Saque de fundos via simulação",
+        referenceType: "withdrawal",
+      });
     },
     onSuccess: onSettled,
   });
