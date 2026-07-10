@@ -17,7 +17,7 @@ export function useNetwork(limit = 12) {
         direita: Number(r.right_count || r.right_side_count || 0),
       }));
 
-      return { customers: distributorData || [], legs, relationships: relationshipData || [] };
+      return { customers: customerData || [], legs, relationships: relationshipData || [] };
     },
   });
 }

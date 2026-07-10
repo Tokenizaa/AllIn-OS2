@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle } from "lucide-react";
-import { productsService } from "@/services/productsService";
+import { productsService } from "@/services/products";
 
 export const Route = createFileRoute("/_app/products/")({ component: ProductsPage });
 

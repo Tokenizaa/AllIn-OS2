@@ -17,8 +17,8 @@ interface ProductGalleryProps {
 
 const ProductGallery = ({ limit }: ProductGalleryProps) => {
   const { setIsOpen } = useCart();
-  const [displayedProducts, setDisplayedProducts] = useState<ReturnType<typeof useProducts>["products"]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<ReturnType<typeof useProducts>["products"][number] | null>(null);
+  const [displayedProducts, setDisplayedProducts] = useState<ReturnType<typeof useProductsQuery>["products"]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<ReturnType<typeof useProductsQuery>["products"][number] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 

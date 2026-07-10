@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { copilotService, ChatRequest, ChatResponse, CopilotConversation, CopilotMessage } from '@/services/copilot.service';
+import { copilotService, ChatRequest, ChatResponse, CopilotConversation, CopilotMessage } from '@/services/copilot';
 
 export function useCopilot() {
   const [isLoading, setIsLoading] = useState(false);

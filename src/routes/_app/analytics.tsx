@@ -15,7 +15,7 @@ function AnalyticsPage() {
   const { data: ordersResult, isLoading: ordersLoading, isError: ordersIsError, error: ordersError, refetch: refetchOrders } = orders;
   const { data: customersData, isLoading: customersLoading, isError: customersIsError, error: customersError, refetch: refetchCustomers } = customers;
 
-  const ordersList = useMemo(() => ordersResult?.data?.data || [], [ordersResult]);
+  const ordersList = useMemo(() => ((ordersResult as any)?.data?.data || []) as any[], [ordersResult]);
 
   const revenueSeries = useMemo(() => {
     // Show in chronological order (left to right) by reversing the recent orders slice
@@ -64,13 +64,13 @@ function AnalyticsPage() {
   }, [ordersList]);
 
   const networkLegs = useMemo(() => {
-    const total = Number(statsData?.data?.totalOrders || 0);
-    const active = Number(statsData?.data?.deliveredOrders || 0);
-    const pending = Number(statsData?.data?.pendingOrders || 0);
+    const total = Number(((statsData as any)?.data as any)?.totalOrders || 0);
+    const active = Number(((statsData as any)?.data as any)?.deliveredOrders || 0);
+    const pending = Number(((statsData as any)?.data as any)?.pendingOrders || 0);
     return [
       { name: "Pedidos", esquerda: total, direita: active },
       { name: "Entregues", esquerda: active, direita: pending },
-      { name: "Faturamento", esquerda: Number(statsData?.data?.totalRevenue || 0), direita: Number(statsData?.data?.processingOrders || 0) },
+      { name: "Faturamento", esquerda: Number(((statsData as any)?.data as any)?.totalRevenue || 0), direita: Number(((statsData as any)?.data as any)?.processingOrders || 0) },
     ];
   }, [statsData]);
 
@@ -112,10 +112,10 @@ function AnalyticsPage() {
       <PageHeader eyebrow="Executive" title="Analytics" subtitle="KPIs operacionais com dados reais de pedidos." />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Receita total" value={`R$ ${Number(statsData?.data?.totalRevenue || 0).toLocaleString()}`} helper={`${Number(statsData?.data?.totalOrders || 0)} pedidos`} />
-        <MetricCard title="Pedidos" value={Number(statsData?.data?.totalOrders || 0).toString()} helper={`${Number(statsData?.data?.pendingOrders || 0)} pendentes`} />
-        <MetricCard title="Entregues" value={Number(statsData?.data?.deliveredOrders || 0).toString()} helper={`${Number(statsData?.data?.shippedOrders || 0)} enviados`} />
-        <MetricCard title="Cancelados" value={Number(statsData?.data?.cancelledOrders || 0).toString()} helper="Monitoramento de perda" />
+        <MetricCard title="Receita total" value={`R$ ${Number(((statsData as any)?.data as any)?.totalRevenue || 0).toLocaleString()}`} helper={`${Number(((statsData as any)?.data as any)?.totalOrders || 0)} pedidos`} />
+        <MetricCard title="Pedidos" value={Number(((statsData as any)?.data as any)?.totalOrders || 0).toString()} helper={`${Number(((statsData as any)?.data as any)?.pendingOrders || 0)} pendentes`} />
+        <MetricCard title="Entregues" value={Number(((statsData as any)?.data as any)?.deliveredOrders || 0).toString()} helper={`${Number(((statsData as any)?.data as any)?.shippedOrders || 0)} enviados`} />
+        <MetricCard title="Cancelados" value={Number(((statsData as any)?.data as any)?.cancelledOrders || 0).toString()} helper="Monitoramento de perda" />
       </div>
 
       <Tabs defaultValue="operacional" className="space-y-4">

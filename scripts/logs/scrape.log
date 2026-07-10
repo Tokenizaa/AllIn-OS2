@@ -1,5 +1,0 @@
-2026-06-07 08:25:12 | INFO     | scrape | [main] Iniciando scrape v2.0
-2026-06-07 08:25:12 | INFO     | scrape | [main] Nenhum checkpoint encontrado. Iniciando do zero.
-2026-06-07 08:25:12 | INFO     | scrape | [auth] Iniciando autenticação
-2026-06-07 08:25:16 | INFO     | scrape | [auth] Autenticação bem-sucedida
-2026-06-07 08:25:16 | INFO     | scrape | [pagination] Iniciando extração de lista de pedidos

@@ -32,7 +32,7 @@ function Dashboard() {
     return <div className="p-6 text-sm text-muted-foreground">Carregando dados reais...</div>;
   }
 
-  const { stats: current, salesSeries, bonusOrigin, topProducts, timeline, aiInsights, goals } = data;
+  const { stats: current = {} as any, salesSeries = [], bonusOrigin = [], topProducts = [], timeline = [], aiInsights = [], goals = [] } = (data as any) || {};
 
   return (
     <div className="space-y-6">

@@ -6,11 +6,11 @@ import { Search, X } from 'lucide-react';
 import ProductGallery from '@/components/features/products/ProductGallery';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useProductsFromCSV } from '@/hooks/useProductsFromCSV';
+import { useProductsLegacy } from '@/hooks/useProductsLegacy';
 import { Product } from '@/types/products';
 
 const ProductSearch: React.FC = () => {
-  const { products, loading, error } = useProductsFromCSV();
+  const { products, loading, error } = useProductsLegacy();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -62,7 +62,7 @@ const ProductSearch: React.FC = () => {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-    setFilteredProducts(result);
+    setFilteredProducts(result as any);
   }, [products, searchTerm, selectedCategory, sortBy, sortOrder]);
 
   const handleClearFilters = () => {

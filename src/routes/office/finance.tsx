@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDownToLine, TrendingUp, Sparkles, Lock, Clock, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useCustomer360 } from "@/hooks/customers/useCustomer360";
+import { useCustomer360ByCustomerId } from "@/hooks/customers/useCustomer360New";
 import { useCreateWallet } from "@/hooks/mutations/wallets/useCreateWallet";
 import { useCreatePointsWallet } from "@/hooks/mutations/wallets/useCreatePointsWallet";
 import { useUpdateWalletBalance } from "@/hooks/mutations/wallets/useUpdateWalletBalance";
@@ -26,8 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
+import { Badge } from "@/components/ui/badge";
+import { CustomerTimelineTab } from "@/components/customers/CustomerTimelineTab";
+import { CustomerOrdersTab } from "@/components/customers/CustomerOrdersTab";
+import { CustomerWalletTab } from "@/components/customers/CustomerWalletTab";
+import { CustomerAutomationsTab } from "@/components/customers/CustomerAutomationsTab";
 import { toast } from "sonner";
-import { CustomerService } from "@/services/customers";
 
 const statusStyles: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
@@ -51,28 +54,21 @@ export const Route = createFileRoute("/_app/customers/$id")({
 function Customer360() {
   const { id } = Route.useParams();
 
-  const { data: customer, isLoading: isLoadingCustomer, isError: isErrorCustomer, error: customerError } = useQuery({
-    queryKey: ["customer", id],
-    queryFn: () => CustomerService.fetchCustomerById(id),
-  });
-
-  const { data: queryData, isLoading, isError, error, refetch } = useCustomer360(
-    customer?.id,
-    customer?.patrocinador_comprador,
-    customer?.id_comprador
-  );
+  const { data: queryData, isLoading, isError, error, refetch } = useCustomer360ByCustomerId(id);
 
   const createWallet = useCreateWallet();
   const createPointsWallet = useCreatePointsWallet();
   const updateWalletBalance = useUpdateWalletBalance();
   const createWalletTransaction = useCreateWalletTransaction();
 
+  const customer = (queryData as any)?.customer;
   const orders = queryData?.orders ?? EMPTY_LIST;
   const sponsor = queryData?.sponsor || null;
   const wallet = queryData?.wallet || null;
   const pointsWallet = queryData?.pointsWallet || null;
   const walletTransactions = queryData?.walletTransactions ?? EMPTY_LIST;
   const downlines = queryData?.downlines ?? EMPTY_LIST;
+  const customer360 = queryData;
 
   // Wallet Movement Manual Trigger Form
   const [showAddTx, setShowAddTx] = useState(false);
@@ -188,6 +184,9 @@ function Customer360() {
   };
 
   // Timeline entries
+  const [noteText, setNoteText] = useState("");
+  const [customNotes, setCustomNotes] = useState<any[]>([]);
+
   const handleAddNote = (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteText.trim()) return;
@@ -217,16 +216,16 @@ function Customer360() {
     ];
   }, [customNotes, orders, customer?.created_at]);
 
-  if (isErrorCustomer) {
+  if (isError) {
     return (
       <div className="space-y-3">
         <PageHeader eyebrow="Customer 360" title="Cliente não encontrado" subtitle="Falha ao carregar dados do cliente." />
-        <p className="text-sm text-destructive">Erro: {customerError instanceof Error ? customerError.message : "falha desconhecida"}</p>
+        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
       </div>
     );
   }
 
-  if (isLoadingCustomer || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-3 bg-background">
         <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -246,7 +245,7 @@ function Customer360() {
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Link to="/_app/customers" className="hover:text-foreground transition-colors">
+        <Link to="/customers" className="hover:text-foreground transition-colors">
           Distribuidores
         </Link>
         <span>/</span>

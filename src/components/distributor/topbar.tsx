@@ -1,14 +1,14 @@
 import { Bell, Search, Sparkles, Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useDistributor } from "@/lib/distributor-context";
+import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
 import { toast } from "sonner";
 
 export function OfficeTopbar() {
-  const { currentDistributor } = useDistributor();
+  const { data: distributor } = useDistributorDefault();
   const copyLink = () => {
-    if (currentDistributor.slug) {
-      navigator.clipboard.writeText(`${window.location.origin}/loja/${currentDistributor.slug}`);
+    if (distributor.slug) {
+      navigator.clipboard.writeText(`${window.location.origin}/loja/${distributor.slug}`);
       toast.success("Link da sua loja copiado!");
     }
   };

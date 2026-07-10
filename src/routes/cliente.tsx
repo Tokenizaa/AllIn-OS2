@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RouteGuard } from "@/modules/auth";
 import { UserRole } from "@/shared/types/roles";
 
-export const Route = createFileRoute("/cliente")({
+export const Route = createFileRoute("/_cliente")({
   component: ClientePageSecure,
 });
 

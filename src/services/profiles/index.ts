@@ -117,7 +117,7 @@ export const ProfileService = {
     if (error) throw error;
 
     const rows = data || [];
-    const mapped = [];
+    const mapped: any[] = [];
     for (const row of rows) {
       const profile = await mapCustomerRow(row);
       if (!role || profile?.role === role) {
@@ -185,7 +185,7 @@ export const ProfileService = {
     const { data, error, count } = await query;
     if (error) throw error;
 
-    const profiles = [];
+    const profiles: any[] = [];
     for (const row of data || []) {
       const profile = await mapCustomerRow(row);
       if (!role || profile?.role === role) {

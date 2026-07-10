@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/modules/auth";
-import { cartService, CartItem as SupabaseCartItem } from "@/services/cartService";
+import { cartService, CartItem as SupabaseCartItem } from "@/services/cart";
 
 export type CartItem = {
   id: string;
@@ -19,7 +19,7 @@ async function fetchCartItems(userId: string): Promise<CartItem[]> {
   return supabaseItems.map(item => ({
     id: item.id,
     productId: item.product_id,
-    name: item.product?.name || 'Produto',
+    name: item.product?.nome || 'Produto',
     imageUrl: item.product?.images?.[0] || '',
     price: item.product?.price || '0',
     quantity: item.quantity,

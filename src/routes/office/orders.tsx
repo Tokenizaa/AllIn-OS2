@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ShoppingBag, Search, Filter, Download, RotateCcw, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ function formatBRL(value: number) {
 function OrdersPage() {
   const [search, setSearch] = useState("");
 
-  const { data: oRows = [], isLoading } = useOrders(200);
+  const { data: oRows = [], isLoading } = useOrders(200) as any;
 
   const filteredOrders = useMemo(() => {
     const q = search.trim().toLowerCase();

@@ -5,8 +5,8 @@ import { User } from "./auth.types";
 import { AuthService } from "../services/auth.service";
 import { ProfileService } from "../services/profile.service";
 import { SupabaseService } from "../services/supabase.service";
-import { referralTrackingService } from "@/services/referralTrackingService";
-import { authService } from "@/services/auth/auth.service";
+import { referralTrackingService } from "@/services/network/referral-tracking";
+import { supabase } from "@/lib/supabase/client";
 import { UserRole } from "@/shared/types/roles";
 
 /**
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        const { data: { session }, error: sessionError } = await authService.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
           console.error("[AuthProvider] Session error:", sessionError);
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     })();
 
-    const { data: authListener } = authService.onAuthStateChange(async (_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
 
       // Set loadedUserIdRef immediately when session exists to prevent refetch
@@ -208,17 +208,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value: AuthContextType = {
     user,
     loading,
-    distributorProfile: null, // Sprint 4: Migrado para useDistributorProfileQuery
-    activeSponsor: null, // Sprint 4: Migrado para useReferralTrackingQuery
-    activeReferralMetadata: null, // Sprint 4: Migrado para useReferralTrackingQuery
+    distributorProfile: null,
+    activeSponsor: null,
+    activeReferralMetadata: null,
     login,
     register,
     logout,
     updateProfile,
     updateDistributorProfile: async () => { throw new Error("Use useDistributorProfileQuery instead"); },
     changeUserRole,
-    clearSponsor: async () => { throw new Error("Use useReferralTrackingQuery instead"); },
+    clearSponsor: () => {},
     activateDistributorOffice: async () => { throw new Error("Use useDistributorProfileQuery instead"); },
+    adminInvites: [],
+    usersList: [],
+    triggerBinomialBonusPay: async () => {},
+    addAuditLog: async () => {},
+    getAdminInviteByToken: async () => null,
+    acceptAdminInvite: async () => null,
+    createAdminInvite: async () => {},
+    revokeAdminInvite: async () => {},
+    resendAdminInvite: async () => {},
+    deleteUserAndInviteSession: async () => {},
+    fetchRecentWithdrawals: async () => [],
+    fetchWorkspaceSettings: async () => ({}),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

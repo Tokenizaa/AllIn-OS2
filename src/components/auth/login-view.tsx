@@ -14,7 +14,8 @@ import { getNetworkErrorMessage } from "@/lib/network-resilience";
 export function LoginView() {
   const navigate = useNavigate();
   const { login, user } = useAuth();
-  const { activeSponsor } = useReferralTrackingQuery();
+  const referralQuery = useReferralTrackingQuery();
+  const activeSponsor = (referralQuery as any).data?.activeSponsor;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

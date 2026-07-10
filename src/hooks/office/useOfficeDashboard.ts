@@ -13,22 +13,23 @@ export function useOfficeDashboard() {
     staleTime: 0,
     refetchOnMount: "always",
     queryFn: async () => {
-      const [orders, payments, customers, products, withdrawals, lastProfile] = await Promise.all([
+      const [orders, payments, customers, products, withdrawalsRes, lastProfile] = await Promise.all([
         OrderService.fetchOrdersForDashboard(),
         PaymentService.fetchPaymentsForDashboard(),
         CustomerService.fetchCustomersList(),
         ProductService.fetchProducts(20),
-        WalletService.fetchRecentWithdrawals(20),
+        WalletService.fetchWithdrawals(20),
         ProfileService.fetchLastProfile(),
       ]);
+      const withdrawals = (withdrawalsRes as any)?.data || [];
 
       const totalVendido = orders.reduce((sum, row) => sum + Number(row.valor_total_pedido || row.valor_total || 0), 0);
-      const totalPago = payments.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+      const totalPago = payments.reduce((sum, row: any) => sum + Number(row.amount || 0), 0);
       const pedidosMes = orders.length;
       const redeTotal = customers.length;
       const ticketMedio = orders.length ? totalVendido / orders.length : 0;
       const conversion = customers.length ? Math.round((orders.length / customers.length) * 100) : 0;
-      const saldoDisponivel = Math.max(0, totalPago - withdrawals.reduce((sum, row) => sum + Number(row.amount || 0), 0));
+      const saldoDisponivel = Math.max(0, totalPago - withdrawals.reduce((sum, row: any) => sum + Number(row.amount || 0), 0));
 
       const stats = {
         saldoDisponivel,

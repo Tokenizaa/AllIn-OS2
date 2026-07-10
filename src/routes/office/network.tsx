@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Network, Users, TrendingUp, Sparkles, UserPlus, GitMerge, Search, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ function NetworkPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "leader" | "critical">("all");
 
-  const { data: nodes = [], isLoading } = useNetwork(500);
+  const { data: nodes = [], isLoading } = useNetwork(500) as any;
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

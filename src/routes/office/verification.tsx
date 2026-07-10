@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck, UploadCloud, FileText, CheckCircle2, Clock, Brain, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";

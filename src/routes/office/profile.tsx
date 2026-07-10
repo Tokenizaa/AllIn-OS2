@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { User, Building, Shield, Camera, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";

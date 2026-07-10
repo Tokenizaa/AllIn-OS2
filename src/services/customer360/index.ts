@@ -207,7 +207,7 @@ export const Customer360Service = {
       cidade: viewData.cidade,
       estado: viewData.estado,
       cep: viewData.cep,
-      qualificacao: viewData.qualification,
+      qualification: viewData.qualification,
       plano_comprador: viewData.plan_name || null,
       status: viewData.status,
       metadata: null,
@@ -469,7 +469,7 @@ export const Customer360Service = {
       .limit(500);
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as any;
   },
 
   /**
@@ -483,6 +483,6 @@ export const Customer360Service = {
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 };

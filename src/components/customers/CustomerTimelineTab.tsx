@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Timeline } from "@/components/widgets/timeline";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { CustomerNotesService } from "@/services/customer-notes";
+import { CustomerNotesService } from "@/services/crm360/customer-notes";
 
 interface CustomerTimelineTabProps {
   customer: any;

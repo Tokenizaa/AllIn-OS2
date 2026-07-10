@@ -24,12 +24,13 @@ export function useOfficeFinance() {
     staleTime: 0,
     refetchOnMount: "always",
     queryFn: async () => {
-      const [withdrawalsData, profileData] = await Promise.all([
-        WalletService.fetchRecentWithdrawals(50),
-        WalletService.fetchWorkspaceSettings(),
+      const [withdrawalsRes, profileData] = await Promise.all([
+        WalletService.fetchWithdrawals(50),
+        Promise.resolve({}),
       ]);
+      const withdrawalsData = ((withdrawalsRes as any)?.data as any[]) || [];
       return {
-        withdrawals: (withdrawalsData as WithdrawalRow[]) || [],
+        withdrawals: withdrawalsData as WithdrawalRow[],
         wallet: (profileData as WalletRow) || {},
       };
     },

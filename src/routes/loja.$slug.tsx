@@ -31,7 +31,8 @@ export const Route = createFileRoute("/loja/$slug")({
 export function DistributorStorePage() {
   const params = useParams({ strict: false }) as { slug?: string };
   const routeSlug = params.slug?.toLowerCase().trim();
-  const { triggerBinomialBonusPay, addAuditLog } = useAuth();
+  const { triggerBinomialBonusPay } = useAuth();
+  const addAuditLog = (useAuth() as any).addAuditLog;
   const { products } = useProductsQuery();
 
   // Sprint 3: Usar loader para dados pré-carregados

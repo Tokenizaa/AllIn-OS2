@@ -5,6 +5,7 @@ import { UserPlus, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { UserRole } from "@/shared/types/roles";
+import { useReferralTrackingQuery } from "@/hooks/referral/useReferralTrackingQuery";
 
 export const Route = createFileRoute("/cadastro")({
   component: RegisterPage,
@@ -13,7 +14,8 @@ export const Route = createFileRoute("/cadastro")({
 function RegisterPage() {
   const navigate = useNavigate();
   const { register, usersList } = useAuth();
-  const { activeSponsor } = useReferralTrackingQuery();
+  const referralQuery = useReferralTrackingQuery();
+  const activeSponsor = (referralQuery as any).data?.activeSponsor;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Check, Crown, Sparkles, ArrowUp, History } from "lucide-react";

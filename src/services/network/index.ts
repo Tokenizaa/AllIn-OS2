@@ -1,4 +1,4 @@
-import { httpClient } from "@/lib/api-client/http-client";
+import { supabase } from "@/lib/supabase/client";
 
 export const NetworkService = {
   async fetchNetworkRelationships(limit = 12) {

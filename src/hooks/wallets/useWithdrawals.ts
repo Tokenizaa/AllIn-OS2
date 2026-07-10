@@ -8,8 +8,8 @@ export function useWithdrawals() {
     staleTime: 0,
     refetchOnMount: "always",
     queryFn: async () => {
-      const withdrawalsData = await WalletService.fetchWithdrawals();
-      const transformedWithdrawals = withdrawalsData.map(w => ({
+      const withdrawalsRes = await WalletService.fetchWithdrawals();
+      const transformedWithdrawals = (withdrawalsRes.success ? withdrawalsRes.data : []).map((w: any) => ({
         id: w.id,
         user: w.user_name,
         valor: Number(w.valor || 0),

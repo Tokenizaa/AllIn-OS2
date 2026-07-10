@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { industrialService, Machine, MachineMaintenance, MachineDocument, MachinePhoto } from '@/services/industrial.service';
+import { industrialService, Machine, MachineMaintenance, MachineDocument, MachinePhoto } from '@/services/industrial';
 
 interface Machine360Props {
   machineId: string;

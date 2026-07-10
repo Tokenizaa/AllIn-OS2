@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
+import { useDistributorProfileQuery } from "@/hooks/distributor/useDistributorProfileQuery";
 import { SupabaseService } from "@/modules/auth/services/supabase.service";
-import { Award } from "lucide-react";
+import { Award, ArrowRight, QrCode, CreditCard, ClipboardCopy, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { UserRole } from "@/shared/types/roles";
@@ -13,7 +14,8 @@ export const Route = createFileRoute("/ativacao")({
 
 function ActivationPage() {
   const navigate = useNavigate();
-  const { user, loading, activateDistributorOffice, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
+  const activateDistributorOffice = (useAuth() as any).activateDistributorOffice;
   
   const [selectedPlan, setSelectedPlan] = useState<string>("plan-pro");
   const [paymentStep, setPaymentStep] = useState<"select" | "checkout" | "processing" | "success">("select");

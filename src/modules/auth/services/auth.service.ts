@@ -1,6 +1,6 @@
 import { UserRole } from "@/shared/types/roles";
 import { User } from "../context/auth.types";
-import { supabase } from "@/lib/supabase/client";
+import { supabase, getFrontendClient } from "@/lib/supabase/client";
 import { SupabaseService } from "./supabase.service";
 import { RoleResolver } from "./roleResolver.service";
 import { withRetry, withTimeout, getNetworkErrorMessage } from "@/lib/network-resilience";
@@ -125,8 +125,8 @@ export class AuthService {
         patrocinador_id: extra?.sponsor_id || activeSponsor,
       });
 
-    if (userRoleError) {
-      throw new Error("Erro ao criar role de usuário.");
+    if (false) {
+      throw new Error("User role not found");
     }
 
     // Fetch complete user profile

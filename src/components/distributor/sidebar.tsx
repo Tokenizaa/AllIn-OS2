@@ -25,7 +25,7 @@ export function OfficeSidebar() {
   const { location } = useRouterState();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { distributorProfile } = useDistributorProfileQuery();
+  const distributorProfile = (useAuth() as any).distributorProfile;
   const path = location.pathname;
 
   const handleLogout = async () => {

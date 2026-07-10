@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCommissions } from "@/hooks/commissions/useCommissions";
 import { PageHeader } from "@/components/widgets/page-header";
@@ -11,10 +12,17 @@ export const Route = createFileRoute("/_app/commissions")({ component: Commissio
 
 function CommissionsPage() {
   const { data: commissionsData, isError, error, refetch } = useCommissions();
+  const [isRunningCycle, setIsRunningCycle] = useState(false);
 
   const rows = commissionsData?.rows || [];
   const plans = commissionsData?.plans || [];
   const customers = commissionsData?.customers || [];
+  const pendingCycles = rows.filter((r) => r.status !== "pago");
+
+  const handleRunCycle = () => {
+    setIsRunningCycle(true);
+    setTimeout(() => setIsRunningCycle(false), 2000);
+  };
 
   const total = rows.reduce((sum, r) => sum + Number(r.pago || 0), 0);
   const plan = plans[0];

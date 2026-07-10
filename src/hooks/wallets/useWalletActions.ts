@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { creditWallet, debitWallet } from "@/lib/api/wallet.functions";
+import { WalletService } from "@/services/wallets";
 
 export function useWalletActions(customerId?: string | null, onSettled?: () => void) {
   const credit = useMutation({
     mutationFn: async (amount: number) => {
       if (!customerId) throw new Error("No customer ID");
-      return creditWallet({
+      return WalletService.creditWallet({
         customerId,
         amount,
         description: "Adição de fundos via simulação",
@@ -18,7 +18,7 @@ export function useWalletActions(customerId?: string | null, onSettled?: () => v
   const debit = useMutation({
     mutationFn: async (amount: number) => {
       if (!customerId) throw new Error("No customer ID");
-      return debitWallet({
+      return WalletService.debitWallet({
         customerId,
         amount,
         description: "Saque de fundos via simulação",

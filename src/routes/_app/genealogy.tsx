@@ -5,7 +5,7 @@ import { ChevronRight, ChevronDown, Users, Loader2 } from "lucide-react";
 import { NetworkService } from "@/services/network";
 import { CustomerService } from "@/services/customers";
 
-export const Route = createFileRoute("/_app/genealogy")({
+export const Route = createFileRoute("/genealogy")({
   component: GenealogyPage,
 });
 
@@ -31,19 +31,20 @@ function GenealogyPage() {
         setError(null);
 
         // Buscar relacionamentos de rede
-        const relationships = await NetworkService.fetchNetworkRelationships(100);
+        const relationships = ((await NetworkService.fetchNetworkRelationships(100)) as any) || [];
+        const relationshipsArr: any[] = Array.isArray(relationships) ? relationships : ((relationships as any)?.data as any[]) || [];
         
         // Buscar dados dos clientes
-        const idCompradores = [...new Set(relationships.map(r => r.id_comprador))];
+        const idCompradores = [...new Set(relationshipsArr.map((r: any) => r.id_comprador))];
         const customers = await Promise.all(
-          idCompradores.map(id => CustomerService.fetchCustomerByCompradorId(id))
+          idCompradores.map((id: any) => CustomerService.fetchCustomerByCompradorId(id))
         );
 
         // Construir árvore genealógica
-        const customerMap = new Map(customers.map(c => [c?.id_comprador, c]));
+        const customerMap = new Map(customers.map((c: any) => [c?.id_comprador, c]));
         
         // Encontrar nó raiz (sem sponsor ou sponsor é null)
-        const rootRelationship = relationships.find(r => !r.sponsor_id_comprador);
+        const rootRelationship = relationshipsArr.find((r: any) => !r.sponsor_id_comprador);
         const rootCustomer = rootRelationship ? customerMap.get(rootRelationship.id_comprador) : customers[0];
         
         if (!rootCustomer) {
@@ -60,9 +61,9 @@ function GenealogyPage() {
           if (!customer) return null;
 
           // Buscar filhos diretos (onde este customer é sponsor)
-          const children = relationships
-            .filter(r => r.sponsor_id_comprador === idComprador)
-            .map(r => buildTree(r.id_comprador, new Set(visited)))
+          const children = relationshipsArr
+            .filter((r: any) => r.sponsor_id_comprador === idComprador)
+            .map((r: any) => buildTree(r.id_comprador, new Set(visited)))
             .filter(Boolean) as TreeNode[];
 
           return {

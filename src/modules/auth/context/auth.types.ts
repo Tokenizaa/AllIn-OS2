@@ -63,6 +63,33 @@ export interface Permission {
   description: string;
 }
 
+export interface AuditLog {
+  id: string;
+  action: string;
+  entity_type: string;
+  description: string;
+  user_id?: string;
+  user_email?: string;
+  created_at: string;
+}
+
+export interface AdminInvite {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  permissions: string[];
+  invite_token: string;
+  invite_link: string;
+  invited_by: string;
+  expires_at: string;
+  status: "pending" | "accepted" | "revoked" | "expired";
+  notes?: string;
+  created_at: string;
+  revoked_at?: string;
+  accepted_at?: string;
+}
+
 /**
  * AuthContext type definition
  * Contains all authentication state and methods
@@ -81,4 +108,16 @@ export interface AuthContextType {
   changeUserRole: (userId: string, targetRole: UserRole) => Promise<void>;
   clearSponsor: () => void;
   activateDistributorOffice: (planId: string) => Promise<DistributorProfile | null>;
+  adminInvites: any[];
+  usersList: any[];
+  triggerBinomialBonusPay: () => Promise<void>;
+  addAuditLog: (action: string, entity: string, description: string) => Promise<void>;
+  getAdminInviteByToken: (token: string) => Promise<any>;
+  acceptAdminInvite: (token: string, name: string, password: string) => Promise<any>;
+  createAdminInvite: (data: any) => Promise<void>;
+  revokeAdminInvite: (id: string) => Promise<void>;
+  resendAdminInvite: (id: string) => Promise<void>;
+  deleteUserAndInviteSession: (userId: string) => Promise<void>;
+  fetchRecentWithdrawals: () => Promise<any[]>;
+  fetchWorkspaceSettings: () => Promise<any>;
 }

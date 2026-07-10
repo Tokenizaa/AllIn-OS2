@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useCopilot } from "@/hooks/copilot/useCopilot";
-import { CopilotAction, CopilotSource } from "@/services/copilot.service";
+import { CopilotAction, CopilotSource } from "@/services/copilot";
 
 interface ChatMessage { 
   id: string; 

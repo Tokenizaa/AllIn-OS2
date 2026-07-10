@@ -1,7 +1,12 @@
+import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/widgets/page-header";
 import { useOrderList } from "@/hooks/orders/useOrderList";
 import { OrderService } from "@/services/orders";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, ChevronRight, ChevronLeft } from "lucide-react";
 
 export const Route = createFileRoute("/_app/orders/")({ component: OrdersPage });
 
@@ -16,12 +21,16 @@ const statusColor: Record<string, string> = {
 function OrdersPage() {
   const { data: ordersPageData, isLoading, isError, error, refetch } = useOrderList(60);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [pageSize, setPageSize] = useState(15);
+  const [currentPage, setCurrentPage] = useState(1);
+  const orderStatsResponse = ordersPageData;
+
   const orders = useMemo(() => ordersPageData?.orders || [], [ordersPageData]);
   const customers = useMemo(() => ordersPageData?.customers || [], [ordersPageData]);
-  const totalCount = ordersPageData?.totalCount || 0;
-  const orderStats = (orderStatsResponse as any)?.data || {};
-
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalCount = (ordersPageData as any)?.totalCount || 0;
+  const orderStats = (ordersPageData as any)?.orderStats || (ordersPageData as any)?.data || {};
 
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
@@ -35,24 +44,13 @@ function OrdersPage() {
   }, [orders, statusFilter, searchQuery]);
 
   const total = filteredOrders.reduce((sum, o) => sum + Number(o.valor_total_pedido || o.valor_total || 0), 0);
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   if (isError) {
     return (
       <div className="space-y-3">
         <PageHeader eyebrow="Comercial" title="Pedidos" subtitle="Falha ao carregar pedidos." />
-        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
-        <button className="text-sm underline" onClick={() => refetch()}>
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="space-y-3">
-        <PageHeader eyebrow="Comercial" title="Pedidos" subtitle="Falha ao carregar pedidos." />
-        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <p className="text-sm text-destructive">Erro: {(error as any)?.message || "falha desconhecida"}</p>
         <button className="text-sm underline" onClick={() => refetch()}>
           Tentar novamente
         </button>
@@ -157,7 +155,7 @@ function OrdersPage() {
                     <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>
                     <td className="px-4 py-3">
                       {customer ? (
-                        <Link to="/_app/customers/$id" params={{ id: customer.id_comprador || customer.id }} className="hover:text-primary">
+                        <Link to="/customers/$id" params={{ id: customer.id_comprador || customer.id }} className="hover:text-primary">
                           {customerLabel}
                         </Link>
                       ) : (

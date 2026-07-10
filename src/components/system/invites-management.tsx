@@ -16,6 +16,11 @@ import {
 } from "@/components/ui/dialog";
 import { getRoleLabel, getRoleBadgeStyle } from "./rbac-utils";
 import { toast } from "sonner";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { useInviteForm } from "@/hooks/system/useInviteForm";
+import { useInviteActions } from "@/hooks/system/useInviteActions";
 
 export function InvitesManagement() {
   const { 
@@ -114,3 +119,125 @@ export function InvitesManagement() {
     </div>
   );
 }
+
+const InviteFilters = ({ search, setSearch, statusFilter, setStatusFilter }: any) => {
+  return (
+    <div className="flex gap-2 items-center flex-wrap">
+      <Input
+        placeholder="Buscar por nome ou e-mail..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-64"
+      />
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem value="pending">Pendente</SelectItem>
+          <SelectItem value="accepted">Aceito</SelectItem>
+          <SelectItem value="revoked">Revogado</SelectItem>
+          <SelectItem value="expired">Expirado</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
+
+const CreateInviteDialog = ({
+  open,
+  onOpenChange,
+  fullName,
+  setFullName,
+  email,
+  setEmail,
+  selectedRole,
+  setSelectedRole,
+  selectedPermissions,
+  setSelectedPermissions,
+  notes,
+  setNotes,
+  isSubmitLoading,
+  handleTogglePermission,
+  handleCreateInvite,
+}: any) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button className="ml-auto">
+          <Plus className="h-4 w-4 mr-2" />
+          Criar Convite
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Novo Convite</DialogTitle>
+          <DialogDescription>Crie um convite digital para um novo administrador</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleCreateInvite} className="space-y-4">
+          <Input placeholder="Nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          <Input placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="staff">Staff</SelectItem>
+              <SelectItem value="distributor">Distributor</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input placeholder="Observações" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitLoading}>
+              {isSubmitLoading ? "Criando..." : "Criar Convite"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const InvitesTable = ({ filteredInvites, copiedToken, handleCopyLink, handleRevokeInvite, handleResendInvite }: any) => {
+  if (!filteredInvites || filteredInvites.length === 0) {
+    return <div className="p-8 text-center text-muted-foreground text-sm">Nenhum convite encontrado</div>;
+  }
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Nome</TableHead>
+          <TableHead>E-mail</TableHead>
+          <TableHead>Role</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {filteredInvites.map((inv: any) => (
+          <TableRow key={inv.id}>
+            <TableCell>{inv.full_name}</TableCell>
+            <TableCell>{inv.email}</TableCell>
+            <TableCell>{inv.role}</TableCell>
+            <TableCell>
+              <Badge>{inv.status}</Badge>
+            </TableCell>
+            <TableCell className="text-right space-x-1">
+              <Button size="sm" variant="ghost" onClick={() => handleCopyLink(inv.invite_token)}>
+                <Copy className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => handleResendInvite(inv.id)}>
+                <Send className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => handleRevokeInvite(inv.id)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};

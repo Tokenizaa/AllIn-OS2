@@ -58,13 +58,13 @@ const StoreCategories: React.FC<StoreCategoriesProps> = ({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.slice(0, 4).map((category) => {
-              const mainProduct = products.find(p => p.categorias === category.name);
+              const mainProduct = products.find((p: any) => (p as any).category === category.name);
               return (
                 <Card key={category.id} className="group cursor-pointer overflow-hidden bg-white/50 dark:bg-allin-bg-dark-1/50 backdrop-blur-sm border border-allin-orange/20 hover:border-allin-orange/50 transition-all duration-300 hover:shadow-xl">
                   <div className="relative h-48 overflow-hidden">
                     {mainProduct ? (
                       <OptimizedImage 
-                        src={mainProduct.imgSrc || ""} 
+                        src={(mainProduct as any).imgSrc || ""} 
                         alt={category.name} 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                       />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { industrialService } from '@/services/industrial.service';
+import { industrialService } from '@/services/industrial';
 
 interface KPICard {
   title: string;

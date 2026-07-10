@@ -5,7 +5,7 @@ import { Label } from "../ui/label";
 import { Calculator, TrendingUp, Users, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { simulateCommission } from "../../lib/api/bonus.functions";
+import { CommissionService } from "@/services/commissions";
 
 export function MLMCommissionSimulator() {
   const [sellerId, setSellerId] = useState("");
@@ -13,7 +13,7 @@ export function MLMCommissionSimulator() {
 
   const { data: simulation, refetch: simulationRefetch, isFetching } = useQuery({
     queryKey: ["mlm-simulation", sellerId, orderAmount],
-    queryFn: async () => simulateCommission({ seller_id: sellerId, order_amount: orderAmount }),
+    queryFn: async () => CommissionService.simulateCommission({ seller_id: sellerId, order_amount: orderAmount }),
     enabled: false,
   });
 

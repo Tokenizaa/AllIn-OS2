@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { industrialService, Process, ProcessStep, ProcessDocument } from '@/services/industrial.service';
+import { industrialService, Process, ProcessStep, ProcessDocument } from '@/services/industrial';
 
 interface Process360Props {
   processId: string;

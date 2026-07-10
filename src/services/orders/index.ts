@@ -1,41 +1,29 @@
-import { httpClient } from "@/lib/api-client/http-client";
+import { supabase } from "@/lib/supabase/client";
 
 export const OrderService = {
   async fetchOrdersForDashboard() {
-    const result = await httpClient.getOrders({ limit: 300 });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch orders for dashboard");
-    }
-    return result.data || [];
-  },
-
-  async fetchOrdersByidComprador(idComprador: string) {
-    const result = await httpClient.getOrdersByComprador(idComprador);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch orders by comprador ID");
-    }
-    return result.data || [];
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .limit(300)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message || "Failed to fetch orders for dashboard");
+    return data || [];
   },
 
   async fetchOrdersList(page = 1, pageSize = 15) {
-    const result = await httpClient.getOrders({ page, limit: pageSize });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch orders list");
-    }
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .range((page - 1) * pageSize, page * pageSize - 1)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message || "Failed to fetch orders list");
     return {
-      orders: result.data || [],
-      totalCount: 0, // TODO: Add pagination support
+      orders: data || [],
+      totalCount: 0,
       page,
       pageSize,
     };
-  },
-
-  async fetchOfficeOrders(limit = 200) {
-    const result = await httpClient.getOfficeOrders({ limit });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch office orders");
-    }
-    return result.data || [];
   },
 
   async fetchOrdersAndCustomers(limit = 60) {
@@ -52,21 +40,29 @@ export const OrderService = {
   },
 
   async fetchRecentOrders(options: { page?: number; limit?: number; id_comprador?: string; status?: string } = {}) {
-    const result = await httpClient.getRecentOrders(options);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch recent orders");
-    }
-    return result.data;
+    let query = supabase
+      .from('orders')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
+    if (options.limit) query = query.limit(options.limit);
+    if (options.page && options.limit) query = query.range((options.page - 1) * options.limit, options.page * options.limit - 1);
+    if (options.id_comprador) query = query.eq('id_comprador', options.id_comprador);
+    if (options.status) query = query.eq('status', options.status);
+    const { data, error, count } = await query;
+    if (error) throw new Error(error.message || "Failed to fetch recent orders");
+    return { data: data || [], total: count || 0, pages: options.limit ? Math.ceil((count || 0) / options.limit) : 1 };
   },
 
   async fetchOrderStats() {
-    const result = await httpClient.getOrderStats();
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch order stats");
-    }
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*');
+    if (error) throw new Error(error.message || "Failed to fetch order stats");
+    const totalOrders = data?.length || 0;
+    const totalRevenue = data?.reduce((sum, o) => sum + (Number(o.total) || 0), 0) || 0;
     return {
       success: true,
-      data: result.data
+      data: { totalOrders, totalRevenue, orders: data }
     };
   }
 };

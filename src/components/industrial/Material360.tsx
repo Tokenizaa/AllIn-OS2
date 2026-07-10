@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { industrialService, Material } from '@/services/industrial.service';
+import { industrialService, Material } from '@/services/industrial';
 
 interface Material360Props {
   materialId: string;

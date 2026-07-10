@@ -129,7 +129,7 @@ export class SupabaseService {
         referral_code: data.usuario || data.id_comprador || "",
         referral_link: `/loja/ref/${data.usuario || data.id_comprador}`,
         plan_id: data.plan_id || "none",
-        qualification: data.qualificacao || "Associado",
+        qualification: data.qualification || "Associado",
         wallet_balance: 0, // Would need to fetch from wallets table
         bonus_balance: 0, // Would need to fetch from wallets table
         status: data.status || "active",

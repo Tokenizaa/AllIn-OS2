@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { industrialService, ProductIndustrial } from '@/services/industrial.service';
+import { industrialService, ProductIndustrial } from '@/services/industrial';
 
 interface Product360Props {
   productId: string;

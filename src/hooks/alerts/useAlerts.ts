@@ -8,13 +8,14 @@ export function useAlerts(limit = 12) {
   return useQuery({
     queryKey: [...queryKeys.alerts, limit],
     queryFn: async () => {
-      const [payments, withdrawals, orders] = await Promise.all([
+      const [payments, withdrawalsRes, orders] = await Promise.all([
         PaymentService.fetchRecentPayments(5),
-        WalletService.fetchRecentWithdrawals(5),
+        WalletService.fetchWithdrawals(5),
         OrderService.fetchOrdersList(5),
       ]);
+      const withdrawals = ((withdrawalsRes as any).data as any[]) || [];
       const items = [
-        ...(withdrawals || []).map((w: any) => ({ id: `w-${w.id}`, title: "Saque em processamento", domain: "financeiro", at: w.created_at, severity: w.risco ? "critical" : "warning" })),
+        ...withdrawals.map((w: any) => ({ id: `w-${w.id}`, title: "Saque em processamento", domain: "financeiro", at: w.created_at, severity: w.risco ? "critical" : "warning" })),
         ...(payments || []).map((p: any) => ({ id: `p-${p.id}`, title: "Pagamento registrado", domain: "payments", at: p.created_at, severity: "info" })),
         ...(orders || []).map((o: any) => ({ id: `o-${o.id}`, title: "Pedido atualizado", domain: "orders", at: o.created_at, severity: "info" })),
       ];

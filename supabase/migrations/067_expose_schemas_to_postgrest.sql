@@ -44,6 +44,10 @@ GRANT USAGE ON SCHEMA commerce TO service_role;
 GRANT USAGE ON SCHEMA logistics TO service_role;
 GRANT USAGE ON SCHEMA finance TO service_role;
 GRANT USAGE ON SCHEMA system TO service_role;
+GRANT USAGE ON SCHEMA industrial TO postgres;
+GRANT USAGE ON SCHEMA industrial TO anon;
+GRANT USAGE ON SCHEMA industrial TO authenticated;
+GRANT USAGE ON SCHEMA industrial TO service_role;
 
 COMMIT;
 
@@ -62,6 +66,7 @@ COMMIT;
 --    - logistics
 --    - finance
 --    - system
+--    - industrial (DB-04)
 -- 4. Save the configuration
 -- 5. Restart the PostgREST service (this happens automatically)
 -- ============================================================================

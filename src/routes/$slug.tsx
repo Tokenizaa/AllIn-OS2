@@ -81,7 +81,7 @@ function DistributorPage() {
     <div className="min-h-screen bg-[#06080d] text-white selection:bg-emerald-500/30 overflow-x-hidden">
       {/* Decorative gradients */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-emerald-950/20 via-transparent to-transparent blur-3xl pointer-events-none" />
-      <div className={`absolute top-1/4 -right-1/4 w-96 h-96 bg-gradient-to-r ${theme.color} opacity-10 blur-3xl pointer-events-none rounded-full`} />
+      <div className={`absolute top-1/4 -right-1/4 w-96 h-96 bg-gradient-to-r ${(theme as any).color} opacity-10 blur-3xl pointer-events-none rounded-full`} />
       <div className="absolute bottom-1/4 -left-1/4 w-96 h-96 bg-indigo-500/5 blur-3xl pointer-events-none rounded-full" />
 
       {/* HEADER NAV */}
@@ -93,7 +93,7 @@ function DistributorPage() {
         <section id="profile-hero" className="grid lg:grid-cols-12 gap-8 items-center pt-4">
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${theme.badgeBg}`}>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${(theme as any).badgeBg}`}>
                 <Crown className="h-3 w-3 shrink-0" /> {distRank}
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono text-muted-foreground border border-border/40 bg-background/50">
@@ -109,12 +109,12 @@ function DistributorPage() {
                 </span>
               </h1>
               <p className="text-md font-medium text-muted-foreground italic leading-relaxed font-sans max-w-xl">
-                "{theme.slogan}"
+                "{(theme as any).slogan}"
               </p>
             </div>
 
             <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
-              {theme.bio}
+              {(theme as any).bio}
             </p>
 
             <div className="flex flex-wrap gap-3.5 pt-2">
@@ -238,7 +238,7 @@ function DistributorPage() {
           <div className="absolute top-0 right-10 h-32 w-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
           <Star className="h-6 w-6 text-emerald-400 mx-auto opacity-75 mb-3" />
           <p className="text-md sm:text-lg font-medium text-white max-w-3xl mx-auto italic leading-relaxed">
-            "{theme.quote}"
+            "{(theme as any).quote}"
           </p>
           <p className="mt-3 text-xs font-mono text-zinc-500 uppercase tracking-widest">— Manifesto Orgânico Celular</p>
         </section>

@@ -11,71 +11,84 @@
  * For migration planning, see: docs/IDENTITY_MIGRATION_MASTER_PLAN.md
  */
 
-import { httpClient } from "@/lib/api-client/http-client";
+import { supabase } from "@/lib/supabase/client";
 
 export const CustomerService = {
   async fetchCustomerById(id: string) {
-    const result = await httpClient.getCustomerById(id);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch customer");
-    }
-    return result.data;
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message || "Failed to fetch customer");
+    return data;
   },
 
   async fetchCustomerByCompradorId(compradorId: string) {
-    const result = await httpClient.getCustomerByCompradorId(compradorId);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch customer by comprador ID");
-    }
-    return result.data;
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id_comprador', compradorId)
+      .single();
+    if (error) throw new Error(error.message || "Failed to fetch customer by comprador ID");
+    return data;
   },
 
   async fetchDownlines(compradorId: string) {
-    const result = await httpClient.getDownlines(compradorId);
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch downlines");
-    }
-    return result.data || [];
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('patrocinador_comprador', compradorId);
+    if (error) throw new Error(error.message || "Failed to fetch downlines");
+    return data || [];
   },
 
   async fetchCustomersList(limit = 100) {
-    const result = await httpClient.getCustomersList({ limit });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch customers list");
-    }
-    return result.data || [];
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .limit(limit)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message || "Failed to fetch customers list");
+    return data || [];
   },
 
   async fetchCustomersWithOrderStats(page = 1, pageSize = 15) {
-    const result = await httpClient.getCustomersWithOrderStats({ page, pageSize });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch customers with order stats");
-    }
-    return result.data;
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('*')
+      .range((page - 1) * pageSize, page * pageSize - 1)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message || "Failed to fetch customers with order stats");
+    return { customers: customers || [], orderStats: {}, totalCount: 0, page, pageSize };
   },
 
   async fetchRecentCustomers(limit = 20) {
-    const result = await httpClient.getRecentCustomers({ limit });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch recent customers");
-    }
-    return result.data || [];
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .limit(limit)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message || "Failed to fetch recent customers");
+    return data || [];
   },
 
   async fetchNetworkMembers(limit = 500) {
-    const result = await httpClient.getNetworkMembers({ limit });
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch network members");
-    }
-    return result.data || [];
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .limit(limit)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message || "Failed to fetch network members");
+    return data || [];
   },
 
   async fetchAnalyticsCustomers() {
-    const result = await httpClient.getAnalyticsCustomers();
-    if (!result.success) {
-      throw new Error(result.error || "Failed to fetch analytics customers");
-    }
-    return result.data || [];
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*');
+    if (error) throw new Error(error.message || "Failed to fetch analytics customers");
+    return data || [];
   }
 };
 

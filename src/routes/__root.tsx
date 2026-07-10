@@ -9,14 +9,6 @@ import {
 } from "@tanstack/react-router";
 
 import { AuthProvider } from "../modules/auth";
-// Sprint 2: Removido DistributorProvider - migrado para TanStack Query
-// import { DistributorProvider } from "../lib/distributor-context";
-// Sprint 2: Removido StoreSettingsProvider - migrado para hook simples
-// import { StoreSettingsProvider } from "../contexts/StoreSettingsContext";
-// Sprint 2: Removido CartProvider - migrado para TanStack Query
-// import { CartProvider } from "../contexts/CartContext";
-// Sprint 2: Removido ProductsProvider - migrado para TanStack Query
-// import { ProductsProvider } from "../contexts/ProductsContext";
 import { StyleProvider } from "../contexts/StyleContext";
 import { ThemeProvider } from "../components/ThemeProvider";
 import "../styles.css";
@@ -91,17 +83,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <DistributorProvider>
-            <StoreSettingsProvider>
-              <CartProvider>
-                <ProductsProvider>
-                  <StyleProvider>
-                    <Outlet />
-                  </StyleProvider>
-                </ProductsProvider>
-              </CartProvider>
-            </StoreSettingsProvider>
-          </DistributorProvider>
+          <StyleProvider>
+            <Outlet />
+          </StyleProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

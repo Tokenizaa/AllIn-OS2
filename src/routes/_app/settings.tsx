@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { FeatureFlagService } from "@/services/featureFlags";
+import { FeatureFlagService } from "@/services/system/feature-flags";
 
 export const Route = createFileRoute("/_app/settings")({ component: SettingsPage });
 

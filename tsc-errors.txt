@@ -1,0 +1,353 @@
+﻿allin-api/__tests__/allin-api.service.spec.ts(5,37): error TS2307: Cannot find module '@nestjs/testing' or its corresponding type declarations.
+allin-api/__tests__/allin-api.service.spec.ts(6,31): error TS2307: Cannot find module '@nestjs/config' or its corresponding type declarations.
+allin-api/__tests__/allin-api.service.spec.ts(7,29): error TS2307: Cannot find module '@nestjs/axios' or its corresponding type declarations.
+allin-api/__tests__/allin-api.service.spec.ts(12,1): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(18,10): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(32,14): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(36,10): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(37,10): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(38,10): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(39,17): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(40,33): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(41,17): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(44,3): error TS2304: Cannot find name 'beforeEach'.
+allin-api/__tests__/allin-api.service.spec.ts(68,3): error TS2304: Cannot find name 'afterEach'.
+allin-api/__tests__/allin-api.service.spec.ts(69,5): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/allin-api.service.spec.ts(72,3): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(73,5): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(76,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(77,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(85,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(86,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(87,9): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(89,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(92,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(101,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(102,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(103,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(106,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(114,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(118,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(119,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(126,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(130,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(131,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(138,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(142,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(143,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(150,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/allin-api.service.spec.ts(154,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(155,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/allin-api.service.spec.ts(158,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(8,1): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(9,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(10,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(32,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(52,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(74,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(75,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(76,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(77,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(78,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(79,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(82,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(103,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(107,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(111,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(112,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(134,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(155,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(156,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.adapter.spec.ts(179,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(180,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(181,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(182,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(183,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.adapter.spec.ts(184,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(7,1): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(8,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(9,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(31,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(32,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(33,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(34,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(35,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(36,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(37,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(38,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(41,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(56,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(57,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(58,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(61,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(77,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(80,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(93,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(96,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(111,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(114,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/distributor.normalizer.spec.ts(129,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(130,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(131,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(132,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(133,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(134,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/distributor.normalizer.spec.ts(135,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(7,1): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(8,3): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(9,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(10,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(14,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(15,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(18,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(19,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(28,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(29,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(32,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(33,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(42,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(43,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(46,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(47,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(50,13): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(57,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(60,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(61,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(64,23): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(72,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(72,47): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(75,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(76,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(89,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(92,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(93,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(106,7): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(109,5): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+allin-api/__tests__/retry.util.spec.ts(110,25): error TS2304: Cannot find name 'jest'.
+allin-api/__tests__/retry.util.spec.ts(113,13): error TS2304: Cannot find name 'expect'.
+allin-api/__tests__/retry.util.spec.ts(120,7): error TS2304: Cannot find name 'expect'.
+allin-api/allin-api.module.ts(6,24): error TS2307: Cannot find module '@nestjs/common' or its corresponding type declarations.
+allin-api/allin-api.module.ts(7,30): error TS2307: Cannot find module '@nestjs/config' or its corresponding type declarations.
+allin-api/allin-api.module.ts(8,28): error TS2307: Cannot find module '@nestjs/axios' or its corresponding type declarations.
+allin-api/allin-api.service.ts(7,46): error TS2307: Cannot find module '@nestjs/common' or its corresponding type declarations.
+allin-api/allin-api.service.ts(8,31): error TS2307: Cannot find module '@nestjs/config' or its corresponding type declarations.
+allin-api/allin-api.service.ts(9,29): error TS2307: Cannot find module '@nestjs/axios' or its corresponding type declarations.
+allin-api/allin-api.service.ts(106,18): error TS18046: 'response' is of type 'unknown'.
+allin-api/dto/bonus.dto.ts(6,67): error TS2307: Cannot find module 'class-validator' or its corresponding type declarations.
+allin-api/dto/distributor.dto.ts(6,68): error TS2307: Cannot find module 'class-validator' or its corresponding type declarations.
+allin-api/dto/network.dto.ts(6,48): error TS2307: Cannot find module 'class-validator' or its corresponding type declarations.
+allin-api/dto/order.dto.ts(6,67): error TS2307: Cannot find module 'class-validator' or its corresponding type declarations.
+allin-api/dto/product.dto.ts(6,70): error TS2307: Cannot find module 'class-validator' or its corresponding type declarations.
+allin-api/dto/wallet.dto.ts(6,59): error TS2307: Cannot find module 'class-validator' or its corresponding type declarations.
+allin-api/utils/cache.util.ts(6,36): error TS2307: Cannot find module '@nestjs/common' or its corresponding type declarations.
+allin-api/utils/cache.util.ts(7,31): error TS2307: Cannot find module '@nestjs/config' or its corresponding type declarations.
+allin-api/utils/cache.util.ts(8,19): error TS2307: Cannot find module 'ioredis' or its corresponding type declarations.
+allin-api/utils/error-handler.util.ts(14,8): error TS2307: Cannot find module '@nestjs/common' or its corresponding type declarations.
+allin-api/utils/retry.util.ts(58,11): error TS2454: Variable 'lastError' is used before being assigned.
+scripts/create-customer-profiles.ts(50,42): error TS2339: Property 'email' does not exist on type 'never'.
+scripts/create-test-users.ts(47,9): error TS2561: Object literal may only specify known properties, but 'emailConfirm' does not exist in type 'AdminUserAttributes'. Did you mean to write 'email_confirm'?
+scripts/generate_embeddings.ts(1,34): error TS2307: Cannot find module '../src/backend/modules/embeddings/services/embedding.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(9,30): error TS2307: Cannot find module '../src/backend/shared/allin/allin.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(10,40): error TS2307: Cannot find module '../src/backend/shared/sync/distributor-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(11,36): error TS2307: Cannot find module '../src/backend/shared/sync/product-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(12,33): error TS2307: Cannot find module '../src/backend/shared/sync/plan-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(13,34): error TS2307: Cannot find module '../src/backend/shared/sync/order-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(14,37): error TS2307: Cannot find module '../src/backend/shared/sync/customer-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(15,42): error TS2307: Cannot find module '../src/backend/shared/sync/qualification-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(16,39): error TS2307: Cannot find module '../src/backend/shared/sync/activation-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(17,39): error TS2307: Cannot find module '../src/backend/shared/sync/withdrawal-sync.service' or its corresponding type declarations.
+scripts/migrate-all-data.ts(18,34): error TS2307: Cannot find module '../src/backend/shared/sync/store-sync.service' or its corresponding type declarations.
+scripts/sync_distributors.ts(8,40): error TS2307: Cannot find module '../src/backend/modules/distributors/services/distributor-sync.service' or its corresponding type declarations.
+scripts/test-api.ts(8,27): error TS2307: Cannot find module '../src/api/config' or its corresponding type declarations.
+scripts/test-auth.ts(2,30): error TS2307: Cannot find module '../src/backend/shared/allin/allin.service' or its corresponding type declarations.
+scripts/test-create-distributor.ts(7,40): error TS2307: Cannot find module '../src/backend/modules/distributors/services/distributor-sync.service' or its corresponding type declarations.
+scripts/test-distributor-sync.ts(8,40): error TS2307: Cannot find module '../src/backend/shared/sync/distributor-sync.service' or its corresponding type declarations.
+scripts/test-pedidos.ts(2,30): error TS2307: Cannot find module '../src/backend/shared/allin/allin.service' or its corresponding type declarations.
+scripts/test-planos.ts(2,30): error TS2307: Cannot find module '../src/backend/shared/allin/allin.service' or its corresponding type declarations.
+scripts/test-produtos.ts(2,30): error TS2307: Cannot find module '../src/backend/shared/allin/allin.service' or its corresponding type declarations.
+src/components/auth/login-view.tsx(17,11): error TS2339: Property 'activeSponsor' does not exist on type 'UseQueryResult<NoInfer<{ isValid: boolean; metadata: null; }>, Error>'.
+src/components/customers/CustomerNetworkTab.tsx(35,11): error TS2322: Type '{ label: string; value: string; icon: Element; }' is not assignable to type 'IntrinsicAttributes & { label: string; value: string; delta?: number | undefined; hint?: string | undefined; spark?: number[] | undefined; accent?: "success" | "destructive" | "primary" | "warning" | undefined; }'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & { label: string; value: string; delta?: number | undefined; hint?: string | undefined; spark?: number[] | undefined; accent?: "success" | "destructive" | "primary" | "warning" | undefined; }'.
+src/components/customers/CustomerNetworkTab.tsx(40,11): error TS2322: Type '{ label: string; value: string; icon: Element; }' is not assignable to type 'IntrinsicAttributes & { label: string; value: string; delta?: number | undefined; hint?: string | undefined; spark?: number[] | undefined; accent?: "success" | "destructive" | "primary" | "warning" | undefined; }'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & { label: string; value: string; delta?: number | undefined; hint?: string | undefined; spark?: number[] | undefined; accent?: "success" | "destructive" | "primary" | "warning" | undefined; }'.
+src/components/customers/CustomerNetworkTab.tsx(45,11): error TS2322: Type '{ label: string; value: string; icon: Element; }' is not assignable to type 'IntrinsicAttributes & { label: string; value: string; delta?: number | undefined; hint?: string | undefined; spark?: number[] | undefined; accent?: "success" | "destructive" | "primary" | "warning" | undefined; }'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & { label: string; value: string; delta?: number | undefined; hint?: string | undefined; spark?: number[] | undefined; accent?: "success" | "destructive" | "primary" | "warning" | undefined; }'.
+src/components/customers/CustomerNetworkTab.tsx(103,25): error TS2820: Type '"/_app/customers/$id"' is not assignable to type '"." | "/login" | "/cadastro" | "/recuperar-senha" | "/redefinir-senha" | "/customers" | "/analytics" | "/wallets" | "/office/orders" | "/marketing" | "/insights" | "/office" | ... 33 more ... | ".."'. Did you mean '"/customers/$id"'?
+src/components/customers/CustomerNetworkTab.tsx(103,60): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "PATH", string, "/_app/customers/$id">'.
+src/components/customers/CustomerProfileCard.tsx(59,17): error TS2820: Type '"/_app/customers/$id"' is not assignable to type '"." | "/login" | "/cadastro" | "/recuperar-senha" | "/redefinir-senha" | "/customers" | "/analytics" | "/wallets" | "/office/orders" | "/marketing" | "/insights" | "/office" | ... 33 more ... | ".."'. Did you mean '"/customers/$id"'?
+src/components/customers/CustomerProfileCard.tsx(59,52): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "PATH", string, "/_app/customers/$id">'.
+src/components/distributor/sidebar.tsx(28,11): error TS2339: Property 'distributorProfile' does not exist on type 'UseQueryResult<any, Error>'.
+src/components/features/products/ProductGallery.tsx(20,80): error TS2304: Cannot find name 'useProducts'.
+src/components/features/products/ProductGallery.tsx(21,76): error TS2304: Cannot find name 'useProducts'.
+src/components/industrial/IndustrialDashboard.tsx(29,27): error TS2551: Property 'getCapacity' does not exist on type '{ getLocations(): Promise<{ success: boolean; data: any[]; }>; getLocationById(id: string): Promise<{ success: boolean; data: any; }>; createLocation(location: Partial<Location>): Promise<...>; ... 104 more ...; calculateAverageEfficiency(capacityId: string): Promise<...>; }'. Did you mean 'getCapacities'?
+src/components/industrial/Machine360.tsx(65,56): error TS2339: Property 'descricao' does not exist on type 'Machine'.
+src/components/industrial/Machine360.tsx(75,26): error TS2339: Property 'tipo' does not exist on type 'Machine'.
+src/components/industrial/Machine360.tsx(117,66): error TS2339: Property 'unidade_medida' does not exist on type 'Machine'.
+src/components/industrial/Machine360.tsx(130,77): error TS2339: Property 'ano_fabricacao' does not exist on type 'Machine'.
+src/components/industrial/Machine360.tsx(134,77): error TS2339: Property 'vida_util_anos' does not exist on type 'Machine'.
+src/components/industrial/Machine360.tsx(138,77): error TS2551: Property 'localizacao' does not exist on type 'Machine'. Did you mean 'localizacao_id'?
+src/components/industrial/Material360.tsx(53,25): error TS2339: Property 'categoria' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(55,29): error TS2339: Property 'categoria' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(58,25): error TS2339: Property 'tipo' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(60,29): error TS2339: Property 'tipo' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(63,25): error TS2339: Property 'status' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(65,28): error TS2339: Property 'status' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(66,28): error TS2339: Property 'status' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(69,29): error TS2339: Property 'status' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(91,74): error TS2339: Property 'categoria' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(95,74): error TS2339: Property 'tipo' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(99,74): error TS2339: Property 'unidade_medida' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(103,74): error TS2339: Property 'status' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(107,74): error TS2339: Property 'fornecedor_id' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(116,76): error TS2339: Property 'densidade' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(120,76): error TS2339: Property 'cor' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(124,76): error TS2339: Property 'peso_unitario' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(128,76): error TS2339: Property 'dimensoes' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(138,76): error TS2339: Property 'quantidade_atual' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(138,113): error TS2339: Property 'unidade_medida' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(142,76): error TS2339: Property 'quantidade_minima' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(142,114): error TS2339: Property 'unidade_medida' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(152,79): error TS2339: Property 'custo_unitario' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(156,79): error TS2339: Property 'custo_total' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(161,19): error TS2339: Property 'observacoes' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(164,52): error TS2339: Property 'observacoes' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(168,19): error TS2339: Property 'especificacoes' does not exist on type 'Material'.
+src/components/industrial/Material360.tsx(172,40): error TS2339: Property 'especificacoes' does not exist on type 'Material'.
+src/components/industrial/Supplier360.tsx(50,72): error TS2339: Property 'nome' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(51,57): error TS2339: Property 'descricao' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(53,25): error TS2339: Property 'categoria' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(55,29): error TS2339: Property 'categoria' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(58,25): error TS2339: Property 'status' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(60,28): error TS2339: Property 'status' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(61,28): error TS2339: Property 'status' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(64,29): error TS2339: Property 'status' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(86,74): error TS2339: Property 'categoria' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(90,74): error TS2339: Property 'status' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(99,76): error TS2339: Property 'email' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(103,76): error TS2339: Property 'telefone' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(113,76): error TS2339: Property 'endereco' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(117,76): error TS2339: Property 'numero' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(121,76): error TS2339: Property 'bairro' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(125,76): error TS2339: Property 'cidade' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(129,76): error TS2339: Property 'estado' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(133,76): error TS2339: Property 'cep' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(138,19): error TS2339: Property 'observacoes' does not exist on type 'Supplier'.
+src/components/industrial/Supplier360.tsx(141,52): error TS2339: Property 'observacoes' does not exist on type 'Supplier'.
+src/components/payments/payment-history.tsx(25,34): error TS2304: Cannot find name 'useDistributorProfileQuery'.
+src/components/payments/payment-history.tsx(45,7): error TS2304: Cannot find name 'usePaymentHistoryFilters'.
+src/components/ProductSearch.tsx(65,25): error TS2345: Argument of type 'ProductUI[]' is not assignable to parameter of type 'SetStateAction<Product[]>'.
+  Type 'ProductUI[]' is not assignable to type 'Product[]'.
+    Type 'ProductUI' is missing the following properties from type 'Product': nome, category, images, description, and 7 more.
+src/components/StoreCategories.tsx(61,56): error TS2551: Property 'categorias' does not exist on type 'Product'. Did you mean 'category'?
+src/components/StoreCategories.tsx(67,42): error TS2339: Property 'imgSrc' does not exist on type 'Product'.
+src/components/system/invites-management.tsx(44,7): error TS2304: Cannot find name 'useInviteForm'.
+src/components/system/invites-management.tsx(51,7): error TS2304: Cannot find name 'useInviteActions'.
+src/components/system/invites-management.tsx(72,10): error TS2304: Cannot find name 'InviteFilters'.
+src/components/system/invites-management.tsx(80,10): error TS2304: Cannot find name 'CreateInviteDialog'.
+src/components/system/invites-management.tsx(106,10): error TS2304: Cannot find name 'InvitesTable'.
+src/hooks/alerts/useAlerts.ts(20,27): error TS2339: Property 'map' does not exist on type '{ orders: any[]; totalCount: number; page: number; pageSize: number; }'.
+src/hooks/mlm/useMLM360.ts(35,58): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/hooks/office/useOfficeDashboard.ts(27,72): error TS2339: Property 'amount' does not exist on type 'PedidoPagamento'.
+src/hooks/system/useInviteForm.ts(7,46): error TS2345: Argument of type '"staff"' is not assignable to parameter of type 'UserRole | (() => UserRole)'.
+src/hooks/system/useInviteForm.ts(13,13): error TS2345: Argument of type '"staff"' is not assignable to parameter of type 'SetStateAction<UserRole>'.
+src/hooks/wallets/useWalletData.ts(25,25): error TS18047: 'balanceInfo' is possibly 'null'.
+src/hooks/wallets/useWalletData.ts(26,34): error TS18047: 'balanceInfo' is possibly 'null'.
+src/hooks/wallets/useWalletData.ts(26,46): error TS2339: Property 'availableBalance' does not exist on type '{ balance: any; available_balance: any; frozen_balance: any; currency: any; } | { balance: number; availableBalance: number; frozenBalance: number; }'.
+  Property 'availableBalance' does not exist on type '{ balance: any; available_balance: any; frozen_balance: any; currency: any; }'.
+src/hooks/wallets/useWalletData.ts(27,31): error TS18047: 'balanceInfo' is possibly 'null'.
+src/hooks/wallets/useWalletData.ts(27,43): error TS2339: Property 'frozenBalance' does not exist on type '{ balance: any; available_balance: any; frozen_balance: any; currency: any; } | { balance: number; availableBalance: number; frozenBalance: number; }'.
+  Property 'frozenBalance' does not exist on type '{ balance: any; available_balance: any; frozen_balance: any; currency: any; }'.
+src/hooks/wallets/useWalletData.ts(29,30): error TS18047: 'bonusInfo' is possibly 'null'.
+src/hooks/wallets/useWalletData.ts(30,24): error TS18047: 'pointsInfo' is possibly 'null'.
+src/hooks/wallets/useWalletData.ts(31,60): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/hooks/wallets/useWalletData.ts(31,79): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/hooks/wallets/useWalletData.ts(32,69): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/hooks/wallets/useWalletData.ts(32,93): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/hooks/wallets/useWalletData.ts(33,72): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/hooks/wallets/useWalletData.ts(33,97): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/modules/auth/guards/RouteGuard.tsx(68,24): error TS2304: Cannot find name 'getPrimaryPathForRole'.
+src/modules/auth/guards/RouteGuard.tsx(74,24): error TS2304: Cannot find name 'getRoleRedirectPath'.
+src/modules/auth/services/auth.service.ts(128,9): error TS2304: Cannot find name 'userRoleError'.
+src/modules/auth/services/supabase.service.ts(132,29): error TS2339: Property 'qualificacao' does not exist on type '{ id: any; auth_user_id: any; usuario: any; id_comprador: any; patrocinador_comprador: any; plan_id: any; metadata: any; qualification: any; status: any; }'.
+src/routes/$slug.tsx(84,81): error TS18048: 'theme' is possibly 'undefined'.
+src/routes/$slug.tsx(96,120): error TS18048: 'theme' is possibly 'undefined'.
+src/routes/$slug.tsx(112,19): error TS18048: 'theme' is possibly 'undefined'.
+src/routes/$slug.tsx(117,16): error TS18048: 'theme' is possibly 'undefined'.
+src/routes/$slug.tsx(241,15): error TS18048: 'theme' is possibly 'undefined'.
+src/routes/_app/analytics.tsx(18,56): error TS2339: Property 'data' does not exist on type 'any[]'.
+src/routes/_app/analytics.tsx(68,44): error TS2339: Property 'deliveredOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/analytics.tsx(69,45): error TS2339: Property 'pendingOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/analytics.tsx(73,117): error TS2339: Property 'processingOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/analytics.tsx(116,133): error TS2339: Property 'pendingOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/analytics.tsx(117,70): error TS2339: Property 'deliveredOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/analytics.tsx(117,139): error TS2339: Property 'shippedOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/analytics.tsx(118,71): error TS2339: Property 'cancelledOrders' does not exist on type '{ totalOrders: number; totalRevenue: any; orders: any[]; }'.
+src/routes/_app/customers/$id.tsx(64,31): error TS2339: Property 'customer' does not exist on type 'NoInfer<Customer360>'.
+src/routes/_app/customers/$id.tsx(248,15): error TS2820: Type '"/_app/customers"' is not assignable to type '"." | "/login" | "/cadastro" | "/recuperar-senha" | "/redefinir-senha" | "/customers" | "/analytics" | "/wallets" | "/office/orders" | "/marketing" | "/insights" | "/office" | ... 33 more ... | ".."'. Did you mean '"/customers"'?
+src/routes/_app/customers/index.tsx(150,33): error TS2820: Type '"/_app/customers/$id"' is not assignable to type '"." | "/login" | "/cadastro" | "/recuperar-senha" | "/redefinir-senha" | "/customers" | "/analytics" | "/wallets" | "/office/orders" | "/marketing" | "/insights" | "/office" | ... 33 more ... | ".."'. Did you mean '"/customers/$id"'?
+src/routes/_app/customers/index.tsx(150,68): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "PATH", string, "/_app/customers/$id">'.
+src/routes/_app/customers/index.tsx(185,25): error TS2820: Type '"/_app/customers/$id"' is not assignable to type '"." | "/login" | "/cadastro" | "/recuperar-senha" | "/redefinir-senha" | "/customers" | "/analytics" | "/wallets" | "/office/orders" | "/marketing" | "/insights" | "/office" | ... 33 more ... | ".."'. Did you mean '"/customers/$id"'?
+src/routes/_app/customers/index.tsx(186,35): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "PATH", string, "/_app/customers/$id">'.
+src/routes/_app/distributors/index.tsx(12,38): error TS2345: Argument of type '"/_app/distributors/"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/_app/distributors/index.tsx(33,53): error TS2554: Expected 0 arguments, but got 2.
+src/routes/_app/distributors/index.tsx(114,23): error TS2322: Type 'unknown' is not assignable to type 'Key | null | undefined'.
+src/routes/_app/distributors/index.tsx(114,36): error TS2322: Type 'unknown' is not assignable to type 'string | number | readonly string[] | undefined'.
+src/routes/_app/distributors/index.tsx(115,17): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/routes/_app/genealogy.tsx(8,38): error TS2345: Argument of type '"/_app/genealogy"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/_app/genealogy.tsx(37,57): error TS2339: Property 'map' does not exist on type 'never'.
+src/routes/_app/genealogy.tsx(39,78): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/routes/_app/genealogy.tsx(46,48): error TS2339: Property 'find' does not exist on type 'never'.
+src/routes/_app/genealogy.tsx(64,14): error TS2339: Property 'filter' does not exist on type 'never'.
+src/routes/_app/industrial/index.tsx(4,38): error TS2345: Argument of type '"/_app/industrial"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/_app/industrial/machines.tsx(4,38): error TS2345: Argument of type '"/_app/industrial/machines"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/_app/industrial/materials.tsx(4,38): error TS2345: Argument of type '"/_app/industrial/materials"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/_app/industrial/processes.tsx(4,38): error TS2345: Argument of type '"/_app/industrial/processes"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/_app/network.tsx(16,52): error TS2339: Property 'relationships' does not exist on type 'NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; }>'.
+src/routes/_app/network.tsx(48,56): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/routes/_app/network.tsx(48,87): error TS2339: Property 'message' does not exist on type 'never'.
+src/routes/_app/network.tsx(49,62): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+src/routes/_app/orders/index.tsx(32,38): error TS2339: Property 'totalCount' does not exist on type 'NoInfer<{ orders: any[]; customers: { id: any; usuario: any; id_comprador: any; user_id: any; qualification: any; telefone: any; metadata: any; nome_completo: any; }[]; }>'.
+src/routes/_app/orders/index.tsx(66,56): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/routes/_app/orders/index.tsx(66,87): error TS2339: Property 'message' does not exist on type 'never'.
+src/routes/_app/orders/index.tsx(67,62): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+src/routes/_app/orders/index.tsx(171,31): error TS2820: Type '"/_app/customers/$id"' is not assignable to type '"." | "/login" | "/cadastro" | "/recuperar-senha" | "/redefinir-senha" | "/customers" | "/analytics" | "/wallets" | "/office/orders" | "/marketing" | "/insights" | "/office" | ... 33 more ... | ".."'. Did you mean '"/customers/$id"'?
+src/routes/_app/orders/index.tsx(171,66): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, { queryClient: QueryClient; }, AnyContext, AnyContext, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, "PATH", string, "/_app/customers/$id">'.
+src/routes/ativacao.tsx(18,11): error TS2339: Property 'activateDistributorOffice' does not exist on type 'UseQueryResult<any, Error>'.
+src/routes/cadastro.tsx(17,11): error TS2339: Property 'activeSponsor' does not exist on type 'UseQueryResult<NoInfer<{ isValid: boolean; metadata: null; }>, Error>'.
+src/routes/cliente.tsx(10,38): error TS2345: Argument of type '"/cliente"' is not assignable to parameter of type 'keyof FileRoutesByPath | undefined'.
+src/routes/loja.$slug.tsx(91,5): error TS2322: Type '(action: string, entity: string, description: string) => Promise<void>' is not assignable to type '(log: any) => void'.
+  Target signature provides too few arguments. Expected 3 or more, but got 1.
+src/routes/loja.tsx(145,13): error TS2322: Type 'ProductUI[]' is not assignable to type 'Product[]'.
+  Type 'ProductUI' is missing the following properties from type 'Product': nome, category, images, description, and 7 more.
+src/routes/office/Dashboard.tsx(11,10): error TS2305: Module '"@/utils/priceFormatter"' has no exported member 'formatCurrency'.
+src/routes/office/index.tsx(35,76): error TS2339: Property 'aiInsights' does not exist on type '{ stats: { saldoDisponivel: number; comissaoAcumulada: number; totalVendido: any; pedidosMes: number; redeTotal: number; ticketMedio: number; conversaoLoja: number; crescimentoRedeMes: number; ... 5 more ...; linkLoja: string; }; ... 8 more ...; withdrawals: any; }'.
+src/routes/office/index.tsx(35,88): error TS2339: Property 'goals' does not exist on type '{ stats: { saldoDisponivel: number; comissaoAcumulada: number; totalVendido: any; pedidosMes: number; redeTotal: number; ticketMedio: number; conversaoLoja: number; crescimentoRedeMes: number; ... 5 more ...; linkLoja: string; }; ... 8 more ...; withdrawals: any; }'.
+src/routes/office/network.tsx(33,18): error TS2339: Property 'filter' does not exist on type 'never[] | NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+  Property 'filter' does not exist on type 'NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+src/routes/office/network.tsx(43,23): error TS2339: Property 'length' does not exist on type 'never[] | NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+  Property 'length' does not exist on type 'NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+src/routes/office/network.tsx(66,50): error TS2339: Property 'filter' does not exist on type 'never[] | NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+  Property 'filter' does not exist on type 'NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+src/routes/office/network.tsx(67,56): error TS2339: Property 'filter' does not exist on type 'never[] | NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+  Property 'filter' does not exist on type 'NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+src/routes/office/network.tsx(68,52): error TS2339: Property 'filter' does not exist on type 'never[] | NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+  Property 'filter' does not exist on type 'NoInfer<{ customers: any[]; legs: { name: string; esquerda: number; direita: number; }[]; relationships: any[]; }>'.
+src/routes/office/orders.tsx(43,18): error TS2339: Property 'filter' does not exist on type 'never[] | NoInfer<{ orders: any[]; totalCount: number; page: number; pageSize: number; }>'.
+  Property 'filter' does not exist on type 'NoInfer<{ orders: any[]; totalCount: number; page: number; pageSize: number; }>'.
+src/routes/office/StorePage.tsx(7,10): error TS2305: Module '"@/utils/priceFormatter"' has no exported member 'formatCurrency'.
+src/routes/produto.$id.tsx(19,40): error TS2304: Cannot find name 'useDistributorDefault'.
+src/routes/produto.$id.tsx(46,34): error TS2554: Expected 0 arguments, but got 3.
+src/routes/produto.$id.tsx(47,5): error TS2554: Expected 3 arguments, but got 1.
+supabase/functions/chat-completion/index.ts(3,25): error TS2304: Cannot find name 'Deno'.
+supabase/functions/chat-completion/index.ts(4,22): error TS2304: Cannot find name 'Deno'.
+supabase/functions/chat-completion/index.ts(6,1): error TS2304: Cannot find name 'Deno'.
+supabase/functions/generate-embedding/index.ts(3,25): error TS2304: Cannot find name 'Deno'.
+supabase/functions/generate-embedding/index.ts(4,22): error TS2304: Cannot find name 'Deno'.
+supabase/functions/generate-embedding/index.ts(6,1): error TS2304: Cannot find name 'Deno'.
+supabase/functions/set-user-claims/index.ts(2,30): error TS2307: Cannot find module 'https://esm.sh/@supabase/supabase-js@2' or its corresponding type declarations.
+supabase/functions/set-user-claims/index.ts(4,21): error TS2304: Cannot find name 'Deno'.
+supabase/functions/set-user-claims/index.ts(5,28): error TS2304: Cannot find name 'Deno'.
+supabase/functions/set-user-claims/index.ts(9,1): error TS2304: Cannot find name 'Deno'.

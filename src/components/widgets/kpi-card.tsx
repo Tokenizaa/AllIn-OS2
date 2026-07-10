@@ -7,6 +7,7 @@ export function KpiCard({
   delta,
   hint,
   spark,
+  icon,
   accent = "primary",
 }: {
   label: string;
@@ -14,13 +15,15 @@ export function KpiCard({
   delta?: number;
   hint?: string;
   spark?: number[];
+  icon?: React.ReactNode;
   accent?: "primary" | "success" | "warning" | "destructive";
 }) {
   const up = (delta ?? 0) >= 0;
   return (
     <div className="rounded-xl border border-border bg-card/60 p-4 hover:bg-card transition-colors">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-muted-foreground">{label}</span>
+        {icon && <span className="text-muted-foreground">{icon}</span>}
         {delta !== undefined && (
           <span className={cn("inline-flex items-center gap-0.5 text-xs font-medium", up ? "text-success" : "text-destructive")}>
             {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}

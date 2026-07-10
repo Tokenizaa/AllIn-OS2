@@ -39,6 +39,14 @@ function resolvePathPermission(pathname: string) {
   return PATH_PERMISSION_MAP.find((entry) => entry.pattern.test(normalizedPath))?.permission || null;
 }
 
+function getPrimaryPathForRole(role: string): string {
+  const map: Record<string, string> = { admin: "/_app", distributor: "/office", staff: "/_app", customer: "/office" };
+  return map[role] || "/login";
+}
+function getRoleRedirectPath(role: string): string {
+  return getPrimaryPathForRole(role);
+}
+
 /**
  * RouteGuard component for protecting routes based on authentication, roles, and permissions
  * Redirects unauthorized users to appropriate pages
@@ -71,7 +79,7 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
 
       if (inferredPermission && !hasPermission(inferredPermission.module, inferredPermission.action || "read")) {
         // No permission error card redirect or similar
-        navigate({ to: getRoleRedirectPath(user) });
+        navigate({ to: getRoleRedirectPath(user.role) });
       }
     }
   }, [user, loading, permissionsLoading, allowedRoles, inferredPermission, navigate, location.pathname, hasPermission]);

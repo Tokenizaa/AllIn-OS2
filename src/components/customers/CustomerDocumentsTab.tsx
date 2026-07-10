@@ -3,7 +3,7 @@ import { Shield, CheckCircle2, Clock, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DocumentService } from "@/services/documents";
+import { DocumentService } from "@/services/crm360/documents";
 
 interface CustomerDocumentsTabProps {
   customer: any;

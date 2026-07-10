@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
 import { useCustomers } from "@/hooks/customers/useCustomers";
 
-export const Route = createFileRoute("/_app/distributors/")({ component: DistributorsPage });
+export const Route = createFileRoute("/distributors/")({ component: DistributorsPage });
 
 const statusStyles: Record<string, string> = {
   active: "bg-success/15 text-success border-success/30",
@@ -30,7 +30,8 @@ function DistributorsPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
 
-  const { data, isLoading, refetch } = useCustomers(currentPage, pageSize);
+  const { data, isLoading, refetch } = useCustomers();
+  const dataAny = data as any;
 
   const customers = (data as any)?.customers || [];
   const orderStats = (data as any)?.orderStats || {};

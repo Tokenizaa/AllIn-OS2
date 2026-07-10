@@ -1,58 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 import { Star, Loader2 } from "lucide-react";
-
-import { productsData } from '@/utils/productsData';
 
 const HeroStatsSection = () => {
   const [productImage, setProductImage] = useState<string>("");
   const [productName, setProductName] = useState<string>("Tênis terapêutico All-In");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Memoizar produtos filtrados para evitar recálculo desnecessário
-  const filteredProducts = useMemo(() => {
-    return productsData.filter(product => {
-      const caption = product.caption?.toLowerCase() || "";
-      return caption.includes("tênis") || 
-             caption.includes("tenis") || 
-             caption.includes("classic") || 
-             caption.includes("sport") || 
-             caption.includes("casual") ||
-             caption.includes("bumper");
-    });
-  }, []);
-
   useEffect(() => {
-    // Função para selecionar uma imagem aleatória dos produtos locais
-    const loadRandomProduct = async () => {
-      try {
-        setLoading(true);
-        
-        if (filteredProducts.length === 0) {
-          throw new Error("Nenhum tênis encontrado nos dados locais");
-        }
-        
-        // Selecionar um produto aleatório
-        const randomIndex = Math.floor(Math.random() * filteredProducts.length);
-        const selectedProduct = filteredProducts[randomIndex];
-        
-        // Definir a imagem e o nome do produto
-        if (selectedProduct.imgSrc) {
-          setProductImage(selectedProduct.imgSrc);
-          setProductName(selectedProduct.caption);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Erro ao carregar imagem aleatória:', err);
-        setError('Falha ao carregar imagem aleatória.');
-        setLoading(false);
-      }
-    };
-
-    loadRandomProduct();
-  }, [filteredProducts]); // Recalcula quando a lista filtrada muda
+    setError("Nenhum produto em destaque configurado.");
+    setLoading(false);
+  }, []);
   return (
     <section className="py-20 bg-allin-bg-light-3 dark:bg-allin-bg-dark-3">
       <div className="container mx-auto px-4">

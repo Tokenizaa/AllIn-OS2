@@ -1,6 +1,6 @@
 import { UserRole } from "@/shared/types/roles";
 import { User, AdminInvite } from "../context/auth.types";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase/client";
 import { AuditService } from "./audit.service";
 
 /**

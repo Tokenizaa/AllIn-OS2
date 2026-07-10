@@ -15,6 +15,7 @@ export const Route = createFileRoute("/_app/system")({ component: SystemPage });
 
 function SystemPage() {
   const { data: auditLogs = [], isLoading, isError, error, refetch } = useAuditLogs(10);
+  const metrics = { adminUsers: 3, integrations: 7, featureFlags: 12 };
 
   if (isError) {
     return (

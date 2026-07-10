@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { industrialService, Supplier } from '@/services/industrial.service';
+import { industrialService, Supplier } from '@/services/industrial';
 
 interface Supplier360Props {
   supplierId: string;

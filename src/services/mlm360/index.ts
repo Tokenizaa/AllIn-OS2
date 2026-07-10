@@ -98,7 +98,7 @@ export const MLM360Service = {
       .limit(500);
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as any;
   },
 
   /**
@@ -123,6 +123,6 @@ export const MLM360Service = {
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 };

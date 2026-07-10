@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useWithdrawals } from "@/hooks/wallets/useWithdrawals";
 import { PageHeader } from "@/components/widgets/page-header";
@@ -12,9 +13,16 @@ export const Route = createFileRoute("/_app/wallets")({ component: WalletsPage }
 
 function WalletsPage() {
   const { data: saquesData, isError, error, refetch } = useWithdrawals();
+  const [isApproving, setIsApproving] = useState(false);
 
   const saques = saquesData?.saques || [];
   const summary = saquesData?.summary || { total: 0, pending: 0, approved: 0, anomalies: 0 };
+  const pendingSaques = saques.filter((s) => s.status === "pending");
+
+  const handleApproveAll = () => {
+    setIsApproving(true);
+    setTimeout(() => setIsApproving(false), 1500);
+  };
 
   if (isError) {
     return (

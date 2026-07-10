@@ -11,9 +11,9 @@ export const Route = createFileRoute("/_app/network")({ component: NetworkPage }
 function NetworkPage() {
   const { data: networkData, isError, error, refetch } = useNetworkMembers(12);
 
-  const customers = useMemo(() => networkData?.customers || [], [networkData]);
-  const legs = useMemo(() => networkData?.legs || [], [networkData]);
-  const relationships = useMemo(() => networkData?.relationships || [], [networkData]);
+  const customers = useMemo(() => (networkData as any)?.customers || [], [networkData]);
+  const legs = useMemo(() => (networkData as any)?.legs || [], [networkData]);
+  const relationships = useMemo(() => (networkData as any)?.relationships || [], [networkData]);
 
   const data = customers.map((c: any) => {
     const name = ((c as any).name || c.usuario || c.id_comprador || "D").split(" ")[0];
@@ -33,19 +33,7 @@ function NetworkPage() {
     return (
       <div className="space-y-3">
         <PageHeader eyebrow="Rede MLM" title="Genealogia inteligente" subtitle="Falha ao carregar a rede." />
-        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
-        <button className="text-sm underline" onClick={() => refetch()}>
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="space-y-3">
-        <PageHeader eyebrow="Rede MLM" title="Genealogia inteligente" subtitle="Falha ao carregar a rede." />
-        <p className="text-sm text-destructive">Erro: {error instanceof Error ? error.message : "falha desconhecida"}</p>
+        <p className="text-sm text-destructive">Erro: {(error as any)?.message || "falha desconhecida"}</p>
         <button className="text-sm underline" onClick={() => refetch()}>
           Tentar novamente
         </button>

@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Search, Download, Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { useAuth } from '@/modules/auth';
-import { getCustomerPayments } from '../../lib/api/payment.functions';
 import { toast } from 'sonner';
 import { usePayments } from '@/hooks/payments/usePayments';
+import { usePaymentHistoryFilters } from "@/hooks/payments/usePaymentHistoryFilters";
+import { useDistributorProfileQuery } from "@/hooks/distributor/useDistributorProfileQuery";
 
 interface Payment {
   id: string;

@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { BarChart3, TrendingUp, ArrowUpRight, FileSpreadsheet, FileText, Activity, ShoppingCart, Users } from "lucide-react";

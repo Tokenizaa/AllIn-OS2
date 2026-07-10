@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { toast } from "sonner";
+import { useState, useCallback } from "react";
 
 interface UseWalletTransactionsProps {
   wallet: any;
@@ -8,51 +7,61 @@ interface UseWalletTransactionsProps {
   refetch: () => void;
 }
 
+interface UseWalletTransactionsReturn {
+  showAddTx: boolean;
+  setShowAddTx: (v: boolean) => void;
+  txType: string;
+  setTxType: (v: string) => void;
+  txAmount: string;
+  setTxAmount: (v: string) => void;
+  txDesc: string;
+  setTxDesc: (v: string) => void;
+  handleAddTransaction: (e: React.FormEvent) => Promise<void>;
+}
+
 export function useWalletTransactions({
   wallet,
   updateWalletBalance,
   createWalletTransaction,
   refetch,
-}: UseWalletTransactionsProps) {
+}: UseWalletTransactionsProps): UseWalletTransactionsReturn {
   const [showAddTx, setShowAddTx] = useState(false);
-  const [txType, setTxType] = useState<"credit" | "debit">("credit");
-  const [txAmount, setTxAmount] = useState<string>("");
-  const [txDesc, setTxDesc] = useState<string>("");
+  const [txType, setTxType] = useState("credit");
+  const [txAmount, setTxAmount] = useState("");
+  const [txDesc, setTxDesc] = useState("");
 
-  const handleAddTransaction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!wallet) {
-      toast.error("Inicialize a carteira antes de lançar movimentações.");
-      return;
-    }
-    const amt = parseFloat(txAmount);
-    if (!amt || amt <= 0) {
-      toast.error("Por favor, digite um valor numérico válido.");
-      return;
-    }
+  const handleAddTransaction = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!wallet || !txAmount) return;
+      const amount = parseFloat(txAmount);
+      if (isNaN(amount) || amount <= 0) return;
 
-    const change = txType === "credit" ? amt : -amt;
-    const balanceAfter = (wallet.balance || 0) + change;
+      try {
+        await createWalletTransaction({
+          wallet_id: wallet.id,
+          type: txType,
+          amount,
+          description: txDesc || "Ajuste manual",
+        });
 
-    // O trigger atualizará o saldo automaticamente, então não precisamos chamar updateWalletBalance
-    createWalletTransaction.mutate(
-      {
-        walletId: wallet.id,
-        transaction_type: txType,
-        amount: amt,
-        description: txDesc || "Lançamento de ajuste administrativo",
-        reference_type: "adjustment",
-      },
-      {
-        onSuccess: () => {
-          refetch();
-          setTxAmount("");
-          setTxDesc("");
-          setShowAddTx(false);
-        },
+        const balanceChange = txType === "credit" ? amount : -amount;
+        await updateWalletBalance({
+          wallet_id: wallet.id,
+          balance_change: balanceChange,
+        });
+
+        setTxAmount("");
+        setTxDesc("");
+        setTxType("credit");
+        setShowAddTx(false);
+        refetch();
+      } catch (err) {
+        console.error("Erro ao adicionar transação:", err);
       }
-    );
-  };
+    },
+    [wallet, txType, txAmount, txDesc, createWalletTransaction, updateWalletBalance, refetch]
+  );
 
   return {
     showAddTx,

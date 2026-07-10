@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useProductDetail } from "@/hooks/products/useProductDetail";
 import { useAuth } from "@/modules/auth";
-import { useDistributor } from "@/lib/distributor-context";
 import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
+import { useDistributorDefault } from "@/hooks/distributor/useDistributorProfileQuery";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,9 @@ export const Route = createFileRoute("/produto/$id")({ component: ProductDetailP
 
 function ProductDetailPage() {
   const { id } = Route.useParams();
-  const { triggerBinomialBonusPay, addAuditLog } = useAuth();
+  const auth = useAuth();
+  const triggerBinomialBonusPay = (auth as any).triggerBinomialBonusPay;
+  const addAuditLog = (auth as any).addAuditLog;
 
   // Sprint 2: Usar TanStack Query em vez de Context API
   const { data: currentDistributor } = useDistributorDefault();
@@ -27,6 +29,7 @@ function ProductDetailPage() {
 
   const { data: prod = null, isLoading } = useProductDetail(id);
 
+  const currentDistributor = (useDistributorDefault() as any)?.data || {};
   const sponsorSlug = currentDistributor?.slug || "";
   const distName = currentDistributor?.name || "Distribuidor";
   const distRank = currentDistributor?.rank || "";

@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useRouteContext } from "@tanstack/react-router";
 import { useAuth } from "@/modules/auth";
-import { useDistributor } from "@/lib/distributor-context";
 import { SupabaseService } from "@/modules/auth/services/supabase.service";
 import { Users, TrendingUp, Trophy, Award, ChevronRight, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PublicHeader } from "@/components/app/public-header";
 import { UserRole } from "@/shared/types/roles";
+import { resolveDistributor } from "@/hooks/distributor/useDistributorQuery";
+import { CompensationGrid } from "@/components/distributor/CompensationGrid";
+import { DistributorPlans } from "@/components/distributor/DistributorPlans";
+import { RegistrationForm } from "@/components/distributor/RegistrationForm";
+import { RegistrationSuccess } from "@/components/distributor/RegistrationSuccess";
 
 export const Route = createFileRoute("/seja-distribuidor/$slug")({
   component: DistributorRecruitmentPage,
-  // Sprint 3: Implementar loader para carregar dados antes da renderização
   loader: async ({ params }) => {
     const slug = params.slug?.toLowerCase().trim();
     if (!slug) {
@@ -23,18 +26,11 @@ export const Route = createFileRoute("/seja-distribuidor/$slug")({
 });
 
 function DistributorRecruitmentPage() {
-  const params = useParams({ strict: false }) as { slug?: string };
-  const { currentDistributor, setDistributorBySlug } = useDistributor();
+  const { distributor: loaderDistributor } = Route.useLoaderData();
   const { register } = useAuth();
   
-  const routeSlug = params.slug?.toLowerCase().trim();
+  const currentDistributor = loaderDistributor || { slug: "", name: "Distribuidor", rank: "", avatar: "", theme: { color: "", gradient: "", badgeBg: "", btnBg: "", accentText: "", slogan: "", bio: "", quote: "" }, isFallback: true };
   const [plans, setPlans] = useState<any[]>([]);
-  
-  useEffect(() => {
-    if (routeSlug) {
-      setDistributorBySlug(routeSlug);
-    }
-  }, [routeSlug, setDistributorBySlug]);
 
   useEffect(() => {
     void (async () => {

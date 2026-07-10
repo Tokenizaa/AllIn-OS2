@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getMaterials, getMaterialById, createMaterial, updateMaterial, deleteMaterial } from '@/services/industrial.service';
+import { getMaterials, getMaterialById, createMaterial, updateMaterial, deleteMaterial } from '@/services/industrial';
 
 export function useMaterials() {
   return useQuery({

@@ -1,83 +1,69 @@
-import { useState } from "react";
-import { toast } from "sonner";
-
-interface Payment {
-  id: string;
-  amount: number;
-  currency: string;
-  status: 'pending' | 'approved' | 'rejected' | 'refunded' | 'cancelled' | 'processing' | 'failed';
-  paymentMethod: 'card' | 'pix' | 'boleto' | 'cash';
-  createdAt: string;
-  orderId?: string;
-  customerName: string;
-}
+import { useState, useMemo } from "react";
 
 interface UsePaymentHistoryFiltersProps {
-  payments: Payment[];
-  refetch: () => void;
+  payments: any[];
+  refetch?: () => void;
 }
 
 export function usePaymentHistoryFilters({ payments, refetch }: UsePaymentHistoryFiltersProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [methodFilter, setMethodFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [methodFilter, setMethodFilter] = useState<string>("all");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400';
-      case 'pending':
-      case 'processing':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-400';
-      case 'rejected':
-      case 'failed':
-        return 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400';
-      case 'refunded':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400';
-      case 'cancelled':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400';
+  const filteredPayments = useMemo(() => {
+    let result = payments || [];
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      result = result.filter((p: any) =>
+        p.id?.toLowerCase().includes(q) ||
+        p.customerName?.toLowerCase().includes(q)
+      );
     }
+    if (statusFilter !== "all") result = result.filter((p: any) => p.status === statusFilter);
+    if (methodFilter !== "all") result = result.filter((p: any) => p.paymentMethod === methodFilter);
+    return result;
+  }, [payments, searchTerm, statusFilter, methodFilter]);
+
+  const getStatusColor = (status: string): string => {
+    const colors: Record<string, string> = {
+      approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+      pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+      rejected: "bg-red-500/10 text-red-400 border-red-500/30",
+      failed: "bg-red-500/10 text-red-400 border-red-500/30",
+      processing: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+      refunded: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+      cancelled: "bg-gray-500/10 text-gray-400 border-gray-500/30",
+    };
+    return colors[status] || "bg-gray-500/10 text-gray-400 border-gray-500/30";
   };
 
-  const getPaymentMethodIcon = (method: string) => {
-    switch (method) {
-      case 'card':
-        return '💳';
-      case 'pix':
-        return '📱';
-      case 'boleto':
-        return '📄';
-      case 'cash':
-        return '💵';
-      default:
-        return '❓';
-    }
+  const getPaymentMethodIcon = (method: string): string => {
+    const icons: Record<string, string> = { card: "💳", pix: "⚡", boleto: "📄", cash: "💵" };
+    return icons[method] || "💰";
   };
-
-  const filteredPayments = payments.filter((payment) => {
-    const matchesSearch =
-      payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (payment.orderId && payment.orderId.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
-    const matchesMethod = methodFilter === 'all' || payment.paymentMethod === methodFilter;
-    return matchesSearch && matchesStatus && matchesMethod;
-  });
 
   const handleViewDetails = (paymentId: string) => {
-    toast.info(`Comprovante de pagamento transação ${paymentId.slice(0, 8)} assinado pelo gateway.`);
+    console.log("View details for payment:", paymentId);
   };
 
   const handleExport = () => {
-    toast.success('Iniciando exportação de relatório financeiro em formato Excel/CSV.');
+    if (typeof window === "undefined") return;
+    const headers = ["id", "customerName", "amount", "status", "paymentMethod", "createdAt"];
+    const rows = filteredPayments.map((p: any) =>
+      headers.map((h: string) => `"${String(p[h] ?? "").replace(/"/g, '""')}"`).join(",")
+    );
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `payment-history-${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleRefresh = () => {
-    refetch();
-    toast.success('Histórico de transações atualizado!');
+    refetch?.();
   };
 
   return {

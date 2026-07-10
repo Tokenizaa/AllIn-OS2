@@ -23,9 +23,6 @@ function formatBRL(value: number) {
 
 function CustomersPage() {
   const [q, setQ] = useState("");
-  const [planoFilter, setPlanoFilter] = useState<string>("all");
-  const [cidadeFilter, setCidadeFilter] = useState<string>("all");
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(15);
 
@@ -35,36 +32,18 @@ function CustomersPage() {
   const orderStats = (data as any)?.orderStats || {};
   const totalCount = (data as any)?.totalCount || 0;
 
-  // Filter to show only final customers (not distributors)
-  const finalCustomers = useMemo(() => {
-    return customers.filter((c: any) => !c.tipo_cliente || c.tipo_cliente !== 'distribuidor');
-  }, [customers]);
-
-  // Get unique values for filters
-  const uniquePlanos = useMemo(() => {
-    const planos = new Set(customers.map((c: any) => c.tipo_cliente).filter(Boolean));
-    return Array.from(planos).sort();
-  }, [customers]);
-
-  const uniqueCidades = useMemo(() => {
-    const cidades = new Set(customers.map((c: any) => c.cidade).filter(Boolean));
-    return Array.from(cidades).sort();
-  }, [customers]);
-
-  // Reset page when queries/filters change to avoid being stranded
+  // Reset page when query changes to avoid being stranded
   useEffect(() => {
     setCurrentPage(1);
-  }, [q, planoFilter, cidadeFilter]);
+  }, [q]);
 
   const filtered = useMemo(
     () =>
-      finalCustomers.filter(
+      customers.filter(
         (c) =>
-          (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())) &&
-          (planoFilter === "all" || c.tipo_cliente === planoFilter) &&
-          (cidadeFilter === "all" || c.cidade === cidadeFilter),
+          (q === "" || getCustomerLabel(c).toLowerCase().includes(q.toLowerCase())),
       ),
-    [q, planoFilter, cidadeFilter, finalCustomers],
+    [q, customers],
   );
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -74,9 +53,9 @@ function CustomersPage() {
       <PageHeader
         eyebrow="CRM"
         title="Clientes"
-        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${finalCustomers
+        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${customers
           .filter((c) => c.status === "active")
-          .length.toLocaleString("pt-BR")} ativos nesta página`}
+          .length.toLocaleString("pt-BR")} ativos`}
         actions={<Button size="sm" onClick={() => refetch()}>Atualizar base</Button>}
       />
 
@@ -84,9 +63,9 @@ function CustomersPage() {
         <Sparkles className="h-4 w-4 text-primary shrink-0" />
         <p className="text-sm flex-1 min-w-0">
           <span className="font-medium">
-            {finalCustomers.filter((c) => (c.status || "") !== "active").length} clientes
+            {customers.filter((c) => (c.status || "") !== "active").length} clientes
           </span>{" "}
-          em atenção. <span className="text-muted-foreground">Use os filtros para priorização.</span>
+          em atenção.
         </p>
         <Button size="sm" variant="outline" onClick={() => refetch()}>
           Recarregar
@@ -102,32 +81,6 @@ function CustomersPage() {
             placeholder="Buscar por nome ou identificação…"
             className="h-9 pl-8 bg-card/60"
           />
-        </div>
-        <div className="flex gap-1.5 flex-wrap items-center">
-          <select
-            value={planoFilter}
-            onChange={(e) => setPlanoFilter(e.target.value)}
-            className="bg-card border border-border rounded-md px-3 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
-          >
-            <option value="all">Todos os tipos</option>
-            {uniquePlanos.map((plano) => (
-              <option key={plano} value={plano}>
-                {plano}
-              </option>
-            ))}
-          </select>
-          <select
-            value={cidadeFilter}
-            onChange={(e) => setCidadeFilter(e.target.value)}
-            className="bg-card border border-border rounded-md px-3 py-1.5 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
-          >
-            <option value="all">Todas as cidades</option>
-            {uniqueCidades.map((cidade) => (
-              <option key={cidade} value={cidade}>
-                {cidade}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
@@ -194,7 +147,7 @@ function CustomersPage() {
                           {getCustomerInitials(c)}
                         </div>
                         <div>
-                          <Link to="/_app/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
+                          <Link to="/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
                             {getCustomerLabel(c)}
                           </Link>
                           <div className="text-[11px] text-muted-foreground">{c.allin_id || c.id || "-"}</div>
@@ -229,7 +182,7 @@ function CustomersPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        to="/_app/customers/$id"
+                        to="/customers/$id"
                         params={{ id: c.id }}
                         className="inline-flex items-center gap-0.5 text-xs text-primary font-medium hover:underline"
                       >
