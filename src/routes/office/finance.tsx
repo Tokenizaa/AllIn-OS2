@@ -1,12 +1,13 @@
-import { useMemo } from "react";
+import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDownToLine, TrendingUp, Sparkles, Lock, Clock, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
-import { ResponsiveContainer, Tooltip, Cell, Pie, PieChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { useOfficeFinance } from "@/modules/finance";
 import { formatBRL } from "@/lib/customer-calculations";
+
+const FinanceCharts = lazy(() => import("./_financeCharts"));
 
 type WalletRow = {
   balance_available?: number | null;
@@ -31,20 +32,6 @@ function FinancePage() {
 
   const withdrawals = financeData?.withdrawals || [];
   const wallet = (financeData?.wallet || {}) as WalletRow;
-
-  const earnings = useMemo(() => {
-    const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-    return months.map((mes, i) => ({
-      mes,
-      valor: Math.max(0, Number(wallet.total_month || 0) * (0.3 + (i / 20))),
-    }));
-  }, [wallet.total_month]);
-
-  const bonusOrigin = useMemo(() => [
-    { name: "Saques", value: 38 },
-    { name: "Comissões", value: 34 },
-    { name: "Bônus", value: 28 },
-  ], []);
 
   const available = Number(wallet.balance_available || 0);
   const blocked = Number(wallet.balance_blocked || 0);
@@ -100,41 +87,9 @@ function FinancePage() {
         <StatCard label="Próxima liberação" value={withdrawals[0]?.created_at ? new Date(withdrawals[0].created_at).toLocaleDateString("pt-BR") : "-"} accent="primary" hint="Último registro do extrato" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Ganhos por mês</h3>
-          <div className="h-64 mt-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={earnings}>
-                <defs>
-                  <linearGradient id="ge" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-success)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="var(--color-success)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="mes" stroke="var(--color-muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-                <Area type="monotone" dataKey="valor" stroke="var(--color-success)" fill="url(#ge)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Origem dos ganhos</h3>
-          <div className="h-56 mt-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={bonusOrigin} dataKey="value" innerRadius={50} outerRadius={80} paddingAngle={3} stroke="none">
-                  {bonusOrigin.map((_, i) => <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+      <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded-2xl" />}>
+        <FinanceCharts totalMonth={Number(wallet.total_month || 0)} />
+      </Suspense>
 
       <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
         <h3 className="text-sm font-semibold mb-3">Extrato recente</h3>

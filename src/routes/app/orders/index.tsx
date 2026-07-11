@@ -1,12 +1,11 @@
 import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/widgets/page-header";
-import { useOrderList } from "@/hooks/orders/useOrderList";
-import { OrderService } from "@/services/orders";
+import { useOrderListInfinite } from "@/hooks/orders/useOrderListInfinite";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, Filter, ChevronDown, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/orders/")({ component: OrdersPage });
 
@@ -18,19 +17,25 @@ const statusColor: Record<string, string> = {
   cancelado: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+const PAGE_SIZE = 20;
+
 function OrdersPage() {
-  const { data: ordersPageData, isLoading, isError, error, refetch } = useOrderList(60);
+  const {
+    orders,
+    customers,
+    totalCount,
+    orderStats,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isError,
+    error,
+    refetch,
+  } = useOrderListInfinite(PAGE_SIZE);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [pageSize, setPageSize] = useState(15);
-  const [currentPage, setCurrentPage] = useState(1);
-  const orderStatsResponse = ordersPageData;
-
-  const orders = useMemo(() => ordersPageData?.orders || [], [ordersPageData]);
-  const customers = useMemo(() => ordersPageData?.customers || [], [ordersPageData]);
-  const totalCount = (ordersPageData as any)?.totalCount || 0;
-  const orderStats = (ordersPageData as any)?.orderStats || (ordersPageData as any)?.data || {};
 
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
@@ -44,7 +49,6 @@ function OrdersPage() {
   }, [orders, statusFilter, searchQuery]);
 
   const total = filteredOrders.reduce((sum, o) => sum + Number(o.valor_total_pedido || o.valor_total || 0), 0);
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   if (isError) {
     return (
@@ -182,61 +186,36 @@ function OrdersPage() {
           </tbody>
         </table>
 
-        {/* Pagination Controls */}
-        {!isLoading && totalPages > 1 && (
+        {!isLoading && orders.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 border-t border-border/60 bg-background/20">
             <div className="text-xs text-muted-foreground">
-              Exibindo <span className="font-semibold text-foreground">{Math.min(filteredOrders.length, (currentPage - 1) * pageSize + 1)}</span> a{" "}
-              <span className="font-semibold text-foreground">{Math.min(filteredOrders.length, currentPage * pageSize)}</span> de{" "}
-              <span className="font-semibold text-foreground">{filteredOrders.length}</span> pedidos
-              {statusFilter !== "all" || searchQuery !== "" ? ` (filtrados de ${totalCount.toLocaleString("pt-BR")})` : ""}
+              Exibindo <span className="font-semibold text-foreground">{orders.length}</span> de{" "}
+              <span className="font-semibold text-foreground">{totalCount.toLocaleString("pt-BR")}</span> pedidos totais
+              {statusFilter !== "all" || searchQuery !== ""
+                ? ` (${filteredOrders.length} com filtros atuais)`
+                : ""}
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span>Itens por página:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="bg-card border border-border rounded-md px-2 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
-                >
-                  {[10, 15, 25, 50, 100].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {hasNextPage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="gap-2"
+              >
+                {isFetchingNextPage ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+                Carregar mais
+              </Button>
+            )}
 
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                <span className="text-xs text-muted-foreground">
-                  Página {currentPage} de {totalPages}
-                </span>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            {!hasNextPage && (
+              <span className="text-xs text-muted-foreground">Todos os pedidos carregados</span>
+            )}
           </div>
         )}
       </div>

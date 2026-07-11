@@ -157,6 +157,29 @@ export const OrderService = {
     }));
   },
 
+  async fetchOrdersPage(page: number, pageSize: number) {
+    const from = (page - 1) * pageSize;
+    const to = page * pageSize - 1;
+    const { data, error, count } = await supabase
+      .schema('commerce')
+      .from('orders')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    if (error) throw error;
+    return { orders: data || [], totalCount: count || 0 };
+  },
+
+  async fetchAllCustomers() {
+    const { data, error } = await supabase
+      .schema('crm')
+      .from('customers')
+      .select('id, usuario, id_comprador, user_id, qualification, telefone, metadata, nome_completo')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
   async fetchOrderStats() {
     const { data, error } = await supabase
       .schema('commerce').from('orders')

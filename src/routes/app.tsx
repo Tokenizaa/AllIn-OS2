@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import { CopilotDrawer } from "@/components/app/copilot-drawer";
 import { SidebarNav } from "@/components/app/sidebar-nav";
@@ -41,7 +41,9 @@ function AppLayout() {
         <Topbar onCopilot={() => setCopilotOpen(true)} />
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] px-4 py-6 md:px-8 md:py-8">
-            <Outlet />
+            <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

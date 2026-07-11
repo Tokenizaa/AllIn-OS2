@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { OfficeSidebar } from "@/components/distributor/sidebar";
 import { OfficeTopbar } from "@/components/distributor/topbar";
@@ -36,7 +37,9 @@ function OfficeLayout() {
         <OfficeTopbar />
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1500px] px-4 md:px-8 py-6 md:py-8">
-            <Outlet />
+            <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>
