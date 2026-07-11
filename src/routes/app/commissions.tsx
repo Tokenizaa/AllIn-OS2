@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCommissions } from "@/hooks/commissions/useCommissions";
+import { useCommissionsDashboard } from "@/modules/commissions";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/app/commissions")({ component: CommissionsPage });
 
 function CommissionsPage() {
-  const { data: commissionsData, isError, error, refetch } = useCommissions();
+  const { data: commissionsData, isError, error, refetch } = useCommissionsDashboard();
   const [isRunningCycle, setIsRunningCycle] = useState(false);
 
   const rows = commissionsData?.rows || [];

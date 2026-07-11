@@ -140,7 +140,7 @@ export const CommissionModule = {
     const directRule = getRuleByType(rules, "direto");
     const direct_commission = parsed.order_amount * ((directRule?.porcentagem || 0) / 100);
 
-    const generations = rules
+    const generations = (rules as BonusRegra[])
       .filter((r) => r.tipo === "geracao" && r.geracao !== null)
       .sort((a, b) => (a.geracao || 0) - (b.geracao || 0))
       .map((r) => ({

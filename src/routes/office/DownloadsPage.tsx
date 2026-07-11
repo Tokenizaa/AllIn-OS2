@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Search, Play, Clock, Info, Sparkles } from "lucide-react";
@@ -89,3 +90,7 @@ export function DownloadsPage() {
     </div>
   );
 }
+
+export const Route = createFileRoute("/office/downloads")({
+  component: DownloadsPage,
+});

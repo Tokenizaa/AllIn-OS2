@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { usePlans } from "@/hooks/plans/usePlans";
+import { usePlans } from "@/modules/plans";
 import { useMyProfile } from "@/hooks/profiles/useMyProfile";
 import { formatBRL } from "@/lib/customer-calculations";
 
@@ -41,10 +41,10 @@ function getPlanPrice(plan: PlanRow): number {
 export const Route = createFileRoute("/office/plan")({ component: PlanPage });
 
 function PlanPage() {
-  const { data: plansData = [], isLoading: plansLoading, isError, error, refetch } = usePlans();
+  const { data: plansViewModel, isLoading: plansLoading, isError, error, refetch } = usePlans();
   const { data: profileData = null, isLoading: profileLoading } = useMyProfile();
 
-  const plans = plansData ?? EMPTY_PLANS;
+  const plans = (plansViewModel?.plans ?? []) as PlanRow[];
   const profile = profileData || null;
 
   const current = plans[0];

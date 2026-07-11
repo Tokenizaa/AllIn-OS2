@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { ResponsiveContainer, Treemap, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { KpiCard } from "@/components/widgets/kpi-card";
-import { useNetwork } from "@/hooks/network/useNetwork";
+import { useNetwork } from "@/modules/network";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/app/network")({ component: NetworkPage });

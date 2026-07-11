@@ -40,6 +40,14 @@ export interface NetworkNode {
   linha: number;
   posicao_relativa: number;
   created_at?: string;
+  id?: string;
+  name?: string;
+  usuario?: string;
+  id_comprador?: string;
+  qualification?: string;
+  status?: string;
+  cidade?: string;
+  estado?: string;
 }
 
 export interface BonusRegra {

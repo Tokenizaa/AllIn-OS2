@@ -163,7 +163,7 @@ function Customer360() {
     const balanceAfter = balanceBefore + change;
 
     updateWalletBalance.mutate(
-      { walletId: wallet.id, balance: balanceAfter },
+      { walletId: wallet.id, balance: balanceAfter } as any,
       {
         onSuccess: () => {
           createWalletTransaction.mutate(
@@ -174,7 +174,7 @@ function Customer360() {
               balance_before: balanceBefore,
               balance_after: balanceAfter,
               description: txDesc || "Lançamento de ajuste administrativo",
-            },
+            } as any,
             {
               onSuccess: () => {
                 refetch();

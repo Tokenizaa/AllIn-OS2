@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { industrialService, Material } from '@/services/industrial';
+import { industrialService } from '@/services/industrial';
 
 interface Material360Props {
   materialId: string;
 }
 
 export function Material360({ materialId }: Material360Props) {
-  const [material, setMaterial] = useState<Material | null>(null);
+  const [material, setMaterial] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

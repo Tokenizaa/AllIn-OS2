@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNetwork } from "@/hooks/network/useNetwork";
+import { useNetwork } from "@/modules/network";
 import { getCustomerLabel } from "@/lib/customer-label";
 
 type NodeRow = {
@@ -26,7 +26,7 @@ function NetworkPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "leader" | "critical">("all");
 
-  const { data: nodes = [], isLoading } = useNetwork(500) as any;
+  const { data: nodes = [], isLoading } = useNetwork(3);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

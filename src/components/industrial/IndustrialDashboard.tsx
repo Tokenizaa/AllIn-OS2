@@ -26,7 +26,7 @@ export function IndustrialDashboard() {
         industrialService.getMachines(),
         industrialService.getProcesses(),
         industrialService.getProductsIndustrial(),
-        industrialService.getCapacity(),
+        industrialService.getCapacities(),
       ]);
 
       // Calculate KPIs

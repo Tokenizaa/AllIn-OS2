@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useOfficeDashboard } from "@/hooks/office/useOfficeDashboard";
+import { useDashboard } from "@/modules/dashboard";
 import { motion } from "framer-motion";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Wallet, Users, TrendingUp, Crown, Sparkles, ArrowUpRight, Copy, Share2, UserPlus, Trophy, Target } from "lucide-react";
@@ -15,8 +15,8 @@ const relTime = (value?: string | null) => (value ? new Intl.DateTimeFormat("pt-
 export const Route = createFileRoute("/office/")({ component: Dashboard });
 
 function Dashboard() {
-  const { data, isLoading, isError, error, refetch } = useOfficeDashboard();
- 
+  const { data, isLoading, isError, error, refetch } = useDashboard();
+  
   if (isError) {
     return (
       <div className="p-6 text-sm text-destructive">
@@ -32,7 +32,7 @@ function Dashboard() {
     return <div className="p-6 text-sm text-muted-foreground">Carregando dados reais...</div>;
   }
 
-  const { stats: current = {} as any, salesSeries = [], bonusOrigin = [], topProducts = [], timeline = [], aiInsights = [], goals = [] } = (data as any) || {};
+  const { stats: current = {} as any, salesSeries = [], bonusOrigin = [], topProducts = [], timeline = [], aiInsights = [], goals = [] } = data;
 
   return (
     <div className="space-y-6">

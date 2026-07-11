@@ -31,11 +31,6 @@ export const queryKeys = {
   paymentHistory: (customerId: string) => ["payment-history-list", customerId] as const,
   marketing: ["marketing"] as const,
   distributor: ["distributor"] as const,
-  bonus: {
-    history: (id?: string, limit?: number) => ["bonus", "history", id, limit] as const,
-    rules: ["bonus", "rules", "active"] as const,
-  } as const,
-  paymentMethods: ["payment-methods", "active"] as const,
   cart: (userId?: string) => ["cart", userId] as const,
   points: {
     saldo: (id?: string) => ["points", "saldo", id] as const,
@@ -52,7 +47,5 @@ export const queryKeys = {
     byDistribuidor: (id?: string) => ["withdrawals", "real", "distribuidor", id] as const,
   } as const,
   referral: (code?: string) => ["referral", "tracking", code] as const,
-  mlm360: (profileId?: string, idComprador?: string) => ["mlm360", profileId, idComprador] as const,
-  officeProfile: ["office-profile"] as const,
   customer360ByCustomerId: (customerId: string, params?: any) => ["customer360-by-id", customerId, params] as const,
 } as const;

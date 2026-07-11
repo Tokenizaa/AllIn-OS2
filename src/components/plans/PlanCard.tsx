@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Check, Star, TrendingUp, Users } from "lucide-react";
-import { usePlanBonuses } from "@/hooks/plans/usePlanBonuses";
+import { usePlanBonuses } from "@/modules/plans";
 
 interface PlanCardProps {
   plan: any;

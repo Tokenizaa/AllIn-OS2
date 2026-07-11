@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Wallet, Gift, Star, ArrowUpRight, ArrowDownLeft, History, CreditCard, RotateCw } from 'lucide-react';
 import { useAuth } from '@/modules/auth';
 import { toast } from 'sonner';
-import { useWalletData } from '@/hooks/wallets/useWalletData';
+import { useWalletData } from '@/modules/wallet';
 import { useWalletActions } from '@/hooks/wallets/useWalletActions';
 
 const MINIMUM_WITHDRAWAL = 100;
@@ -28,7 +28,7 @@ export function WalletDashboard() {
 
   const handleWithdraw = () => {
     const amount = 100.0;
-    const check = canWithdraw(walletData?.balance || 0, amount);
+    const check = canWithdraw(walletData?.stats?.balance || 0, amount);
     if (!check.allowed) {
       toast.error(check.reason || 'Saldo insuficiente para saque');
       return;
@@ -71,8 +71,8 @@ export function WalletDashboard() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{walletData.currency} {walletData.balance.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Disponível para saques e compras: {walletData.currency} {walletData.availableBalance.toFixed(2)}</p>
+            <div className="text-2xl font-bold">{walletData.stats.currency} {walletData.stats.balance.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">Disponível para saques e compras: {walletData.stats.currency} {walletData.stats.availableBalance.toFixed(2)}</p>
           </CardContent>
         </Card>
 
@@ -82,7 +82,7 @@ export function WalletDashboard() {
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{walletData.currency} {walletData.bonusBalance.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{walletData.stats.currency} {walletData.stats.bonusBalance.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">Créditos promocionais utilizáveis</p>
           </CardContent>
         </Card>
@@ -93,7 +93,7 @@ export function WalletDashboard() {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{walletData.points.toLocaleString()} PTS</div>
+            <div className="text-2xl font-bold">{walletData.stats.points.toLocaleString()} PTS</div>
             <p className="text-xs text-muted-foreground">Resgatáveis por descontos na loja</p>
           </CardContent>
         </Card>
@@ -135,7 +135,7 @@ export function WalletDashboard() {
                         </div>
                       </div>
                       <div className={`font-semibold ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-                        {transaction.type === 'credit' ? '+' : '-'}{walletData.currency} {Number(transaction.amount || 0).toFixed(2)}
+                        {transaction.type === 'credit' ? '+' : '-'}{walletData.stats.currency} {Number(transaction.amount || 0).toFixed(2)}
                       </div>
                     </div>
                   ))}
@@ -162,7 +162,7 @@ export function WalletDashboard() {
                         <p className="font-medium capitalize">{tx.description || `${tx.source_type} bonus`}</p>
                         <p className="text-sm text-muted-foreground">{tx.created_at}</p>
                       </div>
-                      <div className="font-semibold text-yellow-600">+{walletData.currency} {Number(tx.amount || 0).toFixed(2)}</div>
+                      <div className="font-semibold text-yellow-600">+{walletData.stats.currency} {Number(tx.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
                 </div>

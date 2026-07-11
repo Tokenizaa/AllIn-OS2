@@ -27,7 +27,7 @@ export function SidebarNav() {
   const filteredSections = APP_NAV_SECTIONS
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => hasPermission(item.module, "read")),
+      items: section.items.filter((item) => hasPermission(item.module as any, "read")),
     }))
     .filter((section) => section.items.length > 0);
 

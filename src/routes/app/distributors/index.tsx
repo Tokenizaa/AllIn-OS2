@@ -47,7 +47,7 @@ function DistributorsPage() {
 
   const uniqueCidades = useMemo(() => {
     const cidades = new Set(distributors.map((d: any) => d.cidade).filter(Boolean));
-    return Array.from(cidades).sort();
+    return Array.from(cidades).sort() as string[];
   }, [distributors]);
 
   // Reset page when queries/filters change to avoid being stranded
@@ -176,7 +176,7 @@ function DistributorsPage() {
                           {getCustomerInitials(d)}
                         </div>
                         <div>
-                          <Link to="/customers/$id" params={{ id: d.id }} className="font-medium hover:text-primary transition-colors">
+                          <Link to="/app/customers/$id" params={{ id: d.id }} className="font-medium hover:text-primary transition-colors">
                             {getCustomerLabel(d)}
                           </Link>
                           <div className="text-[11px] text-muted-foreground">{d.allin_id || d.id || "-"}</div>
@@ -206,7 +206,7 @@ function DistributorsPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        to="/customers/$id"
+                        to="/app/customers/$id"
                         params={{ id: d.id }}
                         className="inline-flex items-center gap-0.5 text-xs text-primary font-medium hover:underline"
                       >

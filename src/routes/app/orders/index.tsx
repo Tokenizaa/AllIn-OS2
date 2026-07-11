@@ -155,7 +155,7 @@ function OrdersPage() {
                     <td className="px-4 py-3 font-mono text-xs">{o.numero_pedido || o.id}</td>
                     <td className="px-4 py-3">
                       {customer ? (
-                        <Link to="/customers/$id" params={{ id: customer.id_comprador || customer.id }} className="hover:text-primary">
+                        <Link to="/app/customers/$id" params={{ id: customer.id_comprador || customer.id }} className="hover:text-primary">
                           {customerLabel}
                         </Link>
                       ) : (

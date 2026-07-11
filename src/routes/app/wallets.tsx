@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useWithdrawals } from "@/hooks/wallets/useWithdrawals";
+import { useWithdrawalsDashboard } from "@/modules/withdrawals";
 import { PageHeader } from "@/components/widgets/page-header";
 import { KpiCard } from "@/components/widgets/kpi-card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { PaymentHistory } from "@/components/payments/payment-history";
 export const Route = createFileRoute("/app/wallets")({ component: WalletsPage });
 
 function WalletsPage() {
-  const { data: saquesData, isError, error, refetch } = useWithdrawals();
+  const { data: saquesData, isError, error, refetch } = useWithdrawalsDashboard();
   const [isApproving, setIsApproving] = useState(false);
 
   const saques = saquesData?.saques || [];

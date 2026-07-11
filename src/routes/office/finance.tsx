@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
 import { ResponsiveContainer, Tooltip, Cell, Pie, PieChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { useOfficeFinance } from "@/hooks/office/useOfficeFinance";
+import { useOfficeFinance } from "@/modules/finance";
 import { formatBRL } from "@/lib/customer-calculations";
 
 type WalletRow = {
@@ -30,7 +30,7 @@ function FinancePage() {
   const { data: financeData, isError, error, refetch } = useOfficeFinance();
 
   const withdrawals = financeData?.withdrawals || [];
-  const wallet = financeData?.wallet || {};
+  const wallet = (financeData?.wallet || {}) as WalletRow;
 
   const earnings = useMemo(() => {
     const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
