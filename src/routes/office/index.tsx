@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Suspense, lazy } from "react";
 import { useDashboard } from "@/modules/dashboard";
-import { motion } from "framer-motion";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Wallet, Users, TrendingUp, Crown, Sparkles, ArrowUpRight, Copy, Share2, UserPlus, Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,13 +9,15 @@ import { StatCard } from "@/components/distributor/stat-card";
 import { toast } from "sonner";
 import { formatBRL } from "@/lib/customer-calculations";
 
+const DashboardCharts = lazy(() => import("./_dashboardCharts"));
+
 const relTime = (value?: string | null) => (value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value)) : "-");
 
 export const Route = createFileRoute("/office/")({ component: Dashboard });
 
 function Dashboard() {
   const { data, isLoading, isError, error, refetch } = useDashboard();
-  
+
   if (isError) {
     return (
       <div className="p-6 text-sm text-destructive">
@@ -36,14 +37,14 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/15 via-fuchsia-500/10 to-cyan-400/5 p-6 md:p-8">
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/15 via-fuchsia-500/10 to-cyan-400/5 p-6 md:p-8">
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Badge className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/20"><Crown className="h-3 w-3 mr-1" /> {current.qualificacao}</Badge>
               <Badge variant="outline" className="border-border/60">{current.plano}</Badge>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Olá, {current.nome} 👋</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Olá, {current.nome}</h1>
             <p className="mt-1.5 text-sm text-muted-foreground max-w-lg">Sua operação está lendo o Supabase em tempo real.</p>
             <div className="mt-4 max-w-md">
               <div className="flex items-center justify-between text-xs mb-1.5"><span className="text-muted-foreground">Progresso</span><span className="font-semibold">{current.progresso}%</span></div>
@@ -56,7 +57,7 @@ function Dashboard() {
             <Button size="sm" className="gap-2 bg-gradient-to-r from-primary to-fuchsia-500"><UserPlus className="h-3.5 w-3.5" /> Cadastrar</Button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Saldo disponível" value={formatBRL(current.saldoDisponivel)} delta={0} icon={Wallet} accent="success" />
@@ -65,34 +66,9 @@ function Dashboard() {
         <StatCard label="Cadastros diretos" value={String(current.redeTotal)} delta={0} icon={Users} accent="warning" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Vendas & Bônus · últimos registros</h3>
-          <div className="h-72 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesSeries}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="day" stroke="var(--color-muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--color-muted-foreground)" fontSize={11} tickFormatter={(v) => `${(v / 1000).toFixed(1)}k`} />
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-                <Area type="monotone" dataKey="vendas" stroke="var(--color-primary)" fill="url(#g1)" strokeWidth={2} />
-                <Area type="monotone" dataKey="bonus" stroke="var(--color-success)" fill="url(#g2)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Origem dos bônus</h3>
-          <div className="h-56 mt-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={bonusOrigin} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="none">{bonusOrigin.map((_, i) => <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />)}</Pie>
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+      <Suspense fallback={<div className="h-72 rounded-2xl border border-border/60 bg-card/60 animate-pulse" />}>
+        <DashboardCharts salesSeries={salesSeries} bonusOrigin={bonusOrigin} topProducts={topProducts} />
+      </Suspense>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2 space-y-3">
@@ -102,16 +78,16 @@ function Dashboard() {
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {aiInsights.map((i) => (
-              <motion.div key={i.id} whileHover={{ y: -2 }} className="rounded-2xl border border-border/60 bg-card/60 p-4">
+              <div key={i.id} className="rounded-2xl border border-border/60 bg-card/60 p-4">
                 <div className="flex items-start gap-3">
                   <div className="h-8 w-8 shrink-0 rounded-lg grid place-items-center bg-info/15 text-info"><Sparkles className="h-4 w-4" /></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold leading-tight">{i.title}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{i.detail}</p>
-                    <Button size="sm" variant="ghost" className="mt-2 -ml-2 h-7 text-xs text-primary">{i.action} →</Button>
+                    <Button size="sm" variant="ghost" className="mt-2 -ml-2 h-7 text-xs text-primary">{i.action}</Button>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -149,20 +125,6 @@ function Dashboard() {
               </li>
             ))}
           </ul>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-5">
-          <h3 className="text-sm font-semibold">Top produtos</h3>
-          <div className="h-44 mt-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topProducts} layout="vertical" margin={{ left: 0, right: 12 }}>
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" stroke="var(--color-muted-foreground)" fontSize={10} width={120} />
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="qtd" fill="var(--color-primary)" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
         </div>
       </div>
     </div>

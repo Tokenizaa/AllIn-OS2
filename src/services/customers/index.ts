@@ -53,14 +53,17 @@ export const CustomerService = {
     return data || [];
   },
 
-  async fetchCustomersWithOrderStats(page = 1, pageSize = 15) {
-    const { data: customers, error } = await supabase
-      .schema('crm').from('customers')
-      .select('*')
-      .range((page - 1) * pageSize, page * pageSize - 1)
-      .order('created_at', { ascending: false });
-    if (error) throw new Error(error.message || "Failed to fetch customers with order stats");
-    return { customers: customers || [], orderStats: {}, totalCount: 0, page, pageSize };
+  async fetchCustomersPage(page: number, pageSize: number) {
+    const from = (page - 1) * pageSize;
+    const to = page * pageSize - 1;
+    const { data, error, count } = await supabase
+      .schema('crm')
+      .from('customers')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    if (error) throw error;
+    return { customers: data || [], totalCount: count || 0 };
   },
 
   async fetchRecentCustomers(limit = 20) {

@@ -1,13 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowUpRight, Search, Sparkles, ChevronDown, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/widgets/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getCustomerInitials, getCustomerLabel } from "@/lib/customer-label";
-import { useCustomers } from "@/hooks/customers/useCustomers";
-import { formatBRL } from "@/lib/customer-calculations";
+import { useCustomerListInfinite } from "@/hooks/customers/useCustomerListInfinite";
 
 export const Route = createFileRoute("/app/customers/")({ component: CustomersPage });
 
@@ -18,21 +17,22 @@ const statusStyles: Record<string, string> = {
   churned: "bg-muted text-muted-foreground border-border",
 };
 
+const PAGE_SIZE = 15;
+
 function CustomersPage() {
   const [q, setQ] = useState("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(15);
 
-  const { data, isLoading, refetch } = useCustomers();
-
-  const customers = useMemo(() => (data as any)?.customers || [], [data]);
-  const orderStats = (data as any)?.orderStats || {};
-  const totalCount = (data as any)?.totalCount || 0;
-
-  // Reset page when query changes to avoid being stranded
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [q]);
+  const {
+    customers,
+    totalCount,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isError,
+    error,
+    refetch,
+  } = useCustomerListInfinite(PAGE_SIZE);
 
   const filtered = useMemo(
     () =>
@@ -43,25 +43,34 @@ function CustomersPage() {
     [q, customers],
   );
 
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const activeCount = useMemo(() => customers.filter((c) => c.status === "active").length, [customers]);
+  const attentionCount = useMemo(() => customers.filter((c) => (c.status || "") !== "active").length, [customers]);
+
+  if (isError) {
+    return (
+      <div className="space-y-3">
+        <PageHeader eyebrow="CRM" title="Clientes" subtitle="Falha ao carregar clientes." />
+        <p className="text-sm text-destructive">Erro: {(error as any)?.message || "falha desconhecida"}</p>
+        <button className="text-sm underline" onClick={() => refetch()}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="CRM"
         title="Clientes"
-        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${customers
-          .filter((c) => c.status === "active")
-          .length.toLocaleString("pt-BR")} ativos`}
+        subtitle={`${totalCount.toLocaleString("pt-BR")} registros · ${activeCount.toLocaleString("pt-BR")} ativos`}
         actions={<Button size="sm" onClick={() => refetch()}>Atualizar base</Button>}
       />
 
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-wrap items-center gap-3">
         <Sparkles className="h-4 w-4 text-primary shrink-0" />
         <p className="text-sm flex-1 min-w-0">
-          <span className="font-medium">
-            {customers.filter((c) => (c.status || "") !== "active").length} clientes
-          </span>{" "}
+          <span className="font-medium">{attentionCount.toLocaleString("pt-BR")} clientes</span>{" "}
           em atenção.
         </p>
         <Button size="sm" variant="outline" onClick={() => refetch()}>
@@ -89,14 +98,12 @@ function CustomersPage() {
               <th className="px-4 py-2.5 font-medium">Tipo</th>
               <th className="px-4 py-2.5 font-medium">Cidade</th>
               <th className="px-4 py-2.5 font-medium">Status</th>
-              <th className="px-4 py-2.5 font-medium text-right">Pedidos</th>
-              <th className="px-4 py-2.5 font-medium text-right">LTV</th>
               <th className="px-4 py-2.5 font-medium" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
             {isLoading ? (
-              Array.from({ length: pageSize }).map((_, idx) => (
+              Array.from({ length: 6 }).map((_, idx) => (
                 <tr key={`skeleton-${idx}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -107,165 +114,95 @@ function CustomersPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="h-4 w-16 bg-muted rounded animate-pulse" />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="h-4 w-16 bg-muted rounded animate-pulse" />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="h-4 w-8 bg-muted rounded animate-pulse ml-auto" />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="h-4 w-14 bg-muted rounded animate-pulse ml-auto" />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="h-4 w-16 bg-muted rounded animate-pulse ml-auto" />
-                  </td>
+                  <td className="px-4 py-3"><div className="h-4 w-20 bg-muted rounded animate-pulse" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-16 bg-muted rounded animate-pulse" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-16 bg-muted rounded animate-pulse" /></td>
+                  <td className="px-4 py-3 text-right"><div className="h-4 w-16 bg-muted rounded animate-pulse ml-auto" /></td>
                 </tr>
               ))
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground text-sm">
                   Nenhum cliente encontrado com os filtros atuais.
                 </td>
               </tr>
             ) : (
-              filtered.map((c) => {
-                const stats = orderStats[c.id] || { count: 0, ltv: 0 };
-                return (
-                  <tr key={c.id} className="hover:bg-accent/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/40 to-fuchsia-500/40 grid place-items-center text-[11px] font-medium text-white shadow-sm">
-                          {getCustomerInitials(c)}
-                        </div>
-                        <div>
-                          <Link to="/app/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
-                            {getCustomerLabel(c)}
-                          </Link>
-                          <div className="text-[11px] text-muted-foreground">{c.allin_id || c.id || "-"}</div>
-                        </div>
+              filtered.map((c) => (
+                <tr key={c.id} className="hover:bg-accent/30 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/40 to-fuchsia-500/40 grid place-items-center text-[11px] font-medium text-white shadow-sm">
+                        {getCustomerInitials(c)}
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs text-muted-foreground truncate max-w-[150px] block">
-                        {c.tipo_cliente || "-"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs text-muted-foreground">
-                        {c.cidade || "-"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize",
-                          statusStyles[c.status || "pending"],
-                        )}
-                      >
-                        {c.status || "pending"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {stats.count.toLocaleString("pt-BR")}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums font-medium text-emerald-500">
-                      {formatBRL(stats.ltv)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        to="/app/customers/$id"
-                        params={{ id: c.id }}
-                        className="inline-flex items-center gap-0.5 text-xs text-primary font-medium hover:underline"
-                      >
-                        Abrir 360 <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })
+                      <div>
+                        <Link to="/app/customers/$id" params={{ id: c.id }} className="font-medium hover:text-primary transition-colors">
+                          {getCustomerLabel(c)}
+                        </Link>
+                        <div className="text-[11px] text-muted-foreground">{c.allin_id || c.id || "-"}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs text-muted-foreground truncate max-w-[150px] block">
+                      {c.tipo_cliente || "-"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs text-muted-foreground">{c.cidade || "-"}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={cn(
+                        "inline-flex rounded-md border px-1.5 py-0.5 text-[10px] capitalize",
+                        statusStyles[c.status || "pending"],
+                      )}
+                    >
+                      {c.status || "pending"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      to="/app/customers/$id"
+                      params={{ id: c.id }}
+                      className="inline-flex items-center gap-0.5 text-xs text-primary font-medium hover:underline"
+                    >
+                      Abrir 360 <ArrowUpRight className="h-3 w-3" />
+                    </Link>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
 
-        {/* Dynamic Pagination Controls */}
-        {!isLoading && totalPages > 1 && (
+        {!isLoading && customers.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 border-t border-border/60 bg-background/20">
             <div className="text-xs text-muted-foreground">
-              Exibindo <span className="font-semibold text-foreground">{Math.min(filtered.length, (currentPage - 1) * pageSize + 1)}</span> a{" "}
-              <span className="font-semibold text-foreground">{Math.min(filtered.length, currentPage * pageSize)}</span> de{" "}
-              <span className="font-semibold text-foreground">{totalCount}</span> clientes
+              Exibindo <span className="font-semibold text-foreground">{customers.length.toLocaleString("pt-BR")}</span> de{" "}
+              <span className="font-semibold text-foreground">{totalCount.toLocaleString("pt-BR")}</span> clientes totais
+              {q !== "" ? ` (${filtered.length} com filtros atuais)` : ""}
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span>Itens por página:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="bg-card border border-border rounded-md px-2 py-1 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none"
-                >
-                  {[10, 15, 25, 50, 100].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {hasNextPage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="gap-2"
+              >
+                {isFetchingNextPage ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+                Carregar mais
+              </Button>
+            )}
 
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  if (currentPage > 3) {
-                    pageNum = currentPage - 3 + i;
-                  }
-                  if (pageNum + (4 - i) > totalPages) {
-                    pageNum = Math.max(1, totalPages - 4 + i);
-                  }
-
-                  if (pageNum > totalPages) return null;
-
-                  return (
-                    <Button
-                      key={i}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      className="h-8 w-8 text-xs font-medium"
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            {!hasNextPage && (
+              <span className="text-xs text-muted-foreground">Todos os clientes carregados</span>
+            )}
           </div>
         )}
       </div>

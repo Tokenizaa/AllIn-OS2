@@ -48,4 +48,5 @@ export const queryKeys = {
   } as const,
   referral: (code?: string) => ["referral", "tracking", code] as const,
   customer360ByCustomerId: (customerId: string, params?: any) => ["customer360-by-id", customerId, params] as const,
+  customerListInfinite: (pageSize: number) => ["customers", "infinite", pageSize] as const,
 } as const;
