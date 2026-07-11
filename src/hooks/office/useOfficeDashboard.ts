@@ -3,25 +3,23 @@ import { queryKeys } from "../queryKeys";
 import { OrderService } from "@/services/orders";
 import { PaymentService } from "@/services/payments";
 import { CustomerService } from "@/services/customers";
-import { WalletService } from "@/services/wallets";
+import { WithdrawalService } from "@/services/withdrawals";
 import { ProductService } from "@/services/products";
-import { ProfileService } from "@/services/profiles";
+import { OfficeRules } from "@/services/orders";
+import { useAuth } from "@/modules/auth";
 
 export function useOfficeDashboard() {
+  const { user } = useAuth();
   return useQuery({
     queryKey: queryKeys.office.dashboard,
-    staleTime: 0,
-    refetchOnMount: "always",
     queryFn: async () => {
-      const [orders, payments, customers, products, withdrawalsRes, lastProfile] = await Promise.all([
+      const [orders, payments, customers, products, withdrawals] = await Promise.all([
         OrderService.fetchOrdersForDashboard(),
         PaymentService.fetchPaymentsForDashboard(),
         CustomerService.fetchCustomersList(),
         ProductService.fetchProducts(20),
-        WalletService.fetchWithdrawals(20),
-        ProfileService.fetchLastProfile(),
+        WithdrawalService.fetchRecentWithdrawals(20),
       ]);
-      const withdrawals = (withdrawalsRes as any)?.data || [];
 
       const totalVendido = orders.reduce((sum, row) => sum + Number(row.valor_total_pedido || row.valor_total || 0), 0);
       const totalPago = payments.reduce((sum, row: any) => sum + Number(row.amount || 0), 0);
@@ -33,14 +31,14 @@ export function useOfficeDashboard() {
 
       const stats = {
         saldoDisponivel,
-        comissaoAcumulada: totalPago * 0.18,
+        comissaoAcumulada: OfficeRules.calculateCommission(totalPago),
         totalVendido,
         pedidosMes,
         redeTotal,
         ticketMedio,
         conversaoLoja: conversion,
         crescimentoRedeMes: 0,
-        nome: lastProfile?.name || "Usuário",
+        nome: user?.name || "Usuário",
         qualificacao: "Ativo",
         plano: "Plano Real",
         progresso: Math.min(100, conversion),
@@ -54,16 +52,25 @@ export function useOfficeDashboard() {
         const current = grouped.get(day) || { vendas: 0, bonus: 0 };
         const orderAmount = Number(row.valor_total_pedido || row.valor_total || 0);
         current.vendas += orderAmount;
-        current.bonus += orderAmount * 0.1;
+        current.bonus += OfficeRules.calculateBonus(orderAmount);
         grouped.set(day, current);
       });
       const salesSeries = Array.from(grouped.entries()).map(([day, value]) => ({ day, vendas: value.vendas, bonus: value.bonus }));
+      const totalBonus = salesSeries.reduce((sum, s) => sum + s.bonus, 0);
+      const totalSales = salesSeries.reduce((sum, s) => sum + s.vendas, 0);
       const bonusOrigin = [
-        { name: "Vendas", value: 45 },
-        { name: "Pagamentos", value: 35 },
-        { name: "Rede", value: 20 },
+        { name: "Vendas", value: totalSales > 0 ? Math.round((totalSales / (totalSales + totalBonus || 1)) * 100) : 0 },
+        { name: "Comissões", value: totalBonus > 0 ? Math.round((totalBonus / (totalSales + totalBonus || 1)) * 100) : 0 },
       ];
-      const topProducts = products.slice(0, 5).map((p: any) => ({ name: p.name || "Produto", qtd: 10, receita: Number(p.price || 0) * 10 }));
+      const productSales = new Map<string, number>();
+      orders.forEach((o) => {
+        const name = (o as any).nome_produto || (o as any).product_name || "Produto";
+        productSales.set(name, (productSales.get(name) || 0) + 1);
+      });
+      const topProducts = Array.from(productSales.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name, qtd]) => ({ name, qtd, receita: qtd * ticketMedio }));
       const timeline = [
         ...orders.slice(0, 3).map((o: any) => ({ id: `o-${o.id}`, title: "Pedido registrado", description: `Pedido ${o.numero_pedido || o.id} carregado do Supabase.`, at: o.created_at, type: "order" })),
         ...payments.slice(0, 3).map((p: any) => ({ id: `p-${p.id}`, title: "Pagamento recebido", description: `Pagamento de R$${Number(p.amount || 0).toLocaleString("pt-BR")} processado.`, at: p.created_at, type: "payment" })),

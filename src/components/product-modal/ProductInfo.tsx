@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPrice } from "@/utils/priceFormatter";
+import { formatBRL } from "@/lib/customer-calculations";
 
 interface ProductInfoProps {
   product: {
@@ -64,7 +64,7 @@ const ProductInfo = ({
         <div className="flex items-center gap-4">
           <Tag className="w-6 h-6 text-allin-orange" />
           <span className="text-3xl md:text-4xl font-bold text-allin-orange">
-            {formatPrice(product.price) || 'Preço não disponível'}
+            {formatBRL(product.price) || 'Preço não disponível'}
           </span>
         </div>
         
@@ -292,7 +292,7 @@ const ProductInfo = ({
                   <div>
                     <div className="text-sm text-allin-dark/80 dark:text-allin-white/80">Preço Total</div>
                     <div className="text-2xl md:text-xl font-bold text-allin-orange">
-                      {formatPrice(product.price ? (parseFloat(product.price.replace('R$', '').replace(',', '.')) * quantity).toString() : '0') || 'Preço não disponível'}
+                      {formatBRL(product.price ? (parseFloat(product.price.replace('R$', '').replace(',', '.')) * quantity).toString() : '0') || 'Preço não disponível'}
                     </div>
                   </div>
                 </div>

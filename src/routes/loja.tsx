@@ -9,7 +9,7 @@ import CartSidebar from '@/components/features/cart/CartSidebar';
 import { PublicHeader } from '@/components/app/public-header';
 import { StyleProvider } from '@/contexts/StyleContext';
 import { useToast } from '@/hooks/use-toast';
-import { useProductsLegacy } from '@/hooks/useProductsLegacy';
+import { useProductsQuery } from '@/hooks/products/useProductsQuery';
 import { RouteGuard } from "@/modules/auth";
 import { UserRole } from "@/shared/types/roles";
 
@@ -58,7 +58,7 @@ const neutralStore: StoreInfo = {
 
 function LojaPage() {
   const { toast } = useToast();
-  const { products, loading, error } = useProductsLegacy();
+  const { products, loading, error } = useProductsQuery();
   const [storeInfo, setStoreInfo] = React.useState<StoreInfo>(neutralStore);
   const [reviews] = React.useState<Review[]>([]);
   const [isLoadingStore, setIsLoadingStore] = React.useState(true);

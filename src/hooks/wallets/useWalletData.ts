@@ -1,36 +1,59 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
-import { WalletService } from "@/services/wallets";
+import { PointsService } from "@/services/points";
+import { BonusService } from "@/services/bonus";
+import { MlmEngineService } from "@/services/mlm-engine";
 
 export function useWalletData(customerId?: string | null) {
   return useQuery({
     queryKey: customerId ? queryKeys.walletData(customerId) : queryKeys.wallets,
     queryFn: async () => {
       if (!customerId) return null;
-      try {
-        await Promise.all([WalletService.ensureWallet({ customerId }), WalletService.ensureBonusWallet({ customerId }), WalletService.ensurePointsWallet({ customerId })]);
-      } catch {}
-      const [walletRes, bonusRes, pointsRes, txsRes, bonusTxsRes, pointsTxsRes] = await Promise.all([
-        WalletService.getWalletBalance({ customerId }),
-        WalletService.getBonusWalletBalance({ customerId }),
-        WalletService.getPointsWalletBalance({ customerId }),
-        WalletService.getWalletTransactions({ customerId, limit: 10 }),
-        WalletService.getBonusTransactions({ customerId, limit: 10 }),
-        WalletService.getPointsTransactions({ customerId, limit: 10 }),
+      
+      // Use MLM Engine wallet module for main wallet
+      const [walletBalance, pointsBalance, bonusHistory, walletTxs, pointsTxs] = await Promise.all([
+        MlmEngineService.wallet.getBalance(customerId),
+        PointsService.fetchPointsByDistribuidor(customerId),
+        BonusService.fetchBonusByDistribuidor(customerId),
+        MlmEngineService.wallet.getTransactions(customerId, 10),
+        PointsService.fetchTransactionsByDistribuidor(customerId, { limit: 10 }),
       ]);
-      const balanceInfo: any = walletRes.success ? walletRes.data : { balance: 0, available_balance: 0, frozen_balance: 0 };
-      const bonusInfo: any = bonusRes.success ? bonusRes.data : { balance: 0, available_balance: 0 };
-      const pointsInfo: any = pointsRes.success ? pointsRes.data : { balance: 0, available_balance: 0 };
+
+      // Calculate bonus balance from bonus history (only approved/paid)
+      const bonusBalance = bonusHistory
+        .filter((b: any) => ['aprovado', 'pago'].includes(b.status))
+        .reduce((sum: number, b: any) => sum + Number(b.valor_calculado || 0), 0);
+
       return {
-        balance: Number(balanceInfo.balance || 0),
-        availableBalance: Number(balanceInfo.available_balance || 0),
-        frozenBalance: Number(balanceInfo.frozen_balance || 0),
+        balance: walletBalance.saldo,
+        availableBalance: walletBalance.disponivel,
+        frozenBalance: walletBalance.bloqueado,
         currency: "BRL",
-        bonusBalance: Number(bonusInfo.balance || 0),
-        points: Number(pointsInfo.balance || 0),
-        recentTransactions: txsRes.success && txsRes.data ? txsRes.data : [],
-        bonusTransactions: bonusTxsRes.success && bonusTxsRes.data ? bonusTxsRes.data : [],
-        pointsTransactions: pointsTxsRes.success && pointsTxsRes.data ? pointsTxsRes.data : [],
+        bonusBalance,
+        points: pointsBalance?.saldo_atual || 0,
+        recentTransactions: walletTxs.map((tx: any) => ({
+          id: tx.id,
+          type: tx.valor >= 0 ? 'credit' : 'debit',
+          amount: Math.abs(tx.valor),
+          balance: tx.saldo_depois,
+          description: tx.descricao,
+          date: tx.created_at,
+          created_at: tx.created_at,
+        })),
+        bonusTransactions: bonusHistory.map((b: any) => ({
+          id: b.id,
+          amount: b.valor_calculado,
+          description: b.referencia_tipo || b.tipo,
+          created_at: b.data_calculo,
+          status: b.status,
+        })),
+        pointsTransactions: pointsTxs.map((tx: any) => ({
+          id: tx.id,
+          amount: tx.quantidade,
+          description: tx.descricao || tx.origem || tx.tipo,
+          created_at: tx.created_at,
+          source_type: tx.tipo,
+        })),
       };
     },
     enabled: !!customerId,

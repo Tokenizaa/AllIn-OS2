@@ -1,71 +1,43 @@
 import { supabase } from "@/lib/supabase/client";
 
-export interface CustomerNote {
-  id: string;
-  customer_id: string;
-  id_comprador: string;
-  note: string;
-  note_type: 'general' | 'support' | 'compliance' | 'payment' | 'network';
-  created_by: string;
-  is_private: boolean;
-  metadata: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
-
 export const CustomerNotesService = {
-  async fetchCustomerNotes(customerId: string, idComprador?: string) {
-    const { data, error } = await supabase
-      .from("crm.customer_notes")
+  async fetchNotes(filters: { customerId?: string; idComprador?: string }) {
+    let query = supabase
+      .schema("crm")
+      .from("customer_notes")
       .select("*")
-      .or(`customer_id.eq.${customerId}${idComprador ? `,id_comprador.eq.${idComprador}` : ''}`)
       .order("created_at", { ascending: false });
 
+    if (filters.customerId) query = query.eq("customer_id", filters.customerId);
+    if (filters.idComprador) query = query.eq("id_comprador", filters.idComprador);
+
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   },
 
-  async fetchCustomerNotesByComprador(idComprador: string) {
-    const { data, error } = await supabase
-      .from("crm.customer_notes")
-      .select("*")
-      .eq("id_comprador", idComprador)
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  async createNote(note: Omit<CustomerNote, 'id' | 'created_at' | 'updated_at'>) {
-    const { data, error } = await supabase
-      .from("crm.customer_notes")
-      .insert(note)
+  async createNote(data: {
+    customerId?: string;
+    idComprador?: string;
+    note: string;
+    noteType?: string;
+    createdBy?: string;
+  }) {
+    const { data: note, error } = await supabase
+      .schema("crm")
+      .from("customer_notes")
+      .insert({
+        customer_id: data.customerId,
+        id_comprador: data.idComprador,
+        note: data.note,
+        note_type: data.noteType || "general",
+        created_by: data.createdBy || "system",
+        is_private: false,
+        metadata: {},
+      })
       .select()
       .single();
-
     if (error) throw error;
-    return data;
+    return note;
   },
-
-  async updateNote(noteId: string, updates: Partial<Omit<CustomerNote, 'id' | 'created_at' | 'created_by'>>) {
-    const { data, error } = await supabase
-      .from("crm.customer_notes")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", noteId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async deleteNote(noteId: string) {
-    const { error } = await supabase
-      .from("crm.customer_notes")
-      .delete()
-      .eq("id", noteId);
-
-    if (error) throw error;
-    return true;
-  }
 };

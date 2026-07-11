@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { StatCard } from "@/components/distributor/stat-card";
 import { toast } from "sonner";
+import { formatBRL } from "@/lib/customer-calculations";
 
-const formatBRL = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 const relTime = (value?: string | null) => (value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value)) : "-");
 
 export const Route = createFileRoute("/office/")({ component: Dashboard });

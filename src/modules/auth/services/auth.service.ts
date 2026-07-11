@@ -125,10 +125,6 @@ export class AuthService {
         patrocinador_id: extra?.sponsor_id || activeSponsor,
       });
 
-    if (false) {
-      throw new Error("User role not found");
-    }
-
     // Fetch complete user profile
     const userProfile = await SupabaseService.fetchUserProfile(user.id);
     

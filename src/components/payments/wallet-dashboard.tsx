@@ -7,6 +7,14 @@ import { toast } from 'sonner';
 import { useWalletData } from '@/hooks/wallets/useWalletData';
 import { useWalletActions } from '@/hooks/wallets/useWalletActions';
 
+const MINIMUM_WITHDRAWAL = 100;
+
+function canWithdraw(balance: number, amount: number): { allowed: boolean; reason?: string } {
+  if (amount < MINIMUM_WITHDRAWAL) return { allowed: false, reason: `Saque mínimo: R$ ${MINIMUM_WITHDRAWAL.toFixed(2)}` };
+  if (balance < amount) return { allowed: false, reason: 'Saldo insuficiente' };
+  return { allowed: true };
+}
+
 export function WalletDashboard() {
   const { user, distributorProfile } = useAuth();
   const customerId = distributorProfile?.id || user?.id;
@@ -19,12 +27,14 @@ export function WalletDashboard() {
   };
 
   const handleWithdraw = () => {
-    if (walletData && walletData.balance < 100) {
-      toast.error('Saldo insuficiente para retirar R$ 100,00');
+    const amount = 100.0;
+    const check = canWithdraw(walletData?.balance || 0, amount);
+    if (!check.allowed) {
+      toast.error(check.reason || 'Saldo insuficiente para saque');
       return;
     }
-    debit.mutate(100.0);
-    toast.success('Saque de R$ 100,00 simulado com sucesso!');
+    debit.mutate(amount);
+    toast.success(`Saque de R$ ${amount.toFixed(2)} simulado com sucesso!`);
   };
 
   const handleTransfer = () => {

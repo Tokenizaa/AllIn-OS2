@@ -9,11 +9,12 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { Customer360Service } from "@/services/customer360";
 
 export function useMLM360(profileId?: string, idComprador?: string) {
   return useQuery({
-    queryKey: ["mlm360", profileId, idComprador],
+    queryKey: queryKeys.mlm360(profileId, idComprador),
     enabled: !!profileId || !!idComprador,
     queryFn: async () => {
       if (!profileId && !idComprador) throw new Error("profileId or idComprador is required");

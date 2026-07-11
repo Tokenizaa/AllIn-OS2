@@ -6,11 +6,11 @@ import { Search, X } from 'lucide-react';
 import ProductGallery from '@/components/features/products/ProductGallery';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useProductsLegacy } from '@/hooks/useProductsLegacy';
+import { useProductsQuery } from '@/hooks/products/useProductsQuery';
 import { Product } from '@/types/products';
 
 const ProductSearch: React.FC = () => {
-  const { products, loading, error } = useProductsLegacy();
+  const { products, loading, error } = useProductsQuery();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');

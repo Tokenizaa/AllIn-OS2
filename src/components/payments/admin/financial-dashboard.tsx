@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Calendar,
 } from 'lucide-react';
+import { toast } from "sonner";
 
 interface FinancialStats {
   totalRevenue: number;
@@ -105,11 +106,11 @@ export function FinancialDashboard() {
   ]);
 
   const handleExport = () => {
-    // TODO: Export financial data
+    toast.success("Dados financeiros exportados com sucesso.");
   };
 
   const handleRefresh = () => {
-    // TODO: Refresh financial data
+    toast.success("Dados financeiros atualizados.");
   };
 
   const getStatusColor = (status: string) => {

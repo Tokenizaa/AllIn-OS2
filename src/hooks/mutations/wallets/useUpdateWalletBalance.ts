@@ -1,18 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase/client";
+import { MlmEngineService } from "@/services/mlm-engine";
 
 export function useUpdateWalletBalance() {
   return useMutation({
-    mutationFn: async ({ walletId, balance }: { walletId: string; balance: number }) => {
-      const { data, error } = await supabase
-        .from("wallets")
-        .update({ balance, updated_at: new Date().toISOString() })
-        .eq("id", walletId)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+    mutationFn: async (data: { distribuidorId: string; balance: number }) => {
+      const current = await MlmEngineService.wallet.getBalance(data.distribuidorId);
+      const diff = data.balance - current.saldo;
+      if (diff > 0) {
+        return MlmEngineService.wallet.addFunds(data.distribuidorId, diff, "admin_adjustment");
+      } else if (diff < 0) {
+        return MlmEngineService.wallet.withdraw(data.distribuidorId, Math.abs(diff));
+      }
+      return current;
     },
   });
 }

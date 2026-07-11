@@ -1,48 +1,32 @@
-import { useState, useEffect } from 'react';
-import { industrialService, Process, ProcessStep, ProcessDocument } from '@/services/industrial';
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { industrialService, Process } from '@/services/industrial';
 
 interface Process360Props {
   processId: string;
 }
 
 export function Process360({ processId }: Process360Props) {
-  const [process, setProcess] = useState<Process | null>(null);
-  const [steps, setSteps] = useState<ProcessStep[]>([]);
-  const [documents, setDocuments] = useState<ProcessDocument[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'steps' | 'documents'>('overview');
 
-  useEffect(() => {
-    loadProcessData();
-  }, [processId]);
+  const { data: processData } = useSuspenseQuery({
+    queryKey: ['industrial', 'process', processId],
+    queryFn: () => industrialService.getProcessById(processId),
+  });
 
-  const loadProcessData = async () => {
-    try {
-      setLoading(true);
-      
-      const [processData, stepsData, documentsData] = await Promise.all([
-        industrialService.getProcessById(processId),
-        industrialService.getProcessStepsByProcessId(processId),
-        industrialService.getProcessDocumentsByProcessId(processId),
-      ]);
+  const { data: stepsData } = useSuspenseQuery({
+    queryKey: ['industrial', 'process', processId, 'steps'],
+    queryFn: () => industrialService.getProcessStepsByProcessId(processId),
+  });
 
-      setProcess(processData.data);
-      setSteps(stepsData.data || []);
-      setDocuments(documentsData.data || []);
-    } catch (error) {
-      console.error('Error loading process data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: documentsData } = useSuspenseQuery({
+    queryKey: ['industrial', 'process', processId, 'documents'],
+    queryFn: () => industrialService.getProcessDocumentsByProcessId(processId),
+  });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Carregando dados do processo...</div>
-      </div>
-    );
-  }
+  const process = processData?.data;
+  const steps = stepsData?.data || [];
+  const documents = documentsData?.data || [];
 
   if (!process) {
     return (
@@ -54,7 +38,6 @@ export function Process360({ processId }: Process360Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <div className="flex items-start justify-between">
           <div>
@@ -77,7 +60,6 @@ export function Process360({ processId }: Process360Props) {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8">
           {[
@@ -100,7 +82,6 @@ export function Process360({ processId }: Process360Props) {
         </nav>
       </div>
 
-      {/* Tab Content */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         {activeTab === 'overview' && (
           <div className="space-y-6">

@@ -8,14 +8,11 @@ import { ProductService } from "@/services/products";
 import { useAuth } from "@/modules/auth";
 import { useProducts } from "@/hooks/products/useProducts";
 import { UserRole } from "@/shared/types/roles";
+import { formatBRL } from "@/lib/customer-calculations";
 
 type ProductRow = { id: string; name?: string | null; description?: string | null; price?: number | null; category?: string | null };
 
 export const Route = createFileRoute("/office/store")({ component: StorePage });
-
-function formatBRL(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function StorePage() {
   const { user } = useAuth();

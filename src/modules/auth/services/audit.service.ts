@@ -9,7 +9,7 @@ export class AuditService {
     user: User | null
   ): Promise<void> {
     try {
-      await supabase.from("audit_logs").insert({
+      await supabase.schema("system").from("audit_logs").insert({
         action,
         entity_type: entityType,
         description,

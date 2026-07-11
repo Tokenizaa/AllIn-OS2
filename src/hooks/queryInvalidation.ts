@@ -1,11 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { queryKeys } from "./queryKeys";
 
-/**
- * Centralized cache invalidation functions
- * All mutations should use these functions to invalidate related queries
- */
-
 export function invalidateCustomerQueries(queryClient: QueryClient, customerId?: string) {
   queryClient.invalidateQueries({ queryKey: queryKeys.customers });
   if (customerId) {
@@ -62,5 +57,4 @@ export function invalidateAnalyticsQueries(queryClient: QueryClient) {
 
 export function invalidateAuditQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: queryKeys.auditLogs });
-  queryClient.invalidateQueries({ queryKey: queryKeys.audit as any });
 }

@@ -29,4 +29,30 @@ export const queryKeys = {
   paymentAnalytics: ["payment-analytics"] as const,
   walletData: (customerId: string) => ["wallet-data", customerId] as const,
   paymentHistory: (customerId: string) => ["payment-history-list", customerId] as const,
+  marketing: ["marketing"] as const,
+  distributor: ["distributor"] as const,
+  bonus: {
+    history: (id?: string, limit?: number) => ["bonus", "history", id, limit] as const,
+    rules: ["bonus", "rules", "active"] as const,
+  } as const,
+  paymentMethods: ["payment-methods", "active"] as const,
+  cart: (userId?: string) => ["cart", userId] as const,
+  points: {
+    saldo: (id?: string) => ["points", "saldo", id] as const,
+    transactions: (id?: string, limit?: number) => ["points", "transactions", id, limit] as const,
+  } as const,
+  payments2: {
+    list: (limit?: number) => ["payments", "real", limit] as const,
+    byId: (id: string) => ["payments", "real", "id", id] as const,
+    byPedido: (pedidoId: string) => ["payments", "real", "pedido", pedidoId] as const,
+  } as const,
+  withdrawals2: {
+    list: (status?: string, limit?: number) => ["withdrawals", "real", status, limit] as const,
+    recent: (limit?: number) => ["withdrawals", "real", "recent", limit] as const,
+    byDistribuidor: (id?: string) => ["withdrawals", "real", "distribuidor", id] as const,
+  } as const,
+  referral: (code?: string) => ["referral", "tracking", code] as const,
+  mlm360: (profileId?: string, idComprador?: string) => ["mlm360", profileId, idComprador] as const,
+  officeProfile: ["office-profile"] as const,
+  customer360ByCustomerId: (customerId: string, params?: any) => ["customer360-by-id", customerId, params] as const,
 } as const;

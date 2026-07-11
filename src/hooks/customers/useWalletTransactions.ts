@@ -1,9 +1,8 @@
 import { useState, useCallback } from "react";
+import { MlmEngineService } from "@/services/mlm-engine";
 
 interface UseWalletTransactionsProps {
   wallet: any;
-  updateWalletBalance: any;
-  createWalletTransaction: any;
   refetch: () => void;
 }
 
@@ -21,8 +20,6 @@ interface UseWalletTransactionsReturn {
 
 export function useWalletTransactions({
   wallet,
-  updateWalletBalance,
-  createWalletTransaction,
   refetch,
 }: UseWalletTransactionsProps): UseWalletTransactionsReturn {
   const [showAddTx, setShowAddTx] = useState(false);
@@ -38,29 +35,28 @@ export function useWalletTransactions({
       if (isNaN(amount) || amount <= 0) return;
 
       try {
-        await createWalletTransaction({
-          wallet_id: wallet.id,
-          type: txType,
-          amount,
-          description: txDesc || "Ajuste manual",
-        });
-
-        const balanceChange = txType === "credit" ? amount : -amount;
-        await updateWalletBalance({
-          wallet_id: wallet.id,
-          balance_change: balanceChange,
-        });
-
+        if (txType === "credit") {
+          await MlmEngineService.wallet.addFunds(
+            wallet.id_comprador || wallet.distribuidor_id || wallet.id,
+            amount,
+            txDesc || "Lançamento manual"
+          );
+        } else {
+          await MlmEngineService.wallet.withdraw(
+            wallet.id_comprador || wallet.distribuidor_id || wallet.id,
+            amount
+          );
+        }
         setTxAmount("");
         setTxDesc("");
         setTxType("credit");
         setShowAddTx(false);
         refetch();
-      } catch (err) {
-        console.error("Erro ao adicionar transação:", err);
+      } catch (err: any) {
+        console.error("Transaction failed:", err);
       }
     },
-    [wallet, txType, txAmount, txDesc, createWalletTransaction, updateWalletBalance, refetch]
+    [wallet, txType, txAmount, txDesc, refetch]
   );
 
   return {

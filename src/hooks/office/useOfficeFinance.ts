@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
-import { WalletService } from "@/services/wallets";
+import { WithdrawalService } from "@/services/withdrawals";
 
 type WalletRow = {
   balance_available?: number | null;
@@ -21,17 +21,11 @@ type WithdrawalRow = {
 export function useOfficeFinance() {
   return useQuery({
     queryKey: queryKeys.office.finance,
-    staleTime: 0,
-    refetchOnMount: "always",
     queryFn: async () => {
-      const [withdrawalsRes, profileData] = await Promise.all([
-        WalletService.fetchWithdrawals(50),
-        Promise.resolve({}),
-      ]);
-      const withdrawalsData = ((withdrawalsRes as any)?.data as any[]) || [];
+      const withdrawalsData = await WithdrawalService.fetchRecentWithdrawals(50);
       return {
         withdrawals: withdrawalsData as WithdrawalRow[],
-        wallet: (profileData as WalletRow) || {},
+        wallet: {} as WalletRow,
       };
     },
   });

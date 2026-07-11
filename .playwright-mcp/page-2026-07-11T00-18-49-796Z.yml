@@ -1,0 +1,179 @@
+- generic [ref=e350]:
+  - banner [ref=e351]:
+    - generic [ref=e353]:
+      - link "Logo All-In All-In" [ref=e354] [cursor=pointer]:
+        - /url: /
+        - img "Logo All-In" [ref=e355]
+        - generic [ref=e356]: All-In
+      - navigation [ref=e357]:
+        - link "Inicio" [ref=e358] [cursor=pointer]:
+          - /url: /
+        - link "Loja" [ref=e359] [cursor=pointer]:
+          - /url: /loja
+        - link "Distribuidor" [ref=e360] [cursor=pointer]:
+          - /url: /seja-distribuidor
+      - generic [ref=e361]:
+        - button "Alternar tema" [ref=e362] [cursor=pointer]
+        - link [ref=e364] [cursor=pointer]:
+          - /url: /customers
+          - button "Dashboard" [ref=e365]
+  - main [ref=e366]:
+    - generic [ref=e367]:
+      - generic [ref=e368]:
+        - generic [ref=e369]: SP / Brasil
+        - generic [ref=e377]:
+          - heading "Espaço Autoral de Distribuidor" [level=1] [ref=e378]
+          - paragraph [ref=e379]: "\"\""
+        - paragraph
+        - generic [ref=e380]:
+          - link "Explorar Vitrine On-Line" [ref=e381] [cursor=pointer]:
+            - /url: /loja/distributors
+          - link "Trabalhar Conosco" [ref=e385] [cursor=pointer]:
+            - /url: /seja-distribuidor/distributors
+          - button [ref=e388] [cursor=pointer]
+        - generic [ref=e395]:
+          - generic [ref=e396]:
+            - paragraph [ref=e397]: 500+
+            - paragraph [ref=e398]: Clientes Atendidos
+          - generic [ref=e399]:
+            - paragraph [ref=e400]: 600+
+            - paragraph [ref=e401]: Parceiros de Rede
+          - generic [ref=e402]:
+            - paragraph [ref=e403]: R$ 400k+
+            - paragraph [ref=e404]: Vendas Efetuadas
+      - generic [ref=e408]:
+        - generic [ref=e409]: D
+        - generic [ref=e412]:
+          - heading "Distribuidor" [level=3] [ref=e413]
+          - paragraph
+        - generic [ref=e414]:
+          - paragraph [ref=e415]: Contato Autorizado
+          - paragraph [ref=e416]:
+            - text: "Email:"
+            - generic [ref=e417]: distributors@allin.io
+          - paragraph [ref=e418]:
+            - text: "Código:"
+            - generic [ref=e419]: "@distributors"
+        - generic [ref=e420]:
+          - link "Falar pelo WhatsApp" [ref=e421] [cursor=pointer]:
+            - /url: https://wa.me/5511987654321?text=Ola%20Distribuidor,%20gostaria%20de%20saber%20mais%20sobre%20os%20produtos%20da%20Allin
+          - link "Acompanhar Instagram" [ref=e424] [cursor=pointer]:
+            - /url: https://instagram.com
+    - generic [ref=e428]:
+      - paragraph [ref=e431]: "\"\""
+      - paragraph [ref=e432]: — Manifesto Orgânico Celular
+    - generic [ref=e433]:
+      - generic [ref=e434]:
+        - generic [ref=e435]:
+          - text: Vitrine Exclusiva
+          - heading "Nossos Lançamentos de Alta Performance" [level=2] [ref=e436]
+        - link "Ver vitrine completa" [ref=e437] [cursor=pointer]:
+          - /url: /loja/distributors
+      - generic [ref=e440]:
+        - generic [ref=e441]:
+          - generic [ref=e442]:
+            - img "Produto Teste 1" [ref=e443]
+            - generic [ref=e444]: Geral
+          - generic [ref=e445]:
+            - generic [ref=e446]:
+              - heading "Produto Teste 1" [level=3] [ref=e447]
+              - paragraph
+            - generic [ref=e448]:
+              - generic [ref=e449]:
+                - generic [ref=e450]: "Valor Comercial:"
+                - strong [ref=e451]: R$ 0,00
+              - link "Detalhes do Produto" [ref=e452] [cursor=pointer]:
+                - /url: /produto/fdc7d5db-af88-46a5-8e4d-a04403b05db6?ref=distributors
+        - generic [ref=e453]:
+          - generic [ref=e454]:
+            - img "Produto Teste 2" [ref=e455]
+            - generic [ref=e456]: Geral
+          - generic [ref=e457]:
+            - generic [ref=e458]:
+              - heading "Produto Teste 2" [level=3] [ref=e459]
+              - paragraph
+            - generic [ref=e460]:
+              - generic [ref=e461]:
+                - generic [ref=e462]: "Valor Comercial:"
+                - strong [ref=e463]: R$ 0,00
+              - link "Detalhes do Produto" [ref=e464] [cursor=pointer]:
+                - /url: /produto/38f44aad-2571-4a96-8210-4455ed389161?ref=distributors
+        - generic [ref=e465]:
+          - generic [ref=e466]:
+            - img "Produto Teste 3" [ref=e467]
+            - generic [ref=e468]: Geral
+          - generic [ref=e469]:
+            - generic [ref=e470]:
+              - heading "Produto Teste 3" [level=3] [ref=e471]
+              - paragraph
+            - generic [ref=e472]:
+              - generic [ref=e473]:
+                - generic [ref=e474]: "Valor Comercial:"
+                - strong [ref=e475]: R$ 0,00
+              - link "Detalhes do Produto" [ref=e476] [cursor=pointer]:
+                - /url: /produto/cbe72983-155b-4ca4-b3fb-877e88702144?ref=distributors
+    - generic [ref=e477]:
+      - generic [ref=e479]:
+        - text: WORKFLOW DE CAPTAÇÃO LEAD
+        - heading "Inicie Sua Jornada na All-In Life em Nosso Time Especializado" [level=2] [ref=e480]
+        - paragraph [ref=e481]:
+          - text: Trabalhe em colaboração direta com
+          - strong [ref=e482]: Distribuidor
+          - text: . Ganhe acesso imediato ao material de prospecção corporativo, webinars semanais operados por IA e taxas preferenciais no licenciamento global de rede.
+        - generic [ref=e483]:
+          - paragraph [ref=e484]:
+            - text: Patrocínio garantido sob código
+            - strong [ref=e487]: "@distributors"
+          - paragraph [ref=e488]: Treinamentos e scripts para mídias sociais inclusos
+          - paragraph [ref=e491]: Licenciamento e ativação em menos de 10 minutos
+      - generic [ref=e495]:
+        - heading "Fale Direto Com Nosso Especialista" [level=3] [ref=e496]
+        - generic [ref=e497]:
+          - generic [ref=e498]:
+            - text: Nome Completo
+            - 'textbox "Ex: Carlos Silva" [ref=e499]'
+          - generic [ref=e500]:
+            - generic [ref=e501]:
+              - text: E-mail Corporativo
+              - textbox "carlos@gmail.com" [ref=e502]
+            - generic [ref=e503]:
+              - text: Telefone (WhatsApp)
+              - textbox "(11) 99999-0000" [ref=e504]
+          - generic [ref=e505]:
+            - text: Seu Principal Interesse
+            - combobox [ref=e506] [cursor=pointer]:
+              - option "Quero consumir produtos e fazer rede MLM" [selected]
+              - option "Quero ser apenas consumidor licenciado (descontos de até 40%)"
+              - option "Quero revender e ganhar na margem comercial de 100%"
+        - button "Sim, Quero Me Cadastrar No Time!" [ref=e507] [cursor=pointer]
+  - contentinfo [ref=e510]:
+    - generic [ref=e511]:
+      - generic [ref=e512]:
+        - generic [ref=e513]: All-In life
+        - paragraph [ref=e514]: Plataforma de expansão de rede MLM descentralizada conectada à All-In Brasil e operada por inteligência artificial contextual.
+      - generic [ref=e515]:
+        - heading "Links Corporativos" [level=4] [ref=e516]
+        - list [ref=e517]:
+          - listitem [ref=e518]:
+            - link "Entrar na Área Restrita" [ref=e519] [cursor=pointer]:
+              - /url: /login
+          - listitem [ref=e520]:
+            - link "Criar Nova Distribuidora" [ref=e521] [cursor=pointer]:
+              - /url: /cadastro
+          - listitem [ref=e522]:
+            - link "Termos de Conformidade" [ref=e523] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e524]:
+            - link "Guia de Compliance MLM" [ref=e525] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e526]:
+        - heading "Patrocinador Ativo" [level=4] [ref=e527]
+        - generic [ref=e528]:
+          - generic [ref=e529]: D
+          - generic [ref=e531]:
+            - paragraph [ref=e532]: Distribuidor
+            - paragraph [ref=e533]: "@distributors"
+        - paragraph [ref=e534]: Qualificação ativa auditada em tempo real.
+      - generic [ref=e535]:
+        - heading "Aviso Legal" [level=4] [ref=e536]
+        - paragraph [ref=e537]: All-In Life é uma marca registrada de nutrição de precisão patenteada. Os resultados financeiros MLM variam dependendo da volumetria, esforço individual e captação legítima de rede.

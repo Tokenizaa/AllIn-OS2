@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/modules/auth";
 import { cartService, CartItem as SupabaseCartItem } from "@/services/cart";
+import { queryKeys } from "../queryKeys";
 
 export type CartItem = {
   id: string;
@@ -31,10 +32,10 @@ export function useCartQuery() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["cart", user?.id],
+    queryKey: queryKeys.cart(user?.id),
     queryFn: () => fetchCartItems(user?.id || ""),
     enabled: !!user?.id,
-    staleTime: 0, // Sempre atualizar
+    staleTime: 0,
   });
 
   const addItemMutation = useMutation({
@@ -43,7 +44,7 @@ export function useCartQuery() {
       await cartService.addItem(user.id, { product_id: productId, quantity });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart(user?.id) });
     },
   });
 
@@ -52,7 +53,7 @@ export function useCartQuery() {
       await cartService.removeItem(cartItemId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart(user?.id) });
     },
   });
 
@@ -61,7 +62,7 @@ export function useCartQuery() {
       await cartService.updateItemQuantity(cartItemId, quantity);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart(user?.id) });
     },
   });
 
@@ -71,7 +72,7 @@ export function useCartQuery() {
       await cartService.clearCart(user.id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart(user?.id) });
     },
   });
 

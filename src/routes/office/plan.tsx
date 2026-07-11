@@ -6,21 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { PlanService } from "@/services/plans";
-import { ProfileService } from "@/services/profiles";
-import { getPlanRule } from "@/modules/plans/mlm-rules";
 import { usePlans } from "@/hooks/plans/usePlans";
 import { useMyProfile } from "@/hooks/profiles/useMyProfile";
+import { formatBRL } from "@/lib/customer-calculations";
 
 type PlanRow = {
   id: string;
+  nome?: string | null;
   name?: string | null;
+  preco?: number | null;
   price?: number | null;
-  commission_percent?: number | null;
-  generations?: number | null;
-  benefits?: string[] | null;
+  description?: string | null;
+  ativo?: boolean | null;
   is_active?: boolean | null;
-  sort_order?: number | null;
+  max_geracoes?: number | null;
+  metadata?: Record<string, any> | null;
 };
 
 type ProfileRow = {
@@ -30,11 +30,15 @@ type ProfileRow = {
 
 const EMPTY_PLANS: PlanRow[] = [];
 
-export const Route = createFileRoute("/office/plan")({ component: PlanPage });
-
-function formatBRL(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+function getPlanDisplayName(plan: PlanRow): string {
+  return plan.nome || plan.name || "Plano";
 }
+
+function getPlanPrice(plan: PlanRow): number {
+  return Number(plan.preco ?? plan.price ?? 0);
+}
+
+export const Route = createFileRoute("/office/plan")({ component: PlanPage });
 
 function PlanPage() {
   const { data: plansData = [], isLoading: plansLoading, isError, error, refetch } = usePlans();
@@ -46,7 +50,6 @@ function PlanPage() {
   const current = plans[0];
   const next = plans[1] || plans[0];
   const createdAt = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "-";
-  const currentRule = getPlanRule(current?.name);
 
   const planCards = useMemo(() => plans.slice(0, 4), [plans]);
 
@@ -79,30 +82,24 @@ function PlanPage() {
           <div className="absolute -top-20 -right-20 h-60 w-60 rounded-full bg-primary/20 blur-3xl" />
           <div className="relative">
             <Badge className="bg-primary/20 text-primary border-primary/30"><Crown className="h-3 w-3 mr-1" /> Plano atual</Badge>
-            <h2 className="mt-2 text-3xl font-bold">{current?.name || "Plano ativo"}</h2>
+            <h2 className="mt-2 text-3xl font-bold">{getPlanDisplayName(current || {})}</h2>
             <p className="mt-1 text-sm text-muted-foreground">Ativo desde {createdAt}</p>
             <div className="mt-6 grid grid-cols-3 gap-4">
-              <Metric label="Bônus máximo" value={`${currentRule?.generationBonuses?.reduce((m, g) => Math.max(m, g.percentage), current?.commission_percent ?? 0) ?? current?.commission_percent ?? 0}%`} />
-              <Metric label="Gerações" value={String(currentRule?.generationBonuses?.length ?? current?.generations ?? 0)} />
-              <Metric label="Mensalidade" value={formatBRL(Number(current?.price ?? 0))} />
+              <Metric label="Gerações" value={String(current?.max_geracoes ?? 3)} />
+              <Metric label="Preço" value={formatBRL(getPlanPrice(current || {}))} />
+              <Metric label="Status" value={current?.ativo !== false ? "Ativo" : "Inativo"} />
             </div>
             <div className="mt-6">
-              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Benefícios</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {(current?.benefits || []).slice(0, 6).map((benefit) => (
-                  <li key={benefit} className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-success" /> {benefit}
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Descrição</h3>
+              <p className="text-sm text-muted-foreground">{current?.description || "Plano de distribuição MLM"}</p>
             </div>
           </div>
         </motion.div>
 
         <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
           <Badge variant="outline" className="border-border/60"><Sparkles className="h-3 w-3 mr-1 text-primary" /> Recomendação IA</Badge>
-          <h3 className="mt-3 text-lg font-bold">{next ? `Próximo plano: ${next.name}` : "Sem recomendação disponível"}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">A recomendação agora é baseada somente nos planos reais ativos.</p>
+          <h3 className="mt-3 text-lg font-bold">{next ? `Próximo plano: ${getPlanDisplayName(next)}` : "Sem recomendação disponível"}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">A recomendação é baseada nos planos reais ativos.</p>
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="text-muted-foreground">Projeção de ganho</span>
@@ -119,35 +116,26 @@ function PlanPage() {
       <div>
         <h3 className="text-sm font-semibold mb-3">Comparação de planos</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {planCards.map((plan, index) => {
-            const rule = getPlanRule(plan.name);
-            return (
-              <motion.div
-                key={plan.id}
-                whileHover={{ y: -4 }}
-                className={cn(
-                  "relative rounded-2xl border p-5",
-                  index === 0 ? "border-primary/40 bg-primary/5" : index === 1 ? "border-fuchsia-500/40 bg-gradient-to-br from-fuchsia-500/10 to-transparent" : "border-border/60 bg-card/60",
-                )}
-              >
-                {index === 0 && <Badge className="absolute top-3 right-3 bg-primary/20 text-primary border-primary/30 text-[10px]">Atual</Badge>}
-                {index === 1 && <Badge className="absolute top-3 right-3 bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30 text-[10px]">Topo</Badge>}
-                <h4 className="text-lg font-bold">{plan.name}</h4>
-                <p className="mt-1 text-2xl font-bold">{formatBRL(Number(plan.price || 0))}<span className="text-xs text-muted-foreground font-normal">/mês</span></p>
-                <div className="mt-3 flex gap-3 text-xs text-muted-foreground">
-                  <span>Bônus {rule?.generationBonuses?.map((g) => g.percentage).join("/") || `${plan.commission_percent ?? 0}`}%</span>
-                  <span>·</span>
-                  <span>{rule?.generationBonuses?.length ?? plan.generations ?? 0} gerações</span>
-                </div>
-                <ul className="mt-4 space-y-1.5 text-xs">
-                  {(plan.benefits || []).slice(0, 4).map((benefit) => (
-                    <li key={benefit} className="flex items-start gap-1.5"><Check className="h-3 w-3 mt-0.5 text-success shrink-0" /> {benefit}</li>
-                  ))}
-                </ul>
-                {index !== 0 && <Button size="sm" variant="outline" className="mt-4 w-full">Selecionar</Button>}
-              </motion.div>
-            );
-          })}
+          {planCards.map((plan, index) => (
+            <motion.div
+              key={plan.id}
+              whileHover={{ y: -4 }}
+              className={cn(
+                "relative rounded-2xl border p-5",
+                index === 0 ? "border-primary/40 bg-primary/5" : index === 1 ? "border-fuchsia-500/40 bg-gradient-to-br from-fuchsia-500/10 to-transparent" : "border-border/60 bg-card/60",
+              )}
+            >
+              {index === 0 && <Badge className="absolute top-3 right-3 bg-primary/20 text-primary border-primary/30 text-[10px]">Atual</Badge>}
+              {index === 1 && <Badge className="absolute top-3 right-3 bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30 text-[10px]">Topo</Badge>}
+              <h4 className="text-lg font-bold">{getPlanDisplayName(plan)}</h4>
+              <p className="mt-1 text-2xl font-bold">{formatBRL(getPlanPrice(plan))}<span className="text-xs text-muted-foreground font-normal">/mês</span></p>
+              <div className="mt-3 flex gap-3 text-xs text-muted-foreground">
+                <span>{plan.max_geracoes ?? 3} gerações</span>
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground leading-relaxed">{plan.description || ""}</p>
+              {index !== 0 && <Button size="sm" variant="outline" className="mt-4 w-full">Selecionar</Button>}
+            </motion.div>
+          ))}
         </div>
       </div>
 

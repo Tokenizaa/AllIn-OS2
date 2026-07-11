@@ -14,22 +14,22 @@ export class DashboardResolver {
    */
   private static readonly DASHBOARD_PATHS: Record<UserRole, string> = {
     // Administrative Roles
-    [UserRole.ADMIN_MASTER]: "/customers",
-    [UserRole.GESTAO_ADMIN]: "/analytics",
+    [UserRole.ADMIN_MASTER]: "/_app/customers",
+    [UserRole.GESTAO_ADMIN]: "/_app/analytics",
 
     // Departmental Roles
-    [UserRole.FINANCEIRO]: "/wallets",
-    [UserRole.SUPORTE]: "/customers",
-    [UserRole.LOGISTICA]: "/office/orders",
-    [UserRole.MARKETING]: "/marketing",
-    [UserRole.ANALYTICS]: "/analytics",
-    [UserRole.AUDITOR]: "/insights",
-    [UserRole.OPERADOR]: "/office",
+    [UserRole.FINANCEIRO]: "/_app/wallets",
+    [UserRole.SUPORTE]: "/_app/customers",
+    [UserRole.LOGISTICA]: "/_app/orders",
+    [UserRole.MARKETING]: "/_app/marketing",
+    [UserRole.ANALYTICS]: "/_app/analytics",
+    [UserRole.AUDITOR]: "/_app/insights",
+    [UserRole.OPERADOR]: "/_app",
 
     // Business Roles
     [UserRole.DISTRIBUIDOR]: "/office/network",
     [UserRole.AFILIADO]: "/office/network",
-    [UserRole.CLIENTE_FINAL]: "/cliente",
+    [UserRole.CLIENTE_FINAL]: "/minha-conta",
   };
 
   /**
@@ -67,15 +67,15 @@ export class DashboardResolver {
    */
   static getDemoPath(role: UserRole): string {
     const DEMO_PATHS: Record<UserRole, string> = {
-      [UserRole.ADMIN_MASTER]: "/analytics",
-      [UserRole.GESTAO_ADMIN]: "/analytics",
-      [UserRole.FINANCEIRO]: "/wallets",
-      [UserRole.SUPORTE]: "/customers",
-      [UserRole.LOGISTICA]: "/office/orders",
-      [UserRole.MARKETING]: "/marketing",
-      [UserRole.ANALYTICS]: "/analytics",
-      [UserRole.AUDITOR]: "/insights",
-      [UserRole.OPERADOR]: "/office",
+      [UserRole.ADMIN_MASTER]: "/_app/analytics",
+      [UserRole.GESTAO_ADMIN]: "/_app/analytics",
+      [UserRole.FINANCEIRO]: "/_app/wallets",
+      [UserRole.SUPORTE]: "/_app/customers",
+      [UserRole.LOGISTICA]: "/_app/orders",
+      [UserRole.MARKETING]: "/_app/marketing",
+      [UserRole.ANALYTICS]: "/_app/analytics",
+      [UserRole.AUDITOR]: "/_app/insights",
+      [UserRole.OPERADOR]: "/_app",
       [UserRole.DISTRIBUIDOR]: "/office/network",
       [UserRole.AFILIADO]: "/office/network",
       [UserRole.CLIENTE_FINAL]: "/loja",

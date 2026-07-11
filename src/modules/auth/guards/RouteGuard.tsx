@@ -22,6 +22,7 @@ const PATH_PERMISSION_MAP: Array<{
   { pattern: /^\/insights(?:\/|$)/, permission: { module: "analytics", action: "read" } },
   { pattern: /^\/alerts(?:\/|$)/, permission: { module: "dashboard", action: "read" } },
   { pattern: /^\/customers(?:\/|$)/, permission: { module: "support", action: "read" } },
+  { pattern: /^\/distributors(?:\/|$)/, permission: { module: "network", action: "read" } },
   { pattern: /^\/orders(?:\/|$)/, permission: { module: "orders", action: "read" } },
   { pattern: /^\/products(?:\/|$)/, permission: { module: "products", action: "read" } },
   { pattern: /^\/network(?:\/|$)/, permission: { module: "network", action: "read" } },
@@ -32,15 +33,15 @@ const PATH_PERMISSION_MAP: Array<{
 ];
 
 function resolvePathPermission(pathname: string) {
-  const normalizedPath = pathname.startsWith("/_app")
-    ? pathname.slice("/_app".length) || "/"
+  const normalizedPath = pathname.startsWith("/__app")
+    ? pathname.slice("/__app".length) || "/"
     : pathname;
 
   return PATH_PERMISSION_MAP.find((entry) => entry.pattern.test(normalizedPath))?.permission || null;
 }
 
 function getPrimaryPathForRole(role: string): string {
-  const map: Record<string, string> = { admin: "/_app", distributor: "/office", staff: "/_app", customer: "/office" };
+  const map: Record<string, string> = { admin: "/__app", distributor: "/office", staff: "/__app", customer: "/office" };
   return map[role] || "/login";
 }
 function getRoleRedirectPath(role: string): string {

@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/hooks/cart/useCartQuery";
 import { useProductsQuery } from "@/hooks/products/useProductsQuery";
-import { formatPrice } from "@/utils/priceFormatter";
+import { formatBRL } from "@/lib/customer-calculations";
 import ProductModal from "@/components/ProductModal";
 
 interface ProductGalleryProps {
@@ -127,7 +127,7 @@ const ProductGallery = ({ limit }: ProductGalleryProps) => {
                     {(product.caption2 || "").substring(0, 100)}...
                   </p>
                   <p className="text-xl font-bold text-allin-orange mt-2">
-                    {formatPrice(product.price) || 'Preço não disponível'}
+                    {formatBRL(product.price) || 'Preço não disponível'}
                   </p>
                 </CardHeader>
                 <CardContent className="p-4 mt-auto">

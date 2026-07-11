@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import type { BonusRegra } from "@/modules/mlm-engine";
 
 /**
  * BonusService — Bônus MLM
@@ -8,34 +9,9 @@ import { supabase } from "@/lib/supabase/client";
  * FONTE DA VERDADE:
  *   - `mlm.bonus_historico` — bônus calculados/gerados/aprovados
  *   - `mlm.bonus_regras` — regras de cálculo de bônus
- *
- * Regras hardcoded (legado) estão em `src/modules/plans/mlm-rules.ts`.
- * Esta service é para o histórico e configuração de regras dinâmicas.
  */
 
 export type BonusStatus = 'calculado' | 'aprovado' | 'pago' | 'cancelado' | 'pendente';
-
-export interface BonusRegra {
-  id: string;
-  nome: string;
-  tipo: string;
-  descricao?: string;
-  geracao?: number;
-  porcentagem: number;
-  valor_fixo?: number;
-  pontos_minimos?: number;
-  volume_minimo?: number;
-  diretos_minimos?: number;
-  periodo_tipo?: string;
-  periodo_dias?: number;
-  is_active?: boolean;
-  data_inicio?: string;
-  data_fim?: string;
-  configuracoes?: any;
-  metadata?: any;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface BonusHistorico {
   id: string;
@@ -123,13 +99,13 @@ export const BonusService = {
   },
 
   // ============================================================
-  // BÔNUS REGRAS
+  // BÔNUS REGRAS (canonical type from @/modules/mlm-engine)
   // ============================================================
 
   /**
    * Lista regras de bônus ativas.
    */
-  async fetchActiveRules() {
+  async fetchActiveRules(): Promise<BonusRegra[]> {
     const { data, error } = await supabase
       .schema('mlm')
       .from('bonus_regras')
@@ -143,7 +119,7 @@ export const BonusService = {
   /**
    * Busca regra por ID.
    */
-  async fetchRuleById(id: string) {
+  async fetchRuleById(id: string): Promise<BonusRegra | null> {
     const { data, error } = await supabase
       .schema('mlm')
       .from('bonus_regras')
@@ -157,7 +133,7 @@ export const BonusService = {
   /**
    * Lista todas as regras (incluindo inativas).
    */
-  async fetchAllRules() {
+  async fetchAllRules(): Promise<BonusRegra[]> {
     const { data, error } = await supabase
       .schema('mlm')
       .from('bonus_regras')

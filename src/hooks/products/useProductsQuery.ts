@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { productsService } from "@/services/products";
 
 export interface Product {
@@ -31,15 +32,14 @@ interface ProductsContextType {
   getProductsByCategory: (categoryName: string, limit?: number) => Product[];
 }
 
-// Sprint 2: Migrar ProductsProvider para TanStack Query
 async function fetchProducts(): Promise<Product[]> {
   const productsData = await productsService.getAllProducts();
   // Mapear campos do banco de dados para a interface esperada pelo ProductGallery
   return productsData.map(product => ({
     id: product.id,
     linkProduto: `/loja/${product.id}`,
-    imgSrc: product.images?.[0] || 'https://placehold.co/400x400?text=Imagem+Indispon%C3%ADvel',
-    imgSrc2: product.images?.[1] || product.images?.[0] || 'https://placehold.co/400x400?text=Imagem+Indispon%C3%ADvel',
+    imgSrc: product.images?.[0] || '/placeholder.svg',
+    imgSrc2: product.images?.[1] || product.images?.[0] || '/placeholder.svg',
     caption: product.nome || 'Produto',
     categorias: product.category || 'Geral',
     caption2: product.description || '',
@@ -68,7 +68,7 @@ function extractCategories(products: Product[]): Category[] {
 
 export function useProductsQuery() {
   const query = useQuery({
-    queryKey: ["products"],
+    queryKey: queryKeys.products,
     queryFn: fetchProducts,
     staleTime: 10 * 60 * 1000, // 10 minutos
   });

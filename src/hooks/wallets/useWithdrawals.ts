@@ -1,21 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
-import { WalletService } from "@/services/wallets";
+import { WithdrawalService, SolicitacaoSaque } from "@/services/withdrawals";
 
 export function useWithdrawals() {
   return useQuery({
-    queryKey: queryKeys.wallets,
-    staleTime: 0,
-    refetchOnMount: "always",
+    queryKey: [...queryKeys.wallets, "withdrawals"] as const,
     queryFn: async () => {
-      const withdrawalsRes = await WalletService.fetchWithdrawals();
-      const transformedWithdrawals = (withdrawalsRes.success ? withdrawalsRes.data : []).map((w: any) => ({
+      const withdrawals = await WithdrawalService.fetchWithdrawals({});
+      const transformedWithdrawals = withdrawals.map((w: SolicitacaoSaque) => ({
         id: w.id,
-        user: w.user_name,
-        valor: Number(w.valor || 0),
-        metodo: w.metodo,
-        status: w.status,
-        risco: w.risco,
+        user: w.distribuidor_nome,
+        valor: Number(w.valor_solicitado || 0),
+        metodo: w.tipo_conta,
+        status: w.status_descricao,
+        risco: false,
       }));
       const summary = {
         total: transformedWithdrawals.reduce((sum, w) => sum + Number(w.valor || 0), 0),

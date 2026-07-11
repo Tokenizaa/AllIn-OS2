@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Download, Search, Play, Clock, Info, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase/client";
 
 export function DownloadsPage() {
   const [search, setSearch] = useState("");
@@ -12,17 +14,25 @@ export function DownloadsPage() {
   const [favorites] = useState<string[]>([]);
   const videoProgress = 65;
 
-  const items = useMemo(() => [
-    { id: "p1", title: "Guia de Produto", category: "treinamento" },
-    { id: "p2", title: "Kit de Campanha", category: "campanha" },
-    { id: "p3", title: "Estratégia de Vendas", category: "estratégia" },
-  ], []);
+  const { data: items = [] } = useQuery({
+    queryKey: ["office", "downloads"],
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .schema("crm")
+        .from("downloads")
+        .select("*")
+        .order("created_at", { ascending: false }) as any);
+      if (error) {
+        console.warn("Downloads table not available:", error.message);
+        return [];
+      }
+      return data || [];
+    },
+    staleTime: 30 * 60 * 1000,
+    retry: 1,
+  });
 
-  // NOTE: This page currently uses hardcoded items as a placeholder.
-  // To integrate with real data, create a downloads table in Supabase
-  // and fetch data using a service similar to CustomerService.
-
-  const filteredLibrary = items.filter(item => {
+  const filteredLibrary = items.filter((item: any) => {
     const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) || item.category.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = activeCategory === "all" || item.category === activeCategory || (activeCategory === "favorites" && favorites.includes(item.id));
     return matchesSearch && matchesCategory;

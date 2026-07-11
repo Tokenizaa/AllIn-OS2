@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { WalletService } from "@/services/wallets";
+import { PointsService } from "@/services/points";
 
 export function useCreatePointsWallet() {
   return useMutation({
     mutationFn: async (customerId: string) => {
-      return WalletService.ensurePointsWallet({ customerId });
+      return PointsService.fetchPointsByDistribuidor(customerId);
     },
   });
 }

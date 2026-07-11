@@ -1,60 +1,30 @@
 import { supabase } from "@/lib/supabase/client";
 
-export interface Automation {
-  id: string;
-  id_comprador: string;
-  name: string;
-  description: string;
-  type: string;
-  active: boolean;
-  runs: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export const AutomationService = {
-  async fetchCustomerAutomations(idComprador: string): Promise<Automation[]> {
+export const CustomerAutomationsService = {
+  async fetchAutomations(customerId: string) {
     const { data, error } = await supabase
-      .from("crm.customer_automations")
+      .schema("crm")
+      .from("customer_automations")
       .select("*")
-      .eq("id_comprador", idComprador)
+      .eq("customer_id", customerId)
       .order("created_at", { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching customer automations:", error);
-      return [];
-    }
-    
+    if (error) throw error;
     return data || [];
   },
 
-  async updateAutomationStatus(automationId: string, active: boolean): Promise<boolean> {
+  async toggleAutomation(automationId: string, active: boolean) {
     const { error } = await supabase
-      .from("crm.customer_automations")
-      .update({ 
-        active, 
-        updated_at: new Date().toISOString() 
-      })
+      .schema("crm")
+      .from("customer_automations")
+      .update({ active })
       .eq("id", automationId);
-    
-    if (error) {
-      console.error("Error updating automation status:", error);
-      return false;
-    }
-    
-    return true;
+    if (error) throw error;
   },
 
-  async incrementAutomationRuns(automationId: string): Promise<boolean> {
-    const { error } = await supabase.rpc('increment_automation_runs', {
-      automation_id: automationId
+  async incrementRuns(automationId: string) {
+    const { error } = await supabase.rpc("increment_automation_runs", {
+      p_automation_id: automationId,
     });
-    
-    if (error) {
-      console.error("Error incrementing automation runs:", error);
-      return false;
-    }
-    
-    return true;
-  }
+    if (error) throw error;
+  },
 };

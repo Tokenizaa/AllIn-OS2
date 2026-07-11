@@ -1,10 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "../queryKeys";
-import { ProfileService } from "@/services/profiles";
+import { useAuth } from "@/modules/auth";
 
 export function useMyProfile() {
-  return useQuery({
-    queryKey: ["office-profile"] as const,
-    queryFn: () => ProfileService.fetchMyProfile(),
-  });
+  const { user } = useAuth();
+  return { data: user, isLoading: false, error: null };
 }

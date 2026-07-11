@@ -6,14 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePayments } from "@/hooks/payments/usePayments";
 import { toast } from "sonner";
+import { formatBRL } from "@/lib/customer-calculations";
 
 type ReportPoint = { month: string; vendas: number; comissoes: number; retencao: number; conversao: number };
 
 export const Route = createFileRoute("/office/reports")({ component: ReportsPage });
-
-function formatBRL(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function ReportsPage() {
   const [timeframe, setTimeframe] = useState("30");

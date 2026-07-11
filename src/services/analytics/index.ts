@@ -1,15 +1,6 @@
 import { supabase } from "@/lib/supabase/client";
-import { OrderService } from "../orders";
 
 export const AnalyticsService = {
-  async fetchOrderStats() {
-    return OrderService.fetchOrderStats();
-  },
-
-  async fetchRecentOrders(options: { page: number; limit: number }) {
-    return OrderService.fetchRecentOrders(options);
-  },
-
   async fetchAuditLogs(limit = 12) {
     const { data, error } = await supabase
       .from("system.audit_log")

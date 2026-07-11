@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
 import { NetworkService } from "@/services/network";
 import { CustomerService } from "@/services/customers";
+import { OrderService } from "@/services/orders";
 
 export function useNetwork(limit = 12) {
   return useQuery({
@@ -11,11 +12,7 @@ export function useNetwork(limit = 12) {
         CustomerService.fetchRecentCustomers(20),
         NetworkService.fetchRecentNetworkRelationships(limit),
       ]);
-      const legs = (relationshipData || []).map((r: any, i: number) => ({
-        name: `G${i + 1}`,
-        esquerda: Number(r.left_count || r.left_side_count || 0),
-        direita: Number(r.right_count || r.right_side_count || 0),
-      }));
+      const legs = OrderService.transformNetworkLegs(relationshipData);
 
       return { customers: customerData || [], legs, relationships: relationshipData || [] };
     },

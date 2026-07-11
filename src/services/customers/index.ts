@@ -16,7 +16,7 @@ import { supabase } from "@/lib/supabase/client";
 export const CustomerService = {
   async fetchCustomerById(id: string) {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .eq('id', id)
       .single();
@@ -26,7 +26,7 @@ export const CustomerService = {
 
   async fetchCustomerByCompradorId(compradorId: string) {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .eq('id_comprador', compradorId)
       .single();
@@ -36,7 +36,7 @@ export const CustomerService = {
 
   async fetchDownlines(compradorId: string) {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .eq('patrocinador_comprador', compradorId);
     if (error) throw new Error(error.message || "Failed to fetch downlines");
@@ -45,7 +45,7 @@ export const CustomerService = {
 
   async fetchCustomersList(limit = 100) {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .limit(limit)
       .order('created_at', { ascending: false });
@@ -55,7 +55,7 @@ export const CustomerService = {
 
   async fetchCustomersWithOrderStats(page = 1, pageSize = 15) {
     const { data: customers, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .range((page - 1) * pageSize, page * pageSize - 1)
       .order('created_at', { ascending: false });
@@ -65,7 +65,7 @@ export const CustomerService = {
 
   async fetchRecentCustomers(limit = 20) {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .limit(limit)
       .order('created_at', { ascending: false });
@@ -75,7 +75,7 @@ export const CustomerService = {
 
   async fetchNetworkMembers(limit = 500) {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*')
       .limit(limit)
       .order('created_at', { ascending: false });
@@ -85,7 +85,7 @@ export const CustomerService = {
 
   async fetchAnalyticsCustomers() {
     const { data, error } = await supabase
-      .from('customers')
+      .schema('crm').from('customers')
       .select('*');
     if (error) throw new Error(error.message || "Failed to fetch analytics customers");
     return data || [];

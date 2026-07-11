@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useAuditLogs } from "@/hooks/audit/useAuditLogs";
+import { useAuditLogs } from "@/hooks/system/useAuditLogs";
 
 interface UploadingFile { name: string; size: string; progress: number; status: "uploading" | "scanning" | "finished"; }
 

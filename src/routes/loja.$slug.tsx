@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, useParams, useLoaderData } from "@tanstack/react-router";
-import { useAuth } from "@/modules/auth";
 import { resolveDistributor } from "@/hooks/distributor/useDistributorQuery";
 import { useProductsQuery } from "@/hooks/products/useProductsQuery";
 import { AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/app/public-header";
+import { formatBRL } from "@/lib/customer-calculations";
 import { useStoreCart } from "@/hooks/store/useStoreCart";
 import { useStoreCheckout } from "@/hooks/store/useStoreCheckout";
 import { CatalogView } from "@/components/store/CatalogView";
@@ -31,17 +31,10 @@ export const Route = createFileRoute("/loja/$slug")({
 export function DistributorStorePage() {
   const params = useParams({ strict: false }) as { slug?: string };
   const routeSlug = params.slug?.toLowerCase().trim();
-  const { triggerBinomialBonusPay } = useAuth();
-  const addAuditLog = (useAuth() as any).addAuditLog;
   const { products } = useProductsQuery();
 
   // Sprint 3: Usar loader para dados pré-carregados
   const { distributor: currentDistributor } = useLoaderData({ from: "/loja/$slug" });
-
-  const formatBRL = (value: string) => {
-    const num = parseFloat(value);
-    return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  };
 
   const sponsorSlug = currentDistributor?.slug || "";
   const distName = currentDistributor?.name || "Distribuidor";
@@ -88,8 +81,6 @@ export function DistributorStorePage() {
     discount: 0,
     deliveryCost,
     finalTotal: Math.max(0, subtotal - 0 + deliveryCost),
-    triggerBinomialBonusPay,
-    addAuditLog,
     sponsorSlug,
     clearCart,
     setCheckoutStep: setCheckoutStep as any,

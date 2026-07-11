@@ -72,18 +72,16 @@ function ActivationPage() {
     setPaymentStep("checkout");
   };
 
-  const handleSimulatePayment = () => {
+  const handleSimulatePayment = async () => {
     setPaymentStep("processing");
-    setTimeout(async () => {
-      try {
-        await activateDistributorOffice(selectedPlan);
-        setPaymentStep("success");
-        toast.success("Pagamento confirmado! Licença comercial ativada.");
-      } catch (err: any) {
-        toast.error(err.message || "Erro ao realizar ativação.");
-        setPaymentStep("checkout");
-      }
-    }, 2500);
+    try {
+      await activateDistributorOffice(selectedPlan);
+      setPaymentStep("success");
+      toast.success("Pagamento confirmado! Licença comercial ativada.");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao realizar ativação.");
+      setPaymentStep("checkout");
+    }
   };
 
   if (loading || !user) {

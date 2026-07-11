@@ -1,33 +1,58 @@
 import React from 'react';
+import { useQuery } from "@tanstack/react-query";
 
-import { Check, Star, Crown, Gem } from 'lucide-react';
+import { Check, Star, Crown, Gem, Sparkles, Zap, Target, Globe } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSponsorLink } from '@/hooks/useSponsorLink';
+import { PlanService } from "@/services/plans";
+import { queryKeys } from "@/hooks/queryKeys";
+
+const iconMap: Record<string, any> = {
+  iniciante: Star,
+  profissional: Crown,
+  elite: Gem,
+  master: Sparkles,
+  premium: Zap,
+  avancado: Target,
+  enterprise: Globe,
+};
 
 const PlansOverviewSection = () => {
   const { handleCadastro } = useSponsorLink();
 
-  // DEPRECATED: Hardcoded plans array - should come from Supabase plans table
-  // TODO: Replace with Supabase query to fetch plans from database
-  const plans = [
-    {
-      name: 'Iniciante',
-      icon: Star,
-      price: 'Grátis',
-      period: 'para sempre',
-      features: [
-        'Acesso aos produtos',
-        'Comissões básicas',
-        'Suporte por email',
-        'Material de marketing básico'
-      ],
-      popular: false
-    },
-    {
-      name: 'Profissional',
+  const { data: plansData = [] } = useQuery({
+    queryKey: queryKeys.plans,
+    queryFn: () => PlanService.fetchActivePlans(),
+  });
+
+  const plans = plansData.length > 0
+    ? plansData.map((p: any, i: number) => ({
+        name: p.nome,
+        icon: iconMap[p.slug?.toLowerCase()] || Star,
+        price: p.preco === 0 ? 'Grátis' : `R$ ${p.preco}`,
+        period: p.preco === 0 ? 'para sempre' : '/mês',
+        features: p.metadata?.features || ['Acesso aos produtos', 'Comissões básicas', 'Suporte prioritário'],
+        popular: i === 1,
+      }))
+    : [
+        {
+          name: 'Iniciante',
+          icon: Star,
+          price: 'Grátis',
+          period: 'para sempre',
+          features: [
+            'Acesso aos produtos',
+            'Comissões básicas',
+            'Suporte por email',
+            'Material de marketing básico'
+          ],
+          popular: false
+        },
+        {
+          name: 'Profissional',
       icon: Crown,
       price: 'R$ 197',
       period: '/mês',

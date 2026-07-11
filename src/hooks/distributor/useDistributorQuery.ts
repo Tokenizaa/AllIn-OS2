@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { SupabaseService } from "@/modules/auth/services/supabase.service";
 
 export interface DistributorTheme {
@@ -79,9 +80,8 @@ export async function resolveDistributor(slug: string | undefined): Promise<Dist
 // Sprint 2: Migrar DistributorProvider para TanStack Query
 export function useDistributorQuery(slug: string | undefined) {
   return useQuery({
-    queryKey: ["distributor", slug],
+    queryKey: [...queryKeys.distributor, slug] as const,
     queryFn: () => resolveDistributor(slug),
-    staleTime: 5 * 60 * 1000, // 5 minutos
     enabled: !!slug && slug !== "",
   });
 }

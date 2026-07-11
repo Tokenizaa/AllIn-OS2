@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { useAuth, usePermissions } from "@/modules/auth";
-import { ROLE_DISPLAY_NAMES } from "@/shared/types/roles";
+import { getRoleLabel } from "@/components/system/rbac-utils";
 import { APP_NAV_SECTIONS } from "@/modules/app-navigation";
 
 export function SidebarNav() {
@@ -30,8 +30,6 @@ export function SidebarNav() {
       items: section.items.filter((item) => hasPermission(item.module, "read")),
     }))
     .filter((section) => section.items.length > 0);
-
-  const getRoleLabel = (role: string) => ROLE_DISPLAY_NAMES[role as keyof typeof ROLE_DISPLAY_NAMES] || role;
 
   return (
     <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">

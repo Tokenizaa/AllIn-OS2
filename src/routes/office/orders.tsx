@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
 import { useOrders } from "@/hooks/orders/useOrders";
+import { formatBRL } from "@/lib/customer-calculations";
 
 type OrderRow = {
   id: string;
@@ -27,10 +28,6 @@ const statusColors: Record<string, string> = {
   pendente: "bg-warning/15 text-warning border-warning/30",
   cancelado: "bg-destructive/15 text-destructive border-destructive/30",
 };
-
-function formatBRL(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function OrdersPage() {
   const [search, setSearch] = useState("");

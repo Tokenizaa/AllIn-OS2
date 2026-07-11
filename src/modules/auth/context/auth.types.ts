@@ -53,15 +53,7 @@ export interface CustomerReferral {
   created_at: string;
 }
 
-/**
- * Permission definition for RBAC system
- */
-export interface Permission {
-  id: string;
-  module: "dashboard" | "analytics" | "finance" | "support" | "network" | "orders" | "products" | "marketing" | "settings" | "system" | "industrial";
-  action: "read" | "write" | "delete" | "manage" | "all";
-  description: string;
-}
+export type { Permission } from '../../../../shared/types/permissions';
 
 export interface AuditLog {
   id: string;
@@ -110,8 +102,6 @@ export interface AuthContextType {
   activateDistributorOffice: (planId: string) => Promise<DistributorProfile | null>;
   adminInvites: any[];
   usersList: any[];
-  triggerBinomialBonusPay: () => Promise<void>;
-  addAuditLog: (action: string, entity: string, description: string) => Promise<void>;
   getAdminInviteByToken: (token: string) => Promise<any>;
   acceptAdminInvite: (token: string, name: string, password: string) => Promise<any>;
   createAdminInvite: (data: any) => Promise<void>;

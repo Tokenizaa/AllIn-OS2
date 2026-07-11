@@ -1,0 +1,100 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: A
+      - generic [ref=e8]:
+        - paragraph [ref=e9]: AllIn OS
+        - paragraph [ref=e10]: Login leve
+    - generic [ref=e11]:
+      - generic [ref=e12]: Sistema de Gestão de Rede
+      - heading "Construa sua rede de distribuição com inteligência" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Acesse sua conta para gerenciar sua rede de distribuidores, acompanhar comissões, e expandir seu negócio de venda direta com ferramentas profissionais.
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - paragraph [ref=e25]: Rede de Distribuidores
+          - paragraph [ref=e26]: Gerencie sua rede binária e unilevel com visualização completa.
+        - generic [ref=e27]:
+          - paragraph [ref=e31]: Comissões em Tempo Real
+          - paragraph [ref=e32]: Acompanhe seus ganhos e bônus com relatórios detalhados.
+        - generic [ref=e33]:
+          - paragraph [ref=e38]: Escritório Virtual
+          - paragraph [ref=e39]: Ferramentas completas para gerenciar seu negócio de qualquer lugar.
+        - generic [ref=e40]:
+          - paragraph [ref=e46]: Venda Direta
+          - paragraph [ref=e47]: Loja virtual integrada para maximizar suas vendas.
+    - generic [ref=e48]: Sessao validada pelo Auth atual.
+  - main [ref=e52]:
+    - generic [ref=e54]:
+      - generic [ref=e55]:
+        - paragraph [ref=e56]: Acesso à Plataforma
+        - heading "Entre na sua conta" [level=2] [ref=e57]
+        - paragraph [ref=e58]: Acesse seu painel de distribuidor e gerencie sua rede de negócios
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - text: E-mail
+          - textbox "seu@email.com" [ref=e61]
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]: Senha
+            - link "Esqueceu?" [ref=e65] [cursor=pointer]:
+              - /url: /recuperar-senha
+          - generic [ref=e66]:
+            - textbox "••••••••" [ref=e67]
+            - button "Mostrar senha" [ref=e68]
+        - button "Entrar" [ref=e72] [cursor=pointer]
+      - generic [ref=e73]: Ambiente de Desenvolvimento
+      - generic [ref=e78]:
+        - paragraph [ref=e79]: "Contas de teste (apenas preencher campos):"
+        - generic [ref=e80]:
+          - button "Admin Master admin@allin.io" [ref=e81] [cursor=pointer]:
+            - generic [ref=e82]:
+              - generic [ref=e83]: Admin Master
+              - generic [ref=e84]: admin@allin.io
+          - button "Gestao Admin gestao@allin.io" [ref=e85] [cursor=pointer]:
+            - generic [ref=e86]:
+              - generic [ref=e87]: Gestao Admin
+              - generic [ref=e88]: gestao@allin.io
+          - button "Financeiro financeiro@allin.io" [ref=e89] [cursor=pointer]:
+            - generic [ref=e90]:
+              - generic [ref=e91]: Financeiro
+              - generic [ref=e92]: financeiro@allin.io
+          - button "Suporte suporte@allin.io" [ref=e93] [cursor=pointer]:
+            - generic [ref=e94]:
+              - generic [ref=e95]: Suporte
+              - generic [ref=e96]: suporte@allin.io
+          - button "Logistica logistica@allin.io" [ref=e97] [cursor=pointer]:
+            - generic [ref=e98]:
+              - generic [ref=e99]: Logistica
+              - generic [ref=e100]: logistica@allin.io
+          - button "Marketing marketing@allin.io" [ref=e101] [cursor=pointer]:
+            - generic [ref=e102]:
+              - generic [ref=e103]: Marketing
+              - generic [ref=e104]: marketing@allin.io
+          - button "Analytics analytics@allin.io" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]:
+              - generic [ref=e107]: Analytics
+              - generic [ref=e108]: analytics@allin.io
+          - button "Auditor auditor@allin.io" [ref=e109] [cursor=pointer]:
+            - generic [ref=e110]:
+              - generic [ref=e111]: Auditor
+              - generic [ref=e112]: auditor@allin.io
+          - button "Operador operador@allin.io" [ref=e113] [cursor=pointer]:
+            - generic [ref=e114]:
+              - generic [ref=e115]: Operador
+              - generic [ref=e116]: operador@allin.io
+          - button "Distribuidor distributor@allin.io" [ref=e117] [cursor=pointer]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: Distribuidor
+              - generic [ref=e120]: distributor@allin.io
+          - button "Afiliado afiliado@allin.io" [ref=e121] [cursor=pointer]:
+            - generic [ref=e122]:
+              - generic [ref=e123]: Afiliado
+              - generic [ref=e124]: afiliado@allin.io
+          - button "Cliente customer@allin.io" [ref=e125] [cursor=pointer]:
+            - generic [ref=e126]:
+              - generic [ref=e127]: Cliente
+              - generic [ref=e128]: customer@allin.io
+      - paragraph [ref=e130]:
+        - text: Ainda não tem conta?
+        - link "Cadastre-se como distribuidor" [ref=e131] [cursor=pointer]:
+          - /url: /cadastro

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/distributor/stat-card";
 import { ResponsiveContainer, Tooltip, Cell, Pie, PieChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { useOfficeFinance } from "@/hooks/office/useOfficeFinance";
+import { formatBRL } from "@/lib/customer-calculations";
 
 type WalletRow = {
   balance_available?: number | null;
@@ -24,10 +25,6 @@ type WithdrawalRow = {
 };
 
 export const Route = createFileRoute("/office/finance")({ component: FinancePage });
-
-function formatBRL(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function FinancePage() {
   const { data: financeData, isError, error, refetch } = useOfficeFinance();

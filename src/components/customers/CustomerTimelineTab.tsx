@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Timeline } from "@/components/widgets/timeline";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { CustomerNotesService } from "@/services/crm360/customer-notes";
+import { CustomerNotesService } from "@/services/crm360";
 
 interface CustomerTimelineTabProps {
   customer: any;
@@ -14,17 +14,16 @@ export function CustomerTimelineTab({ customer, orders }: CustomerTimelineTabPro
   const [noteText, setNoteText] = useState("");
   const [isLoadingNotes, setIsLoadingNotes] = useState(false);
 
-  // Carregar notas do banco ao montar o componente
   useEffect(() => {
     const loadNotes = async () => {
       if (!customer?.id && !customer?.id_comprador) return;
-      
+
       setIsLoadingNotes(true);
       try {
-        const notes = await CustomerNotesService.fetchCustomerNotes(
-          customer?.id,
-          customer?.id_comprador
-        );
+        const notes = await CustomerNotesService.fetchNotes({
+          customerId: customer?.id,
+          idComprador: customer?.id_comprador,
+        });
         setCustomNotes(notes);
       } catch (error) {
         console.error("Error loading notes:", error);
@@ -39,18 +38,15 @@ export function CustomerTimelineTab({ customer, orders }: CustomerTimelineTabPro
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteText.trim()) return;
-    
+
     try {
       const newNote = await CustomerNotesService.createNote({
-        customer_id: customer?.id,
-        id_comprador: customer?.id_comprador,
+        customerId: customer?.id,
+        idComprador: customer?.id_comprador,
         note: noteText,
-        note_type: "general",
-        created_by: customer?.user_id || "system",
-        is_private: false,
-        metadata: {}
+        createdBy: customer?.user_id || "system",
       });
-      
+
       setCustomNotes([newNote, ...customNotes]);
       setNoteText("");
       toast.success("Nota salva com sucesso na linha do tempo!");

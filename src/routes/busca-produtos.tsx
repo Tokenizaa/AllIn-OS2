@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useDistributorDefault } from "@/hooks/distributor/useDistributorQuery";
 import { useProductsQuery } from "@/hooks/products/useProductsQuery";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { PublicHeader } from "@/components/app/public-header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/shared/ProductCard";
 import { Search, Filter } from "lucide-react";
+import { productsService } from "@/services/products";
 
 export const Route = createFileRoute("/busca-produtos")({
   component: ProductSearchPage,
@@ -17,11 +19,16 @@ function ProductSearchPage() {
   const sponsorSlug = currentDistributor?.slug || "";
   const isDefaultTenant = !sponsorSlug || currentDistributor?.isFallback;
   const { products, loading } = useProductsQuery();
+  const { data: categoryNames = [] } = useSuspenseQuery({
+    queryKey: ["product-categories"],
+    queryFn: () => productsService.getCategories(),
+    staleTime: 10 * 60 * 1000,
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const categories = ["all", "Calçados", "Palmilhas", "Acessórios"];
+  const categories = ["all", ...categoryNames];
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.caption.toLowerCase().includes(searchTerm.toLowerCase()) ||

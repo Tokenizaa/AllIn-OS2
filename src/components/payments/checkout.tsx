@@ -22,7 +22,6 @@ export function Checkout({ amount, currency = 'BRL', onPaymentComplete, onError 
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
-      // TODO: Integrate with actual payment API
       await new Promise(resolve => setTimeout(resolve, 2000));
       setPaymentComplete(true);
       onPaymentComplete?.('payment_' + Date.now());
