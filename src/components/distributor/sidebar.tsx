@@ -9,16 +9,16 @@ import { useDistributorProfileQuery } from "@/hooks/distributor/useDistributorPr
 import { toast } from "sonner";
 
 const items = [
-  { to: "/office", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/office/plan", label: "Meu Plano", icon: Crown },
-  { to: "/office/orders", label: "Pedidos", icon: ShoppingBag },
-  { to: "/office/store", label: "Loja Virtual", icon: Store },
-  { to: "/office/finance", label: "Financeiro", icon: Wallet },
-  { to: "/office/network", label: "Minha Rede", icon: Network },
-  { to: "/office/reports", label: "Relatórios", icon: BarChart3 },
-  { to: "/office/downloads", label: "Downloads", icon: Download },
-  { to: "/office/profile", label: "Meus Dados", icon: User },
-  { to: "/office/verification", label: "Verificação", icon: ShieldCheck },
+  { to: "/distributor", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/distributor/plan", label: "Meu Plano", icon: Crown },
+  { to: "/distributor/orders", label: "Pedidos", icon: ShoppingBag },
+  { to: "/distributor/store", label: "Loja Virtual", icon: Store },
+  { to: "/distributor/finance", label: "Financeiro", icon: Wallet },
+  { to: "/distributor/network", label: "Minha Rede", icon: Network },
+  { to: "/distributor/reports", label: "Relatórios", icon: BarChart3 },
+  { to: "/distributor/downloads", label: "Downloads", icon: Download },
+  { to: "/distributor/profile", label: "Meus Dados", icon: User },
+  { to: "/distributor/verification", label: "Verificação", icon: ShieldCheck },
 ];
 
 export function OfficeSidebar() {
@@ -56,7 +56,7 @@ export function OfficeSidebar() {
         <div className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Navegação</div>
         <ul className="space-y-0.5">
           {items.map((it) => {
-            const active = it.exact ? path === it.to : path.startsWith(it.to) && it.to !== "/office";
+            const active = it.exact ? path === it.to : path.startsWith(it.to) && it.to !== "/distributor";
             const isActive = it.exact ? path === it.to : active;
             const Icon = it.icon;
             return (
@@ -80,9 +80,9 @@ export function OfficeSidebar() {
         </ul>
 
         <div className="mt-6 px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Inteligência</div>
-        <Link to="/office/copilot" className={cn(
+        <Link to="/distributor/copilot" className={cn(
           "flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm transition-all",
-          path.startsWith("/office/copilot")
+          path.startsWith("/distributor/copilot")
             ? "bg-gradient-to-r from-primary/20 to-transparent text-foreground"
             : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60",
         )}>

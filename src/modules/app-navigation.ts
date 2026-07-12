@@ -40,8 +40,8 @@ export const APP_NAV_SECTIONS: AppNavSection[] = [
 {
     label: "CRM",
     items: [
-      { to: "/_app/customers", label: "Clientes", icon: Users, module: "support" },
-      { to: "/_app/distributors", label: "Distribuidores", icon: Network, module: "network" },
+      { to: "/admin/customers", label: "Clientes", icon: Users, module: "support" },
+      { to: "/admin/distributors", label: "Distribuidores", icon: Network, module: "network" },
     ],
   },
   {

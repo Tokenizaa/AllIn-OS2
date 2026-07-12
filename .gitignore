@@ -4,6 +4,30 @@ node_modules
 .env
 .env.local
 .env.*.local
+.env.e2e
+.env.e2e.local
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.env.e2e
+.env.e2e.local
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.env.e2e
+.env.e2e.local
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
 # Build artifacts
 dist/

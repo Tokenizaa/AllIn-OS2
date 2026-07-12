@@ -85,7 +85,7 @@ function RegisterPage() {
       if (userResult.role === UserRole.DISTRIBUIDOR) {
         navigate({ to: "/ativacao" });
       } else {
-        navigate({ to: "/office/store" });
+        navigate({ to: "/distributor/store" });
       }
     } catch (err: any) {
       toast.error(err.message || "Erro ao criar conta.");

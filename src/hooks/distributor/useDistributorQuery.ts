@@ -48,8 +48,8 @@ function emptyDistributor(slug = ""): DistributorInfo {
 // Sprint 3: Exportar para uso em loaders
 export async function resolveDistributor(slug: string | undefined): Promise<DistributorInfo> {
   const activeSlug = (slug || "").toLowerCase().trim();
-  const reservedSlugs = new Set(["_", "_app", "login", "cadastro", "recuperar-senha", "redefinir-senha", "office", "loja"]);
-  if (!activeSlug || reservedSlugs.has(activeSlug) || activeSlug.startsWith("_app")) {
+  const reservedSlugs = new Set(["_", "admin", "login", "cadastro", "recuperar-senha", "redefinir-senha", "office", "loja"]);
+  if (!activeSlug || reservedSlugs.has(activeSlug) || activeSlug.startsWith("admin")) {
     return emptyDistributor();
   }
 

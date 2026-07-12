@@ -12,7 +12,13 @@
     "format": "prettier --write .",
     "backend": "tsx src/backend/server/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run backend\"",
-    "import:products": "tsx scripts/import-products.ts"
+    "import:products": "tsx scripts/import-products.ts",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:debug": "playwright test --debug",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report",
+    "e2e:install": "playwright install chromium --with-deps"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -75,7 +81,9 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.49.0",
     "@types/cors": "^2.8.17",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
@@ -83,12 +91,14 @@
     "@vitejs/plugin-react": "^5.0.4",
     "@welldone-software/why-did-you-render": "^10.0.1",
     "concurrently": "^9.1.2",
+    "dotenv": "^17.4.2",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "prettier": "^3.7.3",
     "rollup-plugin-visualizer": "^7.0.1",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",

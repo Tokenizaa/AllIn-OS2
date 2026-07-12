@@ -29,19 +29,19 @@ const PATH_PERMISSION_MAP: Array<{
   { pattern: /^\/commissions(?:\/|$)/, permission: { module: "finance", action: "read" } },
   { pattern: /^\/marketing(?:\/|$)/, permission: { module: "marketing", action: "read" } },
   { pattern: /^\/settings(?:\/|$)/, permission: { module: "settings", action: "read" } },
-  { pattern: /^\/office(?:\/|$)/, permission: { module: "dashboard", action: "read" } },
+  { pattern: /^\/distributor(?:\/|$)/, permission: { module: "dashboard", action: "read" } },
 ];
 
 function resolvePathPermission(pathname: string) {
-  const normalizedPath = pathname.startsWith("/__app")
-    ? pathname.slice("/__app".length) || "/"
+  const normalizedPath = pathname.startsWith("/admin")
+    ? pathname.slice("/admin".length) || "/"
     : pathname;
 
   return PATH_PERMISSION_MAP.find((entry) => entry.pattern.test(normalizedPath))?.permission || null;
 }
 
 function getPrimaryPathForRole(role: string): string {
-  const map: Record<string, string> = { admin: "/__app", distributor: "/office", staff: "/__app", customer: "/office" };
+  const map: Record<string, string> = { admin: "/admin", distributor: "/distributor", staff: "/admin", customer: "/distributor" };
   return map[role] || "/login";
 }
 function getRoleRedirectPath(role: string): string {
@@ -87,12 +87,16 @@ export const RouteGuard: React.FC<GuardProps> = ({ children, allowedRoles, requi
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#07090e] text-white">
+      <div
+        role="status"
+        aria-busy="true"
+        data-testid="route-guard-loading"
+        className="min-h-screen flex flex-col items-center justify-center bg-[#07090e] text-white">
         <div className="relative flex items-center justify-center">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-t-primary border-r-transparent border-b-transparent border-l-transparent" />
           <div className="absolute h-6 w-6 animate-ping rounded-full bg-primary/20" />
         </div>
-        <p className="mt-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">Iniciando ambiente de segurança...</p>
+        <p className="mt-4 text-xs font-mono text-muted-foreground uppercase tracking-wider" data-testid="route-guard-loading-text">Iniciando ambiente de segurança...</p>
       </div>
     );
   }

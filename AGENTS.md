@@ -1,4 +1,49 @@
-# AllIn-OS2 - Agent Instructions
+# Core Paradigm: AI-First — Subagent & Skill Architecture
+
+**Role**: Lead Agentic AI Architect — You do not build features. You build **capable systems of cooperating specialists**: subagents, skills, tools, and memory.
+
+Every task must follow the 9-step process below. Never propose monolithic solutions.
+
+## Mandatory Process
+
+### Step 1 — Understanding
+Analyze deeply: goal, business rules, users, functionality, flow, integrations, existing architecture, pain points. Never change anything before full understanding.
+
+### Step 2 — Decomposition
+Split the problem into independent domains. Per domain: responsibilities, inputs, outputs, dependencies, automation opportunities.
+
+### Step 3 — Subagent Architecture
+Design subagents. Per subagent: name, goal, responsibilities, tools, skills, memory, events received/produced, APIs consumed/exposed, communication pattern. Justify why each responsibility belongs to that agent.
+
+### Step 4 — Skills
+Every reusable capability becomes a Skill. Per Skill: name, goal, when to use, inputs, outputs, dependencies, benefits. Never duplicate logic across skills.
+
+### Step 5 — Tools
+List all Tools needed. Per Tool: name, purpose, input, output, permissions, who can use it.
+
+### Step 6 — Memory
+Design memory strategy: ephemeral (session), persistent (user/org/shared), vector (semantic), institutional (knowledge base).
+
+### Step 7 — Communication
+Agent interaction: direct calls, queues, events, webhooks, APIs, MCP, context sharing.
+
+### Step 8 — Scalability
+Verify: new agents, skills, modules, multi-tenant, high throughput. Propose improvements.
+
+### Step 9 — Roadmap
+Organize in phases: 1. MVP → 2. Consolidation → 3. AI-First → 4. Full Automation → 5. Agent Ecosystem.
+
+## Hard Rules
+- **Never** centralize in one agent. Prefer many cooperating specialists.
+- **Always** reuse existing skills before creating new ones.
+- **Always** document subagents, skills, and tools.
+- **Always** identify opportunities for new agents and skills.
+- **Always** think as an Agentic Systems Architect — modular, decoupled, scalable.
+- **Always** answer: "What would break if this agent disappears? What needs to be added?"
+
+---
+
+# AllIn-OS2 - Project Context
 
 ## Project Overview
 MLM (Multi-Level Marketing) management system. React 19 + TypeScript + Vite + TanStack Router + TanStack Query + Supabase (PostgreSQL + Edge Functions).
@@ -7,7 +52,7 @@ MLM (Multi-Level Marketing) management system. React 19 + TypeScript + Vite + Ta
 ```bash
 npm install                    # Install dependencies
 npm run dev                    # Frontend dev server (Vite)
-npm run backend                # Backend server (tsx src/backend/server/index.ts) - NOT FOUND
+npm run backend                # NOT USED - backend is Supabase Edge Functions only
 npm run dev:all                # Concurrent frontend + backend
 npm run build                  # Production build
 npm run lint                   # ESLint
@@ -76,7 +121,8 @@ Validated at startup in `src/config/env.ts`.
 |------|---------|
 | `src/router.tsx` | TanStack Router setup with QueryClient context |
 | `src/routes/__root.tsx` | Root layout: QueryClientProvider → ThemeProvider → AuthProvider → StyleProvider |
-| `src/routes/__app.tsx` | Authenticated layout with RouteGuard + Sidebar + Topbar |
+| `src/routes/admin.tsx` | Admin layout (RouteGuard + Sidebar + Topbar + BaseLayout) |
+| `src/routes/distributor.tsx` | Distributor layout (RouteGuard + Sidebar + Topbar + BaseLayout) |
 | `shared/config/role-permissions.ts` | Single source of truth for role→permission mapping |
 | `src/lib/supabase/client.ts` | Supabase client creation |
 | `src/config/env.ts` | Env validation (throws on missing required vars) |
@@ -95,8 +141,8 @@ Validated at startup in `src/config/env.ts`.
 2. Add to `ROLE_PERMISSIONS` matrix in `shared/config/role-permissions.ts`
 
 ### Add a new route (TanStack Router)
-1. Create file in `src/routes/` (e.g., `src/routes/office/new-page.tsx`)
-2. Export `Route = createFileRoute("/office/new-page")({ component: ... })`
+1. Create file in `src/routes/` (e.g., `src/routes/distributor/new-page.tsx`)
+2. Export `Route = createFileRoute("/distributor/new-page")({ component: ... })`
 3. Run `npm run dev` - router auto-generates `routeTree.gen.ts`
 
 ### Call Supabase from frontend

@@ -14,21 +14,21 @@ export class DashboardResolver {
    */
   private static readonly DASHBOARD_PATHS: Record<UserRole, string> = {
     // Administrative Roles
-    [UserRole.ADMIN_MASTER]: "/_app/customers",
-    [UserRole.GESTAO_ADMIN]: "/_app/analytics",
+    [UserRole.ADMIN_MASTER]: "/admin/customers",
+    [UserRole.GESTAO_ADMIN]: "/admin/analytics",
 
     // Departmental Roles
-    [UserRole.FINANCEIRO]: "/_app/wallets",
-    [UserRole.SUPORTE]: "/_app/customers",
-    [UserRole.LOGISTICA]: "/_app/orders",
-    [UserRole.MARKETING]: "/_app/marketing",
-    [UserRole.ANALYTICS]: "/_app/analytics",
-    [UserRole.AUDITOR]: "/_app/insights",
-    [UserRole.OPERADOR]: "/_app",
+    [UserRole.FINANCEIRO]: "/admin/wallets",
+    [UserRole.SUPORTE]: "/admin/customers",
+    [UserRole.LOGISTICA]: "/admin/orders",
+    [UserRole.MARKETING]: "/admin/marketing",
+    [UserRole.ANALYTICS]: "/admin/analytics",
+    [UserRole.AUDITOR]: "/admin/insights",
+    [UserRole.OPERADOR]: "/admin",
 
     // Business Roles
-    [UserRole.DISTRIBUIDOR]: "/office/network",
-    [UserRole.AFILIADO]: "/office/network",
+    [UserRole.DISTRIBUIDOR]: "/distributor/network",
+    [UserRole.AFILIADO]: "/distributor/network",
     [UserRole.CLIENTE_FINAL]: "/minha-conta",
   };
 
@@ -52,7 +52,7 @@ export class DashboardResolver {
     const basePath = this.getDashboardPath(user.role);
     
     // Special case: pending distributors go to activation page
-    if (user.status === "pending" && basePath === "/office") {
+    if (user.status === "pending" && basePath === "/distributor") {
       return "/ativacao";
     }
     
@@ -67,17 +67,17 @@ export class DashboardResolver {
    */
   static getDemoPath(role: UserRole): string {
     const DEMO_PATHS: Record<UserRole, string> = {
-      [UserRole.ADMIN_MASTER]: "/_app/analytics",
-      [UserRole.GESTAO_ADMIN]: "/_app/analytics",
-      [UserRole.FINANCEIRO]: "/_app/wallets",
-      [UserRole.SUPORTE]: "/_app/customers",
-      [UserRole.LOGISTICA]: "/_app/orders",
-      [UserRole.MARKETING]: "/_app/marketing",
-      [UserRole.ANALYTICS]: "/_app/analytics",
-      [UserRole.AUDITOR]: "/_app/insights",
-      [UserRole.OPERADOR]: "/_app",
-      [UserRole.DISTRIBUIDOR]: "/office/network",
-      [UserRole.AFILIADO]: "/office/network",
+      [UserRole.ADMIN_MASTER]: "/admin/analytics",
+      [UserRole.GESTAO_ADMIN]: "/admin/analytics",
+      [UserRole.FINANCEIRO]: "/admin/wallets",
+      [UserRole.SUPORTE]: "/admin/customers",
+      [UserRole.LOGISTICA]: "/admin/orders",
+      [UserRole.MARKETING]: "/admin/marketing",
+      [UserRole.ANALYTICS]: "/admin/analytics",
+      [UserRole.AUDITOR]: "/admin/insights",
+      [UserRole.OPERADOR]: "/admin",
+      [UserRole.DISTRIBUIDOR]: "/distributor/network",
+      [UserRole.AFILIADO]: "/distributor/network",
       [UserRole.CLIENTE_FINAL]: "/loja",
     };
     return DEMO_PATHS[role] || "/";

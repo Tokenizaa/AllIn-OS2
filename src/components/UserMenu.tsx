@@ -48,7 +48,7 @@ const UserMenu = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate({ to: '/office/profile' })}
+          onClick={() => navigate({ to: '/distributor/profile' })}
           className="hidden md:flex text-allin-dark dark:text-allin-white hover:text-allin-orange"
         >
           <User className="w-4 h-4 mr-2" />
