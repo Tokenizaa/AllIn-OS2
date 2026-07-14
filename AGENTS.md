@@ -68,14 +68,14 @@ npm run import:products        # Import products from CSV (tsx scripts/import-pr
 
 ## Critical Architecture Decisions
 
-### Canonical Identifier = `customers.id_comprador` (text)
-**NOT** `customers.id` (UUID). Used everywhere (247 occurrences / 54 files). Migration to UUID would require massive rewrite. Documented in `docs/IDENTITY_MIGRATION_MASTER_PLAN.md`.
+### Canonical Identifier Strategy — Dual-Key
+Documented in `docs/IDENTITY_MIGRATION_MASTER_PLAN.md`. `customer_id` (`crm.customers.id`, uuid) = chave canônica INTERNA para joins e relacionamentos. `id_comprador` (text) e `allin_id` (integer) = pontes legadas mantidas por compatibilidade com API AllIn (**não remover**). Todas as ~247 ocorrências em ~54 arquivos devem migrar gradualmente para `customer_id` via Key-Resolution Service (Fase 2 do plano).
 
 ### Centralized Role/Permission System
 Single source of truth:
 - `src/shared/types/roles.ts` - `UserRole` enum (11 roles) **CANONICAL**
 - `shared/types/permissions.ts` - `PermissionEnum`, `PermissionAction`, `PermissionModule`
-- `shared/config/role-permissions.ts` - `ROLE_PERMISSIONS` matrix (imports from `../types/roles` - **BROKEN**: file doesn't exist at `shared/types/roles.ts`)
+- `shared/config/role-permissions.ts` - `ROLE_PERMISSIONS` matrix (imports from `../types/roles` → barrel em `shared/types/roles.ts` re-exporta de `src/shared/types/roles.ts`)
 
 **Frontend imports from `@/shared/types/roles`** (via `@/*` → `./src/*`). Edge Functions/Shared config import relatively from `shared/`.
 
@@ -169,7 +169,7 @@ const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPAB
 - Dual role definitions: `src/shared/types/roles.ts` (canonical) vs `shared/types/api.types.ts:77` (legacy `UserRole` type alias)
 - 50+ RLS policies, 70+ SQL functions, 200+ FKs - audit for duplication before adding more
 - `jsonwebtoken` in `vite.config.ts` build.external but used in Edge Functions
-- `shared/config/role-permissions.ts` imports `../types/roles` which doesn't exist (should be `../../src/shared/types/roles`)
+- `shared/types/roles.ts` barrel file re-exports de `../../src/shared/types/roles` (resolve o import `../types/roles` de `shared/config/role-permissions.ts` para uso em Edge Functions/Deno)
 
 ## Documentation References
 - `docs/IDENTITY_MIGRATION_MASTER_PLAN.md` - Identifier strategy deep dive
