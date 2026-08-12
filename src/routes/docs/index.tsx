@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookOpen, Factory, Package, ShoppingCart, Zap, Map } from "lucide-react";
-import { buildSidebarTree, humanizeFolder } from "@/lib/docs-data";
+import { PublicHeader } from "@/components/app/public-header";
+import { buildSidebarTree, humanizeFolder, type DocNode } from "@/lib/docs-data";
 
 export const Route = createFileRoute("/docs/")({
   component: DocsHome,
@@ -36,7 +37,9 @@ function DocsHome() {
     });
 
   return (
-    <div className="min-h-screen bg-white pt-16 dark:bg-zinc-950">
+    <>
+      <PublicHeader />
+      <div className="min-h-screen bg-white pt-[var(--docs-header-h)] dark:bg-zinc-950">
       <div className="mx-auto max-w-5xl px-4 py-14 sm:px-8">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
@@ -85,10 +88,11 @@ function DocsHome() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
-function countLeaves(node: { children?: { children?: unknown[] }[] }): number {
+function countLeaves(node: DocNode): number {
   return node.children?.reduce(
     (acc, c) => acc + (c.children ? countLeaves(c) : 1),
     0,
@@ -96,7 +100,7 @@ function countLeaves(node: { children?: { children?: unknown[] }[] }): number {
 }
 
 /** Primeira folha (doc) de um nó, descendo recursivamente */
-function firstLeaf(node: { path: string; children?: { path: string; children?: unknown[] }[] }): { path: string } {
+function firstLeaf(node: DocNode): { path: string } {
   if (!node.children?.length) return node;
   return firstLeaf(node.children[0]);
 }

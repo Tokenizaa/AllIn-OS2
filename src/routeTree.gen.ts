@@ -26,7 +26,6 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DistributorIndexRouteImport } from './routes/distributor/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SejaDistribuidorSlugRouteImport } from './routes/seja-distribuidor.$slug'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as LojaSlugRouteImport } from './routes/loja.$slug'
@@ -151,11 +150,6 @@ const DistributorIndexRoute = DistributorIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DistributorRoute,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
 } as any)
 const SejaDistribuidorSlugRoute = SejaDistribuidorSlugRouteImport.update({
   id: '/$slug',
@@ -399,7 +393,6 @@ export interface FileRoutesByFullPath {
   '/loja/$slug': typeof LojaSlugRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
-  '/admin/': typeof AdminIndexRoute
   '/distributor/': typeof DistributorIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -417,6 +410,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRouteWithChildren
   '/ativacao': typeof AtivacaoRoute
   '/busca-produtos': typeof BuscaProdutosRouteWithChildren
   '/cadastro': typeof CadastroRoute
@@ -456,7 +450,6 @@ export interface FileRoutesByTo {
   '/loja/$slug': typeof LojaSlugRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
-  '/admin': typeof AdminIndexRoute
   '/distributor': typeof DistributorIndexRoute
   '/docs': typeof DocsIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -516,7 +509,6 @@ export interface FileRoutesById {
   '/loja/$slug': typeof LojaSlugRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
-  '/admin/': typeof AdminIndexRoute
   '/distributor/': typeof DistributorIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
@@ -577,7 +569,6 @@ export interface FileRouteTypes {
     | '/loja/$slug'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
-    | '/admin/'
     | '/distributor/'
     | '/docs/'
     | '/admin/customers/$id'
@@ -595,6 +586,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$slug'
+    | '/admin'
     | '/ativacao'
     | '/busca-produtos'
     | '/cadastro'
@@ -634,7 +626,6 @@ export interface FileRouteTypes {
     | '/loja/$slug'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
-    | '/admin'
     | '/distributor'
     | '/docs'
     | '/admin/customers/$id'
@@ -693,7 +684,6 @@ export interface FileRouteTypes {
     | '/loja/$slug'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
-    | '/admin/'
     | '/distributor/'
     | '/docs/'
     | '/admin/customers/$id'
@@ -851,13 +841,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/distributor/'
       preLoaderRoute: typeof DistributorIndexRouteImport
       parentRoute: typeof DistributorRoute
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
     }
     '/seja-distribuidor/$slug': {
       id: '/seja-distribuidor/$slug'
@@ -1148,7 +1131,6 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSystemRoute: typeof AdminSystemRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   AdminCustomersIdRoute: typeof AdminCustomersIdRoute
   AdminDistributorsIdRoute: typeof AdminDistributorsIdRoute
   AdminIndustrialMachinesRoute: typeof AdminIndustrialMachinesRoute
@@ -1174,7 +1156,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSystemRoute: AdminSystemRoute,
   AdminWalletsRoute: AdminWalletsRoute,
-  AdminIndexRoute: AdminIndexRoute,
   AdminCustomersIdRoute: AdminCustomersIdRoute,
   AdminDistributorsIdRoute: AdminDistributorsIdRoute,
   AdminIndustrialMachinesRoute: AdminIndustrialMachinesRoute,

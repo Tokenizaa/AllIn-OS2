@@ -545,3 +545,8 @@
   font-family: var(--font-mono);
   font-size: 0.875em;
 }
+
+/* Altura do header fixo — drive os offsets de /docs (ajustar se PublicHeader mudar) */
+:root {
+  --docs-header-h: 81px;
+}
