@@ -6,7 +6,7 @@ interface Supplier360Props {
 }
 
 export function Supplier360({ supplierId }: Supplier360Props) {
-  const [supplier, setSupplier] = useState<Supplier | null>(null);
+  const [supplier, setSupplier] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

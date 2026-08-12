@@ -5,7 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 
 export default ts.config(
-  { ignores: ["dist", ".tanstack", "routeTree.gen.ts", "node_modules", ".venv", "src/backend"] },
+  { ignores: ["dist", ".tanstack", "routeTree.gen.ts", "node_modules", ".venv", "src/backend", "test-results", "playwright-report", "playwright/.cache", "e2e/**", "playwright.config.ts"] },
   js.configs.recommended,
   ...ts.configs.recommended,
   {

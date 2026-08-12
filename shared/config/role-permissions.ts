@@ -9,7 +9,7 @@
  * - src/backend/modules/auth/guards/permission.guard.ts (backend)
  */
 
-import { UserRole } from '../types/roles';
+import { UserRole } from '@/shared/types/roles';
 import { PermissionEnum } from '../types/permissions';
 
 /**

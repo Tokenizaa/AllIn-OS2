@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { WalletService } from "@/services/wallets";
+import { MlmEngineService } from "@/services/mlm-engine";
 
 export function useCreateWallet() {
   return useMutation({
     mutationFn: async (customerId: string) => {
-      return WalletService.ensureWallet({ customerId });
+      return MlmEngineService.wallet.getBalance(customerId);
     },
   });
 }

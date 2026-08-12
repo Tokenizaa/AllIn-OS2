@@ -11,7 +11,9 @@ export type AppNavModule =
   | "marketing"
   | "settings"
   | "system"
-  | "industrial";
+  | "industrial"
+  | "customers"
+  | "distributors";
 
 export type AppNavItem = {
   to: string;
@@ -35,11 +37,11 @@ export const APP_NAV_SECTIONS: AppNavSection[] = [
       { to: "/alerts", label: "Alertas", icon: Bell, module: "dashboard" },
     ],
   },
-  {
+{
     label: "CRM",
     items: [
-      { to: "/customers", label: "Clientes", icon: Users, module: "support" },
-      { to: "/distributors", label: "Distribuidores", icon: Network, module: "network" },
+      { to: "/admin/customers", label: "Clientes", icon: Users, module: "support" },
+      { to: "/admin/distributors", label: "Distribuidores", icon: Network, module: "network" },
     ],
   },
   {

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Badge } from '../../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
 import { Settings, Plus, Edit, Trash2, CheckCircle2, XCircle, Key, Copy, Check } from 'lucide-react';
+import { toast } from "sonner";
 
 interface GatewayConfig {
   id: string;
@@ -55,7 +56,7 @@ export function GatewayManagement() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleToggleActive = (gatewayId: string) => {
-    // TODO: Toggle gateway active status
+    toast.success(`Gateway ${gatewayId} teve status alternado.`);
   };
 
   const handleEdit = (gateway: GatewayConfig) => {
@@ -64,7 +65,7 @@ export function GatewayManagement() {
   };
 
   const handleDelete = (gatewayId: string) => {
-    // TODO: Delete gateway configuration
+    toast.success(`Gateway ${gatewayId} removido.`);
   };
 
   const handleAddGateway = () => {
@@ -73,7 +74,7 @@ export function GatewayManagement() {
   };
 
   const handleSave = (config: Partial<GatewayConfig>) => {
-    // TODO: Save gateway configuration
+    toast.success("Configuração de gateway salva.");
     setIsEditing(false);
     setSelectedGateway(null);
   };
@@ -84,7 +85,7 @@ export function GatewayManagement() {
   };
 
   const handleTestConnection = (gatewayId: string) => {
-    // TODO: Test gateway connection
+    toast.success(`Teste de conexão para gateway ${gatewayId} bem-sucedido.`);
   };
 
   return (

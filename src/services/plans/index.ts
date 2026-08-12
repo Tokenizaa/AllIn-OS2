@@ -3,13 +3,13 @@ import { supabase } from "@/lib/supabase/client";
 
 export const PlanService = {
   async fetchActivePlans() {
-    const { data, error } = await supabase.schema('mlm').from('planos').select('*');
+    const { data, error } = await supabase.schema("mlm").from("planos").select("*");
     if (error) throw new Error(error.message || "Failed to fetch active plans");
     return data || [];
   },
 
   async getAllPlans() {
-    const { data, error } = await supabase.schema('mlm').from('planos').select('*');
+    const { data, error } = await supabase.schema("mlm").from("planos").select("*");
     if (error) throw new Error(error.message || "Failed to fetch plans");
     return data || [];
   },
@@ -17,46 +17,39 @@ export const PlanService = {
   async getPlanBonuses(data: { planId: string }) {
     const parsed = z.object({ planId: z.string() }).parse(data);
     const { data: bonuses, error } = await supabase
-      .from('plan_bonuses')
-      .select('*')
-      .eq('plan_id', parsed.planId);
+      .schema("mlm")
+      .from("bonus_regras")
+      .select("*")
+      .eq("plan_id", parsed.planId);
     if (error) throw new Error(error.message || "Failed to fetch plan bonuses");
     return bonuses;
   },
 
   async createPlan(data: {
-    name: string;
+    nome: string;
     slug: string;
     description?: string;
-    price: number;
-    activation_fee?: number;
-    plan_type?: string;
-    is_affiliate?: boolean;
-    is_active?: boolean;
-    max_generations?: number;
-    direct_bonus_percentage?: number;
+    preco: number;
+    ativo?: boolean;
+    max_geracoes?: number;
     metadata?: any;
   }) {
     const parsed = z.object({
-      name: z.string().min(1),
+      nome: z.string().min(1),
       slug: z.string().min(1),
       description: z.string().optional(),
-      price: z.number().min(0),
-      activation_fee: z.number().min(0).default(0),
-      plan_type: z.string().optional(),
-      is_affiliate: z.boolean().default(false),
-      is_active: z.boolean().default(true),
-      max_generations: z.number().min(1).default(1),
-      direct_bonus_percentage: z.number().min(0).max(100).default(0),
+      preco: z.number().min(0),
+      ativo: z.boolean().default(true),
+      max_geracoes: z.number().min(1).default(3),
       metadata: z.record(z.any()).optional(),
     }).parse(data);
 
     const { data: plan, error } = await supabase
-      .from('plans')
+      .schema("mlm")
+      .from("planos")
       .insert({
         ...parsed,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -66,140 +59,144 @@ export const PlanService = {
 
   async updatePlan(data: {
     id: string;
-    name?: string;
+    nome?: string;
     description?: string;
-    price?: number;
-    activation_fee?: number;
-    plan_type?: string;
-    is_affiliate?: boolean;
-    is_active?: boolean;
-    max_generations?: number;
-    direct_bonus_percentage?: number;
+    preco?: number;
+    ativo?: boolean;
+    max_geracoes?: number;
     metadata?: any;
   }) {
     const parsed = z.object({
       id: z.string().uuid(),
-      name: z.string().min(1).optional(),
+      nome: z.string().min(1).optional(),
       description: z.string().optional(),
-      price: z.number().min(0).optional(),
-      activation_fee: z.number().min(0).optional(),
-      plan_type: z.string().optional(),
-      is_affiliate: z.boolean().optional(),
-      is_active: z.boolean().optional(),
-      max_generations: z.number().min(1).optional(),
-      direct_bonus_percentage: z.number().min(0).max(100).optional(),
+      preco: z.number().min(0).optional(),
+      ativo: z.boolean().optional(),
+      max_geracoes: z.number().min(1).optional(),
       metadata: z.record(z.any()).optional(),
     }).parse(data);
 
     const { id, ...updateData } = parsed;
     const { data: plan, error } = await supabase
-      .from('plans')
-      .update({ ...updateData, updated_at: new Date().toISOString() })
-      .eq('id', id)
+      .schema("mlm")
+      .from("planos")
+      .update(updateData)
+      .eq("id", id)
       .select()
       .single();
     if (error) throw new Error(error.message || "Failed to update plan");
     return plan;
   },
 
-  async createPlanBonus(data: {
-    plan_id: string;
-    generation: number;
-    bonus_percentage: number;
-    required_directs?: number;
-    bonus_type?: string;
+  async createBonusRule(data: {
+    nome: string;
+    tipo: string;
+    porcentagem: number;
+    geracao?: number;
+    plan_id?: string;
+    configuracoes?: Record<string, any>;
   }) {
     const parsed = z.object({
-      plan_id: z.string().uuid(),
-      generation: z.number().min(0),
-      bonus_percentage: z.number().min(0).max(100),
-      required_directs: z.number().min(0).default(0),
-      bonus_type: z.string().default("generation"),
+      nome: z.string().min(1),
+      tipo: z.string().min(1),
+      porcentagem: z.number().min(0).max(100),
+      geracao: z.number().min(0).optional(),
+      plan_id: z.string().uuid().optional(),
+      configuracoes: z.record(z.any()).optional(),
     }).parse(data);
 
     const { data: bonus, error } = await supabase
-      .from('plan_bonuses')
-      .insert({ ...parsed, created_at: new Date().toISOString() })
-      .select()
-      .single();
-    if (error) throw new Error(error.message || "Failed to create plan bonus");
-    return bonus;
-  },
-
-  async deletePlanBonus(data: { id: string }) {
-    const parsed = z.object({ id: z.string().uuid() }).parse(data);
-    const { error } = await supabase
-      .from('plan_bonuses')
-      .delete()
-      .eq('id', parsed.id);
-    if (error) throw new Error(error.message || "Failed to delete plan bonus");
-    return { success: true };
-  },
-
-  async activateCustomerPlan(data: {
-    customer_id: string;
-    plan_id: string;
-    expires_at?: string;
-  }) {
-    const parsed = z.object({
-      customer_id: z.string().uuid(),
-      plan_id: z.string().uuid(),
-      expires_at: z.string().optional(),
-    }).parse(data);
-
-    const { data: customerPlan, error } = await supabase
-      .from('customer_plans')
+      .schema("mlm")
+      .from("bonus_regras")
       .insert({
         ...parsed,
         is_active: true,
-        activated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       })
       .select()
       .single();
-    if (error) throw new Error(error.message || "Failed to activate customer plan");
-    return customerPlan;
+    if (error) throw new Error(error.message || "Failed to create bonus rule");
+    return bonus;
   },
 
-  async deactivateCustomerPlan(data: { customer_id: string }) {
-    const parsed = z.object({ customer_id: z.string().uuid() }).parse(data);
+  async deleteBonusRule(data: { id: string }) {
+    const parsed = z.object({ id: z.string().uuid() }).parse(data);
     const { error } = await supabase
-      .schema('mlm')
-      .from('planos_distribuidores')
-      .update({ status: 'inactive' })
-      .eq('id_comprador', parsed.customer_id);
-    if (error) throw new Error(error.message || "Failed to deactivate customer plan");
+      .schema("mlm")
+      .from("bonus_regras")
+      .delete()
+      .eq("id", parsed.id);
+    if (error) throw new Error(error.message || "Failed to delete bonus rule");
     return { success: true };
   },
 
-  async getCustomerPlanHistory(data: { customerId: string }) {
-    const parsed = z.object({ customerId: z.string().uuid() }).parse(data);
+  async activatePlan(data: {
+    distribuidor_id: string;
+    plano_id: string;
+  }) {
+    const parsed = z.object({
+      distribuidor_id: z.string().uuid(),
+      plano_id: z.string().uuid(),
+    }).parse(data);
+
+    const { data: planAssignment, error } = await supabase
+      .schema("mlm")
+      .from("planos_distribuidores")
+      .upsert({
+        distribuidor_id: parsed.distribuidor_id,
+        plano_id: parsed.plano_id,
+        data_ativacao: new Date().toISOString(),
+        ativo: true,
+        status: "active",
+      }, { onConflict: "distribuidor_id" })
+      .select()
+      .single();
+    if (error) throw new Error(error.message || "Failed to activate plan");
+    return planAssignment;
+  },
+
+  async deactivatePlan(data: { distribuidor_id: string }) {
+    const parsed = z.object({ distribuidor_id: z.string().uuid() }).parse(data);
+    const { error } = await supabase
+      .schema("mlm")
+      .from("planos_distribuidores")
+      .update({ status: "inactive", ativo: false })
+      .eq("distribuidor_id", parsed.distribuidor_id);
+    if (error) throw new Error(error.message || "Failed to deactivate plan");
+    return { success: true };
+  },
+
+  async getPlanHistory(data: { distribuidorId: string }) {
+    const parsed = z.object({ distribuidorId: z.string().uuid() }).parse(data);
     const { data: plans, error } = await supabase
-      .schema('mlm')
-      .from('planos_distribuidores')
-      .select('*')
-      .eq('id_comprador', parsed.customerId);
-    if (error) throw new Error(error.message || "Failed to fetch customer plan history");
+      .schema("mlm")
+      .from("planos_distribuidores")
+      .select("*, planos(*)")
+      .eq("distribuidor_id", parsed.distribuidorId);
+    if (error) throw new Error(error.message || "Failed to fetch plan history");
     return plans;
   },
 
   async getPlanAnalytics() {
     const { data: plans, error } = await supabase
-      .from('plans')
-      .select('*, customer_plans(count)');
+      .schema("mlm")
+      .from("planos")
+      .select("*");
     if (error) throw new Error(error.message || "Failed to fetch plan analytics");
     return plans;
   },
 
   async getBonusDistribution() {
     const { data: bonuses, error } = await supabase
-      .from('plan_bonuses')
-      .select('*, plans(name)');
+      .schema("mlm")
+      .from("bonus_regras")
+      .select("*");
     if (error) throw new Error(error.message || "Failed to fetch bonus distribution");
     return bonuses;
   },
 
   async getPlanStats() {
-    const { data, error } = await supabase.schema('mlm').from('planos').select('*');
+    const { data, error } = await supabase.schema("mlm").from("planos").select("*");
     if (error) throw new Error(error.message || "Failed to fetch plan stats");
     return { total: (data || []).length, plans: data || [] };
   },

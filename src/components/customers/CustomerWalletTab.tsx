@@ -12,8 +12,6 @@ interface CustomerWalletTabProps {
   walletTransactions: any[];
   handleCreateWallet: () => void;
   handleCreatePointsWallet: () => void;
-  updateWalletBalance: any;
-  createWalletTransaction: any;
   refetch: () => void;
 }
 
@@ -23,8 +21,6 @@ export function CustomerWalletTab({
   walletTransactions,
   handleCreateWallet,
   handleCreatePointsWallet,
-  updateWalletBalance,
-  createWalletTransaction,
   refetch,
 }: CustomerWalletTabProps) {
   const {
@@ -39,8 +35,6 @@ export function CustomerWalletTab({
     handleAddTransaction,
   } = useWalletTransactions({
     wallet,
-    updateWalletBalance,
-    createWalletTransaction,
     refetch,
   });
 

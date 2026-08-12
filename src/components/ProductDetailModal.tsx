@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { formatPrice } from '@/utils/priceFormatter';
+import { formatBRL } from '@/lib/customer-calculations';
 import { useCart } from '@/hooks/cart/useCartQuery';
 
 // Ícones simples para os botões de fechar e quantidade
@@ -62,7 +62,7 @@ const ProductDetailModal = ({ product, onClose }: { product: any; onClose: () =>
 
   if (!product) return null;
 
-  const formattedPrice = formatPrice(product.preco);
+  const formattedPrice = formatBRL(product.preco);
 
   return (
     <div 

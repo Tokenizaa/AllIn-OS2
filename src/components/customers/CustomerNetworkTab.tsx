@@ -100,7 +100,7 @@ export function CustomerNetworkTab({ customer, downlines, networkMetrics }: Cust
                   {dl.created_at ? new Date(dl.created_at).toLocaleDateString("pt-BR") : "-"}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <Link to="/customers/$id" params={{ id: dl.id }} className="text-xs text-primary font-medium hover:underline inline-flex items-center gap-0.5">
+                  <Link to="/admin/customers/$id" params={{ id: dl.id }} className="text-xs text-primary font-medium hover:underline inline-flex items-center gap-0.5">
                     Ver 360 <ArrowUpRight className="h-3 w-3" />
                   </Link>
                 </td>

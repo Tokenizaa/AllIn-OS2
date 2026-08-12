@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useProductDetail } from "@/hooks/products/useProductDetail";
-import { useAuth } from "@/modules/auth";
 import { ShieldCheck, ChevronRight, Award, ShoppingCart } from "lucide-react";
 import { useDistributorDefault } from "@/hooks/distributor/useDistributorProfileQuery";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,17 +8,14 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/app/public-header";
+import { formatBRL } from "@/lib/customer-calculations";
+import { supabase } from "@/lib/supabase/client";
 
 export const Route = createFileRoute("/produto/$id")({ component: ProductDetailPage });
 
 function ProductDetailPage() {
   const { id } = Route.useParams();
-  const auth = useAuth();
-  const triggerBinomialBonusPay = (auth as any).triggerBinomialBonusPay;
-  const addAuditLog = (auth as any).addAuditLog;
-
-  // Sprint 2: Usar TanStack Query em vez de Context API
-  const { data: currentDistributor } = useDistributorDefault();
+  const { data: currentDistributor = {} } = useDistributorDefault() as any;
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [custName, setCustName] = useState("");
@@ -28,8 +24,6 @@ function ProductDetailPage() {
   const [custPhone, setCustPhone] = useState("");
 
   const { data: prod = null, isLoading } = useProductDetail(id);
-
-  const currentDistributor = (useDistributorDefault() as any)?.data || {};
   const sponsorSlug = currentDistributor?.slug || "";
   const distName = currentDistributor?.name || "Distribuidor";
   const distRank = currentDistributor?.rank || "";
@@ -37,28 +31,43 @@ function ProductDetailPage() {
   if (isLoading) return <div className="p-8 text-sm text-center text-muted-foreground animate-pulse">Carregando produto real...</div>;
   if (!prod) return <div className="p-8 text-sm text-center text-muted-foreground">Produto não encontrado.</div>;
 
-  const formatBRL = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
   const finalPrice = Number(prod.price || 0);
 
-  const handleQuickCheckoutSubmit = (e: React.FormEvent) => {
+  const handleQuickCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!custName || !custEmail || !custCPF || !custPhone) {
       toast.error("Por favor, preencha todos os dados obrigatórios.");
       return;
     }
     setCheckoutOpen(false);
-    void triggerBinomialBonusPay(Number(prod.bonus_payment_percentage || 0), finalPrice * 0.25, finalPrice);
-    addAuditLog?.({
-      id: `tx-${Math.random().toString(36).substring(3, 11)}`,
-      action: "RETAIL_SALE",
-      userId: "guest",
-      userName: custName,
-      userRole: "customer",
-      module: "orders",
-      details: `Compra de ${prod.name} via loja de @${sponsorSlug}.`,
-      ip: "0.0.0.0",
-    });
-    toast.success("Checkout iniciado.");
+
+    try {
+      const { error: pedidoError } = await supabase
+        .schema("commerce")
+        .from("pedidos")
+        .insert({
+          cliente_nome: custName,
+          cliente_email: custEmail,
+          cliente_cpf: custCPF,
+          cliente_telefone: custPhone,
+          valor_total: finalPrice,
+          tipo_nome: "Produto",
+          pagamento_confirmado: true,
+          comissoes_geradas: false,
+          metadata: {
+            sponsor_slug: sponsorSlug,
+            produto_id: id,
+            produto_nome: prod.name,
+          },
+          created_at: new Date().toISOString(),
+        });
+
+      if (pedidoError) throw pedidoError;
+
+      toast.success("Compra realizada! Comissões processadas automaticamente.");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao processar compra.");
+    }
   };
 
   return (

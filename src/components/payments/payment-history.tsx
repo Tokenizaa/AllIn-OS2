@@ -24,7 +24,7 @@ interface Payment {
 
 export function PaymentHistory() {
   const { user } = useAuth();
-  const { distributorProfile } = useDistributorProfileQuery();
+  const { data: distributorProfile } = useDistributorProfileQuery();
   const idComprador = distributorProfile?.id || user?.id;
 
   const { data: paymentsData, isLoading, refetch } = usePayments(50);

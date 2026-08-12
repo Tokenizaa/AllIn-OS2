@@ -1,19 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { PointsService, PontosTransacao } from "@/services/points";
 
-/**
- * usePoints (Sprint 6 — REDESIGN)
- *
- * Hook canônico para pontos de fidelidade.
- *
- * Usa mlm.pontos_saldo + mlm.pontos_transacoes (tabelas REAIS).
- *
- * Substitui WalletService.ensurePointsWallet e hooks de "points_wallets"
- * (tabela inexistente).
- */
 export function usePointsByDistribuidor(distribuidorId: string | null) {
   return useQuery({
-    queryKey: ["points", "saldo", distribuidorId],
+    queryKey: queryKeys.points.saldo(distribuidorId || undefined),
     queryFn: () => PointsService.fetchPointsByDistribuidor(distribuidorId as string),
     enabled: !!distribuidorId,
   });
@@ -21,7 +12,7 @@ export function usePointsByDistribuidor(distribuidorId: string | null) {
 
 export function usePointsTransactions(distribuidorId: string | null, limit = 50) {
   return useQuery<PontosTransacao[]>({
-    queryKey: ["points", "transactions", distribuidorId, limit],
+    queryKey: queryKeys.points.transactions(distribuidorId || undefined, limit),
     queryFn: () => PointsService.fetchTransactionsByDistribuidor(distribuidorId as string, { limit }),
     enabled: !!distribuidorId,
   });

@@ -5,7 +5,7 @@
  * Both frontend and backend should import from this file to ensure consistency.
  */
 
-import { UserRole } from './roles.ts';
+import { UserRole } from '../../src/shared/types/roles';
 
 /**
  * Permission action types

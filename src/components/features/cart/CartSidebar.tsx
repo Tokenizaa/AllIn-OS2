@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { useCart } from '@/hooks/cart/useCartQuery';
 import { useStoreSettings } from '@/hooks/store/useStoreSettings';
 import { useToast } from '@/hooks/use-toast';
-import { formatPrice } from '@/utils/priceFormatter';
+import { formatBRL } from "@/lib/customer-calculations";
 
 
 // Componente memoizado para evitar re-renderizações desnecessárias
@@ -106,7 +106,7 @@ Total de itens: ${getTotalItems()}`;
                           Tamanho: {item.selectedSize}
                         </p>
                         <p className="text-sm text-allin-orange font-bold">
-                          {formatPrice(item.price) || 'Preço não disponível'}
+                          {formatBRL(item.price) || 'Preço não disponível'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ Total de itens: ${getTotalItems()}`;
                   <div className="space-y-2">
                     <div className="flex justify-between text-allin-dark/80 dark:text-allin-white/80">
                       <span>Subtotal ({getTotalItems()} itens):</span>
-                      <span className="font-semibold">{formatPrice(calculateTotal().toFixed(2))}</span>
+                      <span className="font-semibold">{formatBRL(calculateTotal().toFixed(2))}</span>
                     </div>
                     <div className="flex justify-between text-allin-dark/80 dark:text-allin-white/80">
                       <span>Frete:</span>
@@ -154,7 +154,7 @@ Total de itens: ${getTotalItems()}`;
                     </div>
                     <div className="border-t border-allin-orange/20 pt-2 mt-2 flex justify-between text-lg font-bold text-allin-orange">
                       <span>Total:</span>
-                      <span>{formatPrice(calculateTotal().toFixed(2))}</span>
+                      <span>{formatBRL(calculateTotal().toFixed(2))}</span>
                     </div>
                   </div>
                   

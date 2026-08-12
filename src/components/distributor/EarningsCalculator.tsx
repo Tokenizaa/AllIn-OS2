@@ -99,7 +99,7 @@ export function EarningsCalculator({
             <p className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono tracking-tight leading-none mt-1.5">
               {estimatedMonthlyIncome.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </p>
-            <p className="text-[10px] text-zinc-500 font-mono">Simulação baseada em taxas residuais de 4% s/ consumo</p>
+            <p className="text-[10px] text-zinc-500 font-mono">Simulação baseada em taxas residuais de 5%/3%/2% s/ consumo</p>
           </div>
 
           <div className="p-3 bg-zinc-900/50 rounded-xl border border-zinc-800 text-left text-xs font-mono space-y-1.5 divide-y divide-border/10">

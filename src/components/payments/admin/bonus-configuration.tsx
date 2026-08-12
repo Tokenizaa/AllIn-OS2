@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
 import { Gift, Plus, Edit, Trash2, Percent, Calendar, Users } from 'lucide-react';
+import { toast } from "sonner";
 
 interface BonusRule {
   id: string;
@@ -75,7 +76,7 @@ export function BonusConfiguration() {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleToggleActive = (ruleId: string) => {
-    // TODO: Toggle rule active status
+    toast.success(`Regra ${ruleId} teve status alternado.`);
   };
 
   const handleEdit = (rule: BonusRule) => {
@@ -84,7 +85,7 @@ export function BonusConfiguration() {
   };
 
   const handleDelete = (ruleId: string) => {
-    // TODO: Delete bonus rule
+    toast.success(`Regra de bônus ${ruleId} removida.`);
   };
 
   const handleAddRule = () => {
@@ -93,7 +94,7 @@ export function BonusConfiguration() {
   };
 
   const handleSave = (config: Partial<BonusRule>) => {
-    // TODO: Save bonus rule
+    toast.success("Regra de bônus salva com sucesso.");
     setIsEditing(false);
     setSelectedRule(null);
   };

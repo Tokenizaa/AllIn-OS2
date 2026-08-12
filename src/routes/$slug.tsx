@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useParams, useLoaderData } from "@tanstack/react-router";
 import { useProductsQuery } from "@/hooks/products/useProductsQuery";
 import { resolveDistributor } from "@/hooks/distributor/useDistributorQuery";
+import { formatBRL } from "@/lib/customer-calculations";
 import { 
   Crown, Star, ShoppingBag,
   ArrowRight, MessageSquare, Instagram, ShieldCheck,
@@ -34,19 +35,12 @@ function DistributorPage() {
   // Sprint 3: Usar loader para dados pré-carregados
   const { distributor: currentDistributor } = useLoaderData({ from: "/$slug" });
 
-  const formatBRL = (value: string) => {
-    const num = parseFloat(value);
-    return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  };
-
   const sponsorSlug = currentDistributor?.slug || "";
   const theme = currentDistributor?.theme;
   const distName = currentDistributor?.name || "Distribuidor";
   const distRank = currentDistributor?.rank || "";
   const distAvatar = currentDistributor?.avatar || "";
 
-  // DEPRECATED: usersList removed - use Supabase directly
-  // TODO: Fetch distributor data from Supabase if needed
   const matchedUser = null;
 
   // Lead captured stats

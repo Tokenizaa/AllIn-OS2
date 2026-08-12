@@ -1,25 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { PaymentService, PedidoPagamento } from "@/services/payments";
 
-/**
- * usePayments (Sprint 6 — REDESIGN)
- *
- * Hook canônico para buscar pagamentos de pedidos.
- *
- * Usa commerce.pedidos_pagamentos (tabela REAL).
- *
- * Migrado do antigo `usePayments` que consultava tabela inexistente (`payments`).
- */
 export function usePayments(limit = 50) {
   return useQuery<PedidoPagamento[]>({
-    queryKey: ["payments", "real", limit],
+    queryKey: queryKeys.payments2.list(limit),
     queryFn: () => PaymentService.fetchRecentPayments(limit),
   });
 }
 
 export function usePaymentById(id: string | null) {
   return useQuery({
-    queryKey: ["payments", "real", "id", id],
+    queryKey: queryKeys.payments2.byId(id || ""),
     queryFn: () => PaymentService.fetchPaymentById(id as string),
     enabled: !!id,
   });
@@ -27,7 +19,7 @@ export function usePaymentById(id: string | null) {
 
 export function usePaymentsByPedido(pedidoId: string | null) {
   return useQuery({
-    queryKey: ["payments", "real", "pedido", pedidoId],
+    queryKey: queryKeys.payments2.byPedido(pedidoId || ""),
     queryFn: () => PaymentService.fetchPaymentsByPedido(pedidoId as string),
     enabled: !!pedidoId,
   });

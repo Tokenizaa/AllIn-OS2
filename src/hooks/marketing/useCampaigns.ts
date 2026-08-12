@@ -1,20 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase/client";
+import { queryKeys } from "../queryKeys";
+import { MarketingService } from "@/services/marketing";
 
 export function useCampaigns() {
   return useQuery({
-    queryKey: ["campaigns"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("marketing.campaigns")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      
-      return data || [];
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    queryKey: [...queryKeys.marketing, "campaigns"] as const,
+    queryFn: () => MarketingService.fetchCampaigns(),
   });
 }

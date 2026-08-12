@@ -51,7 +51,7 @@ function ActivationPage() {
       } else if (user.role !== UserRole.DISTRIBUIDOR) {
         navigate({ to: "/" });
       } else if (user.status === "active") {
-        navigate({ to: "/office" });
+        navigate({ to: "/distributor" });
       }
     }
   }, [user, loading, navigate]);
@@ -72,18 +72,16 @@ function ActivationPage() {
     setPaymentStep("checkout");
   };
 
-  const handleSimulatePayment = () => {
+  const handleSimulatePayment = async () => {
     setPaymentStep("processing");
-    setTimeout(async () => {
-      try {
-        await activateDistributorOffice(selectedPlan);
-        setPaymentStep("success");
-        toast.success("Pagamento confirmado! Licença comercial ativada.");
-      } catch (err: any) {
-        toast.error(err.message || "Erro ao realizar ativação.");
-        setPaymentStep("checkout");
-      }
-    }, 2500);
+    try {
+      await activateDistributorOffice(selectedPlan);
+      setPaymentStep("success");
+      toast.success("Pagamento confirmado! Licença comercial ativada.");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao realizar ativação.");
+      setPaymentStep("checkout");
+    }
   };
 
   if (loading || !user) {
@@ -424,7 +422,7 @@ function ActivationPage() {
               </div>
 
               <button
-                onClick={() => navigate({ to: "/office" })}
+                onClick={() => navigate({ to: "/distributor" })}
                 className="w-full h-10 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer pt-0.5"
               >
                 Acessar Meu Backoffice

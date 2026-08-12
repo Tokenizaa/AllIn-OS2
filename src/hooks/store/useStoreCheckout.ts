@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { CheckoutRules } from "@/services/orders";
+import { supabase } from "@/lib/supabase/client";
 
 interface UseStoreCheckoutProps {
   cart: { product: any; quantity: number }[];
@@ -7,8 +9,6 @@ interface UseStoreCheckoutProps {
   discount: number;
   deliveryCost: number;
   finalTotal: number;
-  triggerBinomialBonusPay: (points: number, commission: number, total: number) => Promise<void>;
-  addAuditLog: (log: any) => void;
   sponsorSlug: string;
   clearCart: () => void;
   setCheckoutStep: (step: string) => void;
@@ -20,8 +20,6 @@ export function useStoreCheckout({
   discount,
   deliveryCost,
   finalTotal,
-  triggerBinomialBonusPay,
-  addAuditLog,
   sponsorSlug,
   clearCart,
   setCheckoutStep,
@@ -40,9 +38,10 @@ export function useStoreCheckout({
   const [cardCVC, setCardCVC] = useState("");
 
   const applyCouponHandler = () => {
-    if (coupon.trim().toUpperCase() === "ALLIN10") {
-      setDiscount(subtotal * 0.1);
-      toast.success("Cupom de 10% de desconto aplicado!");
+    const { valid, discount } = CheckoutRules.calculateDiscount(subtotal, coupon);
+    if (valid) {
+      setDiscount(discount);
+      toast.success("Cupom de desconto aplicado!");
     } else {
       toast.error("Cupom inválido.");
     }
@@ -65,38 +64,43 @@ export function useStoreCheckout({
 
     setCheckoutStep("processing");
 
-    setTimeout(async () => {
-      try {
-        const totalPoints = cart.reduce((acc, item) => {
-          const points = item.product.bonus_payment_percentage || 20;
-          return acc + (points * item.quantity);
-        }, 0);
+    try {
+      const totalPoints = CheckoutRules.calculateCartPoints(cart);
 
-        const totalCommission = cart.reduce((acc, item) => {
-          const comm = (parseFloat(item.product.price) * 0.25) * item.quantity;
-          return acc + comm;
-        }, 0);
+      const { data: pedido, error: pedidoError } = await supabase
+        .schema("commerce")
+        .from("pedidos")
+        .insert({
+          cliente_nome: custName,
+          cliente_email: custEmail,
+          cliente_telefone: custPhone,
+          cliente_cpf: custCPF,
+          valor_total: finalTotal,
+          tipo_nome: "Produto",
+          pagamento_confirmado: true,
+          comissoes_geradas: false,
+          metadata: {
+            sponsor_slug: sponsorSlug,
+            itens: cart.map((i) => ({
+              produto_id: i.product.id,
+              nome: i.product.name,
+              quantidade: i.quantity,
+              preco: i.product.price,
+            })),
+          },
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
-        await triggerBinomialBonusPay(totalPoints, totalCommission, finalTotal);
+      if (pedidoError) throw pedidoError;
 
-        addAuditLog({
-          id: `tx-${Math.random().toString(36).substring(3, 11)}`,
-          action: "RETAIL_SALE",
-          userId: "anonymous-guest-customer",
-          userName: custName,
-          userRole: "customer",
-          module: "orders",
-          details: `Venda de varejo via loja de @${sponsorSlug}. Comprador: ${custName} (${custEmail}). Itens: ${cart.map(i => `${i.product.name} (x${i.quantity})`).join(", ")}. Total: R$ ${finalTotal.toFixed(2)}. Distribuindo ${totalPoints} pontos e comissão de R$ ${totalCommission.toFixed(2)} ao sponsor.`,
-          ip: "187.12.92.54"
-        });
-
-        toast.success("Pedido faturado! Comissões vinculadas instantaneamente.");
-        setCheckoutStep("receipt");
-      } catch {
-        toast.error("Erro no processamento da transação.");
-        setCheckoutStep("checkout");
-      }
-    }, 3000);
+      toast.success("Pedido faturado! Comissões vinculadas automaticamente via trigger.");
+      setCheckoutStep("receipt");
+    } catch {
+      toast.error("Erro no processamento da transação.");
+      setCheckoutStep("checkout");
+    }
   };
 
   const handleReturnToCatalog = () => {

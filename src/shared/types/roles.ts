@@ -102,3 +102,38 @@ export function isBusinessRole(role: UserRole): boolean {
 export function isValidRole(value: string): value is UserRole {
   return Object.values(UserRole).includes(value as UserRole);
 }
+
+export const ADMINISTRATIVE_ROLES: UserRole[] = [
+  UserRole.ADMIN_MASTER,
+  UserRole.GESTAO_ADMIN,
+];
+
+export const DEPARTMENTAL_ROLES: UserRole[] = [
+  UserRole.FINANCEIRO,
+  UserRole.SUPORTE,
+  UserRole.LOGISTICA,
+  UserRole.MARKETING,
+  UserRole.ANALYTICS,
+  UserRole.AUDITOR,
+  UserRole.OPERADOR,
+];
+
+export const BUSINESS_ROLES: UserRole[] = [
+  UserRole.DISTRIBUIDOR,
+  UserRole.AFILIADO,
+  UserRole.CLIENTE_FINAL,
+];
+
+export const ALL_ROLES: UserRole[] = [
+  ...ADMINISTRATIVE_ROLES,
+  ...DEPARTMENTAL_ROLES,
+  ...BUSINESS_ROLES,
+];
+
+export function getRoleCategory(role: UserRole): RoleCategory {
+  return ROLE_CATEGORIES[role];
+}
+
+export function getRolesByCategory(category: RoleCategory): UserRole[] {
+  return ALL_ROLES.filter((r) => ROLE_CATEGORIES[r] === category);
+}

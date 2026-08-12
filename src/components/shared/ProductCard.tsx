@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatPrice } from '@/utils/priceFormatter';
+import { formatBRL } from '@/lib/customer-calculations';
 
 interface ProductCardProps {
   image: string;
@@ -26,7 +26,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   onAddToCart,
   className = ''
 }) => {
-  const formattedPrice = formatPrice(price);
+  const formattedPrice = formatBRL(price);
 
   return (
     <Card className={`overflow-hidden border border-allin-orange/40 shadow-lg hover:shadow-xl transition-all duration-300 bg-allin-bg-light-1 dark:bg-allin-bg-dark-1 group animate-slide-up glass-card h-full flex flex-col dark:dark:bg-allin-bg-dark-3 dark:dark:border-allin-bg-dark-2 ${className}`}>

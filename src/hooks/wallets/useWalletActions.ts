@@ -1,16 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { WalletService } from "@/services/wallets";
+import { MlmEngineService } from "@/services/mlm-engine";
 
 export function useWalletActions(customerId?: string | null, onSettled?: () => void) {
   const credit = useMutation({
     mutationFn: async (amount: number) => {
       if (!customerId) throw new Error("No customer ID");
-      return WalletService.creditWallet({
-        customerId,
-        amount,
-        description: "Adição de fundos via simulação",
-        referenceType: "manual",
-      });
+      return MlmEngineService.wallet.addFunds(customerId, amount, "manual", undefined);
     },
     onSuccess: onSettled,
   });
@@ -18,12 +13,7 @@ export function useWalletActions(customerId?: string | null, onSettled?: () => v
   const debit = useMutation({
     mutationFn: async (amount: number) => {
       if (!customerId) throw new Error("No customer ID");
-      return WalletService.debitWallet({
-        customerId,
-        amount,
-        description: "Saque de fundos via simulação",
-        referenceType: "withdrawal",
-      });
+      return MlmEngineService.wallet.withdraw(customerId, amount);
     },
     onSuccess: onSettled,
   });

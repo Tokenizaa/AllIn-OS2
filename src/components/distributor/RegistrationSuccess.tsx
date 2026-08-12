@@ -39,7 +39,7 @@ export function RegistrationSuccess({ name, sponsorSlug }: RegistrationSuccessPr
 
       <button
         onClick={() => {
-          navigate({ to: "/office/plan" });
+          navigate({ to: "/distributor/plan" });
         }}
         className="inline-flex h-11 px-8 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-bold uppercase tracking-wider items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 pt-0.5 cursor-pointer"
       >

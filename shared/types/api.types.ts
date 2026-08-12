@@ -69,12 +69,10 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
+  role: string;
   createdAt: string;
   updatedAt: string;
 }
-
-export type UserRole = 'admin' | 'distributor' | 'customer' | 'manager';
 
 // ============================================================================
 // Customer Types

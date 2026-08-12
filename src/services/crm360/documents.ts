@@ -1,65 +1,39 @@
 import { supabase } from "@/lib/supabase/client";
 
-export interface Document {
-  id: string;
-  id_comprador: string;
-  name: string;
-  type: string;
-  status: "approved" | "pending" | "missing" | "rejected";
-  required: boolean;
-  updated_at?: string;
-  created_at?: string;
-}
-
-export const DocumentService = {
-  async fetchCustomerDocuments(idComprador: string): Promise<Document[]> {
+export const CustomerDocumentsService = {
+  async fetchDocuments(customerId: string) {
     const { data, error } = await supabase
-      .from("crm.customer_documents")
+      .schema("crm")
+      .from("customer_documents")
       .select("*")
-      .eq("id_comprador", idComprador)
+      .eq("customer_id", customerId)
       .order("created_at", { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching customer documents:", error);
-      return [];
-    }
-    
+    if (error) throw error;
     return data || [];
   },
 
-  async updateDocumentStatus(documentId: string, status: string): Promise<boolean> {
+  async updateDocumentStatus(docId: string, status: string) {
     const { error } = await supabase
-      .from("crm.customer_documents")
-      .update({ 
-        status, 
-        updated_at: new Date().toISOString() 
+      .schema("crm")
+      .from("customer_documents")
+      .update({
+        status,
+        updated_at: status === "rejected" ? null : new Date().toISOString(),
       })
-      .eq("id", documentId);
-    
-    if (error) {
-      console.error("Error updating document status:", error);
-      return false;
-    }
-    
-    return true;
+      .eq("id", docId);
+    if (error) throw error;
   },
 
-  async createDocument(document: Omit<Document, "id" | "created_at" | "updated_at">): Promise<Document | null> {
-    const { data, error } = await supabase
-      .from("crm.customer_documents")
-      .insert({
-        ...document,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error("Error creating document:", error);
-      return null;
-    }
-    
-    return data;
-  }
+  async approveAll(customerIds: string[]) {
+    const results = await Promise.all(
+      customerIds.map((id) =>
+        supabase
+          .schema("crm")
+          .from("customer_documents")
+          .update({ status: "approved", updated_at: new Date().toISOString() })
+          .eq("id", id)
+      )
+    );
+    return results.every((r) => !r.error);
+  },
 };

@@ -12,49 +12,60 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SejaDistribuidorRouteImport } from './routes/seja-distribuidor'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as RecuperarSenhaRouteImport } from './routes/recuperar-senha'
-import { Route as OfficeRouteImport } from './routes/office'
+import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as LojaRouteImport } from './routes/loja'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DoencasRouteImport } from './routes/doencas'
+import { Route as DistributorRouteImport } from './routes/distributor'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BuscaProdutosRouteImport } from './routes/busca-produtos'
 import { Route as AtivacaoRouteImport } from './routes/ativacao'
-import { Route as AppRouteImport } from './routes/_app'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as OfficeIndexRouteImport } from './routes/office/index'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as DistributorIndexRouteImport } from './routes/distributor/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SejaDistribuidorSlugRouteImport } from './routes/seja-distribuidor.$slug'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
-import { Route as OfficeVerificationRouteImport } from './routes/office/verification'
-import { Route as OfficeStoreRouteImport } from './routes/office/store'
-import { Route as OfficeReportsRouteImport } from './routes/office/reports'
-import { Route as OfficeProfileRouteImport } from './routes/office/profile'
-import { Route as OfficePlanRouteImport } from './routes/office/plan'
-import { Route as OfficeOrdersRouteImport } from './routes/office/orders'
-import { Route as OfficeNetworkRouteImport } from './routes/office/network'
-import { Route as OfficeFinanceRouteImport } from './routes/office/finance'
-import { Route as OfficeDownloadsRouteImport } from './routes/office/downloads'
-import { Route as OfficeCopilotRouteImport } from './routes/office/copilot'
 import { Route as LojaSlugRouteImport } from './routes/loja.$slug'
 import { Route as DoencasSlugRouteImport } from './routes/doencas.$slug'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
+import { Route as DistributorVerificationRouteImport } from './routes/distributor/verification'
+import { Route as DistributorStoreRouteImport } from './routes/distributor/store'
+import { Route as DistributorReportsRouteImport } from './routes/distributor/reports'
+import { Route as DistributorProfileRouteImport } from './routes/distributor/profile'
+import { Route as DistributorPlanRouteImport } from './routes/distributor/plan'
+import { Route as DistributorOrdersRouteImport } from './routes/distributor/orders'
+import { Route as DistributorNetworkRouteImport } from './routes/distributor/network'
+import { Route as DistributorFinanceRouteImport } from './routes/distributor/finance'
+import { Route as DistributorDownloadsRouteImport } from './routes/distributor/downloads'
+import { Route as DistributorCopilotRouteImport } from './routes/distributor/copilot'
 import { Route as BuscaProdutosSlugRouteImport } from './routes/busca-produtos.$slug'
-import { Route as AppWalletsRouteImport } from './routes/_app/wallets'
-import { Route as AppSystemRouteImport } from './routes/_app/system'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
-import { Route as AppPlansRouteImport } from './routes/_app/plans'
-import { Route as AppNetworkRouteImport } from './routes/_app/network'
-import { Route as AppMarketingRouteImport } from './routes/_app/marketing'
-import { Route as AppInsightsRouteImport } from './routes/_app/insights'
-import { Route as AppCopilotRouteImport } from './routes/_app/copilot'
-import { Route as AppCommissionsRouteImport } from './routes/_app/commissions'
-import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
-import { Route as AppAlertsRouteImport } from './routes/_app/alerts'
-import { Route as AppProductsIndexRouteImport } from './routes/_app/products/index'
-import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
-import { Route as AppCustomersIndexRouteImport } from './routes/_app/customers/index'
+import { Route as AdminWalletsRouteImport } from './routes/admin/wallets'
+import { Route as AdminSystemRouteImport } from './routes/admin/system'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminPlansRouteImport } from './routes/admin/plans'
+import { Route as AdminNetworkRouteImport } from './routes/admin/network'
+import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
+import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
+import { Route as AdminGenealogyRouteImport } from './routes/admin/genealogy'
+import { Route as AdminCopilotRouteImport } from './routes/admin/copilot'
+import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
+import { Route as AdminAlertsRouteImport } from './routes/admin/alerts'
+import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
+import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
+import { Route as AdminIndustrialIndexRouteImport } from './routes/admin/industrial/index'
+import { Route as AdminDistributorsIndexRouteImport } from './routes/admin/distributors/index'
+import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth.invite.$token'
-import { Route as AppCustomersIdRouteImport } from './routes/_app/customers/$id'
+import { Route as AdminIndustrialProcessesRouteImport } from './routes/admin/industrial/processes'
+import { Route as AdminIndustrialMaterialsRouteImport } from './routes/admin/industrial/materials'
+import { Route as AdminIndustrialMachinesRouteImport } from './routes/admin/industrial/machines'
+import { Route as AdminDistributorsIdRouteImport } from './routes/admin/distributors/$id'
+import { Route as AdminCustomersIdRouteImport } from './routes/admin/customers/$id'
 
 const SejaDistribuidorRoute = SejaDistribuidorRouteImport.update({
   id: '/seja-distribuidor',
@@ -71,9 +82,9 @@ const RecuperarSenhaRoute = RecuperarSenhaRouteImport.update({
   path: '/recuperar-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OfficeRoute = OfficeRouteImport.update({
-  id: '/office',
-  path: '/office',
+const MinhaContaRoute = MinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LojaRoute = LojaRouteImport.update({
@@ -89,6 +100,11 @@ const LoginRoute = LoginRouteImport.update({
 const DoencasRoute = DoencasRouteImport.update({
   id: '/doencas',
   path: '/doencas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistributorRoute = DistributorRouteImport.update({
+  id: '/distributor',
+  path: '/distributor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -111,8 +127,9 @@ const AtivacaoRoute = AtivacaoRouteImport.update({
   path: '/ativacao',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -125,10 +142,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OfficeIndexRoute = OfficeIndexRouteImport.update({
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistributorIndexRoute = DistributorIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => OfficeRoute,
+  getParentRoute: () => DistributorRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const SejaDistribuidorSlugRoute = SejaDistribuidorSlugRouteImport.update({
   id: '/$slug',
@@ -140,56 +167,6 @@ const ProdutoIdRoute = ProdutoIdRouteImport.update({
   path: '/produto/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OfficeVerificationRoute = OfficeVerificationRouteImport.update({
-  id: '/verification',
-  path: '/verification',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeStoreRoute = OfficeStoreRouteImport.update({
-  id: '/store',
-  path: '/store',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeReportsRoute = OfficeReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeProfileRoute = OfficeProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficePlanRoute = OfficePlanRouteImport.update({
-  id: '/plan',
-  path: '/plan',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeOrdersRoute = OfficeOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeNetworkRoute = OfficeNetworkRouteImport.update({
-  id: '/network',
-  path: '/network',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeFinanceRoute = OfficeFinanceRouteImport.update({
-  id: '/finance',
-  path: '/finance',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeDownloadsRoute = OfficeDownloadsRouteImport.update({
-  id: '/downloads',
-  path: '/downloads',
-  getParentRoute: () => OfficeRoute,
-} as any)
-const OfficeCopilotRoute = OfficeCopilotRouteImport.update({
-  id: '/copilot',
-  path: '/copilot',
-  getParentRoute: () => OfficeRoute,
-} as any)
 const LojaSlugRoute = LojaSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -200,138 +177,242 @@ const DoencasSlugRoute = DoencasSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => DoencasRoute,
 } as any)
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistributorVerificationRoute = DistributorVerificationRouteImport.update({
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorStoreRoute = DistributorStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorReportsRoute = DistributorReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorProfileRoute = DistributorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorPlanRoute = DistributorPlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorOrdersRoute = DistributorOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorNetworkRoute = DistributorNetworkRouteImport.update({
+  id: '/network',
+  path: '/network',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorFinanceRoute = DistributorFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorDownloadsRoute = DistributorDownloadsRouteImport.update({
+  id: '/downloads',
+  path: '/downloads',
+  getParentRoute: () => DistributorRoute,
+} as any)
+const DistributorCopilotRoute = DistributorCopilotRouteImport.update({
+  id: '/copilot',
+  path: '/copilot',
+  getParentRoute: () => DistributorRoute,
+} as any)
 const BuscaProdutosSlugRoute = BuscaProdutosSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => BuscaProdutosRoute,
 } as any)
-const AppWalletsRoute = AppWalletsRouteImport.update({
+const AdminWalletsRoute = AdminWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppSystemRoute = AppSystemRouteImport.update({
+const AdminSystemRoute = AdminSystemRouteImport.update({
   id: '/system',
   path: '/system',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppPlansRoute = AppPlansRouteImport.update({
+const AdminPlansRoute = AdminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppNetworkRoute = AppNetworkRouteImport.update({
+const AdminNetworkRoute = AdminNetworkRouteImport.update({
   id: '/network',
   path: '/network',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppMarketingRoute = AppMarketingRouteImport.update({
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppInsightsRoute = AppInsightsRouteImport.update({
+const AdminInsightsRoute = AdminInsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppCopilotRoute = AppCopilotRouteImport.update({
+const AdminGenealogyRoute = AdminGenealogyRouteImport.update({
+  id: '/genealogy',
+  path: '/genealogy',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCopilotRoute = AdminCopilotRouteImport.update({
   id: '/copilot',
   path: '/copilot',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppCommissionsRoute = AppCommissionsRouteImport.update({
+const AdminCommissionsRoute = AdminCommissionsRouteImport.update({
   id: '/commissions',
   path: '/commissions',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppAlertsRoute = AppAlertsRouteImport.update({
+const AdminAlertsRoute = AdminAlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppProductsIndexRoute = AppProductsIndexRouteImport.update({
+const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
+const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
+const AdminIndustrialIndexRoute = AdminIndustrialIndexRouteImport.update({
+  id: '/industrial/',
+  path: '/industrial/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDistributorsIndexRoute = AdminDistributorsIndexRouteImport.update({
+  id: '/distributors/',
+  path: '/distributors/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
   id: '/auth/invite/$token',
   path: '/auth/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppCustomersIdRoute = AppCustomersIdRouteImport.update({
+const AdminIndustrialProcessesRoute =
+  AdminIndustrialProcessesRouteImport.update({
+    id: '/industrial/processes',
+    path: '/industrial/processes',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminIndustrialMaterialsRoute =
+  AdminIndustrialMaterialsRouteImport.update({
+    id: '/industrial/materials',
+    path: '/industrial/materials',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminIndustrialMachinesRoute = AdminIndustrialMachinesRouteImport.update({
+  id: '/industrial/machines',
+  path: '/industrial/machines',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDistributorsIdRoute = AdminDistributorsIdRouteImport.update({
+  id: '/distributors/$id',
+  path: '/distributors/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersIdRoute = AdminCustomersIdRouteImport.update({
   id: '/customers/$id',
   path: '/customers/$id',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRouteWithChildren
   '/ativacao': typeof AtivacaoRoute
   '/busca-produtos': typeof BuscaProdutosRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/checkout': typeof CheckoutRoute
+  '/distributor': typeof DistributorRouteWithChildren
   '/doencas': typeof DoencasRouteWithChildren
   '/login': typeof LoginRoute
   '/loja': typeof LojaRouteWithChildren
-  '/office': typeof OfficeRouteWithChildren
+  '/minha-conta': typeof MinhaContaRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/seja-distribuidor': typeof SejaDistribuidorRouteWithChildren
-  '/alerts': typeof AppAlertsRoute
-  '/analytics': typeof AppAnalyticsRoute
-  '/commissions': typeof AppCommissionsRoute
-  '/copilot': typeof AppCopilotRoute
-  '/insights': typeof AppInsightsRoute
-  '/marketing': typeof AppMarketingRoute
-  '/network': typeof AppNetworkRoute
-  '/plans': typeof AppPlansRoute
-  '/settings': typeof AppSettingsRoute
-  '/system': typeof AppSystemRoute
-  '/wallets': typeof AppWalletsRoute
+  '/admin/alerts': typeof AdminAlertsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/copilot': typeof AdminCopilotRoute
+  '/admin/genealogy': typeof AdminGenealogyRoute
+  '/admin/insights': typeof AdminInsightsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/network': typeof AdminNetworkRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/system': typeof AdminSystemRoute
+  '/admin/wallets': typeof AdminWalletsRoute
   '/busca-produtos/$slug': typeof BuscaProdutosSlugRoute
+  '/distributor/copilot': typeof DistributorCopilotRoute
+  '/distributor/downloads': typeof DistributorDownloadsRoute
+  '/distributor/finance': typeof DistributorFinanceRoute
+  '/distributor/network': typeof DistributorNetworkRoute
+  '/distributor/orders': typeof DistributorOrdersRoute
+  '/distributor/plan': typeof DistributorPlanRoute
+  '/distributor/profile': typeof DistributorProfileRoute
+  '/distributor/reports': typeof DistributorReportsRoute
+  '/distributor/store': typeof DistributorStoreRoute
+  '/distributor/verification': typeof DistributorVerificationRoute
+  '/docs/$': typeof DocsSplatRoute
   '/doencas/$slug': typeof DoencasSlugRoute
   '/loja/$slug': typeof LojaSlugRoute
-  '/office/copilot': typeof OfficeCopilotRoute
-  '/office/downloads': typeof OfficeDownloadsRoute
-  '/office/finance': typeof OfficeFinanceRoute
-  '/office/network': typeof OfficeNetworkRoute
-  '/office/orders': typeof OfficeOrdersRoute
-  '/office/plan': typeof OfficePlanRoute
-  '/office/profile': typeof OfficeProfileRoute
-  '/office/reports': typeof OfficeReportsRoute
-  '/office/store': typeof OfficeStoreRoute
-  '/office/verification': typeof OfficeVerificationRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
-  '/office/': typeof OfficeIndexRoute
-  '/customers/$id': typeof AppCustomersIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/distributor/': typeof DistributorIndexRoute
+  '/docs/': typeof DocsIndexRoute
+  '/admin/customers/$id': typeof AdminCustomersIdRoute
+  '/admin/distributors/$id': typeof AdminDistributorsIdRoute
+  '/admin/industrial/machines': typeof AdminIndustrialMachinesRoute
+  '/admin/industrial/materials': typeof AdminIndustrialMaterialsRoute
+  '/admin/industrial/processes': typeof AdminIndustrialProcessesRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
-  '/customers/': typeof AppCustomersIndexRoute
-  '/orders/': typeof AppOrdersIndexRoute
-  '/products/': typeof AppProductsIndexRoute
+  '/admin/customers/': typeof AdminCustomersIndexRoute
+  '/admin/distributors/': typeof AdminDistributorsIndexRoute
+  '/admin/industrial/': typeof AdminIndustrialIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
+  '/admin/products/': typeof AdminProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -343,139 +424,173 @@ export interface FileRoutesByTo {
   '/doencas': typeof DoencasRouteWithChildren
   '/login': typeof LoginRoute
   '/loja': typeof LojaRouteWithChildren
+  '/minha-conta': typeof MinhaContaRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/seja-distribuidor': typeof SejaDistribuidorRouteWithChildren
-  '/alerts': typeof AppAlertsRoute
-  '/analytics': typeof AppAnalyticsRoute
-  '/commissions': typeof AppCommissionsRoute
-  '/copilot': typeof AppCopilotRoute
-  '/insights': typeof AppInsightsRoute
-  '/marketing': typeof AppMarketingRoute
-  '/network': typeof AppNetworkRoute
-  '/plans': typeof AppPlansRoute
-  '/settings': typeof AppSettingsRoute
-  '/system': typeof AppSystemRoute
-  '/wallets': typeof AppWalletsRoute
+  '/admin/alerts': typeof AdminAlertsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/copilot': typeof AdminCopilotRoute
+  '/admin/genealogy': typeof AdminGenealogyRoute
+  '/admin/insights': typeof AdminInsightsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/network': typeof AdminNetworkRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/system': typeof AdminSystemRoute
+  '/admin/wallets': typeof AdminWalletsRoute
   '/busca-produtos/$slug': typeof BuscaProdutosSlugRoute
+  '/distributor/copilot': typeof DistributorCopilotRoute
+  '/distributor/downloads': typeof DistributorDownloadsRoute
+  '/distributor/finance': typeof DistributorFinanceRoute
+  '/distributor/network': typeof DistributorNetworkRoute
+  '/distributor/orders': typeof DistributorOrdersRoute
+  '/distributor/plan': typeof DistributorPlanRoute
+  '/distributor/profile': typeof DistributorProfileRoute
+  '/distributor/reports': typeof DistributorReportsRoute
+  '/distributor/store': typeof DistributorStoreRoute
+  '/distributor/verification': typeof DistributorVerificationRoute
+  '/docs/$': typeof DocsSplatRoute
   '/doencas/$slug': typeof DoencasSlugRoute
   '/loja/$slug': typeof LojaSlugRoute
-  '/office/copilot': typeof OfficeCopilotRoute
-  '/office/downloads': typeof OfficeDownloadsRoute
-  '/office/finance': typeof OfficeFinanceRoute
-  '/office/network': typeof OfficeNetworkRoute
-  '/office/orders': typeof OfficeOrdersRoute
-  '/office/plan': typeof OfficePlanRoute
-  '/office/profile': typeof OfficeProfileRoute
-  '/office/reports': typeof OfficeReportsRoute
-  '/office/store': typeof OfficeStoreRoute
-  '/office/verification': typeof OfficeVerificationRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
-  '/office': typeof OfficeIndexRoute
-  '/customers/$id': typeof AppCustomersIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/distributor': typeof DistributorIndexRoute
+  '/docs': typeof DocsIndexRoute
+  '/admin/customers/$id': typeof AdminCustomersIdRoute
+  '/admin/distributors/$id': typeof AdminDistributorsIdRoute
+  '/admin/industrial/machines': typeof AdminIndustrialMachinesRoute
+  '/admin/industrial/materials': typeof AdminIndustrialMaterialsRoute
+  '/admin/industrial/processes': typeof AdminIndustrialProcessesRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
-  '/customers': typeof AppCustomersIndexRoute
-  '/orders': typeof AppOrdersIndexRoute
-  '/products': typeof AppProductsIndexRoute
+  '/admin/customers': typeof AdminCustomersIndexRoute
+  '/admin/distributors': typeof AdminDistributorsIndexRoute
+  '/admin/industrial': typeof AdminIndustrialIndexRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
+  '/admin/products': typeof AdminProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
-  '/_app': typeof AppRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/ativacao': typeof AtivacaoRoute
   '/busca-produtos': typeof BuscaProdutosRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/checkout': typeof CheckoutRoute
+  '/distributor': typeof DistributorRouteWithChildren
   '/doencas': typeof DoencasRouteWithChildren
   '/login': typeof LoginRoute
   '/loja': typeof LojaRouteWithChildren
-  '/office': typeof OfficeRouteWithChildren
+  '/minha-conta': typeof MinhaContaRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/seja-distribuidor': typeof SejaDistribuidorRouteWithChildren
-  '/_app/alerts': typeof AppAlertsRoute
-  '/_app/analytics': typeof AppAnalyticsRoute
-  '/_app/commissions': typeof AppCommissionsRoute
-  '/_app/copilot': typeof AppCopilotRoute
-  '/_app/insights': typeof AppInsightsRoute
-  '/_app/marketing': typeof AppMarketingRoute
-  '/_app/network': typeof AppNetworkRoute
-  '/_app/plans': typeof AppPlansRoute
-  '/_app/settings': typeof AppSettingsRoute
-  '/_app/system': typeof AppSystemRoute
-  '/_app/wallets': typeof AppWalletsRoute
+  '/admin/alerts': typeof AdminAlertsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/copilot': typeof AdminCopilotRoute
+  '/admin/genealogy': typeof AdminGenealogyRoute
+  '/admin/insights': typeof AdminInsightsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/network': typeof AdminNetworkRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/system': typeof AdminSystemRoute
+  '/admin/wallets': typeof AdminWalletsRoute
   '/busca-produtos/$slug': typeof BuscaProdutosSlugRoute
+  '/distributor/copilot': typeof DistributorCopilotRoute
+  '/distributor/downloads': typeof DistributorDownloadsRoute
+  '/distributor/finance': typeof DistributorFinanceRoute
+  '/distributor/network': typeof DistributorNetworkRoute
+  '/distributor/orders': typeof DistributorOrdersRoute
+  '/distributor/plan': typeof DistributorPlanRoute
+  '/distributor/profile': typeof DistributorProfileRoute
+  '/distributor/reports': typeof DistributorReportsRoute
+  '/distributor/store': typeof DistributorStoreRoute
+  '/distributor/verification': typeof DistributorVerificationRoute
+  '/docs/$': typeof DocsSplatRoute
   '/doencas/$slug': typeof DoencasSlugRoute
   '/loja/$slug': typeof LojaSlugRoute
-  '/office/copilot': typeof OfficeCopilotRoute
-  '/office/downloads': typeof OfficeDownloadsRoute
-  '/office/finance': typeof OfficeFinanceRoute
-  '/office/network': typeof OfficeNetworkRoute
-  '/office/orders': typeof OfficeOrdersRoute
-  '/office/plan': typeof OfficePlanRoute
-  '/office/profile': typeof OfficeProfileRoute
-  '/office/reports': typeof OfficeReportsRoute
-  '/office/store': typeof OfficeStoreRoute
-  '/office/verification': typeof OfficeVerificationRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
-  '/office/': typeof OfficeIndexRoute
-  '/_app/customers/$id': typeof AppCustomersIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/distributor/': typeof DistributorIndexRoute
+  '/docs/': typeof DocsIndexRoute
+  '/admin/customers/$id': typeof AdminCustomersIdRoute
+  '/admin/distributors/$id': typeof AdminDistributorsIdRoute
+  '/admin/industrial/machines': typeof AdminIndustrialMachinesRoute
+  '/admin/industrial/materials': typeof AdminIndustrialMaterialsRoute
+  '/admin/industrial/processes': typeof AdminIndustrialProcessesRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
-  '/_app/customers/': typeof AppCustomersIndexRoute
-  '/_app/orders/': typeof AppOrdersIndexRoute
-  '/_app/products/': typeof AppProductsIndexRoute
+  '/admin/customers/': typeof AdminCustomersIndexRoute
+  '/admin/distributors/': typeof AdminDistributorsIndexRoute
+  '/admin/industrial/': typeof AdminIndustrialIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
+  '/admin/products/': typeof AdminProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$slug'
+    | '/admin'
     | '/ativacao'
     | '/busca-produtos'
     | '/cadastro'
     | '/checkout'
+    | '/distributor'
     | '/doencas'
     | '/login'
     | '/loja'
-    | '/office'
+    | '/minha-conta'
     | '/recuperar-senha'
     | '/redefinir-senha'
     | '/seja-distribuidor'
-    | '/alerts'
-    | '/analytics'
-    | '/commissions'
-    | '/copilot'
-    | '/insights'
-    | '/marketing'
-    | '/network'
-    | '/plans'
-    | '/settings'
-    | '/system'
-    | '/wallets'
+    | '/admin/alerts'
+    | '/admin/analytics'
+    | '/admin/commissions'
+    | '/admin/copilot'
+    | '/admin/genealogy'
+    | '/admin/insights'
+    | '/admin/marketing'
+    | '/admin/network'
+    | '/admin/plans'
+    | '/admin/settings'
+    | '/admin/system'
+    | '/admin/wallets'
     | '/busca-produtos/$slug'
+    | '/distributor/copilot'
+    | '/distributor/downloads'
+    | '/distributor/finance'
+    | '/distributor/network'
+    | '/distributor/orders'
+    | '/distributor/plan'
+    | '/distributor/profile'
+    | '/distributor/reports'
+    | '/distributor/store'
+    | '/distributor/verification'
+    | '/docs/$'
     | '/doencas/$slug'
     | '/loja/$slug'
-    | '/office/copilot'
-    | '/office/downloads'
-    | '/office/finance'
-    | '/office/network'
-    | '/office/orders'
-    | '/office/plan'
-    | '/office/profile'
-    | '/office/reports'
-    | '/office/store'
-    | '/office/verification'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
-    | '/office/'
-    | '/customers/$id'
+    | '/admin/'
+    | '/distributor/'
+    | '/docs/'
+    | '/admin/customers/$id'
+    | '/admin/distributors/$id'
+    | '/admin/industrial/machines'
+    | '/admin/industrial/materials'
+    | '/admin/industrial/processes'
     | '/auth/invite/$token'
-    | '/customers/'
-    | '/orders/'
-    | '/products/'
+    | '/admin/customers/'
+    | '/admin/distributors/'
+    | '/admin/industrial/'
+    | '/admin/orders/'
+    | '/admin/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -487,107 +602,132 @@ export interface FileRouteTypes {
     | '/doencas'
     | '/login'
     | '/loja'
+    | '/minha-conta'
     | '/recuperar-senha'
     | '/redefinir-senha'
     | '/seja-distribuidor'
-    | '/alerts'
-    | '/analytics'
-    | '/commissions'
-    | '/copilot'
-    | '/insights'
-    | '/marketing'
-    | '/network'
-    | '/plans'
-    | '/settings'
-    | '/system'
-    | '/wallets'
+    | '/admin/alerts'
+    | '/admin/analytics'
+    | '/admin/commissions'
+    | '/admin/copilot'
+    | '/admin/genealogy'
+    | '/admin/insights'
+    | '/admin/marketing'
+    | '/admin/network'
+    | '/admin/plans'
+    | '/admin/settings'
+    | '/admin/system'
+    | '/admin/wallets'
     | '/busca-produtos/$slug'
+    | '/distributor/copilot'
+    | '/distributor/downloads'
+    | '/distributor/finance'
+    | '/distributor/network'
+    | '/distributor/orders'
+    | '/distributor/plan'
+    | '/distributor/profile'
+    | '/distributor/reports'
+    | '/distributor/store'
+    | '/distributor/verification'
+    | '/docs/$'
     | '/doencas/$slug'
     | '/loja/$slug'
-    | '/office/copilot'
-    | '/office/downloads'
-    | '/office/finance'
-    | '/office/network'
-    | '/office/orders'
-    | '/office/plan'
-    | '/office/profile'
-    | '/office/reports'
-    | '/office/store'
-    | '/office/verification'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
-    | '/office'
-    | '/customers/$id'
+    | '/admin'
+    | '/distributor'
+    | '/docs'
+    | '/admin/customers/$id'
+    | '/admin/distributors/$id'
+    | '/admin/industrial/machines'
+    | '/admin/industrial/materials'
+    | '/admin/industrial/processes'
     | '/auth/invite/$token'
-    | '/customers'
-    | '/orders'
-    | '/products'
+    | '/admin/customers'
+    | '/admin/distributors'
+    | '/admin/industrial'
+    | '/admin/orders'
+    | '/admin/products'
   id:
     | '__root__'
     | '/'
     | '/$slug'
-    | '/_app'
+    | '/admin'
     | '/ativacao'
     | '/busca-produtos'
     | '/cadastro'
     | '/checkout'
+    | '/distributor'
     | '/doencas'
     | '/login'
     | '/loja'
-    | '/office'
+    | '/minha-conta'
     | '/recuperar-senha'
     | '/redefinir-senha'
     | '/seja-distribuidor'
-    | '/_app/alerts'
-    | '/_app/analytics'
-    | '/_app/commissions'
-    | '/_app/copilot'
-    | '/_app/insights'
-    | '/_app/marketing'
-    | '/_app/network'
-    | '/_app/plans'
-    | '/_app/settings'
-    | '/_app/system'
-    | '/_app/wallets'
+    | '/admin/alerts'
+    | '/admin/analytics'
+    | '/admin/commissions'
+    | '/admin/copilot'
+    | '/admin/genealogy'
+    | '/admin/insights'
+    | '/admin/marketing'
+    | '/admin/network'
+    | '/admin/plans'
+    | '/admin/settings'
+    | '/admin/system'
+    | '/admin/wallets'
     | '/busca-produtos/$slug'
+    | '/distributor/copilot'
+    | '/distributor/downloads'
+    | '/distributor/finance'
+    | '/distributor/network'
+    | '/distributor/orders'
+    | '/distributor/plan'
+    | '/distributor/profile'
+    | '/distributor/reports'
+    | '/distributor/store'
+    | '/distributor/verification'
+    | '/docs/$'
     | '/doencas/$slug'
     | '/loja/$slug'
-    | '/office/copilot'
-    | '/office/downloads'
-    | '/office/finance'
-    | '/office/network'
-    | '/office/orders'
-    | '/office/plan'
-    | '/office/profile'
-    | '/office/reports'
-    | '/office/store'
-    | '/office/verification'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
-    | '/office/'
-    | '/_app/customers/$id'
+    | '/admin/'
+    | '/distributor/'
+    | '/docs/'
+    | '/admin/customers/$id'
+    | '/admin/distributors/$id'
+    | '/admin/industrial/machines'
+    | '/admin/industrial/materials'
+    | '/admin/industrial/processes'
     | '/auth/invite/$token'
-    | '/_app/customers/'
-    | '/_app/orders/'
-    | '/_app/products/'
+    | '/admin/customers/'
+    | '/admin/distributors/'
+    | '/admin/industrial/'
+    | '/admin/orders/'
+    | '/admin/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
-  AppRoute: typeof AppRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   AtivacaoRoute: typeof AtivacaoRoute
   BuscaProdutosRoute: typeof BuscaProdutosRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   CheckoutRoute: typeof CheckoutRoute
+  DistributorRoute: typeof DistributorRouteWithChildren
   DoencasRoute: typeof DoencasRouteWithChildren
   LoginRoute: typeof LoginRoute
   LojaRoute: typeof LojaRouteWithChildren
-  OfficeRoute: typeof OfficeRouteWithChildren
+  MinhaContaRoute: typeof MinhaContaRoute
   RecuperarSenhaRoute: typeof RecuperarSenhaRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SejaDistribuidorRoute: typeof SejaDistribuidorRouteWithChildren
+  DocsSplatRoute: typeof DocsSplatRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
+  DocsIndexRoute: typeof DocsIndexRoute
   AuthInviteTokenRoute: typeof AuthInviteTokenRoute
 }
 
@@ -614,11 +754,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecuperarSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/office': {
-      id: '/office'
-      path: '/office'
-      fullPath: '/office'
-      preLoaderRoute: typeof OfficeRouteImport
+    '/minha-conta': {
+      id: '/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/minha-conta'
+      preLoaderRoute: typeof MinhaContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/loja': {
@@ -640,6 +780,13 @@ declare module '@tanstack/react-router' {
       path: '/doencas'
       fullPath: '/doencas'
       preLoaderRoute: typeof DoencasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/distributor': {
+      id: '/distributor'
+      path: '/distributor'
+      fullPath: '/distributor'
+      preLoaderRoute: typeof DistributorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -670,11 +817,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtivacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -691,12 +838,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/office/': {
-      id: '/office/'
+    '/docs/': {
+      id: '/docs/'
+      path: '/docs'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/distributor/': {
+      id: '/distributor/'
       path: '/'
-      fullPath: '/office/'
-      preLoaderRoute: typeof OfficeIndexRouteImport
-      parentRoute: typeof OfficeRoute
+      fullPath: '/distributor/'
+      preLoaderRoute: typeof DistributorIndexRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/seja-distribuidor/$slug': {
       id: '/seja-distribuidor/$slug'
@@ -712,76 +873,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/office/verification': {
-      id: '/office/verification'
-      path: '/verification'
-      fullPath: '/office/verification'
-      preLoaderRoute: typeof OfficeVerificationRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/store': {
-      id: '/office/store'
-      path: '/store'
-      fullPath: '/office/store'
-      preLoaderRoute: typeof OfficeStoreRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/reports': {
-      id: '/office/reports'
-      path: '/reports'
-      fullPath: '/office/reports'
-      preLoaderRoute: typeof OfficeReportsRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/profile': {
-      id: '/office/profile'
-      path: '/profile'
-      fullPath: '/office/profile'
-      preLoaderRoute: typeof OfficeProfileRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/plan': {
-      id: '/office/plan'
-      path: '/plan'
-      fullPath: '/office/plan'
-      preLoaderRoute: typeof OfficePlanRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/orders': {
-      id: '/office/orders'
-      path: '/orders'
-      fullPath: '/office/orders'
-      preLoaderRoute: typeof OfficeOrdersRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/network': {
-      id: '/office/network'
-      path: '/network'
-      fullPath: '/office/network'
-      preLoaderRoute: typeof OfficeNetworkRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/finance': {
-      id: '/office/finance'
-      path: '/finance'
-      fullPath: '/office/finance'
-      preLoaderRoute: typeof OfficeFinanceRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/downloads': {
-      id: '/office/downloads'
-      path: '/downloads'
-      fullPath: '/office/downloads'
-      preLoaderRoute: typeof OfficeDownloadsRouteImport
-      parentRoute: typeof OfficeRoute
-    }
-    '/office/copilot': {
-      id: '/office/copilot'
-      path: '/copilot'
-      fullPath: '/office/copilot'
-      preLoaderRoute: typeof OfficeCopilotRouteImport
-      parentRoute: typeof OfficeRoute
-    }
     '/loja/$slug': {
       id: '/loja/$slug'
       path: '/$slug'
@@ -796,6 +887,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoencasSlugRouteImport
       parentRoute: typeof DoencasRoute
     }
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/docs/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/distributor/verification': {
+      id: '/distributor/verification'
+      path: '/verification'
+      fullPath: '/distributor/verification'
+      preLoaderRoute: typeof DistributorVerificationRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/store': {
+      id: '/distributor/store'
+      path: '/store'
+      fullPath: '/distributor/store'
+      preLoaderRoute: typeof DistributorStoreRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/reports': {
+      id: '/distributor/reports'
+      path: '/reports'
+      fullPath: '/distributor/reports'
+      preLoaderRoute: typeof DistributorReportsRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/profile': {
+      id: '/distributor/profile'
+      path: '/profile'
+      fullPath: '/distributor/profile'
+      preLoaderRoute: typeof DistributorProfileRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/plan': {
+      id: '/distributor/plan'
+      path: '/plan'
+      fullPath: '/distributor/plan'
+      preLoaderRoute: typeof DistributorPlanRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/orders': {
+      id: '/distributor/orders'
+      path: '/orders'
+      fullPath: '/distributor/orders'
+      preLoaderRoute: typeof DistributorOrdersRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/network': {
+      id: '/distributor/network'
+      path: '/network'
+      fullPath: '/distributor/network'
+      preLoaderRoute: typeof DistributorNetworkRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/finance': {
+      id: '/distributor/finance'
+      path: '/finance'
+      fullPath: '/distributor/finance'
+      preLoaderRoute: typeof DistributorFinanceRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/downloads': {
+      id: '/distributor/downloads'
+      path: '/downloads'
+      fullPath: '/distributor/downloads'
+      preLoaderRoute: typeof DistributorDownloadsRouteImport
+      parentRoute: typeof DistributorRoute
+    }
+    '/distributor/copilot': {
+      id: '/distributor/copilot'
+      path: '/copilot'
+      fullPath: '/distributor/copilot'
+      preLoaderRoute: typeof DistributorCopilotRouteImport
+      parentRoute: typeof DistributorRoute
+    }
     '/busca-produtos/$slug': {
       id: '/busca-produtos/$slug'
       path: '/$slug'
@@ -803,103 +971,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuscaProdutosSlugRouteImport
       parentRoute: typeof BuscaProdutosRoute
     }
-    '/_app/wallets': {
-      id: '/_app/wallets'
+    '/admin/wallets': {
+      id: '/admin/wallets'
       path: '/wallets'
-      fullPath: '/wallets'
-      preLoaderRoute: typeof AppWalletsRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/wallets'
+      preLoaderRoute: typeof AdminWalletsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/system': {
-      id: '/_app/system'
+    '/admin/system': {
+      id: '/admin/system'
       path: '/system'
-      fullPath: '/system'
-      preLoaderRoute: typeof AppSystemRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/system'
+      preLoaderRoute: typeof AdminSystemRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/settings': {
-      id: '/_app/settings'
+    '/admin/settings': {
+      id: '/admin/settings'
       path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/plans': {
-      id: '/_app/plans'
+    '/admin/plans': {
+      id: '/admin/plans'
       path: '/plans'
-      fullPath: '/plans'
-      preLoaderRoute: typeof AppPlansRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminPlansRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/network': {
-      id: '/_app/network'
+    '/admin/network': {
+      id: '/admin/network'
       path: '/network'
-      fullPath: '/network'
-      preLoaderRoute: typeof AppNetworkRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/network'
+      preLoaderRoute: typeof AdminNetworkRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/marketing': {
-      id: '/_app/marketing'
+    '/admin/marketing': {
+      id: '/admin/marketing'
       path: '/marketing'
-      fullPath: '/marketing'
-      preLoaderRoute: typeof AppMarketingRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/insights': {
-      id: '/_app/insights'
+    '/admin/insights': {
+      id: '/admin/insights'
       path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof AppInsightsRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/insights'
+      preLoaderRoute: typeof AdminInsightsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/copilot': {
-      id: '/_app/copilot'
+    '/admin/genealogy': {
+      id: '/admin/genealogy'
+      path: '/genealogy'
+      fullPath: '/admin/genealogy'
+      preLoaderRoute: typeof AdminGenealogyRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/copilot': {
+      id: '/admin/copilot'
       path: '/copilot'
-      fullPath: '/copilot'
-      preLoaderRoute: typeof AppCopilotRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/copilot'
+      preLoaderRoute: typeof AdminCopilotRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/commissions': {
-      id: '/_app/commissions'
+    '/admin/commissions': {
+      id: '/admin/commissions'
       path: '/commissions'
-      fullPath: '/commissions'
-      preLoaderRoute: typeof AppCommissionsRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/commissions'
+      preLoaderRoute: typeof AdminCommissionsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/analytics': {
-      id: '/_app/analytics'
+    '/admin/analytics': {
+      id: '/admin/analytics'
       path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AppAnalyticsRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/alerts': {
-      id: '/_app/alerts'
+    '/admin/alerts': {
+      id: '/admin/alerts'
       path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AppAlertsRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/alerts'
+      preLoaderRoute: typeof AdminAlertsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/products/': {
-      id: '/_app/products/'
+    '/admin/products/': {
+      id: '/admin/products/'
       path: '/products'
-      fullPath: '/products/'
-      preLoaderRoute: typeof AppProductsIndexRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/products/'
+      preLoaderRoute: typeof AdminProductsIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/orders/': {
-      id: '/_app/orders/'
+    '/admin/orders/': {
+      id: '/admin/orders/'
       path: '/orders'
-      fullPath: '/orders/'
-      preLoaderRoute: typeof AppOrdersIndexRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/orders/'
+      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/_app/customers/': {
-      id: '/_app/customers/'
+    '/admin/industrial/': {
+      id: '/admin/industrial/'
+      path: '/industrial'
+      fullPath: '/admin/industrial/'
+      preLoaderRoute: typeof AdminIndustrialIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/distributors/': {
+      id: '/admin/distributors/'
+      path: '/distributors'
+      fullPath: '/admin/distributors/'
+      preLoaderRoute: typeof AdminDistributorsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/customers/': {
+      id: '/admin/customers/'
       path: '/customers'
-      fullPath: '/customers/'
-      preLoaderRoute: typeof AppCustomersIndexRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/customers/'
+      preLoaderRoute: typeof AdminCustomersIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/auth/invite/$token': {
       id: '/auth/invite/$token'
@@ -908,53 +1097,97 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthInviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/customers/$id': {
-      id: '/_app/customers/$id'
+    '/admin/industrial/processes': {
+      id: '/admin/industrial/processes'
+      path: '/industrial/processes'
+      fullPath: '/admin/industrial/processes'
+      preLoaderRoute: typeof AdminIndustrialProcessesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/industrial/materials': {
+      id: '/admin/industrial/materials'
+      path: '/industrial/materials'
+      fullPath: '/admin/industrial/materials'
+      preLoaderRoute: typeof AdminIndustrialMaterialsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/industrial/machines': {
+      id: '/admin/industrial/machines'
+      path: '/industrial/machines'
+      fullPath: '/admin/industrial/machines'
+      preLoaderRoute: typeof AdminIndustrialMachinesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/distributors/$id': {
+      id: '/admin/distributors/$id'
+      path: '/distributors/$id'
+      fullPath: '/admin/distributors/$id'
+      preLoaderRoute: typeof AdminDistributorsIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/customers/$id': {
+      id: '/admin/customers/$id'
       path: '/customers/$id'
-      fullPath: '/customers/$id'
-      preLoaderRoute: typeof AppCustomersIdRouteImport
-      parentRoute: typeof AppRoute
+      fullPath: '/admin/customers/$id'
+      preLoaderRoute: typeof AdminCustomersIdRouteImport
+      parentRoute: typeof AdminRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppAlertsRoute: typeof AppAlertsRoute
-  AppAnalyticsRoute: typeof AppAnalyticsRoute
-  AppCommissionsRoute: typeof AppCommissionsRoute
-  AppCopilotRoute: typeof AppCopilotRoute
-  AppInsightsRoute: typeof AppInsightsRoute
-  AppMarketingRoute: typeof AppMarketingRoute
-  AppNetworkRoute: typeof AppNetworkRoute
-  AppPlansRoute: typeof AppPlansRoute
-  AppSettingsRoute: typeof AppSettingsRoute
-  AppSystemRoute: typeof AppSystemRoute
-  AppWalletsRoute: typeof AppWalletsRoute
-  AppCustomersIdRoute: typeof AppCustomersIdRoute
-  AppCustomersIndexRoute: typeof AppCustomersIndexRoute
-  AppOrdersIndexRoute: typeof AppOrdersIndexRoute
-  AppProductsIndexRoute: typeof AppProductsIndexRoute
+interface AdminRouteChildren {
+  AdminAlertsRoute: typeof AdminAlertsRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminCommissionsRoute: typeof AdminCommissionsRoute
+  AdminCopilotRoute: typeof AdminCopilotRoute
+  AdminGenealogyRoute: typeof AdminGenealogyRoute
+  AdminInsightsRoute: typeof AdminInsightsRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminNetworkRoute: typeof AdminNetworkRoute
+  AdminPlansRoute: typeof AdminPlansRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSystemRoute: typeof AdminSystemRoute
+  AdminWalletsRoute: typeof AdminWalletsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminCustomersIdRoute: typeof AdminCustomersIdRoute
+  AdminDistributorsIdRoute: typeof AdminDistributorsIdRoute
+  AdminIndustrialMachinesRoute: typeof AdminIndustrialMachinesRoute
+  AdminIndustrialMaterialsRoute: typeof AdminIndustrialMaterialsRoute
+  AdminIndustrialProcessesRoute: typeof AdminIndustrialProcessesRoute
+  AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
+  AdminDistributorsIndexRoute: typeof AdminDistributorsIndexRoute
+  AdminIndustrialIndexRoute: typeof AdminIndustrialIndexRoute
+  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
+  AdminProductsIndexRoute: typeof AdminProductsIndexRoute
 }
 
-const AppRouteChildren: AppRouteChildren = {
-  AppAlertsRoute: AppAlertsRoute,
-  AppAnalyticsRoute: AppAnalyticsRoute,
-  AppCommissionsRoute: AppCommissionsRoute,
-  AppCopilotRoute: AppCopilotRoute,
-  AppInsightsRoute: AppInsightsRoute,
-  AppMarketingRoute: AppMarketingRoute,
-  AppNetworkRoute: AppNetworkRoute,
-  AppPlansRoute: AppPlansRoute,
-  AppSettingsRoute: AppSettingsRoute,
-  AppSystemRoute: AppSystemRoute,
-  AppWalletsRoute: AppWalletsRoute,
-  AppCustomersIdRoute: AppCustomersIdRoute,
-  AppCustomersIndexRoute: AppCustomersIndexRoute,
-  AppOrdersIndexRoute: AppOrdersIndexRoute,
-  AppProductsIndexRoute: AppProductsIndexRoute,
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAlertsRoute: AdminAlertsRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminCommissionsRoute: AdminCommissionsRoute,
+  AdminCopilotRoute: AdminCopilotRoute,
+  AdminGenealogyRoute: AdminGenealogyRoute,
+  AdminInsightsRoute: AdminInsightsRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
+  AdminNetworkRoute: AdminNetworkRoute,
+  AdminPlansRoute: AdminPlansRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSystemRoute: AdminSystemRoute,
+  AdminWalletsRoute: AdminWalletsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminCustomersIdRoute: AdminCustomersIdRoute,
+  AdminDistributorsIdRoute: AdminDistributorsIdRoute,
+  AdminIndustrialMachinesRoute: AdminIndustrialMachinesRoute,
+  AdminIndustrialMaterialsRoute: AdminIndustrialMaterialsRoute,
+  AdminIndustrialProcessesRoute: AdminIndustrialProcessesRoute,
+  AdminCustomersIndexRoute: AdminCustomersIndexRoute,
+  AdminDistributorsIndexRoute: AdminDistributorsIndexRoute,
+  AdminIndustrialIndexRoute: AdminIndustrialIndexRoute,
+  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
+  AdminProductsIndexRoute: AdminProductsIndexRoute,
 }
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BuscaProdutosRouteChildren {
   BuscaProdutosSlugRoute: typeof BuscaProdutosSlugRoute
@@ -966,6 +1199,38 @@ const BuscaProdutosRouteChildren: BuscaProdutosRouteChildren = {
 
 const BuscaProdutosRouteWithChildren = BuscaProdutosRoute._addFileChildren(
   BuscaProdutosRouteChildren,
+)
+
+interface DistributorRouteChildren {
+  DistributorCopilotRoute: typeof DistributorCopilotRoute
+  DistributorDownloadsRoute: typeof DistributorDownloadsRoute
+  DistributorFinanceRoute: typeof DistributorFinanceRoute
+  DistributorNetworkRoute: typeof DistributorNetworkRoute
+  DistributorOrdersRoute: typeof DistributorOrdersRoute
+  DistributorPlanRoute: typeof DistributorPlanRoute
+  DistributorProfileRoute: typeof DistributorProfileRoute
+  DistributorReportsRoute: typeof DistributorReportsRoute
+  DistributorStoreRoute: typeof DistributorStoreRoute
+  DistributorVerificationRoute: typeof DistributorVerificationRoute
+  DistributorIndexRoute: typeof DistributorIndexRoute
+}
+
+const DistributorRouteChildren: DistributorRouteChildren = {
+  DistributorCopilotRoute: DistributorCopilotRoute,
+  DistributorDownloadsRoute: DistributorDownloadsRoute,
+  DistributorFinanceRoute: DistributorFinanceRoute,
+  DistributorNetworkRoute: DistributorNetworkRoute,
+  DistributorOrdersRoute: DistributorOrdersRoute,
+  DistributorPlanRoute: DistributorPlanRoute,
+  DistributorProfileRoute: DistributorProfileRoute,
+  DistributorReportsRoute: DistributorReportsRoute,
+  DistributorStoreRoute: DistributorStoreRoute,
+  DistributorVerificationRoute: DistributorVerificationRoute,
+  DistributorIndexRoute: DistributorIndexRoute,
+}
+
+const DistributorRouteWithChildren = DistributorRoute._addFileChildren(
+  DistributorRouteChildren,
 )
 
 interface DoencasRouteChildren {
@@ -989,37 +1254,6 @@ const LojaRouteChildren: LojaRouteChildren = {
 
 const LojaRouteWithChildren = LojaRoute._addFileChildren(LojaRouteChildren)
 
-interface OfficeRouteChildren {
-  OfficeCopilotRoute: typeof OfficeCopilotRoute
-  OfficeDownloadsRoute: typeof OfficeDownloadsRoute
-  OfficeFinanceRoute: typeof OfficeFinanceRoute
-  OfficeNetworkRoute: typeof OfficeNetworkRoute
-  OfficeOrdersRoute: typeof OfficeOrdersRoute
-  OfficePlanRoute: typeof OfficePlanRoute
-  OfficeProfileRoute: typeof OfficeProfileRoute
-  OfficeReportsRoute: typeof OfficeReportsRoute
-  OfficeStoreRoute: typeof OfficeStoreRoute
-  OfficeVerificationRoute: typeof OfficeVerificationRoute
-  OfficeIndexRoute: typeof OfficeIndexRoute
-}
-
-const OfficeRouteChildren: OfficeRouteChildren = {
-  OfficeCopilotRoute: OfficeCopilotRoute,
-  OfficeDownloadsRoute: OfficeDownloadsRoute,
-  OfficeFinanceRoute: OfficeFinanceRoute,
-  OfficeNetworkRoute: OfficeNetworkRoute,
-  OfficeOrdersRoute: OfficeOrdersRoute,
-  OfficePlanRoute: OfficePlanRoute,
-  OfficeProfileRoute: OfficeProfileRoute,
-  OfficeReportsRoute: OfficeReportsRoute,
-  OfficeStoreRoute: OfficeStoreRoute,
-  OfficeVerificationRoute: OfficeVerificationRoute,
-  OfficeIndexRoute: OfficeIndexRoute,
-}
-
-const OfficeRouteWithChildren =
-  OfficeRoute._addFileChildren(OfficeRouteChildren)
-
 interface SejaDistribuidorRouteChildren {
   SejaDistribuidorSlugRoute: typeof SejaDistribuidorSlugRoute
 }
@@ -1034,31 +1268,24 @@ const SejaDistribuidorRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
-  AppRoute: AppRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   AtivacaoRoute: AtivacaoRoute,
   BuscaProdutosRoute: BuscaProdutosRouteWithChildren,
   CadastroRoute: CadastroRoute,
   CheckoutRoute: CheckoutRoute,
+  DistributorRoute: DistributorRouteWithChildren,
   DoencasRoute: DoencasRouteWithChildren,
   LoginRoute: LoginRoute,
   LojaRoute: LojaRouteWithChildren,
-  OfficeRoute: OfficeRouteWithChildren,
+  MinhaContaRoute: MinhaContaRoute,
   RecuperarSenhaRoute: RecuperarSenhaRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   SejaDistribuidorRoute: SejaDistribuidorRouteWithChildren,
+  DocsSplatRoute: DocsSplatRoute,
   ProdutoIdRoute: ProdutoIdRoute,
+  DocsIndexRoute: DocsIndexRoute,
   AuthInviteTokenRoute: AuthInviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,0 +1,14 @@
+[ -286436ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=170530b5:20102
+[ -285491ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/favicon.ico:0
+[ -285355ms] [LOG] [AuthProvider] onAuthStateChange - public route, skipping @ http://localhost:5173/src/modules/auth/context/AuthProvider.tsx:65
+[ -277716ms] [LOG] [AuthProvider] onAuthStateChange - set loadedUserIdRef to prevent refetch @ http://localhost:5173/src/modules/auth/context/AuthProvider.tsx:62
+[ -277716ms] [LOG] [AuthProvider] onAuthStateChange - public route, skipping @ http://localhost:5173/src/modules/auth/context/AuthProvider.tsx:65
+[ -277713ms] [LOG] [SupabaseService] fetchUserProfile START - userId: a71cc9b5-155d-4088-ab22-706eb18181aa @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:9
+[ -277713ms] [LOG] [SupabaseService] Querying crm.customers table for user_id: a71cc9b5-155d-4088-ab22-706eb18181aa @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:11
+[   15123ms] [LOG] [SupabaseService] Query duration: 292836 ms @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:15
+[   15123ms] [LOG] [SupabaseService] Query result - customer: {id: 341f7140-d891-4d20-930a-c09641932480, tipo_cliente: admin, nome: Admin Master, email: admin@allin.io, cpf: null} @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:16
+[   15124ms] [LOG] [SupabaseService] Query result - error: null @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:17
+[   15125ms] [LOG] [RoleResolver] Fetching role for userId: a71cc9b5-155d-4088-ab22-706eb18181aa @ http://localhost:5173/src/modules/auth/services/roleResolver.service.ts:12
+[ -277295ms] [LOG] [RoleResolver] Role resolved: admin_master @ http://localhost:5173/src/modules/auth/services/roleResolver.service.ts:35
+[ -277294ms] [LOG] [SupabaseService] fetchUserProfile END - Total duration: 421 ms @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:49
+[ -277294ms] [LOG] [SupabaseService] fetchUserProfile SUCCESS - user: admin@allin.io role: admin_master @ http://localhost:5173/src/modules/auth/services/supabase.service.ts:50

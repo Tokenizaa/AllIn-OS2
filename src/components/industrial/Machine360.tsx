@@ -1,51 +1,38 @@
-import { useState, useEffect } from 'react';
-import { industrialService, Machine, MachineMaintenance, MachineDocument, MachinePhoto } from '@/services/industrial';
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { industrialService } from '@/services/industrial';
 
 interface Machine360Props {
   machineId: string;
 }
 
 export function Machine360({ machineId }: Machine360Props) {
-  const [machine, setMachine] = useState<Machine | null>(null);
-  const [maintenances, setMaintenances] = useState<MachineMaintenance[]>([]);
-  const [documents, setDocuments] = useState<MachineDocument[]>([]);
-  const [photos, setPhotos] = useState<MachinePhoto[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'maintenance' | 'documents' | 'photos'>('overview');
 
-  useEffect(() => {
-    loadMachineData();
-  }, [machineId]);
+  const { data: machineData } = useSuspenseQuery({
+    queryKey: ['industrial', 'machine', machineId],
+    queryFn: () => industrialService.getMachineById(machineId),
+  });
 
-  const loadMachineData = async () => {
-    try {
-      setLoading(true);
-      
-      const [machineData, maintenanceData, documentData, photoData] = await Promise.all([
-        industrialService.getMachineById(machineId),
-        industrialService.getMachineMaintenancesByMachineId(machineId),
-        industrialService.getMachineDocumentsByMachineId(machineId),
-        industrialService.getMachinePhotosByMachineId(machineId),
-      ]);
+  const { data: maintenanceData } = useSuspenseQuery({
+    queryKey: ['industrial', 'machine', machineId, 'maintenance'],
+    queryFn: () => industrialService.getMachineMaintenancesByMachineId(machineId),
+  });
 
-      setMachine(machineData.data);
-      setMaintenances(maintenanceData.data || []);
-      setDocuments(documentData.data || []);
-      setPhotos(photoData.data || []);
-    } catch (error) {
-      console.error('Error loading machine data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: documentData } = useSuspenseQuery({
+    queryKey: ['industrial', 'machine', machineId, 'documents'],
+    queryFn: () => industrialService.getMachineDocumentsByMachineId(machineId),
+  });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Carregando dados da máquina...</div>
-      </div>
-    );
-  }
+  const { data: photoData } = useSuspenseQuery({
+    queryKey: ['industrial', 'machine', machineId, 'photos'],
+    queryFn: () => industrialService.getMachinePhotosByMachineId(machineId),
+  });
+
+  const machine = machineData?.data;
+  const maintenances = maintenanceData?.data || [];
+  const documents = documentData?.data || [];
+  const photos = photoData?.data || [];
 
   if (!machine) {
     return (
@@ -57,12 +44,11 @@ export function Machine360({ machineId }: Machine360Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{machine.nome}</h1>
-            <p className="text-gray-600 mt-1">{machine.descricao}</p>
+            <p className="text-gray-600 mt-1">{machine.observacoes}</p>
             <div className="flex items-center gap-2 mt-3">
               <span className={`px-3 py-1 rounded-full text-sm ${
                 machine.status === 'ativa' ? 'bg-green-100 text-green-800' :
@@ -72,7 +58,7 @@ export function Machine360({ machineId }: Machine360Props) {
                 {machine.status?.toUpperCase()}
               </span>
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {machine.tipo}
+                {machine.criticalidade || 'NORMAL'}
               </span>
             </div>
           </div>
@@ -82,7 +68,6 @@ export function Machine360({ machineId }: Machine360Props) {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8">
           {[
@@ -106,7 +91,6 @@ export function Machine360({ machineId }: Machine360Props) {
         </nav>
       </div>
 
-      {/* Tab Content */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         {activeTab === 'overview' && (
           <div className="space-y-6">
@@ -114,7 +98,7 @@ export function Machine360({ machineId }: Machine360Props) {
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Capacidade</h3>
                 <p className="text-lg font-semibold text-gray-900">
-                  {machine.capacidade_teorica || 'N/A'} {machine.unidade_medida || ''}
+                  {machine.capacidade_teorica || 'N/A'}
                 </p>
               </div>
               <div>
@@ -126,16 +110,16 @@ export function Machine360({ machineId }: Machine360Props) {
                 <p className="text-lg font-semibold text-gray-900">{machine.modelo || 'N/A'}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Ano Fabricação</h3>
-                <p className="text-lg font-semibold text-gray-900">{machine.ano_fabricacao || 'N/A'}</p>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Ano Aquisição</h3>
+                <p className="text-lg font-semibold text-gray-900">{machine.data_aquisicao ? new Date(machine.data_aquisicao).getFullYear() : 'N/A'}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Vida Útil</h3>
-                <p className="text-lg font-semibold text-gray-900">{machine.vida_util_anos || 'N/A'} anos</p>
+                <p className="text-lg font-semibold text-gray-900">{machine.data_fim_vida_util ? new Date(machine.data_fim_vida_util).getFullYear() - new Date(machine.data_aquisicao).getFullYear() : 'N/A'} anos</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Localização</h3>
-                <p className="text-lg font-semibold text-gray-900">{machine.localizacao || 'N/A'}</p>
+                <p className="text-lg font-semibold text-gray-900">{machine.localizacao_detalhe || machine.localizacao_id || 'N/A'}</p>
               </div>
             </div>
 

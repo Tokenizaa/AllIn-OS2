@@ -221,8 +221,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     activateDistributorOffice: async () => { throw new Error("Use useDistributorProfileQuery instead"); },
     adminInvites: [],
     usersList: [],
-    triggerBinomialBonusPay: async () => {},
-    addAuditLog: async () => {},
     getAdminInviteByToken: async () => null,
     acceptAdminInvite: async () => null,
     createAdminInvite: async () => {},

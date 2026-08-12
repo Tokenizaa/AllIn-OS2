@@ -1,5 +1,4 @@
-import { usePlans } from "@/hooks/plans/usePlans";
-import { usePlanAnalytics } from "@/hooks/plans/usePlanAnalytics";
+import { usePlans, usePlanAnalytics } from "@/modules/plans";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Plus, TrendingUp, Users, DollarSign, Activity } from "lucide-react";
@@ -8,14 +7,15 @@ import { PlanAnalytics } from "./PlanAnalytics";
 import { UpgradeSuggestions } from "./UpgradeSuggestions";
 
 export function PlansDashboard() {
-  const { data: plans, isLoading: plansLoading } = usePlans();
+  const { data: plansModel, isLoading: plansLoading } = usePlans();
   const { data: analytics, isLoading: analyticsLoading } = usePlanAnalytics();
 
   if (plansLoading || analyticsLoading) {
     return <div className="p-8">Carregando...</div>;
   }
 
-  const totalPlans = (plans as any[])?.length || 0;
+  const planList = plansModel?.plans ?? [];
+  const totalPlans = planList.length;
   const totalCustomers = (analytics as any[])?.reduce((sum, a: any) => sum + (a.totalCustomers ?? a.total_customers ?? 0), 0) || 0;
   const totalRevenue = (analytics as any[])?.reduce((sum, a: any) => sum + (a.totalRevenue ?? a.total_revenue ?? 0), 0) || 0;
   const activeSubscriptions = (analytics as any[])?.reduce((sum, a: any) => sum + (a.activeSubscriptions ?? a.active_subscriptions ?? 0), 0) || 0;
@@ -100,7 +100,7 @@ export function PlansDashboard() {
       <div>
         <h2 className="text-2xl font-bold mb-6">Planos Disponíveis</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {((plans as any[]) || []).map((plan: any) => (
+          {(planList || []).map((plan: any) => (
             <PlanCard key={plan.id} plan={plan} />
           ))}
         </div>

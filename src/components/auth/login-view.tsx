@@ -140,11 +140,13 @@ export function LoginView() {
                 </div>
               )}
 
-              <form onSubmit={onSubmit} className="mt-6 space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-[0.25em] text-white/40">E-mail</label>
+              <form onSubmit={onSubmit} className="mt-6 space-y-4" data-testid="auth-login-form">
+                <div className="space-y-2" data-testid="auth-login-email-field">
+                  <label htmlFor="auth-login-email" className="text-xs font-medium uppercase tracking-[0.25em] text-white/40">E-mail</label>
                   <Input
+                    id="auth-login-email"
                     type="email"
+                    data-testid="auth-login-email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com"
@@ -153,16 +155,18 @@ export function LoginView() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" data-testid="auth-login-password-field">
                   <div className="flex items-center justify-between gap-3">
-                    <label className="text-xs font-medium uppercase tracking-[0.25em] text-white/40">Senha</label>
+                    <label htmlFor="auth-login-password" className="text-xs font-medium uppercase tracking-[0.25em] text-white/40">Senha</label>
                     <Link to="/recuperar-senha" className="text-xs text-[#ffb84d] hover:text-[#ffd56b] hover:underline">
                       Esqueceu?
                     </Link>
                   </div>
                   <div className="relative">
                     <Input
+                      id="auth-login-password"
                       type={showPassword ? "text" : "password"}
+                      data-testid="auth-login-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
@@ -182,6 +186,7 @@ export function LoginView() {
 
                 <Button
                   type="submit"
+                  data-testid="auth-login-submit"
                   disabled={loading}
                   className="h-11 w-full rounded-xl bg-[#ffb84d] font-semibold text-[#111318] shadow-lg shadow-orange-500/20 hover:bg-[#ffd56b]"
                 >

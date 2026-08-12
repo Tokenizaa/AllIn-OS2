@@ -24,6 +24,7 @@ export function PublicHeader() {
     { label: "Inicio", href: "/" },
     { label: "Loja", href: "/loja" },
     { label: "Distribuidor", href: "/seja-distribuidor" },
+    { label: "Documentação", href: "/docs" },
   ];
 
   return (

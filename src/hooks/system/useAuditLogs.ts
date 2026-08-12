@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
-import { analyticsService } from "@/services/analytics/analytics.service";
+import { AnalyticsService as analyticsService } from "@/services/analytics";
 
 export function useAuditLogs(limit: number = 10) {
   return useQuery({
-    queryKey: queryKeys.audit.logs(limit),
-    staleTime: 0,
-    refetchOnMount: "always",
+    queryKey: [...queryKeys.auditLogs, limit] as const,
     queryFn: async () => {
       const data = await analyticsService.fetchAuditLogs(limit);
       return (data || []).map((row: any) => ({

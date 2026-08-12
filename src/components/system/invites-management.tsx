@@ -56,7 +56,7 @@ export function InvitesManagement() {
   } = useInviteActions({ revokeAdminInvite, resendAdminInvite });
 
   const handleCreateInviteWrapper = (e: React.FormEvent) => {
-    handleCreateInvite(e, setOpenInviteModal);
+    handleCreateInvite(e, () => setOpenInviteModal(false));
   };
 
   // Filter criteria

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { SupabaseService } from "@/modules/auth/services/supabase.service";
 
 export interface DistributorTheme {
@@ -47,8 +48,8 @@ function emptyDistributor(slug = ""): DistributorInfo {
 // Sprint 3: Exportar para uso em loaders
 export async function resolveDistributor(slug: string | undefined): Promise<DistributorInfo> {
   const activeSlug = (slug || "").toLowerCase().trim();
-  const reservedSlugs = new Set(["_", "_app", "login", "cadastro", "recuperar-senha", "redefinir-senha", "office", "loja"]);
-  if (!activeSlug || reservedSlugs.has(activeSlug) || activeSlug.startsWith("_app")) {
+  const reservedSlugs = new Set(["_", "admin", "login", "cadastro", "recuperar-senha", "redefinir-senha", "office", "loja"]);
+  if (!activeSlug || reservedSlugs.has(activeSlug) || activeSlug.startsWith("admin")) {
     return emptyDistributor();
   }
 
@@ -79,9 +80,8 @@ export async function resolveDistributor(slug: string | undefined): Promise<Dist
 // Sprint 2: Migrar DistributorProvider para TanStack Query
 export function useDistributorQuery(slug: string | undefined) {
   return useQuery({
-    queryKey: ["distributor", slug],
+    queryKey: [...queryKeys.distributor, slug] as const,
     queryFn: () => resolveDistributor(slug),
-    staleTime: 5 * 60 * 1000, // 5 minutos
     enabled: !!slug && slug !== "",
   });
 }
