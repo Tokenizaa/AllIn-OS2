@@ -10,8 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "backend": "tsx src/backend/server/index.ts",
-    "dev:all": "concurrently \"npm run dev\" \"npm run backend\"",
+    "backend": "echo 'ERROR: No backend server. Use Supabase Edge Functions.' && exit 1",
+    "dev:all": "npm run dev",
     "import:products": "tsx scripts/import-products.ts",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
@@ -70,9 +70,12 @@
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.2",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.6.5",
     "recharts": "^2.15.4",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
+    "sql.js": "^1.14.1",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
     "uuid": "^14.0.0",
@@ -90,6 +93,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "@welldone-software/why-did-you-render": "^10.0.1",
+    "better-sqlite3": "^12.11.1",
     "concurrently": "^9.1.2",
     "dotenv": "^17.4.2",
     "eslint": "^9.32.0",
@@ -102,6 +106,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^4.1.10"
   }
 }

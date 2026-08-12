@@ -24,11 +24,14 @@ import { Route as AtivacaoRouteImport } from './routes/ativacao'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DistributorIndexRouteImport } from './routes/distributor/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SejaDistribuidorSlugRouteImport } from './routes/seja-distribuidor.$slug'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as LojaSlugRouteImport } from './routes/loja.$slug'
 import { Route as DoencasSlugRouteImport } from './routes/doencas.$slug'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as DistributorVerificationRouteImport } from './routes/distributor/verification'
 import { Route as DistributorStoreRouteImport } from './routes/distributor/store'
 import { Route as DistributorReportsRouteImport } from './routes/distributor/reports'
@@ -139,10 +142,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DistributorIndexRoute = DistributorIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DistributorRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const SejaDistribuidorSlugRoute = SejaDistribuidorSlugRouteImport.update({
   id: '/$slug',
@@ -163,6 +176,11 @@ const DoencasSlugRoute = DoencasSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => DoencasRoute,
+} as any)
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DistributorVerificationRoute = DistributorVerificationRouteImport.update({
   id: '/verification',
@@ -376,11 +394,14 @@ export interface FileRoutesByFullPath {
   '/distributor/reports': typeof DistributorReportsRoute
   '/distributor/store': typeof DistributorStoreRoute
   '/distributor/verification': typeof DistributorVerificationRoute
+  '/docs/$': typeof DocsSplatRoute
   '/doencas/$slug': typeof DoencasSlugRoute
   '/loja/$slug': typeof LojaSlugRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/distributor/': typeof DistributorIndexRoute
+  '/docs/': typeof DocsIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/distributors/$id': typeof AdminDistributorsIdRoute
   '/admin/industrial/machines': typeof AdminIndustrialMachinesRoute
@@ -396,7 +417,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
-  '/admin': typeof AdminRouteWithChildren
   '/ativacao': typeof AtivacaoRoute
   '/busca-produtos': typeof BuscaProdutosRouteWithChildren
   '/cadastro': typeof CadastroRoute
@@ -431,11 +451,14 @@ export interface FileRoutesByTo {
   '/distributor/reports': typeof DistributorReportsRoute
   '/distributor/store': typeof DistributorStoreRoute
   '/distributor/verification': typeof DistributorVerificationRoute
+  '/docs/$': typeof DocsSplatRoute
   '/doencas/$slug': typeof DoencasSlugRoute
   '/loja/$slug': typeof LojaSlugRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/distributor': typeof DistributorIndexRoute
+  '/docs': typeof DocsIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/distributors/$id': typeof AdminDistributorsIdRoute
   '/admin/industrial/machines': typeof AdminIndustrialMachinesRoute
@@ -488,11 +511,14 @@ export interface FileRoutesById {
   '/distributor/reports': typeof DistributorReportsRoute
   '/distributor/store': typeof DistributorStoreRoute
   '/distributor/verification': typeof DistributorVerificationRoute
+  '/docs/$': typeof DocsSplatRoute
   '/doencas/$slug': typeof DoencasSlugRoute
   '/loja/$slug': typeof LojaSlugRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/seja-distribuidor/$slug': typeof SejaDistribuidorSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/distributor/': typeof DistributorIndexRoute
+  '/docs/': typeof DocsIndexRoute
   '/admin/customers/$id': typeof AdminCustomersIdRoute
   '/admin/distributors/$id': typeof AdminDistributorsIdRoute
   '/admin/industrial/machines': typeof AdminIndustrialMachinesRoute
@@ -546,11 +572,14 @@ export interface FileRouteTypes {
     | '/distributor/reports'
     | '/distributor/store'
     | '/distributor/verification'
+    | '/docs/$'
     | '/doencas/$slug'
     | '/loja/$slug'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
+    | '/admin/'
     | '/distributor/'
+    | '/docs/'
     | '/admin/customers/$id'
     | '/admin/distributors/$id'
     | '/admin/industrial/machines'
@@ -566,7 +595,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$slug'
-    | '/admin'
     | '/ativacao'
     | '/busca-produtos'
     | '/cadastro'
@@ -601,11 +629,14 @@ export interface FileRouteTypes {
     | '/distributor/reports'
     | '/distributor/store'
     | '/distributor/verification'
+    | '/docs/$'
     | '/doencas/$slug'
     | '/loja/$slug'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
+    | '/admin'
     | '/distributor'
+    | '/docs'
     | '/admin/customers/$id'
     | '/admin/distributors/$id'
     | '/admin/industrial/machines'
@@ -657,11 +688,14 @@ export interface FileRouteTypes {
     | '/distributor/reports'
     | '/distributor/store'
     | '/distributor/verification'
+    | '/docs/$'
     | '/doencas/$slug'
     | '/loja/$slug'
     | '/produto/$id'
     | '/seja-distribuidor/$slug'
+    | '/admin/'
     | '/distributor/'
+    | '/docs/'
     | '/admin/customers/$id'
     | '/admin/distributors/$id'
     | '/admin/industrial/machines'
@@ -691,7 +725,9 @@ export interface RootRouteChildren {
   RecuperarSenhaRoute: typeof RecuperarSenhaRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SejaDistribuidorRoute: typeof SejaDistribuidorRouteWithChildren
+  DocsSplatRoute: typeof DocsSplatRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
+  DocsIndexRoute: typeof DocsIndexRoute
   AuthInviteTokenRoute: typeof AuthInviteTokenRoute
 }
 
@@ -802,12 +838,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/': {
+      id: '/docs/'
+      path: '/docs'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/distributor/': {
       id: '/distributor/'
       path: '/'
       fullPath: '/distributor/'
       preLoaderRoute: typeof DistributorIndexRouteImport
       parentRoute: typeof DistributorRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/seja-distribuidor/$slug': {
       id: '/seja-distribuidor/$slug'
@@ -836,6 +886,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/doencas/$slug'
       preLoaderRoute: typeof DoencasSlugRouteImport
       parentRoute: typeof DoencasRoute
+    }
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/docs/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/distributor/verification': {
       id: '/distributor/verification'
@@ -1091,6 +1148,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSystemRoute: typeof AdminSystemRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   AdminCustomersIdRoute: typeof AdminCustomersIdRoute
   AdminDistributorsIdRoute: typeof AdminDistributorsIdRoute
   AdminIndustrialMachinesRoute: typeof AdminIndustrialMachinesRoute
@@ -1116,6 +1174,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSystemRoute: AdminSystemRoute,
   AdminWalletsRoute: AdminWalletsRoute,
+  AdminIndexRoute: AdminIndexRoute,
   AdminCustomersIdRoute: AdminCustomersIdRoute,
   AdminDistributorsIdRoute: AdminDistributorsIdRoute,
   AdminIndustrialMachinesRoute: AdminIndustrialMachinesRoute,
@@ -1222,7 +1281,9 @@ const rootRouteChildren: RootRouteChildren = {
   RecuperarSenhaRoute: RecuperarSenhaRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   SejaDistribuidorRoute: SejaDistribuidorRouteWithChildren,
+  DocsSplatRoute: DocsSplatRoute,
   ProdutoIdRoute: ProdutoIdRoute,
+  DocsIndexRoute: DocsIndexRoute,
   AuthInviteTokenRoute: AuthInviteTokenRoute,
 }
 export const routeTree = rootRouteImport
