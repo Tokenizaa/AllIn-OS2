@@ -3,6 +3,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Menu, X } from "lucide-react";
+import { PublicHeader } from "@/components/app/public-header";
 import {
   buildSidebarTree,
   getDocMeta,
@@ -54,11 +55,13 @@ function DocsViewer() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white pt-16 dark:bg-zinc-950">
+    <>
+      <PublicHeader />
+      <div className="min-h-screen bg-white pt-[var(--docs-header-h)] dark:bg-zinc-950">
       <div className="flex">
         {/* Sidebar — chega até a borda esquerda; cola abaixo do header no desktop */}
         <aside
-          className={`fixed inset-y-0 left-0 z-30 w-72 shrink-0 overflow-y-auto border-r border-zinc-200 bg-zinc-50 p-4 pt-16 transition-transform dark:border-zinc-800 dark:bg-zinc-900 lg:sticky lg:top-16 lg:bottom-auto lg:h-[calc(100vh-4rem)] lg:translate-x-0 lg:pt-4 lg:z-auto ${
+          className={`fixed inset-y-0 left-0 z-30 w-72 shrink-0 overflow-y-auto border-r border-zinc-200 bg-zinc-50 p-4 pt-[var(--docs-header-h)] transition-transform dark:border-zinc-800 dark:bg-zinc-900 lg:sticky lg:top-[var(--docs-header-h)] lg:bottom-auto lg:h-[calc(100vh-var(--docs-header-h))] lg:translate-x-0 lg:pt-4 lg:z-auto ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -78,7 +81,7 @@ function DocsViewer() {
 
         {/* Conteúdo — centrado no espaço restante */}
         <main className="min-w-0 flex-1">
-          <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8">
+          <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-8 lg:max-w-5xl">
             <div className="mb-4 flex items-center gap-3 lg:hidden">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -148,6 +151,7 @@ function DocsViewer() {
         </main>
       </div>
     </div>
+    </>
   );
 }
 
